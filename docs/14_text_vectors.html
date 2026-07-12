@@ -1,0 +1,2063 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.36">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Taylor Arnold">
+
+<title>14&nbsp; Textual Data: Vectors – Foundations of Data Science</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./15_network_data.html" rel="next">
+<link href="./13_text_annotations.html" rel="prev">
+<link href="./img/owl_explore.png" rel="icon" type="image/png">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-5ee6335475bc6b9f2146ef75da7f65f4.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./11_spatial_data.html">Part II: Applications</a></li><li class="breadcrumb-item"><a href="./14_text_vectors.html"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Textual Data: Vectors</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Foundations of Data Science</a> 
+        <div class="sidebar-tools-main">
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Welcome</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
+ <span class="menu-text">Part I: Core</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01_intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02_types.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Data Types and Expressions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03_organize.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Organizing Data I</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04_graphics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Visualizing Data I</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05_group.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Grouping and Aggregation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06_window.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Window Functions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07_graphics_ii.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Visualizing Data II</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08_combine.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Combining Tables</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09_restructure.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Restructuring Data</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10_collect.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Collecting Data</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Part II: Applications</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11_spatial_data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Spatial Data</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12_apis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Data APIs and Corpora</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13_text_annotations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Textual Data: Annotations</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./14_text_vectors.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Textual Data: Vectors</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./15_network_data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Network Data</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./16_image_data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Image Data</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#setup" id="toc-setup" class="nav-link active" data-scroll-target="#setup"><span class="header-section-number">14.1</span> Setup</a></li>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link" data-scroll-target="#introduction"><span class="header-section-number">14.2</span> Introduction</a></li>
+  <li><a href="#tf-idf" id="toc-tf-idf" class="nav-link" data-scroll-target="#tf-idf"><span class="header-section-number">14.3</span> TF-IDF</a></li>
+  <li><a href="#documents-as-vectors" id="toc-documents-as-vectors" class="nav-link" data-scroll-target="#documents-as-vectors"><span class="header-section-number">14.4</span> Documents as Vectors</a></li>
+  <li><a href="#document-distances" id="toc-document-distances" class="nav-link" data-scroll-target="#document-distances"><span class="header-section-number">14.5</span> Document Distances</a></li>
+  <li><a href="#across-languages" id="toc-across-languages" class="nav-link" data-scroll-target="#across-languages"><span class="header-section-number">14.6</span> Across Languages</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">14.7</span> Summary</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./11_spatial_data.html">Part II: Applications</a></li><li class="breadcrumb-item"><a href="./14_text_vectors.html"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Textual Data: Vectors</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span id="sec-text-vec" class="quarto-section-identifier"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Textual Data: Vectors</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="setup" class="level2" data-number="14.1">
+<h2 data-number="14.1" class="anchored" data-anchor-id="setup"><span class="header-section-number">14.1</span> Setup</h2>
+<p>Load all of the modules and datasets needed for the chapter. We re-create the annotation table from the previous chapter, which serves as the starting point for everything we do here.</p>
+<div id="b3c4a95f" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine <span class="im">import</span> ggplot, aes</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> polars <span class="im">import</span> col <span class="im">as</span> c</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> funs</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> funs <span class="im">import</span> DSText, umap_text</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> spacy</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>nlp <span class="op">=</span> spacy.load(<span class="st">"en_core_web_sm"</span>)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>meta <span class="op">=</span> pl.read_csv(<span class="st">"data/wiki_uk_meta.csv.gz"</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>docs <span class="op">=</span> pl.read_csv(<span class="st">"data/wiki_uk_authors_text.csv"</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>docs_fr <span class="op">=</span> pl.read_csv(<span class="st">"data/wiki_uk_authors_text_fr.csv"</span>)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>anno <span class="op">=</span> DSText.process(docs, nlp)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="introduction" class="level2" data-number="14.2">
+<h2 data-number="14.2" class="anchored" data-anchor-id="introduction"><span class="header-section-number">14.2</span> Introduction</h2>
+<p>In the previous chapter, we transformed the Wikipedia pages of 75 British authors into a table of annotated tokens and analyzed the corpus one word, phrase, or grammatical pattern at a time. Those techniques answer questions about language <em>within</em> documents. Many of the most interesting questions about a corpus, however, are questions about the documents themselves. Which two authors have the most similar pages? Do the pages cluster into groups, and do those groups correspond to time periods, genres, or something unexpected? Does the French version of Wikipedia describe these authors differently than the English version?</p>
+<p>Answering questions like these requires comparing whole documents to one another, and comparing documents requires representing each one as a single mathematical object rather than as a stream of tokens. In this chapter we develop that representation in three steps. First, we summarize each document by the counts of the terms it contains, refined by the TF-IDF weighting that emphasizes distinctive vocabulary. Second, we reinterpret these weighted counts geometrically, treating each document as a point in a high-dimensional space. Finally, we use this geometry to measure the distance between documents, to project the whole collection into two dimensions for visualization, and to compare corpora across languages.</p>
+<p>The geometric perspective developed here matters well beyond this chapter. The distances between documents that we compute become the raw material for the distance and nearest-neighbor networks of <a href="15_network_data.html" class="quarto-xref"><span>Chapter 15</span></a>, and the general strategy of converting complex objects into numeric vectors reappears when we work with images.</p>
+</section>
+<section id="tf-idf" class="level2" data-number="14.3">
+<h2 data-number="14.3" class="anchored" data-anchor-id="tf-idf"><span class="header-section-number">14.3</span> TF-IDF</h2>
+<p>In the previous chapter, we saw that counting the number of times each token or lemma occurs in a document is a useful way of quickly summarizing the content of a document. We can formalize this idea by defining the concept of a <em>term-frequency matrix</em>, often abbreviated TF. The matrix consists of a table of rows and columns where: (1) each row corresponds to a document, (2) each column corresponds to a term, and (3) the entries count the number of times each document contains each term. An example will help explain this. Consider the four following phrases:</p>
+<ol type="1">
+<li>chop the onion and garlic</li>
+<li>chop chop chop the garlic</li>
+<li>sauté the garlic in olive oil</li>
+<li>add the onion and olive oil to the pan</li>
+</ol>
+<p>This is what the term-frequency matrix looks like:</p>
+<div id="c1991714" class="cell" data-execution_count="3">
+<div class="cell-output cell-output-display" data-execution_count="3">
+<style type="text/css">
+#T_afc3e_row0_col0, #T_afc3e_row0_col4, #T_afc3e_row0_col5, #T_afc3e_row0_col6, #T_afc3e_row0_col8, #T_afc3e_row0_col9, #T_afc3e_row0_col11, #T_afc3e_row1_col0, #T_afc3e_row1_col1, #T_afc3e_row1_col4, #T_afc3e_row1_col5, #T_afc3e_row1_col6, #T_afc3e_row1_col7, #T_afc3e_row1_col8, #T_afc3e_row1_col9, #T_afc3e_row1_col11, #T_afc3e_row2_col0, #T_afc3e_row2_col1, #T_afc3e_row2_col2, #T_afc3e_row2_col7, #T_afc3e_row2_col8, #T_afc3e_row2_col11, #T_afc3e_row3_col2, #T_afc3e_row3_col3, #T_afc3e_row3_col4, #T_afc3e_row3_col9 {
+  background-color: #f7fbff;
+  color: #000000;
+}
+#T_afc3e_row0_col1, #T_afc3e_row0_col2, #T_afc3e_row0_col3, #T_afc3e_row0_col7, #T_afc3e_row0_col10, #T_afc3e_row1_col3, #T_afc3e_row1_col10, #T_afc3e_row2_col3, #T_afc3e_row2_col4, #T_afc3e_row2_col5, #T_afc3e_row2_col6, #T_afc3e_row2_col9, #T_afc3e_row2_col10, #T_afc3e_row3_col0, #T_afc3e_row3_col1, #T_afc3e_row3_col5, #T_afc3e_row3_col6, #T_afc3e_row3_col7, #T_afc3e_row3_col8, #T_afc3e_row3_col11 {
+  background-color: #abd0e6;
+  color: #000000;
+}
+#T_afc3e_row1_col2 {
+  background-color: #08306b;
+  color: #f1f1f1;
+}
+#T_afc3e_row3_col10 {
+  background-color: #3787c0;
+  color: #f1f1f1;
+}
+</style>
+
+<div id="T_afc3e" class="quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="T_afc3e-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;14.1: Term Frequencies
+</figcaption>
+<div aria-describedby="T_afc3e-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table id="T_afc3e" class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th class="blank level0" data-quarto-table-cell-role="th">&nbsp;</th>
+<th id="T_afc3e_level0_col0" class="col_heading level0 col0" data-quarto-table-cell-role="th">add</th>
+<th id="T_afc3e_level0_col1" class="col_heading level0 col1" data-quarto-table-cell-role="th">and</th>
+<th id="T_afc3e_level0_col2" class="col_heading level0 col2" data-quarto-table-cell-role="th">chop</th>
+<th id="T_afc3e_level0_col3" class="col_heading level0 col3" data-quarto-table-cell-role="th">garlic</th>
+<th id="T_afc3e_level0_col4" class="col_heading level0 col4" data-quarto-table-cell-role="th">in</th>
+<th id="T_afc3e_level0_col5" class="col_heading level0 col5" data-quarto-table-cell-role="th">oil</th>
+<th id="T_afc3e_level0_col6" class="col_heading level0 col6" data-quarto-table-cell-role="th">olive</th>
+<th id="T_afc3e_level0_col7" class="col_heading level0 col7" data-quarto-table-cell-role="th">onion</th>
+<th id="T_afc3e_level0_col8" class="col_heading level0 col8" data-quarto-table-cell-role="th">pan</th>
+<th id="T_afc3e_level0_col9" class="col_heading level0 col9" data-quarto-table-cell-role="th">sauté</th>
+<th id="T_afc3e_level0_col10" class="col_heading level0 col10" data-quarto-table-cell-role="th">the</th>
+<th id="T_afc3e_level0_col11" class="col_heading level0 col11" data-quarto-table-cell-role="th">to</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th id="T_afc3e_level0_row0" class="row_heading level0 row0" data-quarto-table-cell-role="th">Doc 1</th>
+<td id="T_afc3e_row0_col0" class="data row0 col0">0</td>
+<td id="T_afc3e_row0_col1" class="data row0 col1">1</td>
+<td id="T_afc3e_row0_col2" class="data row0 col2">1</td>
+<td id="T_afc3e_row0_col3" class="data row0 col3">1</td>
+<td id="T_afc3e_row0_col4" class="data row0 col4">0</td>
+<td id="T_afc3e_row0_col5" class="data row0 col5">0</td>
+<td id="T_afc3e_row0_col6" class="data row0 col6">0</td>
+<td id="T_afc3e_row0_col7" class="data row0 col7">1</td>
+<td id="T_afc3e_row0_col8" class="data row0 col8">0</td>
+<td id="T_afc3e_row0_col9" class="data row0 col9">0</td>
+<td id="T_afc3e_row0_col10" class="data row0 col10">1</td>
+<td id="T_afc3e_row0_col11" class="data row0 col11">0</td>
+</tr>
+<tr class="even">
+<th id="T_afc3e_level0_row1" class="row_heading level0 row1" data-quarto-table-cell-role="th">Doc 2</th>
+<td id="T_afc3e_row1_col0" class="data row1 col0">0</td>
+<td id="T_afc3e_row1_col1" class="data row1 col1">0</td>
+<td id="T_afc3e_row1_col2" class="data row1 col2">3</td>
+<td id="T_afc3e_row1_col3" class="data row1 col3">1</td>
+<td id="T_afc3e_row1_col4" class="data row1 col4">0</td>
+<td id="T_afc3e_row1_col5" class="data row1 col5">0</td>
+<td id="T_afc3e_row1_col6" class="data row1 col6">0</td>
+<td id="T_afc3e_row1_col7" class="data row1 col7">0</td>
+<td id="T_afc3e_row1_col8" class="data row1 col8">0</td>
+<td id="T_afc3e_row1_col9" class="data row1 col9">0</td>
+<td id="T_afc3e_row1_col10" class="data row1 col10">1</td>
+<td id="T_afc3e_row1_col11" class="data row1 col11">0</td>
+</tr>
+<tr class="odd">
+<th id="T_afc3e_level0_row2" class="row_heading level0 row2" data-quarto-table-cell-role="th">Doc 3</th>
+<td id="T_afc3e_row2_col0" class="data row2 col0">0</td>
+<td id="T_afc3e_row2_col1" class="data row2 col1">0</td>
+<td id="T_afc3e_row2_col2" class="data row2 col2">0</td>
+<td id="T_afc3e_row2_col3" class="data row2 col3">1</td>
+<td id="T_afc3e_row2_col4" class="data row2 col4">1</td>
+<td id="T_afc3e_row2_col5" class="data row2 col5">1</td>
+<td id="T_afc3e_row2_col6" class="data row2 col6">1</td>
+<td id="T_afc3e_row2_col7" class="data row2 col7">0</td>
+<td id="T_afc3e_row2_col8" class="data row2 col8">0</td>
+<td id="T_afc3e_row2_col9" class="data row2 col9">1</td>
+<td id="T_afc3e_row2_col10" class="data row2 col10">1</td>
+<td id="T_afc3e_row2_col11" class="data row2 col11">0</td>
+</tr>
+<tr class="even">
+<th id="T_afc3e_level0_row3" class="row_heading level0 row3" data-quarto-table-cell-role="th">Doc 4</th>
+<td id="T_afc3e_row3_col0" class="data row3 col0">1</td>
+<td id="T_afc3e_row3_col1" class="data row3 col1">1</td>
+<td id="T_afc3e_row3_col2" class="data row3 col2">0</td>
+<td id="T_afc3e_row3_col3" class="data row3 col3">0</td>
+<td id="T_afc3e_row3_col4" class="data row3 col4">0</td>
+<td id="T_afc3e_row3_col5" class="data row3 col5">1</td>
+<td id="T_afc3e_row3_col6" class="data row3 col6">1</td>
+<td id="T_afc3e_row3_col7" class="data row3 col7">1</td>
+<td id="T_afc3e_row3_col8" class="data row3 col8">1</td>
+<td id="T_afc3e_row3_col9" class="data row3 col9">0</td>
+<td id="T_afc3e_row3_col10" class="data row3 col10">2</td>
+<td id="T_afc3e_row3_col11" class="data row3 col11">1</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</div>
+</div>
+<p>The approach of using raw counts can be improved by using a scaled version of the count metric. The issue with raw counts is that they tend to point at very common words such as “the”, “have”, and “her”. These can be somewhat avoided by removing a pre-compiled set of known common words, often called <em>stopwords</em>, or by filtering on part of speech. These coarse approaches, however, mostly just move the issue down to a slightly less common set of words that also do not necessarily summarize the contents of each document very well. For example, “publisher” is a frequently used term in many of the documents in the Wikipedia collection due to the subject matter, but that does not mean that it is particularly informative since it occurs in almost every page.</p>
+<p>A common alternative technique is to combine information about the frequency of a word within a document with the frequency of the term across the entire collection. The result depends on how we define a document, a choice that shapes the rest of the analysis. Metrics of this form are known as <em>term frequency-inverse document frequency scores</em> (TF-IDF). A common version of TF-IDF computes a score for every combination of term and document by multiplying the term frequency by the logarithm of the inverse document frequency. The logarithm is a function that is used to make sure that counts do not grow too fast. For example, a count of about 1000 is only approximately twice as big on the logarithmic scale as a count of 25, in comparison to being 40 times larger on a linear scale. Mathematically, we define this TF-IDF function using the following formula, where <em>tf</em> gives the term frequency and <em>df</em> gives the document frequency:</p>
+<p><span class="math display">\[ \text{tfidf} = \text{tf} \times \left(\log\left(\frac{N + 1}{\text{df} + 1}\right) + 1 \right) \]</span></p>
+<p>Here, <em>N</em> is the total number of documents. Adding one to the numerator and denominator inside the logarithm, and adding one to the result, is a common smoothing convention (used, for example, by scikit-learn) that keeps the score well-behaved for rare terms. The score measures how important a term is in describing a document in the context of the other documents. If we select words with the highest TF-IDF score for each document, these should give a good measurement of what terms best describe each document uniquely from the rest of the collection. Note that while the scaling functions given above are popular choices, they are not universal. Other papers and software may make different choices with moderate effects on the output results.</p>
+<p>For comparison, here is what the corresponding TF-IDF matrix looks like for our small example of four phrases. Notice that while the non-zero numbers change from the TF example, all of the zeros in the original matrix remain zero here.</p>
+<div id="0e797baf" class="cell" data-execution_count="4">
+<div class="cell-output cell-output-display" data-execution_count="4">
+<style type="text/css">
+#T_29936_row0_col0, #T_29936_row0_col4, #T_29936_row0_col5, #T_29936_row0_col6, #T_29936_row0_col8, #T_29936_row0_col9, #T_29936_row0_col11, #T_29936_row1_col0, #T_29936_row1_col1, #T_29936_row1_col4, #T_29936_row1_col5, #T_29936_row1_col6, #T_29936_row1_col7, #T_29936_row1_col8, #T_29936_row1_col9, #T_29936_row1_col11, #T_29936_row2_col0, #T_29936_row2_col1, #T_29936_row2_col2, #T_29936_row2_col7, #T_29936_row2_col8, #T_29936_row2_col11, #T_29936_row3_col2, #T_29936_row3_col3, #T_29936_row3_col4, #T_29936_row3_col9 {
+  background-color: #fff5eb;
+  color: #000000;
+}
+#T_29936_row0_col1, #T_29936_row0_col2, #T_29936_row0_col7, #T_29936_row2_col5, #T_29936_row2_col6, #T_29936_row3_col1, #T_29936_row3_col5, #T_29936_row3_col6, #T_29936_row3_col7 {
+  background-color: #fdb97d;
+  color: #000000;
+}
+#T_29936_row0_col3, #T_29936_row1_col3, #T_29936_row2_col3 {
+  background-color: #fdca99;
+  color: #000000;
+}
+#T_29936_row0_col10, #T_29936_row1_col10, #T_29936_row2_col10 {
+  background-color: #fdd5ad;
+  color: #000000;
+}
+#T_29936_row1_col2 {
+  background-color: #7f2704;
+  color: #f1f1f1;
+}
+#T_29936_row2_col4, #T_29936_row2_col9, #T_29936_row3_col0, #T_29936_row3_col8, #T_29936_row3_col11 {
+  background-color: #fda159;
+  color: #000000;
+}
+#T_29936_row3_col10 {
+  background-color: #fd9d53;
+  color: #000000;
+}
+</style>
+
+<div id="T_29936" class="quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="T_29936-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;14.2: TF-IDF Matrix
+</figcaption>
+<div aria-describedby="T_29936-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table id="T_29936" class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th class="blank level0" data-quarto-table-cell-role="th">&nbsp;</th>
+<th id="T_29936_level0_col0" class="col_heading level0 col0" data-quarto-table-cell-role="th">add</th>
+<th id="T_29936_level0_col1" class="col_heading level0 col1" data-quarto-table-cell-role="th">and</th>
+<th id="T_29936_level0_col2" class="col_heading level0 col2" data-quarto-table-cell-role="th">chop</th>
+<th id="T_29936_level0_col3" class="col_heading level0 col3" data-quarto-table-cell-role="th">garlic</th>
+<th id="T_29936_level0_col4" class="col_heading level0 col4" data-quarto-table-cell-role="th">in</th>
+<th id="T_29936_level0_col5" class="col_heading level0 col5" data-quarto-table-cell-role="th">oil</th>
+<th id="T_29936_level0_col6" class="col_heading level0 col6" data-quarto-table-cell-role="th">olive</th>
+<th id="T_29936_level0_col7" class="col_heading level0 col7" data-quarto-table-cell-role="th">onion</th>
+<th id="T_29936_level0_col8" class="col_heading level0 col8" data-quarto-table-cell-role="th">pan</th>
+<th id="T_29936_level0_col9" class="col_heading level0 col9" data-quarto-table-cell-role="th">sauté</th>
+<th id="T_29936_level0_col10" class="col_heading level0 col10" data-quarto-table-cell-role="th">the</th>
+<th id="T_29936_level0_col11" class="col_heading level0 col11" data-quarto-table-cell-role="th">to</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th id="T_29936_level0_row0" class="row_heading level0 row0" data-quarto-table-cell-role="th">Doc 1</th>
+<td id="T_29936_row0_col0" class="data row0 col0">0.00</td>
+<td id="T_29936_row0_col1" class="data row0 col1">1.51</td>
+<td id="T_29936_row0_col2" class="data row0 col2">1.51</td>
+<td id="T_29936_row0_col3" class="data row0 col3">1.22</td>
+<td id="T_29936_row0_col4" class="data row0 col4">0.00</td>
+<td id="T_29936_row0_col5" class="data row0 col5">0.00</td>
+<td id="T_29936_row0_col6" class="data row0 col6">0.00</td>
+<td id="T_29936_row0_col7" class="data row0 col7">1.51</td>
+<td id="T_29936_row0_col8" class="data row0 col8">0.00</td>
+<td id="T_29936_row0_col9" class="data row0 col9">0.00</td>
+<td id="T_29936_row0_col10" class="data row0 col10">1.00</td>
+<td id="T_29936_row0_col11" class="data row0 col11">0.00</td>
+</tr>
+<tr class="even">
+<th id="T_29936_level0_row1" class="row_heading level0 row1" data-quarto-table-cell-role="th">Doc 2</th>
+<td id="T_29936_row1_col0" class="data row1 col0">0.00</td>
+<td id="T_29936_row1_col1" class="data row1 col1">0.00</td>
+<td id="T_29936_row1_col2" class="data row1 col2">4.53</td>
+<td id="T_29936_row1_col3" class="data row1 col3">1.22</td>
+<td id="T_29936_row1_col4" class="data row1 col4">0.00</td>
+<td id="T_29936_row1_col5" class="data row1 col5">0.00</td>
+<td id="T_29936_row1_col6" class="data row1 col6">0.00</td>
+<td id="T_29936_row1_col7" class="data row1 col7">0.00</td>
+<td id="T_29936_row1_col8" class="data row1 col8">0.00</td>
+<td id="T_29936_row1_col9" class="data row1 col9">0.00</td>
+<td id="T_29936_row1_col10" class="data row1 col10">1.00</td>
+<td id="T_29936_row1_col11" class="data row1 col11">0.00</td>
+</tr>
+<tr class="odd">
+<th id="T_29936_level0_row2" class="row_heading level0 row2" data-quarto-table-cell-role="th">Doc 3</th>
+<td id="T_29936_row2_col0" class="data row2 col0">0.00</td>
+<td id="T_29936_row2_col1" class="data row2 col1">0.00</td>
+<td id="T_29936_row2_col2" class="data row2 col2">0.00</td>
+<td id="T_29936_row2_col3" class="data row2 col3">1.22</td>
+<td id="T_29936_row2_col4" class="data row2 col4">1.92</td>
+<td id="T_29936_row2_col5" class="data row2 col5">1.51</td>
+<td id="T_29936_row2_col6" class="data row2 col6">1.51</td>
+<td id="T_29936_row2_col7" class="data row2 col7">0.00</td>
+<td id="T_29936_row2_col8" class="data row2 col8">0.00</td>
+<td id="T_29936_row2_col9" class="data row2 col9">1.92</td>
+<td id="T_29936_row2_col10" class="data row2 col10">1.00</td>
+<td id="T_29936_row2_col11" class="data row2 col11">0.00</td>
+</tr>
+<tr class="even">
+<th id="T_29936_level0_row3" class="row_heading level0 row3" data-quarto-table-cell-role="th">Doc 4</th>
+<td id="T_29936_row3_col0" class="data row3 col0">1.92</td>
+<td id="T_29936_row3_col1" class="data row3 col1">1.51</td>
+<td id="T_29936_row3_col2" class="data row3 col2">0.00</td>
+<td id="T_29936_row3_col3" class="data row3 col3">0.00</td>
+<td id="T_29936_row3_col4" class="data row3 col4">0.00</td>
+<td id="T_29936_row3_col5" class="data row3 col5">1.51</td>
+<td id="T_29936_row3_col6" class="data row3 col6">1.51</td>
+<td id="T_29936_row3_col7" class="data row3 col7">1.51</td>
+<td id="T_29936_row3_col8" class="data row3 col8">1.92</td>
+<td id="T_29936_row3_col9" class="data row3 col9">0.00</td>
+<td id="T_29936_row3_col10" class="data row3 col10">2.00</td>
+<td id="T_29936_row3_col11" class="data row3 col11">1.92</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</div>
+</div>
+<p>Now that we have a conceptual understanding of TF and TF-IDF matrices, let’s see how to construct them in Python. The wrapper <code>DSText.compute_tfidf</code> produces the scores for us, and its code is nothing more than a single Polars chain in which every step uses methods we already know. A trimmed version looks like this (shown for reference, not run):</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>n_docs <span class="op">=</span> df.select(c.doc_id.n_unique()).item()</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    df</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.is_alpha)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    .group_by([c.doc_id, c.lemma])</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    .agg(tf <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    .with_columns(tf_norm <span class="op">=</span> c.tf <span class="op">/</span> c.tf.<span class="bu">sum</span>().over(c.doc_id))</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    .with_columns(df_docs <span class="op">=</span> c.doc_id.n_unique().over(c.lemma))</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>        (c.df_docs <span class="op">/</span> n_docs <span class="op">&gt;=</span> min_df) <span class="op">&amp;</span> (c.df_docs <span class="op">/</span> n_docs <span class="op">&lt;=</span> max_df)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    .with_columns(idf <span class="op">=</span> (pl.lit(n_docs <span class="op">+</span> <span class="dv">1</span>) <span class="op">/</span> (c.df_docs <span class="op">+</span> <span class="dv">1</span>)).log() <span class="op">+</span> <span class="dv">1</span>)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    .with_columns(tfidf <span class="op">=</span> c.tf_norm <span class="op">*</span> c.idf)</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The first <code>group_by</code> counts how often each lemma appears in each document, and the window expression <code>c.tf.sum().over(c.doc_id)</code> converts those counts into within-document proportions. This means the <em>tf</em> in the formula above is a proportion rather than a raw count; the small matrices shown earlier used raw counts only to keep the numbers readable. A second window expression counts how many distinct documents contain each lemma, giving the <em>df</em> term. The <code>filter</code> step in the middle implements the two arguments <code>min_df</code> and <code>max_df</code>, which are proportions between zero and one: setting <code>max_df=0.5</code>, for instance, drops every lemma appearing in more than half of the documents, and <code>min_df=0.01</code> drops lemmas appearing in fewer than 1% of them. The <code>max_df</code> cutoff acts as an automatic stop word list tailored to the corpus, removing whatever vocabulary is common to most of the pages instead of relying on a fixed list.</p>
+<p>Rather than producing the wide matrix described in the small examples above, the chain leaves the output in long format (see <a href="09_restructure.html" class="quarto-xref"><span>Chapter 9</span></a> for a review of wide versus long), with one non-zero combination of term and document in each row. We run it here on the annotations, removing only the rarest terms.</p>
+<div id="e909caf9" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>tfidf <span class="op">=</span> DSText.compute_tfidf(anno, min_df<span class="op">=</span><span class="fl">0.01</span>, max_df<span class="op">=</span><span class="fl">1.0</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>tfidf</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="5">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (106_352, 7)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">doc_id</th>
+<th data-quarto-table-cell-role="th">lemma</th>
+<th data-quarto-table-cell-role="th">tf</th>
+<th data-quarto-table-cell-role="th">tf_norm</th>
+<th data-quarto-table-cell-role="th">df_docs</th>
+<th data-quarto-table-cell-role="th">idf</th>
+<th data-quarto-table-cell-role="th">tfidf</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>str</td>
+<td>u32</td>
+<td>f64</td>
+<td>u32</td>
+<td>f64</td>
+<td>f64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"Geoffrey Chaucer"</td>
+<td>"castel"</td>
+<td>2</td>
+<td>0.000363</td>
+<td>1</td>
+<td>4.637586</td>
+<td>0.001685</td>
+</tr>
+<tr class="even">
+<td>"George Orwell"</td>
+<td>"also"</td>
+<td>37</td>
+<td>0.002265</td>
+<td>74</td>
+<td>1.013245</td>
+<td>0.002295</td>
+</tr>
+<tr class="odd">
+<td>"Jane Austen"</td>
+<td>"whose"</td>
+<td>5</td>
+<td>0.000614</td>
+<td>49</td>
+<td>1.41871</td>
+<td>0.000872</td>
+</tr>
+<tr class="even">
+<td>"Charles Dickens"</td>
+<td>"representative"</td>
+<td>1</td>
+<td>0.000088</td>
+<td>14</td>
+<td>2.622683</td>
+<td>0.000231</td>
+</tr>
+<tr class="odd">
+<td>"John Donne"</td>
+<td>"dissent"</td>
+<td>1</td>
+<td>0.000274</td>
+<td>8</td>
+<td>3.133509</td>
+<td>0.000859</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"Oscar Wilde"</td>
+<td>"ivory"</td>
+<td>1</td>
+<td>0.000089</td>
+<td>2</td>
+<td>4.232121</td>
+<td>0.000377</td>
+</tr>
+<tr class="even">
+<td>"Virginia Woolf"</td>
+<td>"destroy"</td>
+<td>3</td>
+<td>0.000206</td>
+<td>23</td>
+<td>2.15268</td>
+<td>0.000444</td>
+</tr>
+<tr class="odd">
+<td>"Samuel Pepys"</td>
+<td>"deflect"</td>
+<td>1</td>
+<td>0.000155</td>
+<td>2</td>
+<td>4.232121</td>
+<td>0.000658</td>
+</tr>
+<tr class="even">
+<td>"Alexander Pope"</td>
+<td>"several"</td>
+<td>2</td>
+<td>0.000614</td>
+<td>65</td>
+<td>1.141079</td>
+<td>0.000701</td>
+</tr>
+<tr class="odd">
+<td>"Joseph Conrad"</td>
+<td>"magnify"</td>
+<td>1</td>
+<td>0.00008</td>
+<td>1</td>
+<td>4.637586</td>
+<td>0.00037</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Once we have this table, we can combine the top terms from each document to characterize their themes.</p>
+<div id="d6e92593" class="cell" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    tfidf</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    .sort([c.doc_id, c.tfidf], descending<span class="op">=</span>[<span class="va">False</span>, <span class="va">True</span>])</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    .group_by(c.doc_id)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">10</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    .group_by(c.doc_id)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    .agg(top_lemmas <span class="op">=</span> c.lemma.<span class="bu">str</span>.join(<span class="st">"; "</span>))</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="6">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (75, 2)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">doc_id</th>
+<th data-quarto-table-cell-role="th">top_lemmas</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>str</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"Joseph Conrad"</td>
+<td>"Conrad; the; of; conrad; in; a…</td>
+</tr>
+<tr class="even">
+<td>"George Bernard Shaw"</td>
+<td>"the; Shaw; in; and; of; be; a;…</td>
+</tr>
+<tr class="odd">
+<td>"Bram Stoker"</td>
+<td>"Stoker; the; Dracula; of; be; …</td>
+</tr>
+<tr class="even">
+<td>"Beatrix Potter"</td>
+<td>"Potter; the; and; of; in; her;…</td>
+</tr>
+<tr class="odd">
+<td>"Thomas Hobbes"</td>
+<td>"Hobbes; the; of; in; be; and; …</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"Elizabeth Barrett Browning"</td>
+<td>"the; of; and; Barrett; in; her…</td>
+</tr>
+<tr class="even">
+<td>"William Blake"</td>
+<td>"the; Blake; of; be; and; Blake…</td>
+</tr>
+<tr class="odd">
+<td>"Charles Dickens"</td>
+<td>"the; Dickens; of; and; in; be;…</td>
+</tr>
+<tr class="even">
+<td>"Ben Jonson"</td>
+<td>"the; Jonson; of; be; in; Jonso…</td>
+</tr>
+<tr class="odd">
+<td>"Katherine Philipps"</td>
+<td>"the; of; Philipps; be; and; Or…</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>The top TF-IDF terms for each document tend to be proper nouns and domain-specific vocabulary that distinguish one article from another. Compare these to the simple frequency counts from the previous chapter: TF-IDF downweights generic terms like “year” and “work” that appear across all of the biographies, and what remains are the names, places, and titles that actually identify each author.</p>
+</section>
+<section id="documents-as-vectors" class="level2" data-number="14.4">
+<h2 data-number="14.4" class="anchored" data-anchor-id="documents-as-vectors"><span class="header-section-number">14.4</span> Documents as Vectors</h2>
+<p>The TF-IDF matrix introduced above contains a row for each document and a column for each term, with the TF-IDF weight in each cell. There is a productive way to think about this structure: each row of the matrix is a list of numbers that describes a document. We can interpret this list of numbers as a set of coordinates, turning each document into a <em>point in space</em>. This geometric perspective connects textual analysis to the statistical modeling and dimensionality reduction tools that we have developed throughout this book.</p>
+<p>To build intuition for this idea, let’s start with just two terms. Suppose we look at the TF-IDF scores for the lemmas “poem” and “novel” across our collection of author pages. Each document has a TF-IDF score for “poem” and a TF-IDF score for “novel”, giving us two numbers per document. We can plot these as coordinates on a standard scatter plot, with one axis for each term. Because the wrapper returns its results in long format, we first pivot the two terms into columns and fill the missing combinations with zero.</p>
+<div id="8fb195f2" class="cell" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    tfidf</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.lemma.is_in([<span class="st">"poem"</span>, <span class="st">"novel"</span>]))</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    .pivot(on<span class="op">=</span><span class="st">"lemma"</span>, index<span class="op">=</span><span class="st">"doc_id"</span>, values<span class="op">=</span><span class="st">"tfidf"</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    .fill_null(<span class="dv">0</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    .pipe(ggplot, aes(c.poem, c.novel))</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    .geom_text(aes(label<span class="op">=</span>c.doc_id), size<span class="op">=</span><span class="dv">7</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="7">
+<div>
+<figure class="figure">
+<p><a href="14_text_vectors_files/figure-html/cell-8-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="14_text_vectors_files/figure-html/cell-8-output-1.png" width="672" height="480" class="figure-img"></a></p>
+</figure>
+</div>
+</div>
+</div>
+<p>In this two-dimensional view, the position of each document tells us something meaningful. Authors whose Wikipedia pages discuss poetry extensively appear far to the right. Those whose pages focus on novels appear near the top. Authors associated with both forms sit in the upper-right region, while those associated with neither sit near the origin. Documents that are close together in this space have similar usage patterns for these two terms.</p>
+<p>Now imagine extending this idea beyond two terms. Rather than plotting documents along axes for just “poem” and “novel”, we could add a third axis for “play”, creating a three-dimensional space where each document is a point. We could keep going: add axes for “war”, “london”, “publish”, “child”, and every other term in our vocabulary. If the vocabulary contains <span class="math inline">\(V\)</span> terms, each document becomes a point in <span class="math inline">\(V\)</span>-dimensional space. Mathematically, we represent document <span class="math inline">\(d\)</span> as a vector of TF-IDF scores:</p>
+<p><span class="math display">\[
+\mathbf{x}_d = \begin{bmatrix} \text{tfidf}(t_1, d) \\ \text{tfidf}(t_2, d) \\ \vdots \\ \text{tfidf}(t_V, d) \end{bmatrix}
+\]</span></p>
+<p>We cannot visualize a space with thousands of dimensions, but the geometry works the same way regardless of dimensionality. Two documents that are close together in this high-dimensional space use similar vocabulary in similar proportions. Two documents that are far apart use very different language. The notion of distance between points, which is easy to picture with two terms on a scatter plot, extends naturally to any number of dimensions.</p>
+<p>Once documents are points in a numeric space, the rest of the book’s toolkit applies. Dimensionality reduction methods such as PCA or UMAP can project the points down to two dimensions for plotting. Prediction models can classify documents based on their positions, and clustering algorithms can discover groups of similar pages without being told what to look for.</p>
+<p>One important feature of these document vectors is that most of their entries are zero. Any given document uses only a small fraction of the total vocabulary, so most TF-IDF scores are zero. A vector with mostly zero entries is called <em>sparse</em>, and this representation is sometimes called a <em>sparse embedding</em>. Despite the large number of dimensions, the actual information content of each vector is modest, which matters for computational efficiency but does not change how we think about the geometry.</p>
+<p>The code below puts this idea into practice using the wrapper function <code>umap_text</code>. The wrapper builds the document-term matrix from the long annotation table, using the column passed as <code>doc_id</code> to identify the rows and the column passed as <code>term_id</code> to define the vocabulary, and applies the <code>min_df</code> and <code>max_df</code> filters before fitting the UMAP model. As with the other model wrappers in this book, calling <code>.predict(full=True)</code> returns a table with one row per document, and the two projected coordinates arrive in the columns <code>dr0</code> and <code>dr1</code>. Documents that use similar vocabulary will appear near each other in the resulting plot.</p>
+<div id="e1a4c276" class="cell" data-execution_count="8">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    anno</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    .pipe(</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>        umap_text,</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        doc_id<span class="op">=</span>c.doc_id,</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        term_id<span class="op">=</span>c.lemma,</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>        n_components<span class="op">=</span><span class="dv">2</span>,</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>        min_df<span class="op">=</span><span class="fl">0.01</span>,</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>        max_df<span class="op">=</span><span class="fl">0.5</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    .predict(full<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    .pipe(ggplot, aes(c.dr0, c.dr1))</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    .geom_text(aes(label<span class="op">=</span>c.doc_id), size<span class="op">=</span><span class="dv">8</span>)</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="8">
+<div>
+<figure class="figure">
+<p><a href="14_text_vectors_files/figure-html/cell-9-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img src="14_text_vectors_files/figure-html/cell-9-output-1.png" width="672" height="480" class="figure-img"></a></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The <code>min_df</code> and <code>max_df</code> parameters filter the vocabulary before constructing the document vectors: terms appearing in fewer than 1% of documents or more than 50% of documents are excluded. This removes both rare terms, which add noise, and ubiquitous terms, which add no discriminative power, so the representation is built on the most informative vocabulary. The UMAP algorithm then finds a two-dimensional arrangement that preserves, as much as possible, the distances between documents in the original high-dimensional space. The result is a map of the corpus where proximity reflects similarity in language use.</p>
+</section>
+<section id="document-distances" class="level2" data-number="14.5">
+<h2 data-number="14.5" class="anchored" data-anchor-id="document-distances"><span class="header-section-number">14.5</span> Document Distances</h2>
+<p>The UMAP plot gives a visual impression of which documents are similar, but for many applications we need the similarities themselves as numbers. Which page is the single closest match to the Jane Austen page? Which pairs of pages are so similar that we might link them together? Questions like these call for an explicit <em>distance</em> defined between every pair of document vectors.</p>
+<p>The most familiar notion of distance, the straight-line Euclidean distance between two points, turns out to be a poor choice for document vectors. The reason is document length. A long Wikipedia page and a short one about the same subject use similar vocabulary in similar <em>proportions</em>, but the long page has systematically larger TF-IDF values simply because its counts are larger. In Euclidean terms, the long document sits much farther from the origin, and length differences swamp the vocabulary differences we actually care about.</p>
+<p>The standard fix is to measure the <em>angle</em> between the two vectors rather than the straight-line distance between their endpoints. Two documents that use vocabulary in the same proportions point in the same direction from the origin, regardless of their lengths, so the angle between them is small. Mathematically, the angle distance between documents <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span> is computed from the normalized inner product of their vectors:</p>
+<p><span class="math display">\[
+d(\mathbf{x}_a, \mathbf{x}_b) = \arccos\left( \frac{\mathbf{x}_a \cdot \mathbf{x}_b}{\lVert\mathbf{x}_a\rVert \, \lVert\mathbf{x}_b\rVert} \right)
+\]</span></p>
+<p>Because TF-IDF values are never negative, the angle between two document vectors falls between 0 (identical proportions) and <span class="math inline">\(\pi/2 \approx 1.57\)</span> radians (no shared vocabulary at all). The closely related <em>cosine similarity</em> reports the quantity inside the arccosine instead, where 1 means identical and 0 means no overlap; the two conventions carry the same information.</p>
+<p>The wrapper function <code>DSText.compute_distances</code> computes the angle distance for every pair of documents. Conceptually it does three things: it builds the TF-IDF matrix internally by pivoting the long table into wide format, it rescales each row to have unit length, and it computes the pairwise angles with a matrix product. The essential steps, written with NumPy, look like this (shown for reference, not run):</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>mat <span class="op">=</span> (</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    tfidf</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    .pivot(on<span class="op">=</span><span class="st">"lemma"</span>, index<span class="op">=</span><span class="st">"doc_id"</span>, values<span class="op">=</span><span class="st">"tfidf"</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    .fill_null(<span class="dv">0</span>)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> mat.drop(<span class="st">"doc_id"</span>).to_numpy()</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> X <span class="op">/</span> np.linalg.norm(X, axis<span class="op">=</span><span class="dv">1</span>, keepdims<span class="op">=</span><span class="va">True</span>)   <span class="co"># unit-length rows</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>angles <span class="op">=</span> np.arccos(np.clip(X <span class="op">@</span> X.T, <span class="dv">0</span>, <span class="dv">1</span>))          <span class="co"># pairwise angles</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>After the rows are rescaled to unit length, the matrix product <code>X @ X.T</code> contains every pairwise inner product at once, which is exactly the quantity inside the arccosine of the formula above. The <code>clip</code> guards against floating-point values that land a hair outside the valid range of the arccosine. The wrapper then unpivots the resulting square array back into a long table with one row per pair of documents. Each unordered pair appears exactly once, with <code>doc_id</code> alphabetically before <code>doc_id2</code>.</p>
+<div id="0b32633c" class="cell" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>text_dist <span class="op">=</span> DSText.compute_distances(anno, min_df<span class="op">=</span><span class="fl">0.01</span>, max_df<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>text_dist</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="9">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (2_775, 3)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">doc_id</th>
+<th data-quarto-table-cell-role="th">doc_id2</th>
+<th data-quarto-table-cell-role="th">distance</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>str</td>
+<td>f64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"A. A. Milne"</td>
+<td>"Alexander Pope"</td>
+<td>1.562447</td>
+</tr>
+<tr class="even">
+<td>"A. A. Milne"</td>
+<td>"Alfred, Lord Tennyson"</td>
+<td>1.558036</td>
+</tr>
+<tr class="odd">
+<td>"A. A. Milne"</td>
+<td>"Ann Radcliffe"</td>
+<td>1.562401</td>
+</tr>
+<tr class="even">
+<td>"A. A. Milne"</td>
+<td>"Beatrix Potter"</td>
+<td>1.548401</td>
+</tr>
+<tr class="odd">
+<td>"A. A. Milne"</td>
+<td>"Ben Jonson"</td>
+<td>1.562684</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"William Blake"</td>
+<td>"William Shakespeare"</td>
+<td>1.536312</td>
+</tr>
+<tr class="even">
+<td>"William Blake"</td>
+<td>"William Wordsworth"</td>
+<td>1.507469</td>
+</tr>
+<tr class="odd">
+<td>"William Langland"</td>
+<td>"William Shakespeare"</td>
+<td>1.557119</td>
+</tr>
+<tr class="even">
+<td>"William Langland"</td>
+<td>"William Wordsworth"</td>
+<td>1.563088</td>
+</tr>
+<tr class="odd">
+<td>"William Shakespeare"</td>
+<td>"William Wordsworth"</td>
+<td>1.531634</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>With the distances in a table, ordinary Polars operations answer similarity questions directly. Because each pair is stored only once, we first stack the table with a copy of itself with the columns reversed, so that every document appears in the <code>doc_id</code> column.</p>
+<div id="ad126d9e" class="cell" data-execution_count="10">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>text_dist_both <span class="op">=</span> pl.concat([</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    text_dist,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    text_dist.select(doc_id<span class="op">=</span>c.doc_id2, doc_id2<span class="op">=</span>c.doc_id, distance<span class="op">=</span>c.distance)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>We can now answer the question posed at the start of this section: which pages are the closest matches to the Jane Austen page?</p>
+<div id="6ee7869f" class="cell" data-execution_count="11">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    text_dist_both</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.doc_id <span class="op">==</span> <span class="st">"Jane Austen"</span>)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    .sort(c.distance)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">5</span>)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="11">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (5, 3)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">doc_id</th>
+<th data-quarto-table-cell-role="th">doc_id2</th>
+<th data-quarto-table-cell-role="th">distance</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>str</td>
+<td>f64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"Jane Austen"</td>
+<td>"Charlotte Smith"</td>
+<td>1.491556</td>
+</tr>
+<tr class="even">
+<td>"Jane Austen"</td>
+<td>"Ann Radcliffe"</td>
+<td>1.493433</td>
+</tr>
+<tr class="odd">
+<td>"Jane Austen"</td>
+<td>"Mary Wollstonecraft"</td>
+<td>1.533684</td>
+</tr>
+<tr class="even">
+<td>"Jane Austen"</td>
+<td>"Virginia Woolf"</td>
+<td>1.53782</td>
+</tr>
+<tr class="odd">
+<td>"Jane Austen"</td>
+<td>"Charlotte Brontë"</td>
+<td>1.53976</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>And sorting within groups extends the same idea to every document at once, finding the single nearest neighbor of each page.</p>
+<div id="f5cf512f" class="cell" data-execution_count="12">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    text_dist_both</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    .sort(c.doc_id, c.distance)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    .group_by(c.doc_id, maintain_order<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">1</span>)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="12">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (75, 3)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">doc_id</th>
+<th data-quarto-table-cell-role="th">doc_id2</th>
+<th data-quarto-table-cell-role="th">distance</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>str</td>
+<td>f64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"A. A. Milne"</td>
+<td>"T. S. Eliot"</td>
+<td>1.528354</td>
+</tr>
+<tr class="even">
+<td>"Alexander Pope"</td>
+<td>"John Dryden"</td>
+<td>1.484047</td>
+</tr>
+<tr class="odd">
+<td>"Alfred, Lord Tennyson"</td>
+<td>"Elizabeth Barrett Browning"</td>
+<td>1.490942</td>
+</tr>
+<tr class="even">
+<td>"Ann Radcliffe"</td>
+<td>"Jane Austen"</td>
+<td>1.493433</td>
+</tr>
+<tr class="odd">
+<td>"Beatrix Potter"</td>
+<td>"C. S. Lewis"</td>
+<td>1.53407</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"Walter Raleigh"</td>
+<td>"Edmund Spenser"</td>
+<td>1.456216</td>
+</tr>
+<tr class="even">
+<td>"William Blake"</td>
+<td>"Cecil Day-Lewis"</td>
+<td>1.495091</td>
+</tr>
+<tr class="odd">
+<td>"William Langland"</td>
+<td>"John Gower"</td>
+<td>1.529729</td>
+</tr>
+<tr class="even">
+<td>"William Shakespeare"</td>
+<td>"Ben Jonson"</td>
+<td>1.359688</td>
+</tr>
+<tr class="odd">
+<td>"William Wordsworth"</td>
+<td>"Samuel Taylor Coleridge"</td>
+<td>1.227507</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>The nearest-neighbor table is worth reading against literary history. We would expect contemporaries to match with contemporaries and poets with poets, and the rows that depart from that expectation are often the most interesting ones to follow up on. The distances themselves also give a sense of scale: some documents have a very close nearest neighbor, while others sit relatively far from everything else in the collection, an observation we could not make from the UMAP plot alone.</p>
+<p>Finally, since we will reuse these distances in the next chapter, we save the table to disk.</p>
+<div id="fc8237f4" class="cell" data-execution_count="13">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>text_dist.write_csv(<span class="st">"data/wiki_uk_text_dist.csv"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>In <a href="15_network_data.html" class="quarto-xref"><span>Chapter 15</span></a>, this table of pairwise distances becomes an ingredient for building networks: by connecting documents whose distance falls below a threshold, or by linking each document to its nearest neighbors, we can convert the geometry of the corpus into an explicit relational structure and analyze it with network tools.</p>
+</section>
+<section id="across-languages" class="level2" data-number="14.6">
+<h2 data-number="14.6" class="anchored" data-anchor-id="across-languages"><span class="header-section-number">14.6</span> Across Languages</h2>
+<p>One of the reasons that we enjoy using the content of Wikipedia pages as example datasets for textual analysis is that it is possible to get the page text in a large number of different languages. This lets us study how differences across languages and cultures affect the way that knowledge is created and distributed.</p>
+<p>Let’s see how our text analysis pipeline can be modified to work with Wikipedia pages from the French version of the site. SpaCy provides models for many different languages; as with the English model, the French one may need to be downloaded once with <code>python -m spacy download fr_core_news_sm</code> before it can be loaded.</p>
+<div id="ad1575e0" class="cell" data-execution_count="14">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>nlp_fr <span class="op">=</span> spacy.load(<span class="st">"fr_core_news_sm"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>And now, we can annotate the text as follows.</p>
+<div id="22f079f4" class="cell" data-execution_count="15">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>anno_fr <span class="op">=</span> DSText.process(docs_fr, nlp_fr)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>anno_fr</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="14">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (203_785, 15)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">doc_id</th>
+<th data-quarto-table-cell-role="th">sid</th>
+<th data-quarto-table-cell-role="th">tid</th>
+<th data-quarto-table-cell-role="th">token</th>
+<th data-quarto-table-cell-role="th">token_with_ws</th>
+<th data-quarto-table-cell-role="th">lemma</th>
+<th data-quarto-table-cell-role="th">upos</th>
+<th data-quarto-table-cell-role="th">tag</th>
+<th data-quarto-table-cell-role="th">is_alpha</th>
+<th data-quarto-table-cell-role="th">is_stop</th>
+<th data-quarto-table-cell-role="th">is_punct</th>
+<th data-quarto-table-cell-role="th">dep</th>
+<th data-quarto-table-cell-role="th">head_idx</th>
+<th data-quarto-table-cell-role="th">ent_type</th>
+<th data-quarto-table-cell-role="th">ent_iob</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>i64</td>
+<td>i64</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>bool</td>
+<td>bool</td>
+<td>bool</td>
+<td>str</td>
+<td>i64</td>
+<td>str</td>
+<td>str</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"Marie de France"</td>
+<td>1</td>
+<td>1</td>
+<td>"Marie"</td>
+<td>"Marie "</td>
+<td>"marie"</td>
+<td>"NOUN"</td>
+<td>"NOUN"</td>
+<td>true</td>
+<td>false</td>
+<td>false</td>
+<td>"nsubj"</td>
+<td>6</td>
+<td>"PER"</td>
+<td>"B"</td>
+</tr>
+<tr class="even">
+<td>"Marie de France"</td>
+<td>1</td>
+<td>2</td>
+<td>"de"</td>
+<td>"de "</td>
+<td>"de"</td>
+<td>"ADP"</td>
+<td>"ADP"</td>
+<td>true</td>
+<td>true</td>
+<td>false</td>
+<td>"case"</td>
+<td>3</td>
+<td>"PER"</td>
+<td>"I"</td>
+</tr>
+<tr class="odd">
+<td>"Marie de France"</td>
+<td>1</td>
+<td>3</td>
+<td>"France"</td>
+<td>"France "</td>
+<td>"France"</td>
+<td>"PROPN"</td>
+<td>"PROPN"</td>
+<td>true</td>
+<td>false</td>
+<td>false</td>
+<td>"nmod"</td>
+<td>1</td>
+<td>"PER"</td>
+<td>"I"</td>
+</tr>
+<tr class="even">
+<td>"Marie de France"</td>
+<td>1</td>
+<td>4</td>
+<td>"est"</td>
+<td>"est "</td>
+<td>"être"</td>
+<td>"AUX"</td>
+<td>"AUX"</td>
+<td>true</td>
+<td>true</td>
+<td>false</td>
+<td>"cop"</td>
+<td>6</td>
+<td>""</td>
+<td>"O"</td>
+</tr>
+<tr class="odd">
+<td>"Marie de France"</td>
+<td>1</td>
+<td>5</td>
+<td>"une"</td>
+<td>"une "</td>
+<td>"un"</td>
+<td>"DET"</td>
+<td>"DET"</td>
+<td>true</td>
+<td>true</td>
+<td>false</td>
+<td>"det"</td>
+<td>6</td>
+<td>""</td>
+<td>"O"</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"Seamus Heaney"</td>
+<td>78</td>
+<td>5</td>
+<td>"multitude"</td>
+<td>"multitude "</td>
+<td>"multitude"</td>
+<td>"NOUN"</td>
+<td>"NOUN"</td>
+<td>true</td>
+<td>false</td>
+<td>false</td>
+<td>"obj"</td>
+<td>3</td>
+<td>""</td>
+<td>"O"</td>
+</tr>
+<tr class="even">
+<td>"Seamus Heaney"</td>
+<td>78</td>
+<td>6</td>
+<td>"de"</td>
+<td>"de "</td>
+<td>"de"</td>
+<td>"ADP"</td>
+<td>"ADP"</td>
+<td>true</td>
+<td>true</td>
+<td>false</td>
+<td>"case"</td>
+<td>7</td>
+<td>""</td>
+<td>"O"</td>
+</tr>
+<tr class="odd">
+<td>"Seamus Heaney"</td>
+<td>78</td>
+<td>7</td>
+<td>"doctorats"</td>
+<td>"doctorats "</td>
+<td>"doctorat"</td>
+<td>"NOUN"</td>
+<td>"NOUN"</td>
+<td>true</td>
+<td>false</td>
+<td>false</td>
+<td>"nmod"</td>
+<td>5</td>
+<td>""</td>
+<td>"O"</td>
+</tr>
+<tr class="even">
+<td>"Seamus Heaney"</td>
+<td>78</td>
+<td>8</td>
+<td>"honoris"</td>
+<td>"honoris "</td>
+<td>"honoris"</td>
+<td>"VERB"</td>
+<td>"VERB"</td>
+<td>true</td>
+<td>false</td>
+<td>false</td>
+<td>"acl"</td>
+<td>7</td>
+<td>""</td>
+<td>"O"</td>
+</tr>
+<tr class="odd">
+<td>"Seamus Heaney"</td>
+<td>78</td>
+<td>9</td>
+<td>"causa"</td>
+<td>"causa"</td>
+<td>"causa"</td>
+<td>"NOUN"</td>
+<td>"NOUN"</td>
+<td>true</td>
+<td>false</td>
+<td>false</td>
+<td>"obj"</td>
+<td>3</td>
+<td>""</td>
+<td>"O"</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>French and English have different grammatical structures, and we might expect these to show up in the part-of-speech frequencies. French tends to use determiners (articles) more often, for instance, since nearly every French noun requires one. Rather than taking claims like this on faith, we can check them directly by stacking the two annotation tables and comparing the proportion of each part of speech within each language.</p>
+<div id="434e9aa8" class="cell" data-execution_count="16">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    pl.concat([</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>        anno.with_columns(lang <span class="op">=</span> pl.lit(<span class="st">"en"</span>)),</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>        anno_fr.with_columns(lang <span class="op">=</span> pl.lit(<span class="st">"fr"</span>))</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    ])</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    .group_by([c.lang, c.upos])</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    .agg(count <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    .with_columns(prop <span class="op">=</span> c.count <span class="op">/</span> c.count.<span class="bu">sum</span>().over(c.lang))</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    .pipe(ggplot, aes(c.upos, c.prop))</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    .geom_col(aes(fill<span class="op">=</span>c.lang), position<span class="op">=</span><span class="st">"dodge"</span>)</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    .coord_flip()</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="15">
+<div>
+<figure class="figure">
+<p><a href="14_text_vectors_files/figure-html/cell-17-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3"><img src="14_text_vectors_files/figure-html/cell-17-output-1.png" width="672" height="480" class="figure-img"></a></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Differences at this level are linguistic rather than content-based, but they matter when interpreting comparative analyses. A gap in determiner frequency between an English corpus and a French one tells us about grammar, not about editorial choices, and any comparison of the two editions has to look past it.</p>
+<p>The vector representation developed in this chapter applies to the French annotations exactly as it did to the English ones. Running <code>DSText.compute_tfidf</code> on <code>anno_fr</code> produces a TF-IDF table over French lemmas, and the top-scoring terms for each page summarize how the French edition characterizes each author.</p>
+<div id="eb000b9e" class="cell" data-execution_count="17">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    DSText.compute_tfidf(anno_fr, min_df<span class="op">=</span><span class="fl">0.01</span>, max_df<span class="op">=</span><span class="fl">1.0</span>)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    .sort([c.doc_id, c.tfidf], descending<span class="op">=</span>[<span class="va">False</span>, <span class="va">True</span>])</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    .group_by(c.doc_id)</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">10</span>)</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    .group_by(c.doc_id)</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    .agg(top_lemmas <span class="op">=</span> c.lemma.<span class="bu">str</span>.join(<span class="st">"; "</span>))</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="16">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (73, 2)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">doc_id</th>
+<th data-quarto-table-cell-role="th">top_lemmas</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>str</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"William Shakespeare"</td>
+<td>"de; le; shakespeare; et; un; ê…</td>
+</tr>
+<tr class="even">
+<td>"Marie de France"</td>
+<td>"de; le; marie; un; être; à; et…</td>
+</tr>
+<tr class="odd">
+<td>"Margaret Cavendish"</td>
+<td>"de; Cavendish; le; lui; margar…</td>
+</tr>
+<tr class="even">
+<td>"W. B. Yeats"</td>
+<td>"de; le; yeat; son; à; Yeats; e…</td>
+</tr>
+<tr class="odd">
+<td>"George Orwell"</td>
+<td>"de; le; à; Orwell; et; il; en;…</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"Samuel Taylor Coleridge"</td>
+<td>"de; le; il; à; et; Coleridge; …</td>
+</tr>
+<tr class="even">
+<td>"Robert Burns"</td>
+<td>"de; le; Burns; écossais; et; l…</td>
+</tr>
+<tr class="odd">
+<td>"Alfred, Lord Tennyson"</td>
+<td>"de; Tennyson; le; son; et; à; …</td>
+</tr>
+<tr class="even">
+<td>"Louis MacNeice"</td>
+<td>"macneice; spender; de; Lewis; …</td>
+</tr>
+<tr class="odd">
+<td>"Virginia Woolf"</td>
+<td>"de; le; Woolf; Virginia; son; …</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Because the two editions have different vocabularies, the English and French vectors live in different spaces and cannot be compared directly. The <em>structure</em> of each collection, however, can be. We can build a UMAP projection of the French pages with exactly the same code we used for the English ones.</p>
+<div id="3f1509de" class="cell" data-execution_count="18">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    anno_fr</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    .pipe(</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>        umap_text,</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>        doc_id<span class="op">=</span>c.doc_id,</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>        term_id<span class="op">=</span>c.lemma,</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>        n_components<span class="op">=</span><span class="dv">2</span>,</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>        min_df<span class="op">=</span><span class="fl">0.01</span>,</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>        max_df<span class="op">=</span><span class="fl">0.5</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>    .predict(full<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    .pipe(ggplot, aes(c.dr0, c.dr1))</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>    .geom_text(aes(label<span class="op">=</span>c.doc_id), size<span class="op">=</span><span class="dv">8</span>)</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="17">
+<div>
+<figure class="figure">
+<p><a href="14_text_vectors_files/figure-html/cell-19-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4"><img src="14_text_vectors_files/figure-html/cell-19-output-1.png" width="672" height="480" class="figure-img"></a></p>
+</figure>
+</div>
+</div>
+</div>
+<p>If the French projection groups the authors differently than the English one, that difference reflects a genuine difference in how the two communities of editors describe these figures. The same historical figure may be framed differently depending on the national perspective of the Wikipedia editors, and events central to one country’s narrative may be peripheral to another’s. The tools in this chapter make it possible to investigate such questions systematically rather than anecdotally.</p>
+</section>
+<section id="summary" class="level2" data-number="14.7">
+<h2 data-number="14.7" class="anchored" data-anchor-id="summary"><span class="header-section-number">14.7</span> Summary</h2>
+<p>In this chapter, we converted the annotation table from the previous chapter into a numeric representation of whole documents. TF-IDF weighting turns raw term counts into scores that emphasize each document’s distinctive vocabulary, and interpreting each document’s scores as coordinates turns the corpus into a cloud of points in a high-dimensional space. From that geometry we obtained a two-dimensional map of the collection through UMAP, explicit angle distances between every pair of documents, and a set of tools that carried over unchanged to the French edition of the same pages. As in the previous chapter, opening up the wrapper functions showed that they consist of short Polars chains plus a little linear algebra, rather than anything exotic.</p>
+<p>The pairwise distance table is the direct link to the next chapter: distances between documents define relationships, and a table of relationships between pairs of objects is precisely a network.</p>
+</section>
+<section id="references" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="references">References</h2>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./13_text_annotations.html" class="pagination-link" aria-label="Textual Data: Annotations">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Textual Data: Annotations</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./15_network_data.html" class="pagination-link" aria-label="Network Data">
+        <span class="nav-page-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Network Data</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>Taylor Arnold</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>A <a href="https://distantviewing.org/">Distant Viewing Lab</a> project</p>
+</div>
+  </div>
+</footer>
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
+
+
+
+
+</body></html>

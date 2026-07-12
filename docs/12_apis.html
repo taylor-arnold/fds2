@@ -1,0 +1,1890 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.36">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Taylor Arnold">
+
+<title>12&nbsp; Data APIs and Corpora – Foundations of Data Science</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./13_text_annotations.html" rel="next">
+<link href="./11_spatial_data.html" rel="prev">
+<link href="./img/owl_explore.png" rel="icon" type="image/png">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-5ee6335475bc6b9f2146ef75da7f65f4.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./11_spatial_data.html">Part II: Applications</a></li><li class="breadcrumb-item"><a href="./12_apis.html"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Data APIs and Corpora</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Foundations of Data Science</a> 
+        <div class="sidebar-tools-main">
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Welcome</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
+ <span class="menu-text">Part I: Core</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01_intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02_types.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Data Types and Expressions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03_organize.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Organizing Data I</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04_graphics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Visualizing Data I</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05_group.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Grouping and Aggregation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06_window.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Window Functions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07_graphics_ii.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Visualizing Data II</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08_combine.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Combining Tables</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09_restructure.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Restructuring Data</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10_collect.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Collecting Data</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Part II: Applications</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11_spatial_data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Spatial Data</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12_apis.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Data APIs and Corpora</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13_text_annotations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Textual Data: Annotations</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./14_text_vectors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Textual Data: Vectors</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./15_network_data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Network Data</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./16_image_data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Image Data</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#setup" id="toc-setup" class="nav-link active" data-scroll-target="#setup"><span class="header-section-number">12.1</span> Setup</a></li>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link" data-scroll-target="#introduction"><span class="header-section-number">12.2</span> Introduction</a></li>
+  <li><a href="#apis-and-http-requests" id="toc-apis-and-http-requests" class="nav-link" data-scroll-target="#apis-and-http-requests"><span class="header-section-number">12.3</span> APIs and HTTP Requests</a></li>
+  <li><a href="#caching-responses" id="toc-caching-responses" class="nav-link" data-scroll-target="#caching-responses"><span class="header-section-number">12.4</span> Caching Responses</a></li>
+  <li><a href="#a-first-request" id="toc-a-first-request" class="nav-link" data-scroll-target="#a-first-request"><span class="header-section-number">12.5</span> A First Request</a></li>
+  <li><a href="#being-a-polite-client" id="toc-being-a-polite-client" class="nav-link" data-scroll-target="#being-a-polite-client"><span class="header-section-number">12.6</span> Being a Polite Client</a></li>
+  <li><a href="#defining-the-population" id="toc-defining-the-population" class="nav-link" data-scroll-target="#defining-the-population"><span class="header-section-number">12.7</span> Defining the Population</a></li>
+  <li><a href="#redirects-and-missing-pages" id="toc-redirects-and-missing-pages" class="nav-link" data-scroll-target="#redirects-and-missing-pages"><span class="header-section-number">12.8</span> Redirects and Missing Pages</a></li>
+  <li><a href="#article-text" id="toc-article-text" class="nav-link" data-scroll-target="#article-text"><span class="header-section-number">12.9</span> Article Text</a></li>
+  <li><a href="#links-between-pages" id="toc-links-between-pages" class="nav-link" data-scroll-target="#links-between-pages"><span class="header-section-number">12.10</span> Links Between Pages</a></li>
+  <li><a href="#revision-histories" id="toc-revision-histories" class="nav-link" data-scroll-target="#revision-histories"><span class="header-section-number">12.11</span> Revision Histories</a></li>
+  <li><a href="#page-view-statistics" id="toc-page-view-statistics" class="nav-link" data-scroll-target="#page-view-statistics"><span class="header-section-number">12.12</span> Page View Statistics</a></li>
+  <li><a href="#language-links" id="toc-language-links" class="nav-link" data-scroll-target="#language-links"><span class="header-section-number">12.13</span> Language Links</a></li>
+  <li><a href="#raw-and-processed-layers" id="toc-raw-and-processed-layers" class="nav-link" data-scroll-target="#raw-and-processed-layers"><span class="header-section-number">12.14</span> Raw and Processed Layers</a></li>
+  <li><a href="#reproducible-snapshots" id="toc-reproducible-snapshots" class="nav-link" data-scroll-target="#reproducible-snapshots"><span class="header-section-number">12.15</span> Reproducible Snapshots</a></li>
+  <li><a href="#conclusions" id="toc-conclusions" class="nav-link" data-scroll-target="#conclusions"><span class="header-section-number">12.16</span> Conclusions</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./11_spatial_data.html">Part II: Applications</a></li><li class="breadcrumb-item"><a href="./12_apis.html"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Data APIs and Corpora</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span id="sec-apis" class="quarto-section-identifier"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Data APIs and Corpora</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="setup" class="level2" data-number="12.1">
+<h2 data-number="12.1" class="anchored" data-anchor-id="setup"><span class="header-section-number">12.1</span> Setup</h2>
+<p>Load the modules needed for the chapter. We will use the requests and requests-cache modules to make API calls over the network.</p>
+<div id="65c9ff29" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> time</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> urllib.parse <span class="im">import</span> quote</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine <span class="im">import</span> ggplot, aes</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> polars <span class="im">import</span> col <span class="im">as</span> c</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> funs</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> requests</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> requests_cache</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="introduction" class="level2" data-number="12.2">
+<h2 data-number="12.2" class="anchored" data-anchor-id="introduction"><span class="header-section-number">12.2</span> Introduction</h2>
+<p>Every dataset in the book so far arrived as a file: something we could read with <code>pl.read_csv</code> and inspect in full before writing a line of analysis code. A lot of interesting data does not come packaged that way. It sits on remote servers and is only available through a programmatic interface, either because it changes too often to distribute as a static file or because the provider wants to control how it is accessed. Weather forecasts, library catalogs, legislative records, and the entire edit history of Wikipedia all fall in this category.</p>
+<p>This chapter has two goals. The first is to teach the mechanics of <em>application programming interfaces</em> (APIs): how to send an HTTP request, read the response codes, page through large result sets, and turn nested JSON into the flat tables we know how to work with. The second goal is to actually build something with those mechanics. Over the course of the chapter we will assemble a corpus of Wikipedia articles about nineteenth-century British and Irish novelists, collecting each article’s metadata, full text, internal links, revision history, daily page views, and links to versions in other languages. The chapters that follow on temporal, textual, and network data all analyze this corpus, so the output here is not a throwaway example. It is a small, documented data pipeline, and the decisions we make while building it (how the sample is defined, how redirects are handled, which identifiers we key on, when the data was retrieved) will matter every time the data gets used later.</p>
+<p>We work with Wikipedia for a practical reason: its APIs are free, require no account or key, and expose an unusually wide range of data types from a single source. The same request patterns apply to almost any HTTP-based API you will meet in practice.</p>
+</section>
+<section id="apis-and-http-requests" class="level2" data-number="12.3">
+<h2 data-number="12.3" class="anchored" data-anchor-id="apis-and-http-requests"><span class="header-section-number">12.3</span> APIs and HTTP Requests</h2>
+<p>An API is a generic term for an interface that two computer programs can communicate across. The most common type for data access communicates over the Hypertext Transfer Protocol (HTTP), the same protocol your browser uses to fetch web pages. When you visit a website, your browser sends an HTTP request and receives a response containing the page content. Data APIs work the same way, except that instead of returning a human-readable page, the server returns structured data, usually in JSON format, designed for programs to consume.</p>
+<p>HTTP defines several <em>methods</em> that describe what kind of action a request performs. The most common are GET (retrieve data), POST (send data to create something new), PUT (update existing data), and DELETE (remove data). For data collection we almost always use GET. Each request goes to a specific URL called an <em>endpoint</em>, usually with a set of <em>parameters</em> attached that specify exactly what we want. The server replies with a numeric <em>status code</em> indicating what happened: 200 means success, 404 means the requested resource was not found, 429 means we are sending requests too quickly, and codes in the 500s mean the server itself hit an error. Checking status codes is the first step in debugging any failed request.</p>
+<p>Many APIs require an account and an API key, a unique string that authenticates your requests, and some charge per request. The APIs we use in this chapter are run by the Wikimedia Foundation and require neither. We will work with two of them. The <em>MediaWiki Action API</em> at <code>https://en.wikipedia.org/w/api.php</code> is the workhorse: it can return page metadata, article text, links, revision histories, and much more, all controlled through URL parameters. Its documentation is at <a href="https://www.mediawiki.org/wiki/API:Main_page">https://www.mediawiki.org/wiki/API:Main_page</a>. The <em>Wikimedia REST API</em> at <code>https://wikimedia.org/api/rest_v1/</code> serves analytics data such as page view counts through a different URL structure that we will look at near the end of the chapter. Python’s <code>requests</code> library handles both; its documentation is at <a href="https://requests.readthedocs.io/">https://requests.readthedocs.io/</a>.</p>
+</section>
+<section id="caching-responses" class="level2" data-number="12.4">
+<h2 data-number="12.4" class="anchored" data-anchor-id="caching-responses"><span class="header-section-number">12.4</span> Caching Responses</h2>
+<p>Before making any requests, we set up a local cache that stores every response we receive. The <code>requests_cache</code> library provides a drop-in replacement for a standard <code>requests</code> session that saves responses in a SQLite database file and returns the saved copy whenever the same request is repeated.</p>
+<div id="c23aae8e" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>session <span class="op">=</span> requests_cache.CachedSession(</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    cache_name<span class="op">=</span><span class="st">"data/wiki/requests_cache"</span>,</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    backend<span class="op">=</span><span class="st">"sqlite"</span>,</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    allowable_methods<span class="op">=</span>(<span class="st">"GET"</span>, <span class="st">"HEAD"</span>, <span class="st">"POST"</span>),</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    expire_after<span class="op">=</span><span class="va">None</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The cache matters for three reasons. It avoids hammering the server with repeated requests for the same data, which the Wikimedia Foundation explicitly asks clients to avoid. It makes development fast, since re-running a notebook pulls everything from disk instead of the network. And, most useful for our purposes, the cache file is a permanent record of the exact bytes the server sent us. Setting <code>expire_after=None</code> means entries never expire, so the SQLite file becomes the <em>raw layer</em> of our pipeline: every table we build later in the chapter can be reconstructed from it without touching the network at all. We will return to this idea when we discuss reproducibility at the end of the chapter.</p>
+</section>
+<section id="a-first-request" class="level2" data-number="12.5">
+<h2 data-number="12.5" class="anchored" data-anchor-id="a-first-request"><span class="header-section-number">12.5</span> A First Request</h2>
+<p>An API call needs three things: the endpoint URL, a dictionary of parameters, and a set of headers identifying who we are. The parameters are specific to each API, so consulting the documentation is unavoidable. The <code>User-Agent</code> header identifies your application and gives server administrators a way to contact you if your requests cause problems. Wikimedia requires a descriptive one; requests with generic or missing user agents may be blocked.</p>
+<div id="8ac411d5" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>base_url <span class="op">=</span> <span class="st">"https://en.wikipedia.org/w/api.php"</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>headers <span class="op">=</span> {</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"User-Agent"</span>: <span class="st">"DataScienceBook/1.0 (tarnold2@richmond.edu)"</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>params <span class="op">=</span> {</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"action"</span>: <span class="st">"query"</span>,</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"format"</span>: <span class="st">"json"</span>,</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"prop"</span>: <span class="st">"info"</span>,</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"titles"</span>: <span class="st">"Emily Brontë"</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>response <span class="op">=</span> session.get(base_url, params<span class="op">=</span>params, headers<span class="op">=</span>headers)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>response.status_code</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="4">
+<pre><code>200</code></pre>
+</div>
+</div>
+<p>The <code>action</code> parameter tells the Action API what kind of operation we want (<code>query</code> retrieves data), <code>format</code> asks for JSON, <code>prop</code> names the property to fetch (<code>info</code> returns basic page metadata), and <code>titles</code> names the article. The status code of 200 confirms the request succeeded. The response body is JSON, which the response object can parse directly into Python dictionaries and lists.</p>
+<div id="eac236d3" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> response.json()</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>data[<span class="st">"query"</span>][<span class="st">"pages"</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="5">
+<pre><code>{'9810': {'pageid': 9810,
+  'ns': 0,
+  'title': 'Emily Brontë',
+  'contentmodel': 'wikitext',
+  'pagelanguage': 'en',
+  'pagelanguagehtmlcode': 'en',
+  'pagelanguagedir': 'ltr',
+  'touched': '2026-07-12T06:01:37Z',
+  'lastrevid': 1363711038,
+  'length': 72283}}</code></pre>
+</div>
+</div>
+<p>Here we see a pattern that recurs constantly with APIs: the useful data is nested several levels deep, inside <code>data["query"]["pages"]</code>, and is keyed by the page’s numeric ID rather than arranged as rows. We navigate to the nested records, pull out the fields we want as a list of dictionaries, and hand that list to Polars.</p>
+<div id="9067b41b" class="cell" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>rows <span class="op">=</span> []</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> page <span class="kw">in</span> data[<span class="st">"query"</span>][<span class="st">"pages"</span>].values():</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    rows.append({</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">"page_id"</span>: page[<span class="st">"pageid"</span>],</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"title"</span>: page[<span class="st">"title"</span>],</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">"length"</span>: page[<span class="st">"length"</span>],</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">"touched"</span>: page[<span class="st">"touched"</span>]</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    })</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>pl.DataFrame(rows)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="6">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (1, 4)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">page_id</th>
+<th data-quarto-table-cell-role="th">title</th>
+<th data-quarto-table-cell-role="th">length</th>
+<th data-quarto-table-cell-role="th">touched</th>
+</tr>
+<tr class="even">
+<td>i64</td>
+<td>str</td>
+<td>i64</td>
+<td>str</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>9810</td>
+<td>"Emily Brontë"</td>
+<td>72283</td>
+<td>"2026-07-12T06:01:37Z"</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>The <code>length</code> field is the size of the article source in bytes and <code>touched</code> records when the page last changed. Every API nests its responses differently, so there is no single recipe. The skill to practice is exploring the structure (print intermediate pieces, read the documentation) and then writing a short loop that flattens exactly the fields you need.</p>
+</section>
+<section id="being-a-polite-client" class="level2" data-number="12.6">
+<h2 data-number="12.6" class="anchored" data-anchor-id="being-a-polite-client"><span class="header-section-number">12.6</span> Being a Polite Client</h2>
+<p>Wikimedia’s APIs are free, and the etiquette they ask for in return is modest: send a real <code>User-Agent</code>, make requests serially rather than in parallel, and cache what you receive. There is also a formal <em>rate limit</em>, a cap on how many requests a client may send per unit of time. Exceed it and the server starts answering with status code 429 (“too many requests”) instead of data, at which point the correct behavior is to wait and retry rather than to push harder. Commercial APIs tend to have much stricter limits than Wikimedia’s, and hitting them repeatedly can get a key revoked, so pausing between requests is a habit worth building early.</p>
+<p>Since every request in the rest of the chapter uses the same session and headers, we wrap the pattern in a helper function. It raises an error on any failing status code and sleeps briefly after each request that actually went over the network. Cached responses skip the pause, which is what makes re-running the chapter fast.</p>
+<p>One detail matters more than it looks: clearing the session’s cookies before every request. Wikimedia’s responses carry <code>Vary: Cookie</code>, and the rotating session cookies it sets (<code>WMF-Uniq</code>, <code>NetworkProbeLimit</code>, and similar) would otherwise accumulate in <code>session.cookies</code> and get resent on later requests. Because <code>requests_cache</code> honors <code>Vary</code> headers by comparing the cookies attached to the current request against the cookies attached when a response was first cached, and those values differ on every run, a stale cookie jar silently defeats the entire cache: <code>expire_after=None</code> looks like it should make every rerun instant, but each request still fails its <code>Vary: Cookie</code> check and goes back out over the network. Since this API needs no cookies to work, clearing them keeps every request’s cookie state identical (empty) across runs, so cached entries actually get reused.</p>
+<div id="a36f4550" class="cell" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> polite_get(url, params<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    session.cookies.clear()</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    response <span class="op">=</span> session.get(url, params<span class="op">=</span>params, headers<span class="op">=</span>headers)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    response.raise_for_status()</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> <span class="bu">getattr</span>(response, <span class="st">"from_cache"</span>, <span class="va">False</span>):</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>        time.sleep(<span class="fl">0.2</span>)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> response</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="defining-the-population" class="level2" data-number="12.7">
+<h2 data-number="12.7" class="anchored" data-anchor-id="defining-the-population"><span class="header-section-number">12.7</span> Defining the Population</h2>
+<p>Now we turn to the corpus itself, and the first decision is the one that shapes everything downstream: which pages are we collecting? This is a sampling question, and APIs make it easy to get wrong because they make it easy to grab whatever is convenient. A defensible corpus starts from an explicit definition of the population, written down where future users of the data can find it.</p>
+<p>There are several reasonable ways to define a set of Wikipedia pages. You can curate a list by hand, which gives full control but does not scale and encodes your own blind spots. You can query the Wikidata knowledge graph for entities matching structured criteria such as occupation and birth country. Or you can use Wikipedia’s own <em>category</em> system, in which editors tag each article with subject labels. We take the category route here because it stays within the API we have already met, and because its imperfections are instructive.</p>
+<p>Our population is defined as the article pages belonging to two categories: <code>Category:Victorian novelists</code> and <code>Category:19th-century Irish novelists</code>. Together these give a corpus of nineteenth-century British and Irish novelists that is large enough to be interesting and small enough to collect in one sitting. Two caveats belong in the record. First, categories are maintained by volunteer editors, so membership reflects tagging practice as much as historical fact; an author missing the tag is invisible to us. Second, we collect only direct members and do not descend into subcategories, a deliberate choice that keeps the definition simple at the cost of some coverage.</p>
+<p>The Action API returns category members through <code>list=categorymembers</code>. A single response holds at most 500 results, so retrieving a full category requires <em>pagination</em>: when more results remain, the response includes a <code>continue</code> block whose values we feed back into the parameters of the next request, repeating until the block disappears.</p>
+<div id="d68105bf" class="cell" data-execution_count="8">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> category_members(category):</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    members <span class="op">=</span> []</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    params <span class="op">=</span> {</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">"action"</span>: <span class="st">"query"</span>,</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"format"</span>: <span class="st">"json"</span>,</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">"list"</span>: <span class="st">"categorymembers"</span>,</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">"cmtitle"</span>: category,</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">"cmtype"</span>: <span class="st">"page"</span>,</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"cmlimit"</span>: <span class="st">"max"</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="va">True</span>:</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>        data <span class="op">=</span> polite_get(base_url, params).json()</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>        members.extend(data[<span class="st">"query"</span>][<span class="st">"categorymembers"</span>])</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="st">"continue"</span> <span class="kw">not</span> <span class="kw">in</span> data:</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>        params.update(data[<span class="st">"continue"</span>])</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> members</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Setting <code>cmtype</code> to <code>page</code> filters out subcategories and files, and <code>cmlimit</code> set to <code>"max"</code> asks for the largest batch the server allows. We run the function over both categories and stack the results into a table. A handful of authors appear in both categories, so we deduplicate on the page ID, keeping the first category we saw for each.</p>
+<div id="d715b5c9" class="cell" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>categories <span class="op">=</span> [</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Category:Victorian novelists"</span>,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Category:19th-century Irish novelists"</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>rows <span class="op">=</span> []</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> category <span class="kw">in</span> categories:</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> member <span class="kw">in</span> category_members(category):</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>        rows.append({</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>            <span class="st">"page_id"</span>: member[<span class="st">"pageid"</span>],</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>            <span class="st">"title"</span>: member[<span class="st">"title"</span>],</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>            <span class="st">"category"</span>: category</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>        })</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>authors <span class="op">=</span> (</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    pl.DataFrame(rows)</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    .unique(subset<span class="op">=</span><span class="st">"page_id"</span>, keep<span class="op">=</span><span class="st">"first"</span>)</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    .sort(c.title)</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>authors</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="9">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (376, 3)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">page_id</th>
+<th data-quarto-table-cell-role="th">title</th>
+<th data-quarto-table-cell-role="th">category</th>
+</tr>
+<tr class="even">
+<td>i64</td>
+<td>str</td>
+<td>str</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1035916</td>
+<td>"A. E. W. Mason"</td>
+<td>"Category:Victorian novelists"</td>
+</tr>
+<tr class="even">
+<td>58843197</td>
+<td>"A. Garland Mears"</td>
+<td>"Category:19th-century Irish no…</td>
+</tr>
+<tr class="odd">
+<td>71288843</td>
+<td>"Ada Buisson"</td>
+<td>"Category:Victorian novelists"</td>
+</tr>
+<tr class="even">
+<td>931186</td>
+<td>"Ada Ellen Bayly"</td>
+<td>"Category:Victorian novelists"</td>
+</tr>
+<tr class="odd">
+<td>52931031</td>
+<td>"Adelaide O'Keeffe"</td>
+<td>"Category:19th-century Irish no…</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>41493545</td>
+<td>"William Johnson Neale"</td>
+<td>"Category:Victorian novelists"</td>
+</tr>
+<tr class="even">
+<td>14341581</td>
+<td>"William Johnston (Irish politi…</td>
+<td>"Category:19th-century Irish no…</td>
+</tr>
+<tr class="odd">
+<td>40119</td>
+<td>"William Makepeace Thackeray"</td>
+<td>"Category:Victorian novelists"</td>
+</tr>
+<tr class="even">
+<td>33277</td>
+<td>"William Morris"</td>
+<td>"Category:Victorian novelists"</td>
+</tr>
+<tr class="odd">
+<td>67573140</td>
+<td>"William Russell (fiction write…</td>
+<td>"Category:Victorian novelists"</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>This table is the spine of the corpus. Every other table we build will carry the <code>page_id</code> column so that it can be joined back here using the techniques from <a href="08_combine.html" class="quarto-xref"><span>Chapter 8</span></a>.</p>
+</section>
+<section id="redirects-and-missing-pages" class="level2" data-number="12.8">
+<h2 data-number="12.8" class="anchored" data-anchor-id="redirects-and-missing-pages"><span class="header-section-number">12.8</span> Redirects and Missing Pages</h2>
+<p>Our population came from category listings, which hand us canonical titles and page IDs directly. Corpora built from a hand-curated list start from titles typed by a person, and those are far less reliable. Wikipedia handles the mess through <em>redirects</em>: the page “Charlotte Bronte”, without the diaeresis, is not an article but a pointer that forwards readers to “Charlotte Brontë”. Dozens of alternate spellings, pen names, and former titles resolve this way. A title with no article and no redirect is simply missing.</p>
+<p>The Action API can resolve redirects for us if we pass <code>redirects=1</code>, and it batches nicely: up to 50 titles can go in a single request, separated by pipe characters. Here is a small demonstration with one redirect, one canonical title, and one title that does not exist.</p>
+<div id="15f0b32d" class="cell" data-execution_count="10">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>params <span class="op">=</span> {</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"action"</span>: <span class="st">"query"</span>,</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"format"</span>: <span class="st">"json"</span>,</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"prop"</span>: <span class="st">"info"</span>,</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"redirects"</span>: <span class="dv">1</span>,</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"titles"</span>: <span class="st">"Charlotte Bronte|Oscar Wilde|Not A Real Author Page"</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> polite_get(base_url, params).json()</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>data[<span class="st">"query"</span>].get(<span class="st">"redirects"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="10">
+<pre><code>[{'from': 'Charlotte Bronte', 'to': 'Charlotte Brontë'}]</code></pre>
+</div>
+</div>
+<p>The <code>redirects</code> block records each substitution the server made, mapping the title we asked for to the title we got. Keeping this mapping is worth the trouble: if your source list says “Charlotte Bronte” and your corpus says “Charlotte Brontë”, the mapping is the only thing that connects them. Missing pages show up in the <code>pages</code> block flagged with a <code>missing</code> key and a negative placeholder ID.</p>
+<div id="464dc416" class="cell" data-execution_count="11">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>{k: v <span class="cf">for</span> k, v <span class="kw">in</span> data[<span class="st">"query"</span>][<span class="st">"pages"</span>].items() <span class="cf">if</span> <span class="st">"missing"</span> <span class="kw">in</span> v}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="11">
+<pre><code>{'-1': {'ns': 0,
+  'title': 'Not A Real Author Page',
+  'missing': '',
+  'contentmodel': 'wikitext',
+  'pagelanguage': 'en',
+  'pagelanguagehtmlcode': 'en',
+  'pagelanguagedir': 'ltr'}}</code></pre>
+</div>
+</div>
+<p>A missing title should never be silently dropped. It might be a typo worth fixing, a person who has no article (itself informative about coverage), or a sign that your source list and Wikipedia disagree about a name. Log them, look at them, and record the decision.</p>
+<p>This example also raises the question of which identifier to key the corpus on, because the options differ in stability. Titles are the least stable: pages get renamed, and yesterday’s title becomes today’s redirect. The numeric <code>page_id</code> survives renames and is stable within a single wiki, which is why our <code>authors</code> table uses it as the primary key. The most stable identifier of all is the <em>revision ID</em>, which names one immutable version of one page; we will meet it in the revision history section and again when we discuss snapshots.</p>
+</section>
+<section id="article-text" class="level2" data-number="12.9">
+<h2 data-number="12.9" class="anchored" data-anchor-id="article-text"><span class="header-section-number">12.9</span> Article Text</h2>
+<p>With the population fixed, we start attaching data to it, beginning with the article text that the later chapter on textual data will analyze. The TextExtracts property of the Action API returns article text with the wiki markup stripped away. Setting <code>explaintext</code> gives plain text rather than HTML. The one quirk is that full-length extracts are limited to a single page per request, so this step is a loop over the corpus rather than a batched call. On the first run it is the slow part of the chapter; on every later run the cache answers instantly.</p>
+<div id="1d702d56" class="cell" data-execution_count="12">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>rows <span class="op">=</span> []</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> page_id <span class="kw">in</span> authors[<span class="st">"page_id"</span>]:</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    params <span class="op">=</span> {</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">"action"</span>: <span class="st">"query"</span>,</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"format"</span>: <span class="st">"json"</span>,</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">"prop"</span>: <span class="st">"extracts"</span>,</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">"explaintext"</span>: <span class="dv">1</span>,</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">"pageids"</span>: page_id</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> polite_get(base_url, params).json()</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    page <span class="op">=</span> data[<span class="st">"query"</span>][<span class="st">"pages"</span>][<span class="bu">str</span>(page_id)]</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    rows.append({<span class="st">"page_id"</span>: page_id, <span class="st">"text"</span>: page.get(<span class="st">"extract"</span>, <span class="st">""</span>)})</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>texts <span class="op">=</span> pl.DataFrame(rows)</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>texts</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="12">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (376, 2)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">page_id</th>
+<th data-quarto-table-cell-role="th">text</th>
+</tr>
+<tr class="even">
+<td>i64</td>
+<td>str</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1035916</td>
+<td>"Alfred Edward Woodley Mason (7…</td>
+</tr>
+<tr class="even">
+<td>58843197</td>
+<td>"Amelia Garland Mears (1842–192…</td>
+</tr>
+<tr class="odd">
+<td>71288843</td>
+<td>"Ada Buisson (26 March 1839 – 2…</td>
+</tr>
+<tr class="even">
+<td>931186</td>
+<td>"Ada Ellen Bayly (25 March 1857…</td>
+</tr>
+<tr class="odd">
+<td>52931031</td>
+<td>"Adelaide O'Keeffe (5 November …</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>41493545</td>
+<td>"William Johnson Neale (1812–18…</td>
+</tr>
+<tr class="even">
+<td>14341581</td>
+<td>"William Johnston (22 February …</td>
+</tr>
+<tr class="odd">
+<td>40119</td>
+<td>"William Makepeace Thackeray ( …</td>
+</tr>
+<tr class="even">
+<td>33277</td>
+<td>"William Morris (24 March 1834 …</td>
+</tr>
+<tr class="odd">
+<td>67573140</td>
+<td>"William Russell (1806–1876) wa…</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>A quick look at the opening of one article confirms the format: readable prose with section headings marked by equals signs, and no citations, tables, or infoboxes.</p>
+<div id="9dfef101" class="cell" data-execution_count="13">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(texts.row(<span class="dv">0</span>, named<span class="op">=</span><span class="va">True</span>)[<span class="st">"text"</span>][:<span class="dv">400</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Alfred Edward Woodley Mason (7 May 1865 – 22 November 1948) was an English author and Liberal Party Member of Parliament. He is best remembered for his 1902 novel of courage and cowardice in wartime, The Four Feathers, and is also known as the creator of Inspector Hanaud, a French detective who was an early template for Agatha Christie's famous Hercule Poirot.
+His prolific output in short stories </code></pre>
+</div>
+</div>
+<p>Extracts are a processed view of the article, which is exactly what we want for text analysis. If a project instead needs the raw wiki markup or the rendered HTML, the API provides both (through <code>prop=revisions</code> with <code>rvprop=content</code>, or the page HTML endpoints of the REST API), and the loop above transfers with minor changes.</p>
+</section>
+<section id="links-between-pages" class="level2" data-number="12.10">
+<h2 data-number="12.10" class="anchored" data-anchor-id="links-between-pages"><span class="header-section-number">12.10</span> Links Between Pages</h2>
+<p>Wikipedia articles link to each other constantly, and those links form a network: Charlotte Brontë’s article links to Elizabeth Gaskell’s, who wrote her biography. The chapter on network data will study this structure, so here we collect each article’s outgoing internal links. The <code>links</code> property returns them, restricted by <code>plnamespace=0</code> to links pointing at ordinary articles rather than talk pages or categories. Link lists can be long, so the same <code>continue</code> pagination we used for category members shows up again.</p>
+<div id="5e501d9e" class="cell" data-execution_count="14">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>rows <span class="op">=</span> []</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> page_id <span class="kw">in</span> authors[<span class="st">"page_id"</span>]:</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    params <span class="op">=</span> {</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">"action"</span>: <span class="st">"query"</span>,</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"format"</span>: <span class="st">"json"</span>,</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">"prop"</span>: <span class="st">"links"</span>,</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">"plnamespace"</span>: <span class="dv">0</span>,</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">"pllimit"</span>: <span class="st">"max"</span>,</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"pageids"</span>: page_id</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="va">True</span>:</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>        data <span class="op">=</span> polite_get(base_url, params).json()</span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>        page <span class="op">=</span> data[<span class="st">"query"</span>][<span class="st">"pages"</span>][<span class="bu">str</span>(page_id)]</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> link <span class="kw">in</span> page.get(<span class="st">"links"</span>, []):</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>            rows.append({<span class="st">"page_id"</span>: page_id, <span class="st">"link_title"</span>: link[<span class="st">"title"</span>]})</span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="st">"continue"</span> <span class="kw">not</span> <span class="kw">in</span> data:</span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span></span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>        params.update(data[<span class="st">"continue"</span>])</span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>links <span class="op">=</span> pl.DataFrame(rows)</span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>links</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="14">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (34_446, 2)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">page_id</th>
+<th data-quarto-table-cell-role="th">link_title</th>
+</tr>
+<tr class="even">
+<td>i64</td>
+<td>str</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1035916</td>
+<td>"16th century"</td>
+</tr>
+<tr class="even">
+<td>1035916</td>
+<td>"1906 United Kingdom general el…</td>
+</tr>
+<tr class="odd">
+<td>1035916</td>
+<td>"21st Battalion, Manchester Reg…</td>
+</tr>
+<tr class="even">
+<td>1035916</td>
+<td>"22nd Battalion, Manchester Reg…</td>
+</tr>
+<tr class="odd">
+<td>1035916</td>
+<td>"A Romance of Wastdale (novel)"</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>67573140</td>
+<td>"Southampton"</td>
+</tr>
+<tr class="even">
+<td>67573140</td>
+<td>"Stoke Newington"</td>
+</tr>
+<tr class="odd">
+<td>67573140</td>
+<td>"The London Journal"</td>
+</tr>
+<tr class="even">
+<td>67573140</td>
+<td>"William Howard Russell"</td>
+</tr>
+<tr class="odd">
+<td>67573140</td>
+<td>"William Russell (disambiguatio…</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Each row is one directed edge from an author’s page to some target title. Most targets are outside the corpus (places, novels, publishers), which is fine; the table records everything, and narrowing it is a join. Matching the target titles against the <code>authors</code> table keeps only the author-to-author edges and attaches the target’s page ID.</p>
+<div id="2f3929e9" class="cell" data-execution_count="15">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>links_internal <span class="op">=</span> (</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    links</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    .join(</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>        authors.select(link_title <span class="op">=</span> c.title, to_page_id <span class="op">=</span> c.page_id),</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>        on<span class="op">=</span>c.link_title</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>links_internal</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="15">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (1_152, 3)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">page_id</th>
+<th data-quarto-table-cell-role="th">link_title</th>
+<th data-quarto-table-cell-role="th">to_page_id</th>
+</tr>
+<tr class="even">
+<td>i64</td>
+<td>str</td>
+<td>i64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1035916</td>
+<td>"Arthur Conan Doyle"</td>
+<td>18951335</td>
+</tr>
+<tr class="even">
+<td>1035916</td>
+<td>"Arthur Quiller-Couch"</td>
+<td>192030</td>
+</tr>
+<tr class="odd">
+<td>1035916</td>
+<td>"George Bernard Shaw"</td>
+<td>12855</td>
+</tr>
+<tr class="even">
+<td>1035916</td>
+<td>"Oscar Wilde"</td>
+<td>22614</td>
+</tr>
+<tr class="odd">
+<td>71288843</td>
+<td>"Mary Elizabeth Braddon"</td>
+<td>42721</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>33277</td>
+<td>"Benjamin Disraeli"</td>
+<td>3875</td>
+</tr>
+<tr class="even">
+<td>33277</td>
+<td>"Charles Kingsley"</td>
+<td>96810</td>
+</tr>
+<tr class="odd">
+<td>33277</td>
+<td>"George Bernard Shaw"</td>
+<td>12855</td>
+</tr>
+<tr class="even">
+<td>33277</td>
+<td>"George MacDonald"</td>
+<td>146769</td>
+</tr>
+<tr class="odd">
+<td>33277</td>
+<td>"Henry James"</td>
+<td>83117</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>We store the full <code>links</code> table and treat <code>links_internal</code> as a derived view, since the network chapter may want to revisit that filtering decision. Citations to external sources are available through a parallel property, <code>extlinks</code>, and would slot into the same loop if a project needed them.</p>
+</section>
+<section id="revision-histories" class="level2" data-number="12.11">
+<h2 data-number="12.11" class="anchored" data-anchor-id="revision-histories"><span class="header-section-number">12.11</span> Revision Histories</h2>
+<p>Every Wikipedia article carries its complete edit history, and that history is a time series: when was the page created, when did editing surge, how did the article grow? The later chapter on temporal data starts from exactly this table. The <code>revisions</code> property returns the history in reverse chronological order, and for popular authors it runs to thousands of entries, so pagination appears once more, this time via a property-specific <code>rvcontinue</code> token that the generic <code>continue</code> block carries for us. We request the revision ID, timestamp, editor name, and article size at each revision, but not the article content itself, which keeps the responses small.</p>
+<div id="93f6b7de" class="cell" data-execution_count="16">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>rows <span class="op">=</span> []</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> page_id <span class="kw">in</span> authors[<span class="st">"page_id"</span>]:</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    params <span class="op">=</span> {</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">"action"</span>: <span class="st">"query"</span>,</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"format"</span>: <span class="st">"json"</span>,</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">"prop"</span>: <span class="st">"revisions"</span>,</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">"rvprop"</span>: <span class="st">"ids|timestamp|user|size"</span>,</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">"rvlimit"</span>: <span class="st">"max"</span>,</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"pageids"</span>: page_id</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="va">True</span>:</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>        data <span class="op">=</span> polite_get(base_url, params).json()</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>        page <span class="op">=</span> data[<span class="st">"query"</span>][<span class="st">"pages"</span>][<span class="bu">str</span>(page_id)]</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> rev <span class="kw">in</span> page.get(<span class="st">"revisions"</span>, []):</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>            rows.append({</span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>                <span class="st">"page_id"</span>: page_id,</span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>                <span class="st">"rev_id"</span>: rev[<span class="st">"revid"</span>],</span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>                <span class="st">"timestamp"</span>: rev[<span class="st">"timestamp"</span>],</span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>                <span class="st">"user"</span>: rev.get(<span class="st">"user"</span>),</span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>                <span class="st">"size"</span>: rev[<span class="st">"size"</span>]</span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>            })</span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="st">"continue"</span> <span class="kw">not</span> <span class="kw">in</span> data:</span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span></span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>        params.update(data[<span class="st">"continue"</span>])</span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a>revisions <span class="op">=</span> (</span>
+<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a>    pl.DataFrame(rows)</span>
+<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb20-29"><a href="#cb20-29" aria-hidden="true" tabindex="-1"></a>        timestamp <span class="op">=</span> c.timestamp.<span class="bu">str</span>.to_datetime(<span class="st">"%Y-%m-</span><span class="sc">%d</span><span class="st">T%H:%M:%SZ"</span>)</span>
+<span id="cb20-30"><a href="#cb20-30" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb20-31"><a href="#cb20-31" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb20-32"><a href="#cb20-32" aria-hidden="true" tabindex="-1"></a>revisions</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="16">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (164_014, 5)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">page_id</th>
+<th data-quarto-table-cell-role="th">rev_id</th>
+<th data-quarto-table-cell-role="th">timestamp</th>
+<th data-quarto-table-cell-role="th">user</th>
+<th data-quarto-table-cell-role="th">size</th>
+</tr>
+<tr class="even">
+<td>i64</td>
+<td>i64</td>
+<td>datetime[μs]</td>
+<td>str</td>
+<td>i64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1035916</td>
+<td>1362945039</td>
+<td>2026-07-07 02:56:26</td>
+<td>"Jevansen"</td>
+<td>14917</td>
+</tr>
+<tr class="even">
+<td>1035916</td>
+<td>1334234042</td>
+<td>2026-01-22 09:19:45</td>
+<td>"ACB Smith"</td>
+<td>14881</td>
+</tr>
+<tr class="odd">
+<td>1035916</td>
+<td>1316102212</td>
+<td>2025-10-10 13:42:22</td>
+<td>"Chiswick Chap"</td>
+<td>14848</td>
+</tr>
+<tr class="even">
+<td>1035916</td>
+<td>1316101938</td>
+<td>2025-10-10 13:40:12</td>
+<td>"Chiswick Chap"</td>
+<td>15042</td>
+</tr>
+<tr class="odd">
+<td>1035916</td>
+<td>1316100225</td>
+<td>2025-10-10 13:24:32</td>
+<td>"83.104.228.112"</td>
+<td>15134</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>67573140</td>
+<td>1021369177</td>
+<td>2021-05-04 10:25:49</td>
+<td>"Paul W"</td>
+<td>3098</td>
+</tr>
+<tr class="even">
+<td>67573140</td>
+<td>1021368924</td>
+<td>2021-05-04 10:23:34</td>
+<td>"Paul W"</td>
+<td>3066</td>
+</tr>
+<tr class="odd">
+<td>67573140</td>
+<td>1021368902</td>
+<td>2021-05-04 10:23:16</td>
+<td>"Paul W"</td>
+<td>3023</td>
+</tr>
+<tr class="even">
+<td>67573140</td>
+<td>1021368886</td>
+<td>2021-05-04 10:23:04</td>
+<td>"Paul W"</td>
+<td>2998</td>
+</tr>
+<tr class="odd">
+<td>67573140</td>
+<td>1021368790</td>
+<td>2021-05-04 10:22:05</td>
+<td>"Paul W"</td>
+<td>2972</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>This is the largest table in the corpus by far and the most expensive to collect, which makes it the clearest illustration of why the cache is the raw layer: nobody wants to repeat this download because a downstream parsing decision changed. Note the <code>rev_id</code> column. Each value permanently identifies one exact version of one page, and the Action API can return the content of any revision on request. If an analysis ever needs to be pinned to the precise article text we saw today, these IDs are how.</p>
+</section>
+<section id="page-view-statistics" class="level2" data-number="12.12">
+<h2 data-number="12.12" class="anchored" data-anchor-id="page-view-statistics"><span class="header-section-number">12.12</span> Page View Statistics</h2>
+<p>How often people read each article comes from a different service: the Wikimedia REST API, which serves analytics data. REST APIs encode the request in the structure of the URL path rather than in a parameter dictionary, so this section doubles as an introduction to the other major API style you will encounter. The endpoint for per-article page views looks like this:</p>
+<pre><code>https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/
+    {project}/{access}/{agent}/{article}/{granularity}/{start}/{end}</code></pre>
+<p>Each path segment is a choice. We use the <code>en.wikipedia</code> project, <code>all-access</code> to combine desktop and mobile, the <code>user</code> agent class to count human readers and exclude bots, <code>daily</code> granularity, and a fixed date range covering the 2025 calendar year. Fixing the range explicitly, rather than asking for “the last N days”, means a rerun of this code requests the same data rather than a window that drifts with the current date. The article title goes into the path with spaces replaced by underscores and any special characters percent-encoded, which is what <code>quote</code> handles.</p>
+<p>Notice <code>rest_v1</code> sitting in the URL. This is <em>API versioning</em>: the provider promises that endpoints under <code>v1</code> keep behaving the same way, and breaking changes arrive under a new version prefix instead. Version numbers in URLs are one of the quiet foundations of reproducible pipelines, since code that pins a version does not break when the provider moves on.</p>
+<p>One wrinkle is that a small number of pages have no view data at all, and the API reports this with a 404 status rather than an empty list. Our <code>polite_get</code> helper would raise an error on a 404, so this loop calls the session directly and treats the status code as information: 404 means skip, anything else non-200 is a real problem.</p>
+<div id="6b01a2fe" class="cell" data-execution_count="17">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>pv_base <span class="op">=</span> (</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/"</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"en.wikipedia/all-access/user/</span><span class="sc">{article}</span><span class="st">/daily/20250101/20251231"</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>rows <span class="op">=</span> []</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> title <span class="kw">in</span> authors[<span class="st">"title"</span>]:</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>    article <span class="op">=</span> quote(title.replace(<span class="st">" "</span>, <span class="st">"_"</span>), safe<span class="op">=</span><span class="st">""</span>)</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    session.cookies.clear()</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>    response <span class="op">=</span> session.get(pv_base.<span class="bu">format</span>(article<span class="op">=</span>article), headers<span class="op">=</span>headers)</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> <span class="bu">getattr</span>(response, <span class="st">"from_cache"</span>, <span class="va">False</span>):</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>        time.sleep(<span class="fl">0.2</span>)</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> response.status_code <span class="op">==</span> <span class="dv">404</span>:</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">continue</span></span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>    response.raise_for_status()</span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> item <span class="kw">in</span> response.json()[<span class="st">"items"</span>]:</span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>        rows.append({</span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>            <span class="st">"article"</span>: item[<span class="st">"article"</span>],</span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>            <span class="st">"date"</span>: item[<span class="st">"timestamp"</span>],</span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a>            <span class="st">"views"</span>: item[<span class="st">"views"</span>]</span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>        })</span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a>views <span class="op">=</span> (</span>
+<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a>    pl.DataFrame(rows)</span>
+<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a>    .with_columns(date <span class="op">=</span> c.date.<span class="bu">str</span>.<span class="bu">slice</span>(<span class="dv">0</span>, <span class="dv">8</span>).<span class="bu">str</span>.to_date(<span class="st">"%Y%m</span><span class="sc">%d</span><span class="st">"</span>))</span>
+<span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a>    .join(</span>
+<span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a>        authors.select(</span>
+<span id="cb22-28"><a href="#cb22-28" aria-hidden="true" tabindex="-1"></a>            c.page_id,</span>
+<span id="cb22-29"><a href="#cb22-29" aria-hidden="true" tabindex="-1"></a>            article <span class="op">=</span> c.title.<span class="bu">str</span>.replace_all(<span class="st">" "</span>, <span class="st">"_"</span>)</span>
+<span id="cb22-30"><a href="#cb22-30" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb22-31"><a href="#cb22-31" aria-hidden="true" tabindex="-1"></a>        on<span class="op">=</span>c.article</span>
+<span id="cb22-32"><a href="#cb22-32" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb22-33"><a href="#cb22-33" aria-hidden="true" tabindex="-1"></a>    .select(c.page_id, c.date, c.views)</span>
+<span id="cb22-34"><a href="#cb22-34" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-35"><a href="#cb22-35" aria-hidden="true" tabindex="-1"></a>views</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="17">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (132_186, 3)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">page_id</th>
+<th data-quarto-table-cell-role="th">date</th>
+<th data-quarto-table-cell-role="th">views</th>
+</tr>
+<tr class="even">
+<td>i64</td>
+<td>date</td>
+<td>i64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1035916</td>
+<td>2025-01-01</td>
+<td>19</td>
+</tr>
+<tr class="even">
+<td>1035916</td>
+<td>2025-01-02</td>
+<td>33</td>
+</tr>
+<tr class="odd">
+<td>1035916</td>
+<td>2025-01-03</td>
+<td>23</td>
+</tr>
+<tr class="even">
+<td>1035916</td>
+<td>2025-01-04</td>
+<td>20</td>
+</tr>
+<tr class="odd">
+<td>1035916</td>
+<td>2025-01-05</td>
+<td>24</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>67573140</td>
+<td>2025-12-27</td>
+<td>4</td>
+</tr>
+<tr class="even">
+<td>67573140</td>
+<td>2025-12-28</td>
+<td>4</td>
+</tr>
+<tr class="odd">
+<td>67573140</td>
+<td>2025-12-29</td>
+<td>7</td>
+</tr>
+<tr class="even">
+<td>67573140</td>
+<td>2025-12-30</td>
+<td>2</td>
+</tr>
+<tr class="odd">
+<td>67573140</td>
+<td>2025-12-31</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>The timestamps arrive as strings such as <code>2025010100</code>, so we slice off the trailing hour digits and parse the rest as a date, then join the underscore-form titles back to the <code>authors</code> table to recover the page ID. As a check that the collection worked, here are the daily views for the three Brontë sisters across the year.</p>
+<div id="aad118af" class="cell" data-execution_count="18">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>brontes <span class="op">=</span> (</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    views</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    .join(authors.select(c.page_id, c.title), on<span class="op">=</span>c.page_id)</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.title.<span class="bu">str</span>.contains(<span class="st">"Brontë"</span>))</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>    ggplot(brontes, aes(c.date, c.views, color<span class="op">=</span>c.title))</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>    .geom_line()</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="18">
+<div>
+<figure class="figure">
+<p><a href="12_apis_files/figure-html/cell-19-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="12_apis_files/figure-html/cell-19-output-1.png" width="672" height="480" class="figure-img"></a></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The series show weekly rhythms and occasional sharp spikes, and the sisters do not move together. Explaining patterns like these is the business of the temporal data chapter; here we only needed to see that the data came through intact.</p>
+</section>
+<section id="language-links" class="level2" data-number="12.13">
+<h2 data-number="12.13" class="anchored" data-anchor-id="language-links"><span class="header-section-number">12.13</span> Language Links</h2>
+<p>English Wikipedia is one wiki among hundreds, and most of our authors have articles in other languages too. The <code>langlinks</code> property lists, for each page, the languages that have a corresponding article and its title there. Unlike text extracts, this property batches: we can send fifty page IDs per request, using the same chunking trick throughout, with <code>continue</code> pagination inside each batch in case the language lists overflow a response.</p>
+<div id="396a75e4" class="cell" data-execution_count="19">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>ids <span class="op">=</span> authors[<span class="st">"page_id"</span>].to_list()</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>batches <span class="op">=</span> [ids[i:(i <span class="op">+</span> <span class="dv">50</span>)] <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, <span class="bu">len</span>(ids), <span class="dv">50</span>)]</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>rows <span class="op">=</span> []</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> batch <span class="kw">in</span> batches:</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    params <span class="op">=</span> {</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">"action"</span>: <span class="st">"query"</span>,</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">"format"</span>: <span class="st">"json"</span>,</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"prop"</span>: <span class="st">"langlinks"</span>,</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">"lllimit"</span>: <span class="st">"max"</span>,</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">"pageids"</span>: <span class="st">"|"</span>.join(<span class="bu">str</span>(i) <span class="cf">for</span> i <span class="kw">in</span> batch)</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="va">True</span>:</span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>        data <span class="op">=</span> polite_get(base_url, params).json()</span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> page <span class="kw">in</span> data[<span class="st">"query"</span>][<span class="st">"pages"</span>].values():</span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> link <span class="kw">in</span> page.get(<span class="st">"langlinks"</span>, []):</span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>                rows.append({</span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"page_id"</span>: page[<span class="st">"pageid"</span>],</span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"lang"</span>: link[<span class="st">"lang"</span>],</span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"title"</span>: link[<span class="st">"*"</span>]</span>
+<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a>                })</span>
+<span id="cb24-22"><a href="#cb24-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="st">"continue"</span> <span class="kw">not</span> <span class="kw">in</span> data:</span>
+<span id="cb24-23"><a href="#cb24-23" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span></span>
+<span id="cb24-24"><a href="#cb24-24" aria-hidden="true" tabindex="-1"></a>        params.update(data[<span class="st">"continue"</span>])</span>
+<span id="cb24-25"><a href="#cb24-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-26"><a href="#cb24-26" aria-hidden="true" tabindex="-1"></a>langlinks <span class="op">=</span> pl.DataFrame(rows)</span>
+<span id="cb24-27"><a href="#cb24-27" aria-hidden="true" tabindex="-1"></a>langlinks</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="19">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (4_332, 3)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">page_id</th>
+<th data-quarto-table-cell-role="th">lang</th>
+<th data-quarto-table-cell-role="th">title</th>
+</tr>
+<tr class="even">
+<td>i64</td>
+<td>str</td>
+<td>str</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2029</td>
+<td>"af"</td>
+<td>"Anne Brontë"</td>
+</tr>
+<tr class="even">
+<td>2029</td>
+<td>"an"</td>
+<td>"Anne Brontë"</td>
+</tr>
+<tr class="odd">
+<td>2029</td>
+<td>"ar"</td>
+<td>"آن برونتي"</td>
+</tr>
+<tr class="even">
+<td>2029</td>
+<td>"arz"</td>
+<td>"آن برونتى"</td>
+</tr>
+<tr class="odd">
+<td>2029</td>
+<td>"az"</td>
+<td>"Enn Bronte"</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>1821277</td>
+<td>"he"</td>
+<td>"ויליאם קלארק ראסל"</td>
+</tr>
+<tr class="even">
+<td>38205445</td>
+<td>"arz"</td>
+<td>"ويليام بيرنارد مكاب"</td>
+</tr>
+<tr class="odd">
+<td>38205445</td>
+<td>"fr"</td>
+<td>"William Bernard McCabe"</td>
+</tr>
+<tr class="even">
+<td>38205445</td>
+<td>"ru"</td>
+<td>"Маккейб, Уильям Бернард"</td>
+</tr>
+<tr class="odd">
+<td>65815788</td>
+<td>"ur"</td>
+<td>"وایلیٹ گریول، لیڈی گریول"</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Counting rows per author gives a rough measure of international prominence, and the foreign titles themselves open the door to cross-language comparisons, since every request in this chapter could be repeated against, say, <code>fr.wikipedia.org</code> with the French titles. The Action API exposes geographic data through a similar batched property, <code>coordinates</code>, though author biographies rarely carry coordinates; it becomes useful for corpora of places rather than people.</p>
+</section>
+<section id="raw-and-processed-layers" class="level2" data-number="12.14">
+<h2 data-number="12.14" class="anchored" data-anchor-id="raw-and-processed-layers"><span class="header-section-number">12.14</span> Raw and Processed Layers</h2>
+<p>We now have six tables in memory, and it is time to make the pipeline’s structure explicit on disk. The design principle is a separation between two layers. The <em>raw layer</em> is the requests cache: the exact, unmodified responses the servers sent, stored as they arrived. The <em>processed layer</em> is the set of tidy tables we built from them, saved in Parquet format. Everything in the processed layer can be regenerated from the raw layer by re-running this chapter’s code, without any network access, which means normalization decisions (which fields to keep, how to parse timestamps, how to handle duplicates) can be revisited months later without re-downloading anything.</p>
+<div id="f6d5b91b" class="cell" data-execution_count="20">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>Path(<span class="st">"data/wiki"</span>).mkdir(parents<span class="op">=</span><span class="va">True</span>, exist_ok<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>authors.write_parquet(<span class="st">"data/wiki/authors.parquet"</span>)</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>texts.write_parquet(<span class="st">"data/wiki/texts.parquet"</span>)</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>links.write_parquet(<span class="st">"data/wiki/links.parquet"</span>)</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>revisions.write_parquet(<span class="st">"data/wiki/revisions.parquet"</span>)</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>views.write_parquet(<span class="st">"data/wiki/pageviews.parquet"</span>)</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>langlinks.write_parquet(<span class="st">"data/wiki/langlinks.parquet"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The remaining chapters read these files directly and never call the APIs again. A dataset that other people (including your future self) will use also needs documentation, and the minimum viable form is a manifest file recording what was collected, from where, when, and under what definition of the population. Writing it programmatically keeps the counts honest.</p>
+<div id="fb3d4479" class="cell" data-execution_count="21">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datetime <span class="im">import</span> date</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>manifest <span class="op">=</span> <span class="ss">f"""# Wikipedia author corpus</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="ss">Retrieved: </span><span class="sc">{</span>date<span class="sc">.</span>today()<span class="sc">.</span>isoformat()<span class="sc">}</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a><span class="ss">Sources: MediaWiki Action API (en.wikipedia.org) and</span></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="ss">  Wikimedia REST API v1 (wikimedia.org/api/rest_v1)</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a><span class="ss">Population: direct article members of Category:Victorian novelists</span></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a><span class="ss">  and Category:19th-century Irish novelists (no subcategories)</span></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a><span class="ss">Pages: </span><span class="sc">{</span><span class="bu">len</span>(authors)<span class="sc">}</span></span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a><span class="ss">Revisions: </span><span class="sc">{</span><span class="bu">len</span>(revisions)<span class="sc">}</span></span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a><span class="ss">Pageview window: 2025-01-01 to 2025-12-31 (all-access, user agent class)</span></span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a><span class="ss">Tables: authors, texts, links, revisions, pageviews, langlinks</span></span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a><span class="ss">Raw responses: data/wiki/requests_cache.sqlite</span></span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a><span class="ss">"""</span></span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">"data/wiki/MANIFEST.md"</span>, <span class="st">"w"</span>) <span class="im">as</span> f:</span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a>    f.write(manifest)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>None of this is elaborate, and that is the point. A directory of Parquet files, a cache, and a manifest turn “some data I downloaded” into a dataset that can be checked, cited, and rebuilt.</p>
+</section>
+<section id="reproducible-snapshots" class="level2" data-number="12.15">
+<h2 data-number="12.15" class="anchored" data-anchor-id="reproducible-snapshots"><span class="header-section-number">12.15</span> Reproducible Snapshots</h2>
+<p>Wikipedia changes every minute, so the corpus we just built is a <em>snapshot</em>: what the encyclopedia looked like at the moment of retrieval. Someone running this chapter’s code next year will get different category memberships, longer articles, and more revisions, and nothing in the code will warn them that the results have shifted. Reproducibility here does not mean freezing Wikipedia; it means being precise about what was captured and making the captured version recoverable. Our pipeline does this at three levels.</p>
+<p>The manifest records the retrieval date and the population definition, so anyone can state exactly what the snapshot covers. The requests cache preserves the responses themselves, so the processed tables can be rebuilt byte-for-byte from the raw layer. And the revision IDs in the <code>revisions</code> table pin each article to immutable versions: passing an ID to the Action API’s <code>revids</code> parameter returns that exact text forever, even after the live article has moved on. Archiving the <code>data/wiki/</code> directory alongside the analysis code is therefore a complete, self-contained record of the study’s inputs.</p>
+<p>Two further practices round out the picture. First, when an API offers versioned output, ask for it explicitly: we already rely on the <code>rest_v1</code> prefix, and the Action API has a similar mechanism described in the callout below. Second, for projects that need all of Wikipedia rather than a sample, the Wikimedia Foundation publishes complete database dumps at <a href="https://dumps.wikimedia.org/">https://dumps.wikimedia.org/</a>, which are themselves dated snapshots and remove the API from the loop entirely.</p>
+<div class="callout callout-style-simple callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Versioning in the Action API
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>The Action API does not put a version number in its URL, but its JSON output is versioned through the <code>formatversion</code> parameter. The default, version 1, is the format we parsed throughout this chapter, with pages keyed by their ID as strings. Version 2, requested by adding <code>formatversion=2</code> to the parameters, returns pages as a plain list and cleans up several field names (the <code>*</code> key in language links becomes <code>title</code>, for example). New code should generally opt into version 2; this chapter used the default so that our parsing matches the majority of existing documentation and examples. Either way, stating the format version in your code is one more thing pinned down.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="conclusions" class="level2" data-number="12.16">
+<h2 data-number="12.16" class="anchored" data-anchor-id="conclusions"><span class="header-section-number">12.16</span> Conclusions</h2>
+<p>This chapter treated data acquisition as engineering rather than as a download step. The HTTP mechanics came first: endpoints, parameters, headers, status codes, pagination, rate limits, and the flattening of nested JSON into tables. We then put them to work building a corpus of nineteenth-century British and Irish novelists, with deliberate decisions along the way about how the population was sampled, how redirects and missing pages were handled, why the corpus is keyed on page IDs, and how the raw and processed layers of the pipeline stay separate. The result is six documented tables and a manifest sitting in <code>data/wiki/</code>.</p>
+<p>The pattern generalizes well beyond Wikipedia. Whatever the API, the same questions apply: what defines the population, which identifier is stable, where do the raw responses live, and what someone would need to rebuild your tables. The corpus now waits on disk, and the next chapters pick it up: the revision histories and page views feed the temporal analysis, the article texts feed the textual analysis, and the link table feeds the network analysis.</p>
+</section>
+<section id="references" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="references">References</h2>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./11_spatial_data.html" class="pagination-link" aria-label="Spatial Data">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Spatial Data</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./13_text_annotations.html" class="pagination-link" aria-label="Textual Data: Annotations">
+        <span class="nav-page-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Textual Data: Annotations</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>Taylor Arnold</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>A <a href="https://distantviewing.org/">Distant Viewing Lab</a> project</p>
+</div>
+  </div>
+</footer>
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
+
+
+
+
+</body></html>
