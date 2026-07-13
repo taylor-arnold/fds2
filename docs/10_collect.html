@@ -199,14 +199,14 @@ div.csl-indent {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./02_types.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Data Types and Expressions</span></span></a>
+  <a href="./02_organize.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Organizing Data I</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./03_organize.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Organizing Data I</span></span></a>
+  <a href="./03_types.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Data Types</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -276,26 +276,32 @@ div.csl-indent {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./13_text_annotations.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Textual Data: Annotations</span></span></a>
+  <a href="./13_temporal_data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Temporal Data</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./14_text_vectors.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Textual Data: Vectors</span></span></a>
+  <a href="./14_text_annotations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Textual Data: Annotations</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./15_network_data.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Network Data</span></span></a>
+  <a href="./15_text_vectors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Textual Data: Vectors</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./16_image_data.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Image Data</span></span></a>
+  <a href="./16_network_data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Network Data</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./17_image_data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Image Data</span></span></a>
   </div>
 </li>
       </ul>
@@ -354,7 +360,7 @@ div.csl-indent {
 </section>
 <section id="what-tables" class="level2" data-number="10.2">
 <h2 data-number="10.2" class="anchored" data-anchor-id="what-tables"><span class="header-section-number">10.2</span> What Tables?</h2>
-<p>The initial step in designing storage for tabular data is deciding what different tables we will need. As we saw in Chapter 4 when discussing pivots and melts, the most important characteristic that determines the structure of a specific table is the unit of observation. Recall that the unit of observation can be a simple value (such as <code>day</code> or <code>plant</code>) or a combination of values (such as <code>day × plant</code>). So, we need to decide which simple and complex units of observation we need for our specific application. There are two general principles that we should keep in mind in this process:</p>
+<p>The initial step in designing storage for tabular data is deciding what different tables we will need. As we saw in Chapter 9 when discussing pivots and unpivots, the most important characteristic that determines the structure of a specific table is the unit of observation. Recall that the unit of observation can be a simple value (such as <code>day</code> or <code>plant</code>) or a combination of values (such as <code>day × plant</code>). So, we need to decide which simple and complex units of observation we need for our specific application. There are two general principles that we should keep in mind in this process:</p>
 <ul>
 <li><strong>prefer longer to wider</strong>: When we have a situation where we need to decide between a longer and wider formats, prefer the longer format. It is easier to extend, easier to check, and there is usually only one long format instead of multiple possible wide ones.</li>
 <li><strong>respect unit of observation</strong>: When filling in data in a table, a general rule is that we only record data that describes the entire unit of observation. This is always the case for a simple unit of observation, but can easily be broken when we have a complex key.</li>
@@ -398,7 +404,7 @@ div.csl-indent {
 <h2 data-number="10.6" class="anchored" data-anchor-id="reading-imperfect-files"><span class="header-section-number">10.6</span> Reading Imperfect Files</h2>
 <p>Everything so far in this chapter describes how to store data well when you are the one collecting it. Most of the time, you are not. A collaborator hands you a spreadsheet with three header rows and a merged cell. A government agency publishes a CSV encoded in Windows-1252 because the export tool was built in 2003 and never updated. A survey platform codes missing responses as <code>"-99"</code> instead of leaving the cell blank. None of this data is unusable, but none of it will load cleanly with the default settings either. This section covers the tools for reading it anyway.</p>
 <p>Loading a well-formed Excel file is simple. As mentioned above, <code>pl.read_excel()</code> reads a sheet directly into a Polars data frame:</p>
-<div id="6873f52b" class="cell" data-execution_count="2">
+<div id="5aea21ca" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>cookbooks <span class="op">=</span> pl.read_excel(<span class="st">"data/cookbooks.xlsx"</span>, sheet_name<span class="op">=</span><span class="st">"Cookbooks"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -413,7 +419,7 @@ div.csl-indent {
 <li><strong><code>schema_overrides</code></strong>: Polars guesses each column’s type from its contents, and the guess is sometimes wrong in a way that loses information. A ZIP code column full of five-digit numbers gets read as an integer, which silently drops the leading zero from “02138.” Passing <code>schema_overrides={"zip_code": pl.Utf8}</code> forces that column to stay text.</li>
 </ul>
 <p>Putting several of these together on a single file is normal, not exceptional:</p>
-<div id="dfce8de8" class="cell" data-execution_count="3">
+<div id="a5d65979" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>survey <span class="op">=</span> pl.read_csv(</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"data/survey_responses.csv"</span>,</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    separator<span class="op">=</span><span class="st">";"</span>,</span>
@@ -423,7 +429,7 @@ div.csl-indent {
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    schema_overrides<span class="op">=</span>{<span class="st">"zip_code"</span>: pl.Utf8, <span class="st">"respondent_id"</span>: pl.Utf8},</span>
 <span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>The messy CSV file from Chapter 2 is a good one to revisit here. It is not a contrived example; it is closer to what you should expect from real, second-hand data than the clean files we have been using for most of this book. Fixing it draws on the same skills built up across the last several chapters: recognizing the unit of observation to know which rows belong together, reshaping the result into a tidy layout once it loads, and checking the loaded data frame against the grammar-of-graphics tools from earlier chapters to confirm that a column of what looked like numbers didn’t quietly load as text. Reading an imperfect file is rarely a single function call. It’s a short investigation, and everything else in this book is what you investigate with.</p>
+<p>The messy CSV file from <a href="03_types.html" class="quarto-xref"><span>Chapter 3</span></a> is a good one to revisit here. It is not a contrived example; it is closer to what you should expect from real, second-hand data than the clean files we have been using for most of this book. Fixing it draws on the same skills built up across the last several chapters: recognizing the unit of observation to know which rows belong together, reshaping the result into a tidy layout once it loads, and checking the loaded data frame against the grammar-of-graphics tools from earlier chapters to confirm that a column of what looked like numbers didn’t quietly load as text. Reading an imperfect file is rarely a single function call. It’s a short investigation, and everything else in this book is what you investigate with.</p>
 </section>
 <section id="data-dictionary" class="level2" data-number="10.7">
 <h2 data-number="10.7" class="anchored" data-anchor-id="data-dictionary"><span class="header-section-number">10.7</span> Data Dictionary</h2>
