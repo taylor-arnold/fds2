@@ -1,0 +1,618 @@
+# Temporal Data {#sec-temporal}
+
+```{python}
+#| include: false
+import warnings
+warnings.filterwarnings('ignore')
+```
+
+## Setup
+
+Load all of the modules and datasets needed for the chapter.
+
+```{python}
+#| output: false
+import polars as pl
+from plotnine import ggplot, aes, element_text
+from polars import col as c
+
+import funs
+
+meta = pl.read_parquet("data/wiki/uk/meta.parquet")
+page_views = pl.read_parquet("data/wiki/uk/pageviews.parquet")
+page_revisions = pl.read_parquet("data/wiki/uk/revisions.parquet")
+```
+
+## Introduction
+
+This chapter is about data with a temporal component: any dataset with one or more variables recording dates or times, and more broadly any dataset whose rows have a meaningful order. We begin with data that carries explicit dates and times, since that is where the special data types and functions live. The later sections widen the scope to ordered data generally, which is why the tools there apply well beyond time series.
+
+The data comes from the corpus of 75 British and Irish authors that we assembled at the end of @sec-apis. Two of its tables are temporal. One records how many people viewed each author's Wikipedia page on each day of 2025. The other records the most recent 500 edits made to each author's page, with a timestamp, an editor, the size of the article after the edit, and the editor's summary comment. A third table gives each author's birth and death years, which we will need at the end of the chapter.
+
+A word about what is new here and what is not. Two of this chapter's central tools are ones you have already met. Window functions were the subject of @sec-window, where `.shift()` and `.over()` were introduced on the cellphone data, and conditional joins appeared in @sec-combine, where `.join_asof()` and `.join_where()` matched countries on inequalities rather than exact keys. Both come back in this chapter, and both sections say so plainly when they do. This is deliberate rather than accidental. Those tools were introduced on data that had an order but no clock, and time is where they do their real work, so it is worth walking through them a second time on data that actually has dates in it. Where a section is retracing ground, it opens by naming the chapter that covered it and summarizing what you should already know, then moves on to the part that is genuinely new. If a reprise feels too fast, the original treatment is the place to go back to.
+
+The material that is new to this chapter is the temporal type system itself: dates, datetimes, time zones, truncation, and durations, along with the two window and join operations that only make sense once a dataset has real timestamps in it.
+
+## Temporal Data and Ordering
+
+Let's start with the page view data. For each of the 75 authors we have a record of how many people looked at their Wikipedia page on each day of 2025, so the data is organized with one row for each combination of author and day.
+
+```{python}
+page_views
+```
+
+The time variables are given the way @sec-collect recommended for recording dates, with individual columns for year, month, and day. Because all three are stored as numbers, the data can be put in chronological order with `.sort()` on year, then month, then day. It already is.
+
+How could we show the change in page views over time for a single author? One approach is to add a numeric column running down the dataset using a row number. Below is an example of the code to create a line plot using this approach:
+
+```{python}
+(
+    page_views
+    .filter(c.doc_id == "Geoffrey Chaucer")
+    .with_row_index("row_number")
+    .pipe(ggplot, aes(c.row_number, c.views))
+    .geom_line(color="red")
+    .labs(
+        title="Page Views for Geoffrey Chaucer (by Day Number)",
+        x="Day Number",
+        y="Views"
+    )
+)
+```
+
+This is not a bad place to begin. The x-axis is the day number, and in many applications that is exactly what we need. Chaucer's page holds a fairly stable level of around fourteen hundred views a day, with a good deal of short-term noise and a few pronounced spikes. But notice how hard it is to say anything about *when* those spikes happened. The tallest one sits somewhere around day forty-five, which is not a fact anybody can use. There is also a hidden assumption in the plot: the row number only tracks the date because the data happens to be sampled uniformly, one row per day, with nothing missing. Sort the data differently, or lose a few days, and the axis quietly starts lying.
+
+Another way to work with dates is to convert them to a fractional year. Here the months and days are folded into the year as a fraction:
+
+$$ year_{frac} = year + \frac{month - 1}{12} + \frac{day - 1}{12 \cdot 31}$$
+
+We subtract one from the month and day so that, for example, 1 July 2020 (halfway through the year) comes out as `2020.5`. We could make this more exact by accounting for months shorter than 31 days, but as a first pass it works well.
+
+```{python}
+(
+    page_views
+    .filter(c.doc_id == "Geoffrey Chaucer")
+    .with_columns(
+        year_frac = c.year + (c.month - 1) / 12 + (c.day - 1) / (12 * 31)
+    )
+    .pipe(ggplot, aes(c.year_frac, c.views))
+    .geom_line(color="red")
+    .labs(
+        title="Page Views for Geoffrey Chaucer (Fractional Year)",
+        x="Fractional Year",
+        y="Views"
+    )
+)
+```
+
+This improves on the first plot in a few ways. We can roughly read off what date each point corresponds to, and the code works whether or not the data is sorted, evenly spaced, or complete. The cost is an axis that needs explaining to anyone who reads the figure. The same approach extends to times. If we also knew the hour of each observation, the formula would become:
+
+$$ year_{frac} = year + \frac{month - 1}{12} + \frac{day - 1}{12 \cdot 31} + \frac{hour - 1}{24 \cdot 12 \cdot 31}$$
+
+And if we only cared about time elapsed since some event, such as the start of an experiment, we could take the difference from a fixed fractional year.
+
+Fractional times are genuinely useful. They can represent an arbitrarily precise moment as an ordinary number, which means they slot into models and functions that know nothing about dates and require no special handling. They are a good way to explore data quickly. But when we want axis labels a reader can understand, or want to ask questions like "what day of the week was this," we need a type that knows it is a date.
+
+## Date Objects
+
+Most of the variables we have worked with so far are strings or numbers. Dates sit somewhere in between. They are like numbers in that they have a natural order, differences between them are meaningful, and they can be placed on a continuous scale. But they also have structure that numbers do not: a date belongs to a month, falls on a weekday, and sits some irregular number of days from the next date. Extracting that structure requires a dedicated data type. In Polars, `pl.date()` constructs one from its components.
+
+```{python}
+chaucer = (
+    page_views
+    .filter(c.doc_id == "Geoffrey Chaucer")
+    .with_columns(
+        date = pl.date(c.year, c.month, c.day)
+    )
+)
+chaucer
+```
+
+The new column has the data type `Date`. This is the payoff for storing the components separately, as @sec-collect advised: the components are easy to record without error and easy to combine, whereas a malformed date string is a problem you discover much later. Once a column is a real date, plotnine makes sensible choices about how to label an axis without being told anything.
+
+```{python}
+(
+    chaucer
+    .pipe(ggplot, aes(c.date, c.views))
+    .geom_line(color="red")
+    .labs(
+        title="Page Views for Geoffrey Chaucer",
+        x="Date",
+        y="Views"
+    )
+)
+```
+
+Now the spikes have addresses. We can change how often the axis is labeled with `scale_x_date()` and the `date_breaks` option, which takes a duration string such as `"1 week"` or `"3 months"`. The `date_labels` option controls the format of each label.
+
+```{python}
+(
+    chaucer
+    .pipe(ggplot, aes(c.date, c.views))
+    .geom_line(color="red")
+    .scale_x_date(date_breaks="1 month", date_labels="%Y-%m")
+    .theme(axis_text_x=element_text(angle=45, hjust=1))
+    .labs(
+        title="Page Views for Geoffrey Chaucer (Monthly Labels)",
+        x="Date",
+        y="Views"
+    )
+)
+```
+
+Having a date object also lets us pull information out of it, through the `.dt` namespace. The tallest spike in the plot is worth chasing down, and sorting by views identifies it immediately.
+
+```{python}
+(
+    chaucer
+    .sort(c.views, descending=True)
+    .select(c.date, c.views)
+    .head(5)
+)
+```
+
+Chaucer's biggest day of 2025 was 14 February, with nearly twice his typical traffic. This is not a coincidence. His poem *Parlement of Foules* contains the earliest known association of St. Valentine's Day with romantic love, a connection that gets rediscovered by a lot of people every year on exactly that date. This is the kind of finding that the day-number plot made invisible and the date-aware plot hands over immediately.
+
+The `.dt` namespace also gives us the weekday, which lets us ask whether reading habits vary across the week. Here we extract the weekday and average the page views within each one.
+
+```{python}
+(
+    chaucer
+    .with_columns(
+        weekday = c.date.dt.weekday()
+    )
+    .group_by(c.weekday)
+    .agg(
+        views_avg = c.views.mean()
+    )
+    .sort(c.weekday)
+)
+```
+
+Weekdays are numbered with Monday as 1 and Sunday as 7. The pattern is mild but consistent: Chaucer gets read on weekdays and rested on Saturdays, which is roughly what we would expect of a page carried by coursework rather than by leisure.
+
+Dates can also be compared and filtered like numbers. Below we keep only the days after 14 February, using `pl.date()` to build a date to compare against.
+
+```{python}
+(
+    chaucer
+    .filter(c.date > pl.date(2025, 2, 14))
+)
+```
+
+::: {.callout-note collapse="true"}
+## Extracting date components
+
+Polars provides many methods in the `.dt` namespace for pulling components out of date and datetime objects. Common examples include `.dt.year()`, `.dt.month()`, `.dt.day()`, `.dt.weekday()`, `.dt.ordinal_day()` (the day of the year), and `.dt.quarter()`. These are useful for building features for a model and for grouping data into time periods.
+:::
+
+## Datetime Objects
+
+The page view data records a date and nothing finer. Often we know more precisely when something happened, down to the hour, minute, or second. We use the term *datetime* for an object that stores a precise moment, which requires both a date and a time of day. Dates have a natural precision of one day; datetimes do not, and the useful granularity depends entirely on the data. Some sources give only the hour, while others, such as broadcast logs, record milliseconds. Polars stores datetimes with microsecond precision by default, which is finer than anything we will need here.
+
+The revision histories carry exactly this kind of timestamp. Recall from @sec-apis that we deliberately wrote them out as strings, in the `YYYY-MM-DD HH:MM:SS` format that @sec-collect recommends, rather than parsing them at collection time. Turning them into datetime objects is the first thing this chapter does with them.
+
+```{python}
+page_revisions = (
+    page_revisions
+    .with_columns(
+        timestamp = c.timestamp.str.to_datetime()
+    )
+)
+page_revisions
+```
+
+The `timestamp` column now has the type `Datetime`, giving the second at which each edit was saved. Because the string was written in the ISO-8601 format, `.str.to_datetime()` parses it without being told the layout. A format string can be passed if the data uses some other convention, and often must be, since a date like `03/04/2025` is ambiguous in a way that `2025-04-03` is not. That ambiguity is the whole argument for the ISO format.
+
+Each row also carries the editor's username (anyone can edit a Wikipedia page), the size in bytes of the article after the edit, and a short comment describing the change. Plotting size against time shows the article growing, and shows the moments when large sections were added or removed.
+
+```{python}
+selected_authors = ["Geoffrey Chaucer", "Emily Brontë"]
+
+(
+    page_revisions
+    .filter(c.doc_id.is_in(selected_authors))
+    .pipe(ggplot, aes(c.timestamp, c.size, color=c.doc_id))
+    .geom_line()
+    .scale_color_manual(values=["red", "blue"])
+    .labs(
+        title="Wikipedia Page Size Over Time",
+        x="Date",
+        y="Page Size (bytes)",
+        color="Author"
+    )
+)
+```
+
+The two lines cover very different stretches of time, and the reason is worth pausing on. We collected the 500 most recent edits for every page, not every edit ever made, so the window we observe is not a fixed span of years but a fixed number of events. Emily Brontë's page is edited often, so her last 500 edits reach back only to late 2024. Chaucer's page moves more slowly, so the same 500 edits carry us back to 2021. The observation window is different for every author, and any comparison that forgets this will end up comparing a busy year and a quiet half-decade as though they were the same thing.
+
+We can label the axis with `scale_x_datetime()`, which works like `scale_x_date()` but understands times as well as dates.
+
+```{python}
+(
+    page_revisions
+    .filter(c.doc_id.is_in(selected_authors))
+    .pipe(ggplot, aes(c.timestamp, c.size, color=c.doc_id))
+    .geom_line()
+    .scale_color_manual(values=["red", "blue"])
+    .scale_x_datetime(date_breaks="1 year", date_labels="%Y")
+    .theme(axis_text_x=element_text(angle=90, hjust=1))
+    .labs(
+        title="Wikipedia Page Size Over Time (Yearly Labels)",
+        x="Date",
+        y="Page Size (bytes)",
+        color="Author"
+    )
+)
+```
+
+Filtering by a range of times zooms into a region of the data, which is often the only way to see structure that a multi-year plot flattens. Here we keep the edits made from 2025 onward.
+
+```{python}
+(
+    page_revisions
+    .filter(c.doc_id.is_in(selected_authors))
+    .filter(c.timestamp > pl.datetime(2025, 1, 1))
+)
+```
+
+Note that this keeps edits made during 2025, despite the strictly greater than condition, because `pl.datetime(2025, 1, 1)` means the exact instant of 1 January 2025 at 00:00:00. Every other moment in the year comes after it.
+
+## Language and Time Zones
+
+So far our summaries of dates and times have been numeric. Notice that the weekday example above gave us the numbers 1 through 7 rather than names. Polars can produce string names for weekdays and months, but the output depends on the locale configured on the machine running the code, which makes it a poor thing to build an analysis on. The numeric components below are portable, and they are what most analyses want anyway.
+
+```{python}
+(
+    page_revisions
+    .head(10)
+    .with_columns(
+        weekday_num = c.timestamp.dt.weekday(),
+        month_num = c.timestamp.dt.month(),
+        hour = c.timestamp.dt.hour(),
+        date_only = c.timestamp.dt.date()
+    )
+    .select(c.timestamp, c.weekday_num, c.month_num, c.hour, c.date_only)
+)
+```
+
+::: {.callout-note collapse="true"}
+## Weekday and month names
+
+If you need weekday or month names as strings, build the mapping yourself, either with a chain of `pl.when()` expressions or by joining against a small lookup table. Doing it explicitly costs three lines and removes any dependence on the locale of whoever runs the code.
+:::
+
+The other regional problem is time zones. The concept seems simple and the practice is anything but; an impressive share of the bugs in the history of computing trace back to some edge case in time zone handling.
+
+A datetime in Polars is either *naive*, carrying no time zone information at all, or *aware*, tagged with a specific zone. This distinction matters because the two are not interchangeable, and two different methods move between them. The `.dt.replace_time_zone()` method attaches a zone to a naive datetime, asserting what the clock reading meant without changing the reading itself. The `.dt.convert_time_zone()` method takes an aware datetime and expresses the same instant in a different zone, which does change the reading. Attaching is a claim about what the data always meant; converting is an arithmetic operation on a known instant.
+
+Our timestamps came out of the parse naive, because the string we stored carried no zone. But we know from @sec-apis that Wikipedia reports all revision timestamps in UTC, as most technical sources with a global audience do. So the correct first move is to attach UTC, and only then convert.
+
+```{python}
+(
+    page_revisions
+    .head(10)
+    .with_columns(
+        utc = c.timestamp.dt.replace_time_zone("UTC")
+    )
+    .with_columns(
+        nyc = c.utc.dt.convert_time_zone("America/New_York")
+    )
+    .select(c.utc, c.nyc)
+)
+```
+
+It is tempting to skip the first step and call `.dt.convert_time_zone()` on the naive column directly. Polars will let you, and on this data it even gives the right answer, which is precisely what makes it dangerous. Converting a naive datetime silently assumes it was UTC to begin with. That assumption happens to hold for us, so nothing breaks and nothing warns. Feed the same code a column of naive local timestamps from some other source and it will shift every one of them by the offset from UTC, quietly and without complaint. Writing `.dt.replace_time_zone("UTC")` first costs one line and turns a hidden assumption into a statement in the code, where a reader can check it.
+
+The mirror-image mistake is calling `.dt.replace_time_zone()` on a column that is already aware. That overwrites the zone label while leaving the clock reading untouched, which moves the instant by however many hours separate the two zones. Attaching a zone and converting between zones look similar and do opposite things, and confusing them is the most common way to corrupt a timestamp.
+
+With the zone attached, we can present the data in the local terms of whatever audience we have. The code below counts edits by the hour of the day in New York.
+
+```{python}
+hourly_edits = (
+    page_revisions
+    .with_columns(
+        hour_nyc = (
+            c.timestamp
+            .dt.replace_time_zone("UTC")
+            .dt.convert_time_zone("America/New_York")
+            .dt.hour()
+        )
+    )
+    .group_by(c.hour_nyc)
+    .agg(
+        count = pl.len()
+    )
+    .sort(c.hour_nyc)
+)
+
+(
+    hourly_edits
+    .pipe(ggplot, aes(c.hour_nyc, c.count))
+    .geom_col()
+    .labs(
+        title="Wikipedia Edits by Hour (New York Time)",
+        x="Hour of Day",
+        y="Number of Edits"
+    )
+)
+```
+
+Plenty of editors of course live in London, Los Angeles, or Mumbai rather than New York, and the choice of zone is a rhetorical one as much as a technical one. But most readers find it far easier to reason about a distribution stated in a clock they use than one stated in UTC.
+
+## Truncating Dates
+
+We have seen how to build date and datetime objects and how to extract their components. A related operation is reducing a timestamp's precision, which is more useful than it might sound. Our revisions are recorded to the second, and that is finer than almost any question we want to ask of them. Grouping by an exact second would put nearly every edit in a group of its own.
+
+The `.dt.truncate()` method rounds a date or datetime down to a given duration. Setting the duration to `"1h"` discards the minutes and seconds; `"1d"` discards the time entirely.
+
+```{python}
+(
+    page_revisions
+    .head(10)
+    .with_columns(
+        ts_hour = c.timestamp.dt.truncate("1h"),
+        ts_day = c.timestamp.dt.truncate("1d")
+    )
+    .select(c.timestamp, c.ts_hour, c.ts_day)
+)
+```
+
+The value of truncation is that it turns a continuous timestamp into a categorical bin, and bins are things we can group by. Every edit made during the same hour now shares an identical value, so `.group_by()` can collect them. This makes truncation the standard first step in turning an event log into a time series. There is a companion method, `.dt.round()`, which rounds to the nearest unit rather than downward, and `.dt.date()`, which extracts the date part of a datetime directly.
+
+```{python}
+(
+    page_revisions
+    .with_columns(
+        date = c.timestamp.dt.date()
+    )
+    .group_by(c.date)
+    .agg(
+        count = pl.len()
+    )
+    .sort(c.count, descending=True)
+    .head(10)
+)
+```
+
+Above we discarded the time component and counted edits per day, which surfaces the busiest days in the corpus. The opposite move is sometimes wanted: keep the time of day and throw away the date, so that patterns which repeat daily become visible. Extracting the hour does this.
+
+```{python}
+(
+    page_revisions
+    .with_columns(
+        hour = c.timestamp.dt.hour()
+    )
+    .group_by(c.hour)
+    .agg(
+        count = pl.len()
+    )
+    .sort(c.hour)
+)
+```
+
+## Window Functions Revisited
+
+Window functions were the subject of @sec-window, so this section is a return visit rather than an introduction. The two ideas you should carry in from that chapter are these. First, a window function computes a value for every row while looking at other rows, which is what separates it from an aggregation: `.agg()` collapses a group to one row, while `.over()` writes the group's answer onto every row of the group and keeps them all. Second, the functions that look up and down a column, `.shift()` chief among them, depend entirely on the order of the rows, which means they belong immediately after a `.sort()`, and they need `.over()` to stop them running across the boundary between one group and the next. In @sec-window that was the cellphone data, where a year-over-year change computed without `.over(c.iso)` would have subtracted the last year of one country from the first year of the next.
+
+That is the whole toolkit, and it transfers here unchanged. What changes is that our rows are now separated by real, irregular stretches of time, which opens up questions the cellphone data could not ask.
+
+Take the page revisions. We have the size of each article after each edit, and what we would like is the size *of* each edit: how many bytes it added or removed. That value is not in the data, but it is the difference between one row and the row before it, within the same page. The pattern is exactly the one from @sec-window.
+
+```{python}
+(
+    page_revisions
+    .sort(c.doc_id, c.timestamp)
+    .with_columns(
+        size_diff = c.size - c.size.shift(1).over(c.doc_id)
+    )
+    .select(c.doc_id, c.timestamp, c.size, c.size_diff)
+)
+```
+
+The `.sort()` establishes what "the previous row" means, `.shift(1)` reaches back to it, and `.over(c.doc_id)` guarantees that the first edit of one author's page never subtracts the last edit of another's. The first row of each author has no predecessor and so gets a `null`, which propagates through the subtraction. All of this should feel familiar.
+
+One thing we can now do that @sec-window deliberately postponed is use the shortcut. That chapter wrote the subtraction out longhand and noted that `.diff()` does the same job in one step, but kept the long form so the mechanics stayed visible. The mechanics are visible by now, so we can collect on the promise.
+
+```{python}
+(
+    page_revisions
+    .sort(c.doc_id, c.timestamp)
+    .with_columns(
+        size_diff = c.size.diff().over(c.doc_id)
+    )
+    .select(c.doc_id, c.timestamp, c.size, c.size_diff)
+)
+```
+
+The results are identical. Note that `.over()` is still required: `.diff()` is an ordered function like any other and will happily run off the end of one group into the next.
+
+Now for something the cellphone data could not have shown us. Wikipedia has a distinctive editing pathology: an edit gets made, someone disagrees, and the page is *reverted* to its previous state. A reversion leaves a fingerprint in the size column, because the article returns to a size it held two edits ago. Reaching back two rows instead of one is a matter of passing a different argument to `.shift()`.
+
+```{python}
+reversions = (
+    page_revisions
+    .sort(c.doc_id, c.timestamp)
+    .with_columns(
+        size_diff = c.size.diff().over(c.doc_id),
+        is_reversion = c.size == c.size.shift(2).over(c.doc_id)
+    )
+    .filter(c.is_reversion)
+)
+
+reversions.select(c.doc_id, c.timestamp, c.user, c.size, c.size_diff)
+```
+
+That is a substantial number of edits that put a page back where it was two edits earlier. The criterion is a heuristic rather than a proof, since two unrelated edits could coincidentally cancel out, but the pattern is strong enough to study. Counting reversions per page shows where the disputes are.
+
+```{python}
+(
+    reversions
+    .group_by(c.doc_id)
+    .agg(reversion_count = pl.len())
+    .sort(c.reversion_count, descending=True)
+    .head(10)
+)
+```
+
+## Durations
+
+Subtracting two datetimes gives an object of a type we have not met: a `Duration`, representing an elapsed span of time rather than a moment in it. The distinction is the same one that separates a date from a number of days. Combining a duration with the window pattern from the previous section answers a natural question about our data, which is how much time passes between consecutive edits to a page.
+
+```{python}
+(
+    page_revisions
+    .sort(c.doc_id, c.timestamp)
+    .with_columns(
+        since_last = c.timestamp - c.timestamp.shift(1).over(c.doc_id)
+    )
+    .select(c.doc_id, c.timestamp, c.since_last)
+    .drop_nulls()
+)
+```
+
+The `since_last` column holds durations, printed in a readable form but stored underneath as a count of microseconds. Durations aggregate like any other numeric column, so averaging them per author gives a direct measure of how actively each page is maintained.
+
+```{python}
+(
+    page_revisions
+    .sort(c.doc_id, c.timestamp)
+    .with_columns(
+        since_last = c.timestamp - c.timestamp.shift(1).over(c.doc_id)
+    )
+    .drop_nulls(c.since_last)
+    .group_by(c.doc_id)
+    .agg(
+        avg_gap = c.since_last.mean(),
+        hours = c.since_last.dt.total_hours().mean().round(1),
+        edits = pl.len()
+    )
+    .sort(c.avg_gap)
+)
+```
+
+Emily Brontë's page turns over roughly once a day. At the other end, Charlotte Smith's page sits untouched for six months at a stretch. The `avg_gap` column is itself a duration, which reads well but does not plot or compare across units. For that we convert with one of the `.dt.total_*()` methods, of which `.dt.total_hours()` above is one; the family also includes `.dt.total_days()`, `.dt.total_minutes()`, and `.dt.total_seconds()`.
+
+Choose that unit with some care, because these methods truncate toward zero rather than rounding. Had we asked for `.dt.total_days()` here, every gap shorter than twenty-four hours would have become exactly zero, and the busiest pages, the ones whose gaps are measured in hours, would have had their averages dragged toward nothing. The unit needs to be finer than the intervals being measured.
+
+Remember too the caveat from earlier. Because we hold the 500 most recent edits rather than the full history, the authors at the top of this table are the ones whose observation window is shortest. The ranking describes editing intensity in the recent past, not across the whole life of the encyclopedia.
+
+## Rolling Windows in Time
+
+There is one more window function to meet, and it is the one that could not have been taught in @sec-window. That chapter introduced `.rolling_mean()`, which smooths a series by averaging each row with the rows near it, and defines "near" as a count of rows: `window_size=5` means this row and the four above it. It also flagged, in its closing section, that Polars offers time-aware versions of these functions, and left them for later. This is later.
+
+The distinction matters enormously here, and the revision data shows why. A row-count window assumes that consecutive rows are equally spaced, which is exactly what the cellphone data guaranteed and what our revisions violate. Two consecutive edits to Chaucer's page might be forty seconds apart or eight months apart. A five-row window over that series averages together whatever five edits happen to be adjacent, spanning a day in one place and a year in another. The window is measured in the wrong units.
+
+What we want is a window defined by a span of *time*: average the article size over the last thirty days, however many edits that happens to include. The `.rolling_mean_by()` method does this, taking the column holding the timestamps as `by` and the span as `window_size`, written as a duration string.
+
+```{python}
+(
+    page_revisions
+    .filter(c.doc_id == "Geoffrey Chaucer")
+    .sort(c.timestamp)
+    .with_columns(
+        size_smooth = c.size.rolling_mean_by(by=c.timestamp, window_size="30d")
+    )
+    .pipe(ggplot, aes(c.timestamp, c.size))
+    .geom_line(color="grey")
+    .geom_line(aes(y=c.size_smooth), color="red")
+    .labs(
+        title="Chaucer Page Size, Raw and 30-Day Rolling Mean",
+        x="Date",
+        y="Page Size (bytes)"
+    )
+)
+```
+
+The grey line is the raw size after every edit, jagged with vandalism and its reversal. The red line averages over a thirty-day window and shows the article's actual trajectory. Note that no `.over()` appears here only because we filtered to a single author first; computing this across the whole table would need `.over(c.doc_id)` for the same reason every other ordered function does.
+
+Polars provides the whole `_by` family on the same principle, including `.rolling_sum_by()`, `.rolling_max_by()`, and `.rolling_std_by()`. Whenever rows are unevenly spaced in time, these are almost always what you want, and the row-count versions are almost always a subtle mistake.
+
+## Joining on Time
+
+We close with joins, which we last saw in @sec-combine. Recall the distinction that chapter drew. An ordinary join matches rows where a key in one table *equals* a key in another, which covers most of what anybody needs. Conditional joins relax the equality. The `.join_where()` method keeps pairs of rows satisfying any condition you can write as a filter expression, and `.join_asof()` matches each row to the *nearest* value in the other table rather than an exact one, which is much faster but requires both tables to be sorted on the join key.
+
+@sec-combine demonstrated both on the country data, matching African countries to Asian ones by Gini coefficient. It also noted, in passing, that `.join_asof()` was invented for time series and got its name from asking what a value was *as of* a particular moment. That is the case we can finally make properly.
+
+Here is the problem. We have two tables about the same authors, measured on different clocks. Page views are recorded once per day. Revisions are recorded to the second. Suppose we want to know how many people were reading a page on the day it was edited, perhaps to ask whether edits follow attention. There is no exact key to join on, because no revision happened at midnight precisely, which is the only timestamp the page view table contains.
+
+An asof join is built for exactly this. We give each daily view count a datetime, sort both tables, and ask Polars to match each revision backward to the most recent view record at or before it.
+
+```{python}
+views_daily = (
+    page_views
+    .select(
+        c.doc_id,
+        moment = pl.date(c.year, c.month, c.day).cast(pl.Datetime),
+        views = c.views
+    )
+    .sort(c.moment)
+)
+
+edits_2025 = (
+    page_revisions
+    .filter(c.timestamp.dt.year() == 2025)
+    .sort(c.timestamp)
+)
+
+edits_with_views = (
+    edits_2025
+    .join_asof(
+        views_daily,
+        left_on="timestamp",
+        right_on="moment",
+        by="doc_id",
+        strategy="backward"
+    )
+)
+
+edits_with_views.select(c.doc_id, c.timestamp, c.size, c.views)
+```
+
+Every edit now carries the page view count for the day it was made. The `by="doc_id"` argument is doing important work: it requires an exact match on the author before the nearest-in-time search begins, so Chaucer's edits are matched against Chaucer's traffic and nobody else's. Without it, the join would happily pair an edit to Chaucer's page with Virginia Woolf's readership. This is the same boundary problem that `.over()` solves for window functions, wearing a different hat.
+
+Note also the `strategy="backward"`, which is the default and the right choice here. It matches each revision to the most recent view record at or before it, which for a daily series means the count for the day the edit happened. Setting it to `"forward"` would match the next day's count instead, and `"nearest"` would pick whichever is closer in either direction, which for this data would sometimes reach into the future.
+
+With the tables joined, we can ask the question we came for.
+
+```{python}
+(
+    edits_with_views
+    .group_by(c.doc_id)
+    .agg(
+        edits = pl.len(),
+        avg_views_on_edit_days = c.views.mean().round(0)
+    )
+    .sort(c.edits, descending=True)
+    .head(10)
+)
+```
+
+The other conditional join, `.join_where()`, handles cases where no notion of "nearest" applies and we simply want every pair of rows satisfying some condition. Our `meta` table gives each author's birth and death year, so we can ask which authors were alive at the same time: pair author A with author B whenever B was born during A's lifetime.
+
+```{python}
+overlap = (
+    meta
+    .join_where(
+        meta,
+        (c.born <= c.born_right)
+        & (c.died > c.born_right)
+        & (c.doc_id != c.doc_id_right)
+    )
+    .select(c.doc_id, c.born, c.died, c.doc_id_right, c.born_right)
+)
+
+overlap
+```
+
+As @sec-combine explained, `.join_where()` takes filter expressions, and columns from the right table are referred to with the `_right` suffix. The three conditions say that A was born no later than B, that A was still alive when B was born, and that A and B are different people. The result is a few hundred pairs out of the 5,550 that would come from pairing all 75 authors with each other, which is what makes it interesting: a corpus spanning eight centuries produces a sparse overlap structure, where a corpus of Victorians would produce a nearly complete one.
+
+This table is a network, with authors as nodes and shared lifetimes as edges, and it is exactly the sort of structure that @sec-networks takes up.
+
+## Summary
+
+This chapter added a type system for time to the tools we already had. Dates and datetimes are distinct from the numbers that encode them, and constructing them with `pl.date()` or `.str.to_datetime()` unlocks the `.dt` namespace, sensible axis labels, and comparisons that respect the calendar. Time zones divide into naive and aware datetimes, and the difference between attaching a zone and converting between zones is the difference between a claim and a calculation. Truncation reduces precision on purpose, turning a stream of timestamps into bins that can be grouped. Durations arise from subtracting one moment from another and convert into whatever unit the question calls for.
+
+The chapter also revisited two sets of tools deliberately. The window functions of @sec-window came back on data with real timestamps, where `.shift()` and `.over()` behave exactly as before but let us measure the size of an edit, detect a reversion, and time the gap between events. That revisit also paid off two things @sec-window left open: `.diff()` as the shortcut for a differenced shift, and the `_by` family of rolling functions, which define a window as a span of time rather than a count of rows and are the right tool whenever observations are unevenly spaced. The conditional joins of @sec-combine came back too, and `.join_asof()` finally got the time series problem it was designed for.
+
+## References {-}

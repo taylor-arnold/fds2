@@ -1,0 +1,197 @@
+# Data Types {#sec-types}
+
+```{python}
+#| include: false
+import warnings
+warnings.filterwarnings('ignore')
+```
+
+## Setup
+
+As in every chapter, we begin by loading the modules and datasets used below. This chapter needs Polars, our helper functions, and the `country` dataset from @sec-intro. A second, smaller dataset will be read partway through the chapter, at the point where it becomes useful.
+
+```{python}
+#| output: false
+import polars as pl
+from plotnine import ggplot, aes
+from polars import col as c
+
+import funs
+
+country = pl.read_csv("data/countries.csv")
+```
+
+## Introduction
+
+Every time we have printed a DataFrame, the display has shown a short label under each column name: `str` under the country names, `i64` under the population counts, `f64` under the latitudes. These labels are *data types*. Every column in a DataFrame has exactly one type, and that type determines what the column can do: whether its values can be added together, whether they sort numerically or alphabetically, and how missing entries behave. So far we have been able to ignore them, because the `country` dataset arrives in good shape. That luck does not hold.
+
+This chapter has two goals. The first is to explain the type system: what the common types are, how to check them, how to convert a column from one type to another, and what happens when a value is missing or invalid. The second goal is to go back and give a proper account of something we have been using all along. In the last chapter we wrote fragments such as `c.pop` and `c.hdi > 0.9` and handed them to `.sort()`, `.select()`, `.filter()`, and `.with_columns()`, and we said only that they were recipes rather than data. That was true but vague. These fragments are objects called *expressions*, and understanding what they are explains why the same `c.` syntax keeps turning up inside method after method for the rest of the book.
+
+Because the methods from @sec-organize are now in hand, we will use them freely here to display results, without further comment.
+
+## Columns Have Types
+
+Printing a DataFrame shows the type of each column directly under its name. To see the full mapping at once, we can ask for the DataFrame's *schema*, which lists every column name alongside its type.
+
+```{python}
+country.schema
+```
+
+Four types cover almost everything in this book. A `str` (string) column holds text, such as the country names and regions. An `i64` (64-bit integer) column holds whole numbers. An `f64` (64-bit floating point) column holds numbers that may have a decimal part, such as latitude or the Human Development Index. The fourth type, `bool` (Boolean), holds only the values `True` and `False`. There is no `bool` column in `country` as it is read from the file, but one appears as soon as we ask a yes-or-no question about the data.
+
+To see one, we can use `.select()` to place a computed column next to the data it came from. The code below shows each country's HDI alongside a test of whether that HDI is above 0.9.
+
+```{python}
+(
+    country
+    .select(c.iso, c.hdi, high_hdi = c.hdi > 0.9)
+)
+```
+
+The new column's header reads `bool`. Comparison operators (`>`, `<`, `>=`, `<=`, `==`, `!=`) always produce Boolean columns, whatever the type of their inputs. This is what `.filter()` was consuming in the last chapter: the comparison builds a column of `True` and `False` values, and `.filter()` keeps the rows marked `True`. The Boolean type was there the whole time; we simply had no name for it.
+
+## Why Types Matter
+
+The `country` data arrives in good shape: numbers are read as numbers and text as text, so there is little reason to think about types at all. Most real datasets are not this polite. To see what goes wrong, we will read a second file, a small table of Massachusetts cities with their ZIP codes, populations, and founding dates.
+
+```{python}
+cities = pl.read_csv("data/cities_messy.csv")
+cities
+```
+
+Look at the printed types. The `zip` column was read as `i64`, and every code has lost its leading zero: Boston's ZIP code is 02108, but the table says 2108. ZIP codes are labels that happen to be written with digits, not quantities, and treating them as integers has silently damaged them. The `pop` column has the opposite problem. One city's population was entered as `"n/a"`, and because a column must have a single type, that one entry forced the entire column to be read as `str`. The `founded` column is also `str`, since `read_csv` has no way to know those particular strings are dates.
+
+None of this produces an error message. The file reads, the table prints, and everything looks roughly right. The damage only surfaces when we try to use the data. Suppose we ask for the largest population in the table:
+
+```{python}
+(
+    cities
+    .select(c.pop.max())
+)
+```
+
+The answer is `"n/a"`. Strings compare alphabetically, character by character, and `"n"` comes after every digit. Even without the stray entry, alphabetical order would put `"28613"` after `"206518"`, because the comparison never gets past the first character. Arithmetic fails more loudly: asking for `c.pop * 2` raises an error, since Polars refuses to multiply text. A column with the wrong type cannot be trusted, and the printed header is where the problem shows up first, so checking it after every `read_csv` is worth making a habit.
+
+## Casting
+
+Converting a column from one type to another is called *casting*, done with the `.cast()` method on a column. The target type is written with a `pl.` prefix and a capitalized name: `pl.Int64`, `pl.Float64`, `pl.String`, and `pl.Boolean` correspond to the four header labels we have seen. These longer names are how Polars refers to types inside code, while the headers use short forms to save space.
+
+Casting between the numeric types works as you might expect, with one caution. Converting an integer column to `pl.Float64` is always safe. Going the other way, from floating point to `pl.Int64`, drops the decimal part entirely rather than rounding. The example below casts latitude to an integer; a latitude of 41.9 becomes 41, and -34.6 becomes -34.
+
+```{python}
+(
+    country
+    .select(c.iso, c.lat, lat_int = c.lat.cast(pl.Int64))
+)
+```
+
+Now back to the broken `pop` column in `cities`. Casting it to a numeric type should fix it, but a plain cast fails, because `"n/a"` cannot be turned into a number. Polars raises an error rather than guessing. To convert the column anyway, we add `strict=False`, which tells the cast to replace any value it cannot convert with a missing value.
+
+```{python}
+(
+    cities
+    .select(
+      c.city,
+      pop = c.pop.cast(pl.Int64, strict=False)
+    )
+)
+```
+
+The column is now `i64`, the real populations are numbers, and Pittsfield's entry has become `null`, the subject of the next section. Its maximum is now a number rather than `"n/a"`.
+
+What about the ZIP codes? Casting `c.zip` to `pl.String` turns 2108 back into text, but the text it produces is `"2108"`; the leading zero was discarded when the file was read and a cast cannot recover it. The honest fix is to prevent the damage in the first place by telling `read_csv` to treat the column as text from the start. We cover the options for reading imperfect files in @sec-collect. In the meantime, the lesson stands: casting repairs types, not lost information.
+
+## Missing and Invalid Values
+
+The cast above introduced a `null` into the `pop` column. A `null` is Polars' marker for a missing value, and any column of any type can contain one. Floating point columns can additionally contain a second special value, `NaN` (short for "not a number"), which is not a missing value but the result of a numerical computation that has no answer. Taking the square root of a negative number is the classic way to produce one:
+
+```{python}
+(
+    country
+    .select(c.iso, c.lat, lat_sqrt = c.lat.sqrt())
+)
+```
+
+Countries in the Southern Hemisphere have negative latitudes, so their rows show `NaN`. Many libraries blur nulls and NaNs together; Polars keeps them separate, and it pays to keep the distinction straight. A `null` means "we do not have this value." A `NaN` means "we computed this value and the mathematics broke." The two are handled by parallel sets of tools: `.is_null()` tests for missing values and `.is_nan()` for invalid ones, `.fill_null()` replaces missing values and `.fill_nan()` replaces invalid ones, and the row-dropping methods `.drop_nulls()` and `.drop_nans()` from the last chapter remove rows containing each. This is the distinction @sec-organize promised to explain: dropping nulls does not remove NaNs, and dropping NaNs does not remove nulls.
+
+The filling methods take the replacement value as their argument. Below, we fill the missing population with 0. Whether 0 is a sensible stand-in depends entirely on what the analysis does next; for a sum it is harmless, while for an average it would quietly drag the result down. There is no universally correct fill value.
+
+```{python}
+(
+    cities
+    .select(
+      c.city,
+      pop = c.pop.cast(pl.Int64, strict=False).fill_null(0)
+    )
+)
+```
+
+Nulls also *propagate*: almost any arithmetic involving a null produces another null. Adding 5 to a missing value yields a missing value, which is usually what you want, since the alternative would be inventing data. Comparisons behave the same way, so a test like `c.pop > 100` gives `null`, not `False`, for a missing population. This is the rule behind a piece of `.filter()` behavior we noted without explaining in @sec-organize: rows whose test comes out `null` are dropped alongside the `False` ones, because a comparison against a missing value has no answer to give. Aggregations are the exception to propagation. Methods such as `.sum()` and `.mean()` skip nulls rather than being poisoned by them, a design choice that is convenient right up until you forget how many values were skipped.
+
+Polars also provides methods that fill a missing value using its neighbors in the column, copying the entry above or below it. These make the most sense for data with a meaningful row order, and we return to them in @sec-window alongside the other order-aware tools.
+
+## Expressions
+
+By this point we have written a great many `c.` fragments: `c.pop` on its own, `c.hdi > 0.9`, `c.pop.sqrt()`, `c.pop.cast(pl.Int64, strict=False)`. We have handed them to `.sort()`, `.select()`, `.filter()`, and `.with_columns()`, and we have described them loosely as recipes that Polars runs one row at a time. It is time to be precise, because these fragments are the single idea that the rest of the book is built on.
+
+Start by doing something we have not done before: type one alone in a cell, with no DataFrame anywhere in sight.
+
+```{python}
+c.pop
+```
+
+The result is not a column of numbers. It is an object called an *expression*, and its printed form is essentially a note that says "the column named pop." No data is attached, and none could be, because `c.pop` on its own is not connected to any DataFrame. It does not know that `country` exists. It is a description of a computation, not the computation's result.
+
+Expressions can be built up using arithmetic, comparisons, and methods, and each step produces another expression rather than a value. All of the following are expressions, and running any of them alone would again print a description rather than data:
+
+```{python}
+#| eval: false
+c.pop * 1000
+c.pop.sqrt()
+c.hdi > 0.9
+c.pop.cast(pl.Int64, strict=False).fill_null(0)
+```
+
+An expression produces values only when it is handed to a *context*: a DataFrame method that takes the description and applies it to actual data. Every method from the last chapter that accepted a `c.` fragment was acting as a context. `.select()` evaluates expressions and returns their results as the columns of a new DataFrame. `.with_columns()` evaluates them and attaches the results to the DataFrame it was given. `.filter()` evaluates a Boolean expression and keeps the rows where it comes out `True`. `.sort()` evaluates one and uses the result to order the rows.
+
+This is why the same expression can be moved from one method to another without changing a character of it. The comparison `c.hdi > 0.9` appeared in `.select()` earlier in this chapter, where it produced a column of `True` and `False` values, and in `.filter()` in the last chapter, where it decided which rows survived. It is the same description in both places. The expression does not know or care which context will run it, and the context does not care how the expression was built.
+
+That separation is the reason the `c.` syntax repeats across the whole book instead of being replaced by something new every chapter. @sec-group hands these same expressions to `.agg()` to summarize groups; @sec-window hands them to `.over()` to compute within groups; the chapters on text, networks, and images hand them to the same handful of contexts again. There is no second syntax coming. What changes from here on is the set of contexts, not the thing they consume.
+
+The separation between describing a computation and running it has a practical benefit as well, and it is one we have already claimed without justifying. In the last chapter we said that chaining methods together lets Polars optimize the whole sequence internally. This is why it can. A chain hands Polars a full description of the work before any of it starts, which leaves Polars free to reorganize the steps into a faster order. Nothing needs to change in your code for this to happen; it is simply a consequence of the design.
+
+::: {.callout-note collapse="true"}
+## Column names that break the `c.` syntax
+
+Writing `c.pop` only works when the column name is a valid Python name: letters, digits, and underscores, not starting with a digit. A column called `median age` or `GDP (2020)` cannot follow the dot. For these, call `c` as a function with the name in quotes, as in `c("median age")`. The resulting expression behaves exactly like any other. If a dataset will be used at length, it is often easier to rename such columns once at the start with the `.rename()` method from @sec-organize.
+:::
+
+## Strings, Dates, and Categories
+
+The four core types are not the whole story, and this section previews two families of tools that get fuller treatment later.
+
+String columns carry a collection of methods under the `.str` prefix, covering tasks like changing case, measuring length, and extracting pieces of text. One small example, converting names to uppercase:
+
+```{python}
+(
+    country
+    .select(c.iso, name_upper = c.full_name.str.to_uppercase())
+)
+```
+
+Dates get their own types as well. The `founded` column in `cities` is currently a `str`, which means the values can be printed but not treated as points in time; nothing relates `"1626-06-24"` to `"1630-09-07"` except alphabetical order, which for dates written year-first happens to coincide with time order, and for most other formats does not. The `.str.to_date()` method parses text into a genuine `date` column:
+
+```{python}
+(
+    cities
+    .select(c.city, founded = c.founded.str.to_date())
+)
+```
+
+A `date` column knows about years, months, and durations, and supports arithmetic that respects the calendar. We will use dates when we meet time-based data later in the book.
+
+Finally, Polars offers a Categorical type for string columns that take values from a fixed, limited set, such as `region` in the country data. It stores each distinct value once, which saves memory on large datasets and can make grouping faster. For the data sizes in this book the plain `str` type is simpler and entirely adequate, so we mention Categorical only so it is recognizable in documentation and in other people's code.
+
+## Extensions
+
+The full list of Polars data types, including several this chapter skipped (unsigned and smaller-width integers, `Datetime`, `Duration`, `List`, and others), is documented in the data types section of the [Polars user guide](https://docs.pola.rs/). The guide's page on expressions and contexts covers the same ground as this chapter's second half in more technical depth, and is worth reading once the ideas here feel comfortable. Readers curious about why Polars separates `null` from `NaN` can look up the Apache Arrow memory format, which Polars builds on and which makes the missing-value marker essentially free.

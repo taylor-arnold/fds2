@@ -1,0 +1,664 @@
+# Data APIs and Corpora {#sec-apis}
+
+```{python}
+#| include: false
+import warnings
+warnings.filterwarnings("ignore")
+```
+
+## Setup
+
+Load the modules needed for the chapter. We will use the requests and requests-cache modules to make API calls over the network.
+
+```{python}
+#| output: false
+import time
+from pathlib import Path
+from urllib.parse import quote
+
+import polars as pl
+from plotnine import ggplot, aes
+from polars import col as c
+
+import funs
+
+import requests
+import requests_cache
+```
+
+## Introduction
+
+Every dataset in the book so far arrived as a file: something we could read with `pl.read_csv` and inspect in full before writing a line of analysis code. A lot of interesting data does not come packaged that way. It sits on remote servers and is only available through a programmatic interface, either because it changes too often to distribute as a static file or because the provider wants to control how it is accessed. Weather forecasts, library catalogs, legislative records, and the entire edit history of Wikipedia all fall in this category.
+
+This chapter has two goals. The first is to teach the mechanics of *application programming interfaces* (APIs): how to send an HTTP request, read the response codes, page through large result sets, and turn nested JSON into the flat tables we know how to work with. The second goal is to actually build something with those mechanics. Over the course of the chapter we will assemble a corpus of Wikipedia articles about nineteenth-century British and Irish novelists, collecting each article's metadata, full text, internal links, revision history, daily page views, and links to versions in other languages. The chapters that follow on temporal, textual, and network data all analyze this corpus, so the output here is not a throwaway example. It is a small, documented data pipeline, and the decisions we make while building it (how the sample is defined, how redirects are handled, which identifiers we key on, when the data was retrieved) will matter every time the data gets used later.
+
+We work with Wikipedia for a practical reason: its APIs are free, require no account or key, and expose an unusually wide range of data types from a single source. The same request patterns apply to almost any HTTP-based API you will meet in practice.
+
+## APIs and HTTP Requests
+
+An API is a generic term for an interface that two computer programs can communicate across. The most common type for data access communicates over the Hypertext Transfer Protocol (HTTP), the same protocol your browser uses to fetch web pages. When you visit a website, your browser sends an HTTP request and receives a response containing the page content. Data APIs work the same way, except that instead of returning a human-readable page, the server returns structured data, usually in JSON format, designed for programs to consume.
+
+HTTP defines several *methods* that describe what kind of action a request performs. The most common are GET (retrieve data), POST (send data to create something new), PUT (update existing data), and DELETE (remove data). For data collection we almost always use GET. Each request goes to a specific URL called an *endpoint*, usually with a set of *parameters* attached that specify exactly what we want. The server replies with a numeric *status code* indicating what happened: 200 means success, 404 means the requested resource was not found, 429 means we are sending requests too quickly, and codes in the 500s mean the server itself hit an error. Checking status codes is the first step in debugging any failed request.
+
+Many APIs require an account and an API key, a unique string that authenticates your requests, and some charge per request. The APIs we use in this chapter are run by the Wikimedia Foundation and require neither. We will work with two of them. The *MediaWiki Action API* at `https://en.wikipedia.org/w/api.php` is the workhorse: it can return page metadata, article text, links, revision histories, and much more, all controlled through URL parameters. Its documentation is at [https://www.mediawiki.org/wiki/API:Main_page](https://www.mediawiki.org/wiki/API:Main_page). The *Wikimedia REST API* at `https://wikimedia.org/api/rest_v1/` serves analytics data such as page view counts through a different URL structure that we will look at near the end of the chapter. Python's `requests` library handles both; its documentation is at [https://requests.readthedocs.io/](https://requests.readthedocs.io/).
+
+## Caching Responses
+
+Before making any requests, we set up a local cache that stores every response we receive. The `requests_cache` library provides a drop-in replacement for a standard `requests` session that saves responses in a SQLite database file and returns the saved copy whenever the same request is repeated.
+
+```{python}
+session = requests_cache.CachedSession(
+    cache_name="data/wiki/requests_cache",
+    backend="sqlite",
+    allowable_methods=("GET", "HEAD", "POST"),
+    allowable_codes=(200, 404),
+    expire_after=None
+)
+```
+
+The cache matters for three reasons. It avoids hammering the server with repeated requests for the same data, which the Wikimedia Foundation explicitly asks clients to avoid. It makes development fast, since re-running a notebook pulls everything from disk instead of the network. And, most useful for our purposes, the cache file is a permanent record of the exact bytes the server sent us. Setting `expire_after=None` means entries never expire, so the SQLite file becomes the *raw layer* of our pipeline: every table we build later in the chapter can be reconstructed from it without touching the network at all. We will return to this idea when we discuss reproducibility at the end of the chapter.
+
+The `allowable_codes` setting deserves a note, because the default is to store only successful responses with status code 200. That default treats every other code as a failure not worth remembering, which is the wrong call for a 404. When we ask for the page views of an article that has none, the server's 404 is not an error to retry; it is a stable, informative answer, and it will be the same answer tomorrow. Leaving it out of the cache means those requests go back over the network on every rerun, which is exactly the behavior the cache exists to prevent. Adding 404 to the allowable codes records the negative result alongside the positive ones, so that a second run of the chapter reaches the network zero times. Codes we genuinely might want to retry, such as the 429 of a rate limit or a 500 from a struggling server, stay uncached.
+
+## A First Request
+
+An API call needs three things: the endpoint URL, a dictionary of parameters, and a set of headers identifying who we are. The parameters are specific to each API, so consulting the documentation is unavoidable. The `User-Agent` header identifies your application and gives server administrators a way to contact you if your requests cause problems. Wikimedia requires a descriptive one; requests with generic or missing user agents may be blocked.
+
+```{python}
+base_url = "https://en.wikipedia.org/w/api.php"
+headers = {
+    "User-Agent": "DataScienceBook/1.0 (tarnold2@richmond.edu)"
+}
+
+params = {
+    "action": "query",
+    "format": "json",
+    "prop": "info",
+    "titles": "Emily Brontë"
+}
+
+response = session.get(base_url, params=params, headers=headers)
+response.status_code
+```
+
+The `action` parameter tells the Action API what kind of operation we want (`query` retrieves data), `format` asks for JSON, `prop` names the property to fetch (`info` returns basic page metadata), and `titles` names the article. The status code of 200 confirms the request succeeded. The response body is JSON, which the response object can parse directly into Python dictionaries and lists.
+
+```{python}
+data = response.json()
+data["query"]["pages"]
+```
+
+Here we see a pattern that recurs constantly with APIs: the useful data is nested several levels deep, inside `data["query"]["pages"]`, and is keyed by the page's numeric ID rather than arranged as rows. We navigate to the nested records, pull out the fields we want as a list of dictionaries, and hand that list to Polars.
+
+```{python}
+rows = []
+for page in data["query"]["pages"].values():
+    rows.append({
+        "page_id": page["pageid"],
+        "title": page["title"],
+        "length": page["length"],
+        "touched": page["touched"]
+    })
+
+pl.DataFrame(rows)
+```
+
+The `length` field is the size of the article source in bytes and `touched` records when the page last changed. Every API nests its responses differently, so there is no single recipe. The skill to practice is exploring the structure (print intermediate pieces, read the documentation) and then writing a short loop that flattens exactly the fields you need.
+
+## Being a Polite Client
+
+Wikimedia's APIs are free, and the etiquette they ask for in return is modest: send a real `User-Agent`, make requests serially rather than in parallel, and cache what you receive. There is also a formal *rate limit*, a cap on how many requests a client may send per unit of time. Exceed it and the server starts answering with status code 429 ("too many requests") instead of data, at which point the correct behavior is to wait and retry rather than to push harder. Commercial APIs tend to have much stricter limits than Wikimedia's, and hitting them repeatedly can get a key revoked, so pausing between requests is a habit worth building early.
+
+Since every request in the rest of the chapter uses the same session and headers, we wrap the pattern in a helper function. It raises an error on any failing status code and sleeps briefly after each request that actually went over the network. Cached responses skip the pause, which is what makes re-running the chapter fast.
+
+One detail matters more than it looks: clearing the session's cookies before every request. Wikimedia's responses carry `Vary: Cookie`, and the rotating session cookies it sets (`WMF-Uniq`, `NetworkProbeLimit`, and similar) would otherwise accumulate in `session.cookies` and get resent on later requests. Because `requests_cache` honors `Vary` headers by comparing the cookies attached to the current request against the cookies attached when a response was first cached, and those values differ on every run, a stale cookie jar silently defeats the entire cache: `expire_after=None` looks like it should make every rerun instant, but each request still fails its `Vary: Cookie` check and goes back out over the network. Since this API needs no cookies to work, clearing them keeps every request's cookie state identical (empty) across runs, so cached entries actually get reused.
+
+```{python}
+def polite_get(url, params=None):
+    session.cookies.clear()
+    response = session.get(url, params=params, headers=headers)
+    response.raise_for_status()
+    if not getattr(response, "from_cache", False):
+        time.sleep(0.2)
+    return response
+```
+
+## Defining the Population
+
+Now we turn to the corpus itself, and the first decision is the one that shapes everything downstream: which pages are we collecting? This is a sampling question, and APIs make it easy to get wrong because they make it easy to grab whatever is convenient. A defensible corpus starts from an explicit definition of the population, written down where future users of the data can find it.
+
+There are several reasonable ways to define a set of Wikipedia pages. You can curate a list by hand, which gives full control but does not scale and encodes your own blind spots. You can query the Wikidata knowledge graph for entities matching structured criteria such as occupation and birth country. Or you can use Wikipedia's own *category* system, in which editors tag each article with subject labels. We take the category route here because it stays within the API we have already met, and because its imperfections are instructive.
+
+Our population is defined as the article pages belonging to two categories: `Category:Victorian novelists` and `Category:19th-century Irish novelists`. Together these give a corpus of nineteenth-century British and Irish novelists that is large enough to be interesting and small enough to collect in one sitting. Two caveats belong in the record. First, categories are maintained by volunteer editors, so membership reflects tagging practice as much as historical fact; an author missing the tag is invisible to us. Second, we collect only direct members and do not descend into subcategories, a deliberate choice that keeps the definition simple at the cost of some coverage.
+
+The Action API returns category members through `list=categorymembers`. A single response holds at most 500 results, so retrieving a full category requires *pagination*: when more results remain, the response includes a `continue` block whose values we feed back into the parameters of the next request, repeating until the block disappears.
+
+```{python}
+def category_members(category):
+    members = []
+    params = {
+        "action": "query",
+        "format": "json",
+        "list": "categorymembers",
+        "cmtitle": category,
+        "cmtype": "page",
+        "cmlimit": "max"
+    }
+    while True:
+        data = polite_get(base_url, params).json()
+        members.extend(data["query"]["categorymembers"])
+        if "continue" not in data:
+            break
+        params.update(data["continue"])
+    return members
+```
+
+Setting `cmtype` to `page` filters out subcategories and files, and `cmlimit` set to `"max"` asks for the largest batch the server allows. We run the function over both categories and stack the results into a table. A handful of authors appear in both categories, so we deduplicate on the page ID, keeping the first category we saw for each.
+
+```{python}
+categories = [
+    "Category:Victorian novelists",
+    "Category:19th-century Irish novelists"
+]
+
+rows = []
+for category in categories:
+    for member in category_members(category):
+        rows.append({
+            "page_id": member["pageid"],
+            "doc_id": member["title"],
+            "category": category
+        })
+
+authors = (
+    pl.DataFrame(rows)
+    .unique(subset="page_id", keep="first")
+    .sort(c.doc_id)
+)
+authors
+```
+
+This table is the spine of the corpus, and it carries two identifiers rather than one. The numeric `page_id` is the stable key: it survives a page being renamed, which a title does not. The article title, which we store as `doc_id`, is the readable key: `Emily Brontë` tells you who a row is about and `10393` does not. Neither is redundant, because each does something the other cannot, so every table we build below carries both. The chapters that analyze this corpus key their work on `doc_id`, since it is just as unique within the corpus and far easier to interpret in a printed table or a plot legend. Either column can join a table back to this one using the techniques from @sec-combine.
+
+Because that pairing shows up in every table that follows, it is worth a small helper. Given any table with a `page_id`, it looks the page up in a spine table, attaches the matching `doc_id`, and moves both keys to the front. The spine defaults to `authors`, which is what we want everywhere in this chapter until the very last section, where a second corpus arrives with a spine of its own.
+
+```{python}
+def add_doc_id(df, spine=None):
+    spine = authors if spine is None else spine
+    return (
+        df
+        .join(spine.select(c.page_id, c.doc_id), on=c.page_id)
+        .select(c.page_id, c.doc_id, pl.exclude("page_id", "doc_id"))
+    )
+```
+
+## Redirects and Missing Pages
+
+Our population came from category listings, which hand us canonical titles and page IDs directly. Corpora built from a hand-curated list start from titles typed by a person, and those are far less reliable. Wikipedia handles the mess through *redirects*: the page "Charlotte Bronte", without the diaeresis, is not an article but a pointer that forwards readers to "Charlotte Brontë". Dozens of alternate spellings, pen names, and former titles resolve this way. A title with no article and no redirect is simply missing.
+
+The Action API can resolve redirects for us if we pass `redirects=1`, and it batches nicely: up to 50 titles can go in a single request, separated by pipe characters. Here is a small demonstration with one redirect, one canonical title, and one title that does not exist.
+
+```{python}
+params = {
+    "action": "query",
+    "format": "json",
+    "prop": "info",
+    "redirects": 1,
+    "titles": "Charlotte Bronte|Oscar Wilde|Not A Real Author Page"
+}
+data = polite_get(base_url, params).json()
+data["query"].get("redirects")
+```
+
+The `redirects` block records each substitution the server made, mapping the title we asked for to the title we got. Keeping this mapping is worth the trouble: if your source list says "Charlotte Bronte" and your corpus says "Charlotte Brontë", the mapping is the only thing that connects them. Missing pages show up in the `pages` block flagged with a `missing` key and a negative placeholder ID.
+
+```{python}
+{k: v for k, v in data["query"]["pages"].items() if "missing" in v}
+```
+
+A missing title should never be silently dropped. It might be a typo worth fixing, a person who has no article (itself informative about coverage), or a sign that your source list and Wikipedia disagree about a name. Log them, look at them, and record the decision.
+
+This example also raises the question of which identifier to key the corpus on, because the options differ in stability. Titles are the least stable: pages get renamed, and yesterday's title becomes today's redirect. The numeric `page_id` survives renames and is stable within a single wiki, which is why our `authors` table uses it as the primary key. The most stable identifier of all is the *revision ID*, which names one immutable version of one page; we will meet it in the revision history section and again when we discuss snapshots.
+
+## Article Text
+
+With the population fixed, we start attaching data to it, beginning with the article text that the later chapter on textual data will analyze. The TextExtracts property of the Action API returns article text with the wiki markup stripped away. Setting `explaintext` gives plain text rather than HTML. The one quirk is that full-length extracts are limited to a single page per request, so this step is a loop over the corpus rather than a batched call. On the first run it is the slow part of the chapter; on every later run the cache answers instantly.
+
+```{python}
+rows = []
+for page_id in authors["page_id"]:
+    params = {
+        "action": "query",
+        "format": "json",
+        "prop": "extracts",
+        "explaintext": 1,
+        "pageids": page_id
+    }
+    data = polite_get(base_url, params).json()
+    page = data["query"]["pages"][str(page_id)]
+    rows.append({"page_id": page_id, "text": page.get("extract", "")})
+
+texts = add_doc_id(pl.DataFrame(rows))
+texts
+```
+
+A quick look at the opening of one article confirms the format: readable prose with section headings marked by equals signs, and no citations, tables, or infoboxes.
+
+```{python}
+print(texts.row(0, named=True)["text"][:400])
+```
+
+Extracts are a processed view of the article, which is exactly what we want for text analysis. If a project instead needs the raw wiki markup or the rendered HTML, the API provides both (through `prop=revisions` with `rvprop=content`, or the page HTML endpoints of the REST API), and the loop above transfers with minor changes.
+
+## Links Between Pages
+
+Wikipedia articles link to each other constantly, and those links form a network: Charlotte Brontë's article links to Elizabeth Gaskell's, who wrote her biography. The chapter on network data will study this structure, so here we collect each article's outgoing internal links. The `links` property returns them, restricted by `plnamespace=0` to links pointing at ordinary articles rather than talk pages or categories. Link lists can be long, so the same `continue` pagination we used for category members shows up again.
+
+```{python}
+rows = []
+for page_id in authors["page_id"]:
+    params = {
+        "action": "query",
+        "format": "json",
+        "prop": "links",
+        "plnamespace": 0,
+        "pllimit": "max",
+        "pageids": page_id
+    }
+    while True:
+        data = polite_get(base_url, params).json()
+        page = data["query"]["pages"][str(page_id)]
+        for link in page.get("links", []):
+            rows.append({"page_id": page_id, "link_title": link["title"]})
+        if "continue" not in data:
+            break
+        params.update(data["continue"])
+
+links = add_doc_id(pl.DataFrame(rows))
+links
+```
+
+Each row is one directed edge from an author's page to some target title. Most targets are outside the corpus (places, novels, publishers), which is fine; the table records everything, and narrowing it is a join. Matching the target titles against the `authors` table keeps only the author-to-author edges and attaches the target's identifiers.
+
+```{python}
+links_internal = (
+    links
+    .join(
+        authors.select(
+            link_title = c.doc_id,
+            to_page_id = c.page_id,
+            to_doc_id = c.doc_id
+        ),
+        on=c.link_title
+    )
+)
+links_internal
+```
+
+We store the full `links` table and treat `links_internal` as a derived view, since the network chapter may want to revisit that filtering decision. Citations to external sources are available through a parallel property, `extlinks`, and would slot into the same loop if a project needed them.
+
+## Revision Histories
+
+Every Wikipedia article carries its complete edit history, and that history is a time series: when was the page created, when did editing surge, how did the article grow? The later chapter on temporal data starts from exactly this table. The `revisions` property returns the history in reverse chronological order, and for popular authors it runs to thousands of entries, so pagination appears once more, this time via a property-specific `rvcontinue` token that the generic `continue` block carries for us. We request the revision ID, timestamp, editor name, article size, and the editor's summary comment at each revision, but not the article content itself, which keeps the responses small.
+
+```{python}
+rows = []
+for page_id in authors["page_id"]:
+    params = {
+        "action": "query",
+        "format": "json",
+        "prop": "revisions",
+        "rvprop": "ids|timestamp|user|size|comment",
+        "rvlimit": "max",
+        "pageids": page_id
+    }
+    while True:
+        data = polite_get(base_url, params).json()
+        page = data["query"]["pages"][str(page_id)]
+        for rev in page.get("revisions", []):
+            rows.append({
+                "page_id": page_id,
+                "rev_id": rev["revid"],
+                "timestamp": rev["timestamp"],
+                "user": rev.get("user"),
+                "size": rev["size"],
+                "comment": rev.get("comment")
+            })
+        if "continue" not in data:
+            break
+        params.update(data["continue"])
+
+revisions = (
+    pl.DataFrame(rows)
+    .pipe(add_doc_id)
+    .with_columns(
+        timestamp = c.timestamp.str.to_datetime("%Y-%m-%dT%H:%M:%SZ")
+    )
+)
+revisions
+```
+
+This is the largest table in the corpus by far and the most expensive to collect, which makes it the clearest illustration of why the cache is the raw layer: nobody wants to repeat this download because a downstream parsing decision changed. Note the `rev_id` column. Each value permanently identifies one exact version of one page, and the Action API can return the content of any revision on request. If an analysis ever needs to be pinned to the precise article text we saw today, these IDs are how.
+
+## Page View Statistics
+
+How often people read each article comes from a different service: the Wikimedia REST API, which serves analytics data. REST APIs encode the request in the structure of the URL path rather than in a parameter dictionary, so this section doubles as an introduction to the other major API style you will encounter. The endpoint for per-article page views looks like this:
+
+```
+https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/
+    {project}/{access}/{agent}/{article}/{granularity}/{start}/{end}
+```
+
+Each path segment is a choice. We use the `en.wikipedia` project, `all-access` to combine desktop and mobile, the `user` agent class to count human readers and exclude bots, `daily` granularity, and a fixed date range covering the 2025 calendar year. Fixing the range explicitly, rather than asking for "the last N days", means a rerun of this code requests the same data rather than a window that drifts with the current date. The article title goes into the path with spaces replaced by underscores and any special characters percent-encoded, which is what `quote` handles.
+
+Notice `rest_v1` sitting in the URL. This is *API versioning*: the provider promises that endpoints under `v1` keep behaving the same way, and breaking changes arrive under a new version prefix instead. Version numbers in URLs are one of the quiet foundations of reproducible pipelines, since code that pins a version does not break when the provider moves on.
+
+One wrinkle is that a small number of pages have no view data at all, and the API reports this with a 404 status rather than an empty list. Our `polite_get` helper would raise an error on a 404, so this loop calls the session directly and treats the status code as information: 404 means skip, anything else non-200 is a real problem. This is the loop that makes the `allowable_codes` setting from the caching section pay off. Those 404s are cached like any other response, so the handful of authors without view data are quietly skipped on every rerun without a single request leaving the machine.
+
+```{python}
+pv_base = (
+    "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/"
+    "en.wikipedia/all-access/user/{article}/daily/20250101/20251231"
+)
+
+rows = []
+for doc_id in authors["doc_id"]:
+    article = quote(doc_id.replace(" ", "_"), safe="")
+    session.cookies.clear()
+    response = session.get(pv_base.format(article=article), headers=headers)
+    if not getattr(response, "from_cache", False):
+        time.sleep(0.2)
+    if response.status_code == 404:
+        continue
+    response.raise_for_status()
+    for item in response.json()["items"]:
+        rows.append({
+            "article": item["article"],
+            "date": item["timestamp"],
+            "views": item["views"]
+        })
+
+views = (
+    pl.DataFrame(rows)
+    .with_columns(date = c.date.str.slice(0, 8).str.to_date("%Y%m%d"))
+    .join(
+        authors.select(
+            c.page_id,
+            article = c.doc_id.str.replace_all(" ", "_")
+        ),
+        on=c.article
+    )
+    .select(c.page_id, c.date, c.views)
+    .pipe(add_doc_id)
+)
+views
+```
+
+The timestamps arrive as strings such as `2025010100`, so we slice off the trailing hour digits and parse the rest as a date, then join the underscore-form titles back to the `authors` table to recover the page ID. As a check that the collection worked, here are the daily views for the three Brontë sisters across the year.
+
+```{python}
+brontes = views.filter(c.doc_id.str.contains("Brontë"))
+
+(
+    ggplot(brontes, aes(c.date, c.views, color=c.doc_id))
+    .geom_line()
+)
+```
+
+The series show weekly rhythms and occasional sharp spikes, and the sisters do not move together. Explaining patterns like these is the business of the temporal data chapter; here we only needed to see that the data came through intact.
+
+## Language Links
+
+English Wikipedia is one wiki among hundreds, and most of our authors have articles in other languages too. The `langlinks` property lists, for each page, the languages that have a corresponding article and its title there. Unlike text extracts, this property batches: we can send fifty page IDs per request, using the same chunking trick throughout, with `continue` pagination inside each batch in case the language lists overflow a response.
+
+```{python}
+ids = authors["page_id"].to_list()
+batches = [ids[i:(i + 50)] for i in range(0, len(ids), 50)]
+
+rows = []
+for batch in batches:
+    params = {
+        "action": "query",
+        "format": "json",
+        "prop": "langlinks",
+        "lllimit": "max",
+        "pageids": "|".join(str(i) for i in batch)
+    }
+    while True:
+        data = polite_get(base_url, params).json()
+        for page in data["query"]["pages"].values():
+            for link in page.get("langlinks", []):
+                rows.append({
+                    "page_id": page["pageid"],
+                    "lang": link["lang"],
+                    "lang_title": link["*"]
+                })
+        if "continue" not in data:
+            break
+        params.update(data["continue"])
+
+langlinks = add_doc_id(pl.DataFrame(rows))
+langlinks
+```
+
+We store the foreign title as `lang_title` rather than `title`, because `doc_id` already holds the English one and two columns called some variety of "title" in the same table is an invitation to a bug.
+
+Counting rows per author gives a rough measure of international prominence, and the foreign titles themselves open the door to cross-language comparisons, since every request in this chapter could be repeated against, say, `fr.wikipedia.org` with the French titles. The Action API exposes geographic data through a similar batched property, `coordinates`, though author biographies rarely carry coordinates; it becomes useful for corpora of places rather than people.
+
+## A Second Corpus
+
+The category route gave us 376 novelists, nearly all of them born within a few decades of one another. For some questions that is the right corpus. For others it is the wrong one, and it is worth being honest about why. Suppose we want to ask which authors were alive at the same time. Among 376 Victorians, almost everyone overlaps with almost everyone, and the answer is a wall of yes. The question only becomes interesting over a population that spans centuries.
+
+So we build a second, smaller corpus: 75 British and Irish authors running from Marie de France in the twelfth century to Seamus Heaney in the twenty-first. It is small enough that its tables fit on a printed page, and it is spread thinly enough across time that temporal questions have sparse, legible answers. The chapters on temporal, textual, and network data all work with this corpus; the larger one stays on disk for the exercises.
+
+This is the hand-curated route that "Defining the Population" named and declined, so building it costs us the thing that route costs everyone: the titles were typed by a person, and people typing 75 names make mistakes. That is exactly what the redirect machinery is for, and here is where it earns its place.
+
+The list itself, along with each author's birth year, death year, era, and gender, lives in a small curated file in the repository. Those biographical fields do not come from the Action API at all. Somebody compiled them by hand, and a reader who wants to verify them has to check them against something other than Wikipedia. That is not an embarrassment to bury; it is precisely the kind of fact a provenance record exists to state.
+
+```{python}
+uk_curated = pl.read_csv("data/wiki_uk_meta.csv.gz")
+uk_curated.select(c.doc_id, c.born, c.died, c.era, c.gender)
+```
+
+To attach these authors to Wikipedia we need their page IDs, which means resolving each typed title to a real article. The function below batches fifty titles per request with `redirects=1`, then follows each title through whatever substitutions the server reports. Two kinds can apply, and they can chain: `normalized` fixes mechanical issues such as capitalization and underscores, while `redirects` follows an actual pointer page. Walking the map until it stops changing handles both, in any order, however many hops deep.
+
+```{python}
+def resolve_titles(titles):
+    rows = []
+    batches = [titles[i:(i + 50)] for i in range(0, len(titles), 50)]
+    for batch in batches:
+        params = {
+            "action": "query",
+            "format": "json",
+            "prop": "info",
+            "redirects": 1,
+            "titles": "|".join(batch)
+        }
+        data = polite_get(base_url, params).json()
+
+        followed = {}
+        for kind in ("normalized", "redirects"):
+            for step in data["query"].get(kind, []):
+                followed[step["from"]] = step["to"]
+
+        pages = {p["title"]: p for p in data["query"]["pages"].values()}
+        for title in batch:
+            final = title
+            while final in followed:
+                final = followed[final]
+            rows.append({
+                "doc_id": title,
+                "resolved": final,
+                "page_id": pages.get(final, {}).get("pageid")
+            })
+    return pl.DataFrame(rows)
+
+resolved = resolve_titles(uk_curated["doc_id"].to_list())
+resolved.filter(c.doc_id != c.resolved)
+```
+
+Two titles moved, and they moved for different reasons. `Katherine Philipps` is simply a typo, with an extra `p` that a careful transcriber still managed to type. `Margaret Cavendish` is not an error at all: it is a real Wikipedia redirect from the short form of her name to the article's full title, `Margaret Cavendish, Duchess of Newcastle-upon-Tyne`. Our list is not wrong about her, it is just less formal than Wikipedia. Both would have dropped out of the corpus had we looked up titles without following redirects, and the failure would have been silent, which is the dangerous part.
+
+Titles that resolve to nothing at all deserve a separate look, since a null page ID means no article and no redirect. Here the table comes back empty, which is the answer we want, but the check belongs in the code rather than in our memory of having once run it.
+
+```{python}
+resolved.filter(c.page_id.is_null())
+```
+
+Now the spine of the second corpus. We keep the curated title as `doc_id` (it is the name the analysis chapters will print) while keying on the `page_id` the server gave us, and we carry the resolved title along in a working table because the page view API needs the canonical form rather than ours.
+
+```{python}
+uk_pages = (
+    uk_curated
+    .join(resolved, on=c.doc_id)
+    .drop_nulls(c.page_id)
+)
+
+uk_meta = (
+    uk_pages
+    .select(c.page_id, c.doc_id, c.born, c.died, c.era, c.gender, c.short)
+)
+uk_meta
+```
+
+The revision histories come next, with one change from the loop we wrote before: we ask for 500 revisions and stop, rather than paginating to the end of history. Five hundred is the most a single request will return, so dropping the `continue` loop gives us exactly the 500 most recent edits per page. This is a deliberate ceiling rather than a shortcut. Chaucer's article has been edited for twenty years, and the full history of all 75 pages would be a large table that answers no question the analysis chapters actually ask.
+
+```{python}
+rows = []
+for page_id in uk_meta["page_id"]:
+    params = {
+        "action": "query",
+        "format": "json",
+        "prop": "revisions",
+        "rvprop": "ids|timestamp|user|size|comment",
+        "rvlimit": 500,
+        "pageids": page_id
+    }
+    data = polite_get(base_url, params).json()
+    page = data["query"]["pages"][str(page_id)]
+    for rev in page.get("revisions", []):
+        rows.append({
+            "page_id": page_id,
+            "rev_id": rev["revid"],
+            "timestamp": rev["timestamp"],
+            "user": rev.get("user"),
+            "size": rev["size"],
+            "comment": rev.get("comment")
+        })
+
+uk_revisions = (
+    pl.DataFrame(rows)
+    .pipe(add_doc_id, uk_meta)
+    .with_columns(
+        timestamp = (
+            c.timestamp
+            .str.to_datetime("%Y-%m-%dT%H:%M:%SZ")
+            .dt.strftime("%Y-%m-%d %H:%M:%S")
+        )
+    )
+)
+uk_revisions
+```
+
+Page views use the same REST endpoint and the same fixed 2025 window as before, sent against the resolved titles.
+
+```{python}
+rows = []
+for row in uk_pages.iter_rows(named=True):
+    article = quote(row["resolved"].replace(" ", "_"), safe="")
+    session.cookies.clear()
+    response = session.get(pv_base.format(article=article), headers=headers)
+    if not getattr(response, "from_cache", False):
+        time.sleep(0.2)
+    if response.status_code == 404:
+        continue
+    response.raise_for_status()
+    for item in response.json()["items"]:
+        rows.append({
+            "page_id": row["page_id"],
+            "date": item["timestamp"],
+            "views": item["views"]
+        })
+
+uk_views = (
+    pl.DataFrame(rows)
+    .pipe(add_doc_id, uk_meta)
+    .with_columns(
+        year = c.date.str.slice(0, 4).cast(pl.Int64),
+        month = c.date.str.slice(4, 2).cast(pl.Int64),
+        day = c.date.str.slice(6, 2).cast(pl.Int64)
+    )
+    .select(c.page_id, c.doc_id, c.year, c.month, c.day, c.views)
+)
+uk_views
+```
+
+Notice what these two tables do not contain: a `Date` column, or a `Datetime` column. The page views carry `year`, `month`, and `day` as three separate integers, and the revisions carry a timestamp string in the `YYYY-MM-DD HH:MM:SS` form that @sec-collect recommends for recording times by hand. Our main corpus, parsed as it was built, follows the other convention.
+
+The inconsistency is on purpose. Recording the components and constructing a date from them are two different jobs, and @sec-temporal is about the second one. Leaving these columns in the form the API and a careful data-recorder would give us means the next chapter has something real to convert.
+
+## Raw and Processed Layers
+
+We now have nine tables in memory across two corpora, and it is time to make the pipeline's structure explicit on disk. The design principle is a separation between two layers. The *raw layer* is the requests cache: the exact, unmodified responses the servers sent, stored as they arrived. The *processed layer* is the set of tidy tables we built from them, saved in Parquet format. Everything in the processed layer can be regenerated from the raw layer by re-running this chapter's code, without any network access, which means normalization decisions (which fields to keep, how to parse timestamps, how to handle duplicates) can be revisited months later without re-downloading anything.
+
+```{python}
+Path("data/wiki/uk").mkdir(parents=True, exist_ok=True)
+
+authors.write_parquet("data/wiki/authors.parquet")
+texts.write_parquet("data/wiki/texts.parquet")
+links.write_parquet("data/wiki/links.parquet")
+revisions.write_parquet("data/wiki/revisions.parquet")
+views.write_parquet("data/wiki/pageviews.parquet")
+langlinks.write_parquet("data/wiki/langlinks.parquet")
+
+uk_meta.write_parquet("data/wiki/uk/meta.parquet")
+uk_revisions.write_parquet("data/wiki/uk/revisions.parquet")
+uk_views.write_parquet("data/wiki/uk/pageviews.parquet")
+```
+
+The remaining chapters read these files directly and never call the APIs again. A dataset that other people (including your future self) will use also needs documentation, and the minimum viable form is a manifest file recording what was collected, from where, when, and under what definition of the population. Writing it programmatically keeps the counts honest.
+
+```{python}
+from datetime import date
+
+manifest = f"""# Wikipedia author corpus
+
+Retrieved: {date.today().isoformat()}
+Sources: MediaWiki Action API (en.wikipedia.org) and
+  Wikimedia REST API v1 (wikimedia.org/api/rest_v1)
+Population: direct article members of Category:Victorian novelists
+  and Category:19th-century Irish novelists (no subcategories)
+Pages: {len(authors)}
+Revisions: {len(revisions)}
+Pageview window: 2025-01-01 to 2025-12-31 (all-access, user agent class)
+Tables: authors, texts, links, revisions, pageviews, langlinks
+Raw responses: data/wiki/requests_cache.sqlite
+"""
+
+with open("data/wiki/MANIFEST.md", "w") as f:
+    f.write(manifest)
+```
+
+None of this is elaborate, and that is the point. A directory of Parquet files, a cache, and a manifest turn "some data I downloaded" into a dataset that can be checked, cited, and rebuilt.
+
+## Reproducible Snapshots
+
+Wikipedia changes every minute, so the corpus we just built is a *snapshot*: what the encyclopedia looked like at the moment of retrieval. Someone running this chapter's code next year will get different category memberships, longer articles, and more revisions, and nothing in the code will warn them that the results have shifted. Reproducibility here does not mean freezing Wikipedia; it means being precise about what was captured and making the captured version recoverable. Our pipeline does this at three levels.
+
+The manifest records the retrieval date and the population definition, so anyone can state exactly what the snapshot covers. The requests cache preserves the responses themselves, so the processed tables can be rebuilt byte-for-byte from the raw layer. And the revision IDs in the `revisions` table pin each article to immutable versions: passing an ID to the Action API's `revids` parameter returns that exact text forever, even after the live article has moved on. Archiving the `data/wiki/` directory alongside the analysis code is therefore a complete, self-contained record of the study's inputs.
+
+Two further practices round out the picture. First, when an API offers versioned output, ask for it explicitly: we already rely on the `rest_v1` prefix, and the Action API has a similar mechanism described in the callout below. Second, for projects that need all of Wikipedia rather than a sample, the Wikimedia Foundation publishes complete database dumps at [https://dumps.wikimedia.org/](https://dumps.wikimedia.org/), which are themselves dated snapshots and remove the API from the loop entirely.
+
+::: {.callout-note collapse="true"}
+## Versioning in the Action API
+
+The Action API does not put a version number in its URL, but its JSON output is versioned through the `formatversion` parameter. The default, version 1, is the format we parsed throughout this chapter, with pages keyed by their ID as strings. Version 2, requested by adding `formatversion=2` to the parameters, returns pages as a plain list and cleans up several field names (the `*` key in language links becomes `title`, for example). New code should generally opt into version 2; this chapter used the default so that our parsing matches the majority of existing documentation and examples. Either way, stating the format version in your code is one more thing pinned down.
+:::
+
+## Conclusions
+
+This chapter treated data acquisition as engineering rather than as a download step. The HTTP mechanics came first: endpoints, parameters, headers, status codes, pagination, rate limits, and the flattening of nested JSON into tables. We then put them to work building a corpus of nineteenth-century British and Irish novelists, with deliberate decisions along the way about how the population was sampled, how redirects and missing pages were handled, why every table carries both a stable key and a readable one, and how the raw and processed layers of the pipeline stay separate. A second, smaller corpus followed from a curated list, sampled a different way for different questions.
+
+The pattern generalizes well beyond Wikipedia. Whatever the API, the same questions apply: what defines the population, which identifier is stable, where do the raw responses live, and what someone would need to rebuild your tables. The corpus now waits on disk, and the next chapters pick it up: the revision histories and page views feed the temporal analysis, the article texts feed the textual analysis, and the link table feeds the network analysis.
+
+## References {-}

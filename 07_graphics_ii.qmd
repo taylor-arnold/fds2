@@ -1,0 +1,320 @@
+# Visualizing Data II {#sec-graphics-ii}
+
+```{python}
+#| include: false
+import warnings
+warnings.filterwarnings('ignore')
+```
+
+## Setup
+
+Load all of the modules and datasets needed for the chapter.
+
+```{python}
+#| output: false
+import polars as pl
+from plotnine import ggplot, aes
+from polars import col as c
+
+import funs
+
+country = pl.read_csv("data/countries.csv")
+cellphone = pl.read_csv("data/countries_cellphone.csv")
+```
+
+## Introduction
+
+In Chapter 4 we built visualizations one row at a time. Each point, each text label, and each line segment came directly from a single record in the data. In Chapter 5 we learned to do something quite different: group the rows of a table and compute a summary for each group with `group_by` and `agg`. This chapter joins those two ideas together.
+
+That join is the whole point of the geometries we start with here. A bar chart of counts, a boxplot for each region, a histogram: none of these draw one shape per row. Each one first runs a grouped computation over the data and then draws the result. Once you see that a statistical geometry is a `group_by` and `agg` in disguise, the rest of this chapter is mostly about control and polish: choosing the scales that map data to color and position, splitting a plot into small panels, and labeling everything so the result is ready to show to someone else.
+
+## Statistical Geometries
+
+Every geometry we have used so far draws one object per row. A point geometry places one point per country; a text geometry writes one label per country; a line geometry connects one row to the next. The geometries in the next few sections work differently. Before drawing anything, they run a computation over groups of rows, and the objects in the finished plot correspond to that computation rather than to individual records.
+
+The clearest way to see this is to do the computation ourselves first. Suppose we want to know how many countries fall into each subregion. In Chapter 5 we would answer that by grouping and counting.
+
+```{python}
+(
+    country
+    .group_by(c.subregion)
+    .agg(pl.len().alias("n"))
+    .sort(c.n)
+)
+```
+
+The result is a small table: one row per subregion, with a count next to each. Now look at what happens when we hand the raw `country` table to `geom_bar` and map a single aesthetic to `subregion`. We change the default colors so the bars are easier to read and flip the coordinates so the labels do not overlap.
+
+```{python}
+(
+    country
+    .pipe(ggplot, aes(c.subregion))
+    .geom_bar(fill="white", color="black")
+    .coord_flip()
+)
+```
+
+The height of each bar is exactly the count we computed by hand a moment ago. `geom_bar` took a categorical aesthetic, grouped the rows by its value, counted the rows in each group, and drew each count as a bar. It did the `group_by` and `agg` for us and then rendered the answer. That is what "statistics-based geometry" means for the rest of this chapter.
+
+The bars themselves come out in a jumbled order, because the subregions appear on the axis in the order the rows happen to sit in the `country` table. That is a real problem for a plot with this many categories, and the next section is about fixing it.
+
+Letting `geom_bar` count for us is convenient, but in practice the number you want to plot is often already sitting in a frame. Maybe you computed it with `group_by` and `agg`, or it arrived from a database or a colleague already summarized. For that case there is `geom_col`, which does no counting of its own. You give it an `x` and a `y`, and it draws each `y` value as the height of a bar.
+
+We can reproduce the plot above by aggregating first and piping the result straight into `ggplot`. The chain reads as one continuous thought: group the rows, summarize each group, sort them, then plot.
+
+```{python}
+(
+    country
+    .group_by(c.subregion)
+    .agg(pl.len().alias("n"))
+    .sort(c.n)
+    .pipe(ggplot, aes(c.subregion, c.n))
+    .geom_col(fill="white", color="black")
+    .coord_flip()
+)
+```
+
+The bars are the same as in the plot above, but they arrive in a readable order, and the labor is split differently. Here we counted the countries ourselves and `geom_col` only drew the numbers. Notice that nothing in the plotting code asked for the ordering; it came from the `.sort()` we ran on the table before plotting it. The next section takes that idea apart. This pattern, aggregate and then pipe into a column geometry, is the one you will use most often once your data grows past toy examples, because real summaries usually involve more than a plain count: an average price per category, a total revenue per month, a median score per group. Compute the summary you want with the tools from Chapter 5, then plot it with `geom_col`.
+
+The two geometries look nearly identical on the page and are a reliable source of confusion, so it is worth stating the difference plainly: it is a question of who does the counting. `geom_bar` takes a single categorical aesthetic and counts the rows in each category for you, so the height of each bar is a tally it computes internally. `geom_col` takes both an `x` and a `y` and draws each `y` value as given, so you supply the height. Reach for `geom_bar` when you want the raw count of how many rows fall into each category and you would rather not compute it yourself, and reach for `geom_col` when the number you want to show is already in the frame. If you ever find yourself computing a count with `group_by` only to feed it to `geom_bar`, you wanted `geom_col`.
+
+## Ordering Categories
+
+One of the two count plots above came out in a readable order and the other did not, and the difference between them is worth stating as a rule: **a categorical axis follows the order the values first appear in the data**. There is no separate ordering step inside the plot and no default alphabetical sort to work around. Whatever order the rows are in when they reach `ggplot` is the order you get, so ordering a plot means sorting the data before it is plotted.
+
+The `geom_col` version did this without any fuss, because the number the bars were ordered by, the count `n`, was already a column of the table. A plain `.sort(c.n)` put the rows in order and the bars followed. That is the same one-line move the population bar chart in @sec-graphics made when it sorted the Northern African countries by `pop`, and it covers most cases you will meet: if the value you want to order by is in the frame, sort by it.
+
+The `geom_bar` version is the harder case, and it is harder for an interesting reason. There, the count exists only inside the plot; the table we handed over has one row per country and no column of counts to sort on. What we need is a count per subregion written onto every row of that subregion, which is exactly what the window functions of @sec-window do. Sorting by `pl.len().over(c.subregion)` orders the countries by the size of the subregion each one belongs to, and the bars pick that order up.
+
+```{python}
+(
+    country
+    .sort(pl.len().over(c.subregion))
+    .pipe(ggplot, aes(c.subregion))
+    .geom_bar(fill="white", color="black")
+    .coord_flip()
+)
+```
+
+Sorting by a window aggregate is the general recipe for ordering categories by any summary of themselves, and the summary does not have to be a count. We will use it again for the boxplot in the next section, where the regions are ordered by their median HDI.
+
+Related to ordering is the question of what counts as a category at all. Plotnine reads a column of numbers as a continuous quantity, spreading it along an axis with a smooth range of grid lines. Years are the case where that goes wrong most often: a column holding 2003, 2008, 2013 is stored as integers, so plotnine treats the gaps between them as distances rather than treating each year as its own group. Casting the column to a string with `.cast(pl.String)` says otherwise. Once the values are text, each distinct one becomes a category and gets its own box, bar, or color.
+
+```{python}
+(
+    cellphone
+    .filter(c.year.is_in([2003, 2008, 2013, 2018]))
+    .sort(c.year)
+    .with_columns(c.year.cast(pl.String))
+    .pipe(ggplot, aes(c.year, c.cell))
+    .geom_boxplot()
+)
+```
+
+The sort comes before the cast here for the reason we just gave. Once `year` is a string, its order on the axis is the order it appears in the table, and sorting the rows by year first is what makes the boxes run from the earliest year to the latest rather than in whatever order the countries happened to be stored in.
+
+## Distributions
+
+Counting works for categories. For a numeric column we first have to decide what a "group" even is, because no two countries share the exact same HDI. A histogram answers this by cutting the number line into equal intervals, called bins, and counting how many values fall into each one. It is still a grouped count; the groups are just intervals rather than named categories. We create one with `geom_histogram`. The output is easiest to read if we set `binwidth` and `boundary`, which control the width of each bin and where the bins start relative to zero.
+
+```{python}
+(
+    country
+    .pipe(ggplot, aes(c.hdi))
+    .geom_histogram(fill="white", color="black", binwidth=0.1, boundary=0)
+)
+```
+
+::: {.callout-note collapse="true"}
+## Interpreting a histogram
+
+If interpreting a histogram feels difficult, walk through one bar. Take the example above and look at the bar spanning 0.4 to 0.5 on the x-axis. Its height on the y-axis is about 11, which means 11 countries have an HDI between 0.4 and 0.5. In the same way, roughly 26 countries fall between 0.8 and 0.9, and about 33 between 0.9 and 1.0.
+:::
+
+We can instead set `bins` to a whole number to fix the total count of bins. That is quicker when we do not yet know the scale of the data, though the resulting counts are harder to read off directly.
+
+A density plot is an alternative that models the distribution rather than tallying it into buckets. The `adjust` option, which defaults to 1, controls how smooth the curve is. Larger values give a smoother curve and smaller values follow the data more closely, so it is worth trying a few to find the one that shows the pattern you care about.
+
+```{python}
+(
+    country
+    .pipe(ggplot, aes(c.hdi))
+    .geom_density(fill="white", color="black", adjust=0.8)
+)
+```
+
+::: {.callout-note collapse="true"}
+## Interpreting a density plot
+
+The total area under a density curve is 1. The area under the curve between two points gives the proportion of observations that fall between those values. With a larger dataset the density settles into the same shape as the histogram, differing only in scale and in being somewhat smoother.
+:::
+
+Histograms and density plots describe one numeric column on its own. A boxplot combines that idea with the counting of categories we started from: it summarizes a numeric variable separately for each level of a categorical one. To see the grouped computation underneath it, we can compute the pieces ourselves. A box is built from three numbers per group, the 25th, 50th, and 75th percentiles of the values in that group.
+
+```{python}
+(
+    country
+    .group_by(c.region)
+    .agg(
+        q25=c.hdi.quantile(0.25),
+        q50=c.hdi.quantile(0.50),
+        q75=c.hdi.quantile(0.75),
+    )
+    .sort(c.q50)
+)
+```
+
+Each row of this table is a box waiting to be drawn: the box spans the 25th to the 75th percentile, and a line marks the median at the 50th. `geom_boxplot` computes these same quantiles per group and adds two more elements, a pair of lines called whiskers that reach out to show where most of the remaining values lie, and individual points for outliers beyond them. As with the bar charts, sorting the rows first and flipping the coordinates make the result easier to read.
+
+```{python}
+(
+    country
+    .sort(c.hdi.median().over(c.region))
+    .pipe(ggplot, aes(c.region, c.hdi))
+    .geom_boxplot()
+    .coord_flip()
+)
+```
+
+The sort is the recipe from the previous section. Note that it has to be `c.hdi.median().over(c.region)` and not a plain `.sort(c.hdi)`: sorting the countries by their own HDI would order the regions by whichever country in each one happens to come first, that is, by each region's *lowest* HDI, rather than by the middle of its distribution. Ordering categories by a group summary means sorting by that summary, computed with `.over()`.
+
+## Fitting a Model
+
+The last statistical geometry summarizes differently. Rather than grouping rows, `geom_smooth` fits a model to the relationship between two numeric variables and draws the fitted curve. With the option `method="lm"` it fits a straight line of best fit. By default it also draws a confidence band around that line, which we turn off below by setting `se=False`.
+
+```{python}
+(
+    country
+    .filter(c.region == "Europe")
+    .pipe(ggplot, aes(c.hdi, c.happy))
+    .geom_point()
+    .geom_smooth(method="lm", se=False)
+)
+```
+
+Calling `geom_smooth()` without a method produces a more flexible, non-linear curve, which is useful when the relationship is clearly not a straight line.
+
+All of the statistical geometries we have seen, from `geom_bar` through `geom_smooth`, accept a `group` or `color` aesthetic that carries out the summary separately for each value of that aesthetic. This gets crowded quickly and is only advisable with a small number of groups, at most four or five.
+
+## Scales
+
+Python makes many choices for us automatically when it builds a plot. When we mapped the color of the points to a variable, Python decided which specific colors to use. It also chose how large to make the axes, where to place tick marks, and where to draw grid lines. Leaving these details to Python is convenient because it lets us stay focused on the data. Sometimes, though, when we are preparing a plot for others or the defaults are hard to read, we want to set them ourselves. That is what scales are for.
+
+Each aesthetic in the grammar of graphics has a scale attached to it. A scale describes how the plot turns an aesthetic into something you can actually see. The scale for the `x` aesthetic sets the smallest and largest values on the horizontal axis and decides how to label it. A color scale sets which color goes with each category and how to lay out the legend. To change a default scale, we add a scale function to the plot. Its position relative to the geometries does not matter, and by convention we group scales after the geometries.
+
+When we map color to a categorical column, the colors we get by default run from dark purple through green to bright yellow. This palette is called *viridis*, and it is a good default: it is friendly to color-blind readers, it prints well in black and white, and it holds up on a bad projector. The scale that produces it has a name, `scale_color_cmap_d()`, and adding that line to the plot changes nothing at all, because it is what we were already getting. It is worth knowing the name anyway, because a scale we can name is a scale we can change.
+
+To change the palette, pass a different color map to that same scale, as in `scale_color_cmap_d(cmap_name="plasma")`. To change it more thoroughly, use a different scale. The function `scale_color_brewer()` offers a set of hand-designed palettes, and its qualitative ones are built for exactly this case, where the categories have no order and we want colors that are easy to tell apart rather than colors that run along a ramp.
+
+```{python}
+(
+    country
+    .filter(c.region == "Europe")
+    .pipe(ggplot, aes(c.hdi, c.happy))
+    .geom_point(aes(color=c.subregion))
+    .scale_color_brewer(type="qual", palette=2)
+)
+```
+
+The four subregions are now teal, orange, purple, and pink, which are easier to distinguish than four steps along a single ramp. A color scale is a categorical axis like any other, so the same rule applies: the subregions take their colors, and their places in the legend, in the order they appear in the data, and sorting the table before plotting is what changes that order. The `_d` at the end of `scale_color_cmap_d` marks it as discrete, meaning it maps colors to a categorical variable. A matching function, `scale_color_cmap()`, produces the viridis palette when the color varies with a numeric variable instead.
+
+Many other scales exist. For example, `scale_size_area` makes point sizes proportional to a column, and `scale_x_log10()` and `scale_y_log10()` put an axis on a logarithmic scale, which helps with heavily skewed data. We will use these as they come up.
+
+The default scale for the x-axis is `scale_x_continuous`, with `scale_y_continuous` playing the same role for the y-axis. Adding either one on its own changes nothing, but both take optional arguments that adjust how the plot is drawn. Setting `breaks` controls where the labels and grid lines fall along the axis; we usually set it with a helper such as `breaks_width`, which places a break at a fixed spacing. Setting `limits` to a pair of numbers fixes the start and end of the plotted range, and we can pass `None` for one end to leave that side to the default. The code below draws the same data as our original scatter plot, but with grid lines and labels every 0.05 of HDI along the horizontal axis and a vertical axis pinned to start at zero.
+
+```{python}
+#| eval: False
+(
+    country
+    .filter(c.region == "Europe")
+    .pipe(ggplot, aes(c.hdi, c.happy))
+    .geom_point()
+    .scale_x_continuous(breaks=breaks_width(0.05))
+    .scale_y_continuous(limits=(0, None))
+)
+```
+
+Finally, two scale types are useful for working with colors directly. Sometimes a column already holds the color for each observation, in which case `scale_color_identity` tells the plot to use those colors as given. Another option is `scale_color_manual`, which lets you assign an exact color to each category. Below is the syntax for setting a color per subregion in the `countries` data.
+
+```{python}
+#| eval: false
+(
+    country
+    .filter(c.region == "Europe")
+    .pipe(ggplot, aes(c.hdi, c.happy))
+    .geom_point(aes(color=c.subregion))
+    .scale_color_manual(values={
+        "Eastern Europe": "lightblue",
+        "Northern Europe": "navy",
+        "Southern Europe": "peachpuff",
+        "Western Europe": "wheat"
+    })
+)
+```
+
+Manual colors make sense when the groups have well-known colors of their own. Plotting data about political parties, for instance, reads better in each party's traditional color. The plotnine documentation lists many more scales for customizing a plot.
+
+## Facets
+
+Facets are another way to show differences across the levels of a categorical variable. Instead of packing every group into one plot, they lay out a grid of small panels, splitting the data by one or two variables. We add them with `facet_wrap()` and the name of the grouping variable. It is common, as below, to also map color to the grouping variable and hide the legend, so the color reinforces which panel holds which group.
+
+```{python}
+(
+    country
+    .pipe(ggplot, aes(c.hdi, c.happy))
+    .geom_point(aes(color=c.region), show_legend=False)
+    .facet_wrap("region")
+)
+```
+
+By default every panel shares one x-axis and one y-axis, which is what lets us compare them at a glance: a taller bar in one panel really is taller. The `scales` option changes that. Setting it to `free_x`, `free_y`, or `free` gives each panel its own range, which makes a small panel legible and, in the same stroke, destroys the comparison the facets were for. Reach for it rarely, and say so when you do. A related function, `facet_grid`, takes two variables and arranges the panels across both rows and columns; it accepts `scales` as well, along with a `space` option that lets the panels themselves differ in size.
+
+Facets can make certain relationships far easier to read and give your output a polished, professional look. Use them with some restraint, though. People new to data science tend to overuse them badly. They work best when you have only a few categories and have already used the other tools in this chapter and the last to bring out the patterns in the data.
+
+## Labels and Themes
+
+We have built and adjusted a good number of plots by now without ever touching the axis labels. During exploratory work that is usually the right call. The default labels take no effort, which makes it painless to swap variables and settings without stopping to relabel anything. They also use the exact column names from your data, which are the names you need when you refer to those variables in later plots, models, and data manipulation. Once you are presenting results to someone else, though, the axes and legends deserve fuller descriptions, and the grammar of graphics lets us add them directly.
+
+To change the labels, we add a `labs` layer. Inside it, we assign text to the aesthetics we want to describe; anything we leave out keeps its default. The x and y labels appear beside the plot, while labels for aesthetics like size and color appear in the legend. We can also give `labs` a `title`, a `subtitle`, and a `caption` to describe the plot as a whole.
+
+```{python}
+(
+    country
+    .filter(c.region == "Europe")
+    .pipe(ggplot, aes(c.hdi, c.happy))
+    .geom_point(aes(color=c.subregion))
+    .labs(
+        x="Human Development Index (HDI)",
+        y="Happiness Score",
+        color="Subregion",
+        title="Relationship between HDI and Happiness",
+        subtitle="Europe",
+        caption="Data from the Gapminder"
+    )
+)
+```
+
+The other way to prepare a plot for distribution is to change its theme. Themes govern the look of the non-data elements: axis labels, ticks, grid lines, and the background. We have been using `theme_minimal()` throughout, which is a good fit for exploration because it strips away clutter while keeping the grid lines that help us read values. For external publication we often prefer something even sparer, in the spirit of Edward Tufte's work on data visualization, which aims to spend as little ink as possible on anything other than the data itself [@tufte1987]. We select a theme by adding its function to the plot, or by setting it once with `theme_set` so that every later plot picks it up.
+
+```{python}
+#| eval: false
+theme_set(theme_minimal())
+```
+
+A minimal theme can feel too bare when you are first poking at a dataset, but it is an excellent choice for the final version. There are many resources online for tuning a theme further to suit your needs.
+
+## Best Practices
+
+Across this chapter and the last we have covered how to make a wide range of graphics. It helps to close with a few guiding principles about which graphic to reach for. These are defaults, not laws, and specific tasks will sometimes call for breaking them.
+
+- Use bar plots, histograms, and density plots to understand the distribution of a single variable.
+- Use scatter plots and boxplots to understand the relationship between two variables.
+- Use scatter plots with text labels to understand individual data points, either on their own or against a larger set.
+- Only use a variable color scale after you have used the x and y aesthetics as fully as you can.
+- Treat size and color for continuous variables as an extra layer of information, never the primary one. Do not use size for categorical variables.
+- Use color and shape only with a small set of categories. The cutoff depends on the dataset and the task, but eight is a reasonable rule of thumb.
+- Reserve line plots for a single quantity measured over time, space, or another continuous variable.
+
+The best way to learn which plot fits which task, and when to break these rules, is to see many examples. We will build up that library throughout the rest of the book.
+
+## References {-}

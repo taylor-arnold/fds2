@@ -1,0 +1,372 @@
+# Spatial Data {#sec-spatial}
+
+```{python}
+#| include: false
+import warnings
+warnings.filterwarnings('ignore')
+```
+
+## Setup
+
+Load the modules and datasets needed for the chapter. Importing `funs` registers a namespace called `geo` on every Polars DataFrame, which is how we will do all of the spatial work below.
+
+```{python}
+#| output: false
+import polars as pl
+from plotnine import ggplot, aes
+from polars import col as c
+
+import funs
+
+metro = pl.read_csv("data/acs_cbsa.csv")
+```
+
+## Introduction
+
+Every dataset we have worked with so far in this book has been detached from physical space. GDP figures and blood pressure readings are just numbers; it makes no difference to the analysis where they were recorded. A lot of data is not like that. Crime reports happen at street addresses and asthma rates vary by neighborhood. A hospital sits at a fixed point that is some measurable distance from every school in a city. Answering questions about this kind of data requires treating location as a geometric object with shape, area, and spatial relationships to other objects, not as two more numeric columns.
+
+Spatial analysis attaches a *geometry* to each observation: a mathematical description of a location or region on the Earth's surface. A geometry can be a single point (the location of a coffee shop) or a polygon with thousands of vertices (the boundary of a congressional district). Once each row has a geometry, we can ask questions that have no equivalent for ordinary tables. Which points fall inside which polygons? Which polygons share a border? Which observation is nearest to each other observation?
+
+Polars has no built-in support for geometry. The standard Python library for spatial work is [GeoPandas](https://geopandas.org/), which is built on pandas rather than Polars. Instead of asking you to convert between the two libraries by hand, the `funs` module registers a namespace called `geo` on every Polars DataFrame. Any GeoPandas method or property can be reached through it: `metro.geo.to_crs(5069)` reprojects the data, `state.geo.area` computes areas, and `metro.geo.sjoin(state)` performs a spatial join. Each call converts the table to GeoPandas, runs the operation, and converts the result back to Polars. Two conventions make the round trip work. Geometries are stored as plain text in a column named `geometry`, using a standard called Well-Known Text (WKT), and the coordinate system is recorded in a helper column named `_crs`. Both columns will show up in the printed output throughout the chapter.
+
+## Spatial Points
+
+The simplest type of spatial data consists of points: individual locations specified by their coordinates. Points can represent cities, sensor stations, retail locations, or anything else that can reasonably be reduced to a single spot on the map. Each point is defined by two numbers, a longitude (the east-west position) and a latitude (the north-south position).
+
+We begin with a dataset describing metropolitan statistical areas (MSAs) in the United States. Each row is a single metro region, with columns for population, economic indicators, and geographic coordinates.
+
+```{python}
+metro
+```
+
+Because longitude and latitude are just numbers, we can make a basic plot without any spatial tools at all. The longitude values go on the x-axis and the latitude values on the y-axis.
+
+```{python}
+(
+    ggplot(metro, aes(c.lon, c.lat))
+    .geom_point()
+)
+```
+
+This scatter plot works, but it has problems. It treats longitude and latitude as if they were ordinary Cartesian coordinates, when they actually describe positions on a curved surface. The distortion gets worse at higher latitudes, where equal increments in longitude correspond to shorter physical distances. The plot also gives the viewer nothing to orient by: no coastlines and no state boundaries.
+
+To go further, we need to turn the latitude and longitude columns into proper geometries. In the WKT standard, a point is written as text in the form `POINT (lon lat)`, so nothing stops us from building the `geometry` column ourselves with `pl.format`.
+
+```{python}
+metro.with_columns(
+    geometry = pl.format("POINT ({} {})", c.lon, c.lat)
+)
+```
+
+The strings are ordinary Polars data, but every method on the `geo` namespace knows how to interpret them as geometric objects. Building coordinate strings by hand gets tedious for anything more complicated than a point, though, and the version above never declares which coordinate system the numbers belong to. The namespace provides `points_from_xy` to handle both at once: it constructs the points from two coordinate columns and records the coordinate system, defaulting to standard latitude and longitude (more on what the code 4326 means in the next section).
+
+```{python}
+metro = metro.geo.points_from_xy("lon", "lat")
+metro
+```
+
+The result is the same `geometry` column of readable WKT strings, such as `POINT (-86.8 32.4)`, plus the `_crs` helper column recording the coordinate system.
+
+## Coordinate Systems (CRS)
+
+One of the most important concepts in spatial analysis is the *coordinate reference system* (CRS), sometimes called a *spatial reference system*. A CRS defines how coordinates map to actual locations on Earth. This might seem straightforward, but Earth's surface is curved while maps are flat. Any attempt to represent the globe on a two-dimensional surface involves trade-offs: you can preserve shapes or areas or distances, but never all three at once.
+
+The most common CRS for storing geographic data is WGS 84 (World Geodetic System 1984), which uses latitude and longitude measured in degrees. It is the system used by GPS devices and most web mapping services, and it is what `points_from_xy` recorded for us above; `crs=4326` is its default. For visualization and for many calculations, however, we usually want to *project* the data into a different CRS that is optimized for a particular region or purpose.
+
+Each CRS is identified by a numeric code in the EPSG (European Petroleum Survey Group) registry. For example:
+
+- **EPSG:4326** is WGS 84, the standard latitude/longitude system
+- **EPSG:5069** is NAD83 Conus Albers, an equal-area projection suitable for the contiguous United States
+- **EPSG:3857** is Web Mercator, used by Google Maps and other web mapping services
+- **EPSG:32618** is UTM Zone 18N, appropriate for the US East Coast
+- **EPSG:2154** is the official projection for Metropolitan France (including Corsica), mandated by French law
+- **EPSG:7791** is Italy's modern national reference system and the most accurate for Italian data
+
+To find the appropriate EPSG code for a specific region or purpose, you can search the [EPSG.io](https://epsg.io/) website or consult the [Spatial Reference](https://spatialreference.org/) database. Both let you look up projections by name, region, or properties (such as whether they preserve area or shape).
+
+The `to_crs` method transforms the coordinates from the current CRS into a new one. Because the `geometry` column is understood by plotnine as well, we can pass the reprojected table straight into `ggplot` and draw it with `geom_map`. The `coord_fixed` call keeps one map unit on the x-axis the same length as one on the y-axis, which matters now that the coordinates are real distances.
+
+```{python}
+(
+    ggplot(metro.geo.to_crs(5069))
+    .geom_map()
+    .coord_fixed()
+)
+```
+
+The shape of the point cloud now looks much more like the familiar outline of the continental United States. Alaska and Hawaii, if present in the data, would appear distorted under this projection because it is optimized for the lower 48 states.
+
+::: {.callout-note collapse="true"}
+## Why projections matter
+
+The choice of projection affects calculations, not just appearances. Consider calculating the distance between two cities. In WGS 84 coordinates, the distance between two points depends on their latitude: one degree of longitude represents about 111 kilometers at the equator but only about 85 kilometers at 40° latitude (roughly the latitude of New York). If you compute distances using raw latitude/longitude values as if they were Cartesian coordinates, your results will be systematically wrong.
+
+Similarly, if you want to calculate the area of a state or country, you need an *equal-area* projection. Using a projection that distorts areas (like Web Mercator) will give incorrect results. This is why Greenland appears larger than Africa on many web maps, even though Africa is actually 14 times larger.
+:::
+
+## Interactive Visualization
+
+Static maps work well in publications and reports, but interactive maps allow for exploration. GeoPandas provides an `explore` method that builds an interactive map from the [Folium](https://python-visualization.github.io/folium/) library, which in turn uses [Leaflet.js](https://leafletjs.com/). Because `explore` is an ordinary GeoPandas method, the `geo` namespace picks it up like any other.
+
+```{python}
+metro.geo.explore(tooltip=["name"])
+```
+
+The `tooltip` parameter lists the columns to display when the user hovers over a point. Note that it takes plain column names as strings; the `c.` shorthand works inside Polars expressions and `aes()`, but here the names are handed directly to GeoPandas. Try zooming in on different regions and clicking on individual metro areas to see their names. The base map provides the geographic context that was missing from our static scatter plot.
+
+## Spatial Polygons
+
+While points are useful for representing discrete locations, many spatial phenomena are better described by *polygons*: closed shapes that define the boundaries of regions. States, countries, zip codes, census tracts, and watersheds are all naturally represented as polygons. Each polygon is a series of coordinate pairs that trace its boundary.
+
+Spatial data is commonly stored in specialized file formats that can encode complex geometries along with their attributes. The [GeoJSON](https://geojson.org/) format is particularly popular for web applications because it is based on JSON (JavaScript Object Notation) and can be read by virtually any programming language. GeoJSON files have a standardized structure in which each row of the equivalent table is called a *feature*, and all features are collected into a *FeatureCollection*. The official specification is maintained by the Internet Engineering Task Force as [RFC 7946](https://datatracker.ietf.org/doc/html/rfc7946).
+
+Other common formats include Shapefiles (a legacy format still widely used), GeoPackage (a modern SQLite-based format), and database formats like PostGIS. The `funs.read_file` function can read most of them, returning a Polars DataFrame with the geometries already converted to WKT.
+
+```{python}
+state = funs.read_file("data/acs_state.geojson")
+state
+```
+
+The `geometry` column now contains polygons rather than points. Each polygon is defined by many coordinate pairs, sometimes thousands for states with complex coastlines, all written out in the WKT strings.
+
+Unlike point data, polygon data cannot be meaningfully drawn with a scatter plot; we need `geom_map`, which knows how to trace shapes from their vertex coordinates. The effect of projection is also much more noticeable with polygons than with points.
+
+```{python}
+(
+    ggplot(state.geo.to_crs(5069))
+    .geom_map(fill="white", color="black")
+    .coord_fixed()
+)
+```
+
+Compare this to what the same data would look like in unprojected coordinates. The familiar shapes of states would be stretched, particularly in the northern regions where lines of longitude converge. The Albers projection compresses and expands the coordinates to give a more faithful picture of the true shapes and relative sizes of states.
+
+Interactive maps work with polygons just as they do with points. Users can hover over states to see their names and other attributes.
+
+```{python}
+state.geo.explore(tooltip=["name"])
+```
+
+::: {.callout-note collapse="true"}
+## Other geometry types
+
+Points and polygons are the most common geometry types, but GeoJSON and other spatial formats support several others:
+
+- **LineString**: A sequence of connected points forming a path, useful for roads, rivers, or flight routes
+- **MultiPoint**: A collection of points treated as a single feature
+- **MultiLineString**: Multiple disconnected line segments treated as a single feature
+- **MultiPolygon**: Multiple disconnected polygons treated as a single feature (useful for states with islands, like Hawaii)
+- **GeometryCollection**: A heterogeneous collection containing any mix of the above types
+
+Most of the techniques in this chapter apply to all geometry types, though some operations (like calculating area) only make sense for polygons.
+:::
+
+## Polygon Metrics
+
+Once we have polygons, we can compute geometric properties from them. Two useful ones are the *centroid* (the geometric center of a polygon) and the *area* (the amount of surface the boundary encloses). Both are only meaningful in a projected CRS; computed on raw latitude and longitude they come out as nonsense numbers in squared degrees. So we first project the states and keep the projected version from here on.
+
+```{python}
+state = state.geo.to_crs(5069)
+```
+
+In GeoPandas, `centroid` is a property rather than a method, so it is accessed without parentheses. Because the result is a new set of geometries, the `geo` namespace writes them into the `geometry` column of the returned table.
+
+```{python}
+state.geo.centroid
+```
+
+Each state's polygon has been replaced by a single point at its center. Since we did not assign the result back, `state` itself still holds the original polygons. For roughly rectangular states like Colorado, the centroid falls near the geographic center. For states with irregular shapes or several disconnected parts, the centroid can land outside the state's actual boundary.
+
+The `area` property returns ordinary numbers rather than geometries, so the namespace appends them as a new column named after the property.
+
+```{python}
+state = state.geo.area
+state.sort(c.area).select(c.name, c.area)
+```
+
+The results are in square meters, the default unit for most projected coordinate systems; dividing by 1,000,000 would give square kilometers. As expected, Alaska is the largest state by a wide margin, followed by Texas and California.
+
+## Choropleth Maps
+
+A *choropleth map* colors geographic regions according to the value of a variable. This kind of plot appears everywhere quantities vary across space: election results by county, income levels by census tract, or disease rates by state. With the area column now part of the table, building one takes a single aesthetic mapping.
+
+```{python}
+(
+    ggplot(state, aes(fill=c.area))
+    .geom_map(color="white")
+    .coord_fixed()
+)
+```
+
+The same idea works interactively. The `column` parameter tells `explore` which variable to use for coloring, and a legend shows how colors correspond to values.
+
+```{python}
+state.geo.explore(column="area", tooltip=["name"])
+```
+
+Choropleth maps are useful but easy to misread. Larger regions occupy more visual space, so they dominate the viewer's attention even when they contain fewer people or matter less for the question at hand. For this reason, choropleths work best for variables that are naturally area-based (like population density) rather than absolute counts (like total population).
+
+## Spatial Joins
+
+In @sec-restructure, we learned how to join two tables based on a shared key column. Spatial joins extend this idea by joining tables based on geometric relationships. Instead of matching rows where a key value is equal, we match rows where geometries intersect, touch, contain, or sit within some distance of each other.
+
+The most common spatial join matches points to the polygons that contain them. Given our metro areas (points) and states (polygons), we can find which state contains each metro area. Spatial operations require both tables to be in the same CRS, and `state` is now in EPSG:5069, so we first project the metro points to match.
+
+```{python}
+metro = metro.geo.to_crs(5069)
+metro.geo.sjoin(state)
+```
+
+The result contains the columns from both tables, with each metro area matched to the state it falls inside. Column names that appear in both tables get `_left` and `_right` suffixes, and GeoPandas adds an `index_right` column recording which row of the right table matched. Metro areas that straddle a state boundary are assigned to whichever state contains their center point, since that is the coordinate we used to build the geometry. Notice that the geometry in the output is the point geometry from the first (left) table.
+
+We can also reverse the order of the join to keep the state geometry in the result. With the states first, the output contains polygons, and each state is matched to the metro areas it contains.
+
+```{python}
+state.geo.sjoin(metro)
+```
+
+This produces more rows than we have states because a state can contain many metro areas. The logic is analogous to a one-to-many relational join: the state geometry is duplicated once for each metro area inside it.
+
+Spatial joins can test various *predicates* (spatial relationships) beyond simple containment. The `predicate` parameter chooses which relationship to use. For example, we can find which states share a border by joining the state table to itself with the `touches` predicate.
+
+```{python}
+state.geo.sjoin(state, predicate="touches")
+```
+
+This self-join matches each state to every other state that shares at least one point on its boundary, giving all pairs of neighboring states. Each border appears twice: California touches Oregon, and Oregon touches California. If you only want each pair once, you need to filter or deduplicate the results.
+
+Other useful predicates include:
+
+- **intersects**: Geometries share any space (including boundaries)
+- **contains**: The first geometry completely encloses the second
+- **within**: The first geometry is completely enclosed by the second
+- **crosses**: Geometries share some but not all interior points
+- **overlaps**: Geometries share some space but neither contains the other
+
+## Nearest Neighbor Joins
+
+Sometimes we want to match features not by overlap or containment but by proximity. The `sjoin_nearest` method finds, for each feature in the first table, the closest feature in the second. It answers questions like "what is the nearest hospital to each school?" or "which weather station is closest to each measurement site?"
+
+```{python}
+metro.geo.sjoin_nearest(metro, exclusive=True, distance_col="distance")
+```
+
+Here we join the metro table to itself to find each metro area's nearest neighbor. The `exclusive=True` parameter prevents each metro area from matching itself, which would always be a distance of zero, and `distance_col` adds a column with the distance to the match. Because the data is in the Albers projection, those distances are in meters. This is another place where projecting first pays off: in raw latitude and longitude the distances would come out in degrees.
+
+Nearest neighbor joins are computationally expensive because they potentially compare every feature in the first table to every feature in the second. GeoPandas uses spatial index structures (R-trees) to prune most of these comparisons, but the operation still scales worse than a simple predicate join, so expect it to be slow on large datasets.
+
+## Buffers
+
+A *buffer* expands a geometry outward by a fixed distance, turning each point into a disc and each polygon into a slightly larger polygon. Buffers are how we answer "within X of" questions: the region within 100 kilometers of a metro center is exactly the 100 kilometer buffer around its point. Because `buffer` returns new geometries, the namespace writes them into the `geometry` column, just as `centroid` did. The distance is measured in the units of the current CRS, so with our data in the Albers projection the argument below means 100,000 meters. This is one more reason the earlier projection step matters: buffering unprojected data by 100,000 would ask for discs 100,000 degrees across.
+
+```{python}
+(
+    ggplot(metro.geo.buffer(100_000))
+    .geom_map(alpha=0.3)
+    .coord_fixed()
+)
+```
+
+The translucent fill makes the overlaps visible. The discs pile up into a nearly solid band along the eastern seaboard and thin out to isolated circles across the Mountain West, a picture of urban density that the plain point map only hints at.
+
+Buffers become more interesting in combination with spatial joins. Each buffered metro is now a polygon, so joining it against the states finds every state within 100 kilometers of a metro center rather than only the state that contains it.
+
+```{python}
+metro.geo.buffer(100_000).geo.sjoin(state)
+```
+
+Metro areas near a state line now match two or more states, which is often exactly what an analysis needs. A hospital planning study, for example, cares about everyone within driving distance, not just residents on one side of a border.
+
+## Dissolving Boundaries
+
+The `dissolve` method is the spatial counterpart of the `group_by` and `agg` pattern we have used throughout the book. It collects rows into groups, merges each group's geometries into one, and erases the internal boundaries between them. Merging states into larger regions is the classic example.
+
+Our state table has no region column, so we will build one, which gives us an excuse to compose several namespace operations. The Albers projection we have been using is centered on the 96th meridian, meaning a centroid with a negative x coordinate sits west of 96°W and a positive one sits east of it. The `x` property of a point geometry is available through the namespace like everything else: `state.geo.centroid` swaps the polygons for their center points, `.geo.x` appends the x coordinate as a column, and `get_column` pulls out just that column so we can attach it to the original polygon table.
+
+```{python}
+state = state.with_columns(
+    state.geo.centroid.geo.x.get_column("x")
+).with_columns(
+    side = pl.when(c.x < 0).then(pl.lit("West")).otherwise(pl.lit("East"))
+)
+state.select(c.name, c.x, c.side)
+```
+
+With the grouping column in place, `dissolve` works like a spatial `group_by`. The `by` parameter names the group key and `aggfunc` says how to combine the ordinary columns; here we sum the state areas within each group. The group key comes back as a regular column because the namespace moves the pandas index into the table during the return trip.
+
+```{python}
+region = state.geo.dissolve(by="side", aggfunc={"area": "sum"})
+region
+```
+
+Two rows remain, one per side, and each holds a single merged geometry with the state borders gone. The western geometry is a MultiPolygon since Alaska and Hawaii do not touch the mainland.
+
+```{python}
+(
+    ggplot(region, aes(fill=c.side))
+    .geom_map(color="white")
+    .coord_fixed()
+)
+```
+
+## Exploding Geometries
+
+The `explode` method goes in the opposite direction from `dissolve`: it splits every multi-part geometry into one row per part. States made of disconnected pieces, like Hawaii, become several rows, while single-polygon states pass through unchanged. The ordinary columns, including the state-level `area` we computed earlier, are simply copied onto every part.
+
+```{python}
+state.geo.explode().filter(c.name == "Hawaii")
+```
+
+Each Hawaiian island is now its own row. That copied state-level area is no longer very meaningful, but because each row now has its own geometry, per-part metrics are one chained call away. Recomputing `area` after the explode replaces the copied column with the area of each individual island.
+
+```{python}
+(
+    state
+    .geo.explode()
+    .filter(c.name == "Hawaii")
+    .geo.area
+    .select(c.name, c.area)
+    .sort(c.area, descending=True)
+)
+```
+
+The largest value belongs to the Big Island, which is bigger than all of the other islands combined.
+
+## Simplifying Boundaries
+
+Coastlines and rivers make state boundaries expensive to store and draw. The `count_coordinates` method reports how many vertices each geometry uses, and the totals are surprisingly large.
+
+```{python}
+(
+    state
+    .geo.count_coordinates()
+    .select(c.name, c.count_coordinates)
+    .sort(c.count_coordinates, descending=True)
+)
+```
+
+Alaska, with its fjords and island chains, sits far ahead of everything else. Most of that detail is invisible in a plot of the whole country, so we can trade it away for speed with `simplify`. The method removes vertices while keeping the boundary within a *tolerance* of its original position, measured in CRS units. The 20 kilometer tolerance below is deliberately coarse so that the effect shows up on the page; the states turn angular but stay recognizable.
+
+```{python}
+(
+    ggplot(state.geo.simplify(20_000))
+    .geom_map(fill="white", color="black")
+    .coord_fixed()
+)
+```
+
+For real work a much smaller tolerance, on the order of the width of a plotted line, cuts vertex counts dramatically without any visible change. One caveat: each geometry is simplified independently, so neighboring states can develop small gaps or overlaps along their shared borders. That rarely matters for plotting, but it can affect spatial joins that use predicates like `touches`, so simplify for display rather than for analysis.
+
+## Best Practices
+
+Working with spatial data introduces several sources of error that do not arise with ordinary tables.
+
+**CRS mismatches**: If two datasets use different coordinate reference systems, spatial operations will give incorrect results. Points can appear in the wrong location, or spatial joins can fail to find matches that are really there. Verify that your datasets are in compatible CRSs before performing spatial operations, and transform them to a common CRS with `to_crs` if they are not.
+
+**Unprojected coordinates for calculations**: Never calculate distances or areas using raw latitude/longitude coordinates as if they were Cartesian. The errors can be substantial, especially for features that span large areas or sit far from the equator. Project the data to an appropriate CRS first.
+
+**Polygon validity**: Complex polygons can become geometrically invalid through self-intersections or other topological errors. Many spatial functions fail or give wrong answers on invalid geometries. If you hit strange errors, check whether your geometries are valid and repair them if necessary.
+
+**Boundary effects**: Features that span the boundary between regions can cause problems for spatial joins. A metro area straddling a state line gets assigned to one state or the other depending on where its center point falls. Be aware of these edge cases and handle them deliberately in your analysis.
+
+## References {-}

@@ -1,0 +1,440 @@
+# Image Data {#sec-image}
+
+```{python}
+#| include: false
+import warnings
+warnings.filterwarnings('ignore')
+```
+
+## Setup
+
+Load all of the modules and datasets needed for the chapter. In addition to the standard tools, we will use OpenCV (cv2) for image processing and PIL for image display.
+
+```{python}
+#| output: false
+import polars as pl
+from plotnine import ggplot, aes
+from polars import col as c
+
+import funs
+from funs import DSImage, ViTEmbedder, SigLIPEmbedder, umap, dot_product
+from PIL import Image
+import cv2
+
+birds = pl.read_parquet("data/birds10.parquet")
+```
+
+## Introduction
+
+Images are among the most ubiquitous forms of data in the modern world. Every day, billions of photographs are captured on smartphones, satellites orbit the Earth generating terabytes of imagery, medical scanners produce detailed views of the human body, and security cameras record countless hours of video. The ability to extract meaningful information from these images has become one of the most important capabilities in data science.
+
+At their core, digital images are simply arrays of numbers. Each pixel in an image stores numerical values representing color or intensity. Yet from these raw numbers emerge faces, objects, scenes, and stories. The challenge of image analysis lies in bridging this gap between low-level pixel values and high-level semantic meaning. How do we go from a grid of numbers to understanding that an image contains a bird, or that a person in a photograph is smiling, or that a tumor is present in a medical scan?
+
+In this chapter, we explore several approaches to extracting information from images. We begin with basic properties that can be computed directly from pixel values, including brightness and color distributions. These simple features, while limited in their semantic power, provide useful descriptors for large collections of images and can reveal interesting patterns in visual datasets. We then turn to embeddings produced by large pre-trained neural networks, which represent each image as a dense vector in the same spirit as the document vectors of @sec-text-vec. Once images are points in a vector space, the geometric toolkit we developed for text carries over directly: we can map an entire photo collection with UMAP, measure similarities with dot products, and even classify images into categories described in plain English, all without training a model of our own.
+
+The progression in this chapter mirrors the broader evolution of computer vision as a field. Early approaches relied on hand-crafted features computed from pixel statistics. Modern methods use neural networks to learn relevant features directly from data. Both perspectives remain valuable: simple pixel-based features are interpretable, fast to compute, and often sufficient for exploratory analysis, while deep learning models offer unprecedented accuracy for complex recognition tasks. Understanding both approaches equips you to choose the right tool for each analytical situation.
+
+## Image Arrays
+
+We will work with the birds image dataset, which contains photographs of ten species of birds. Each image has been preprocessed to a standard size and format, making it suitable for comparative analysis. The dataset includes species with distinctive coloration, from the brilliant yellow of canaries to the iridescent blues and greens of peacocks.
+
+```{python}
+birds
+```
+
+The dataset contains a `filepath` column pointing to each image file and a `label` column identifying the species. It also contains two columns of precomputed numbers, `vit` and `siglip`, which we will set aside until the second half of the chapter. This structure, with metadata in a table and actual image files stored separately, is a common pattern for working with image datasets. It allows us to use familiar tabular data tools for filtering, grouping, and summarizing while keeping the image files in their native format.
+
+Before turning to the pixel data, let's look at one example of each of the ten species. Examining the data visually gives us intuition about which categories might be easy or difficult to distinguish from one another.
+
+```{python}
+DSImage.plot_image_grid(birds.group_by(c.label).first(), ncol=5)
+```
+
+To work with an image programmatically, we need to read it into Python as a numerical array. The OpenCV library provides the `imread` function for this purpose. Let's load the first image in our dataset.
+
+```{python}
+img = cv2.imread(birds.select(c.filepath).row(0)[0])
+img
+```
+
+What we see is a NumPy array filled with numbers. Each number represents the intensity of a color channel at a specific pixel location. The values range from 0 (no intensity) to 255 (maximum intensity), using 8 bits per channel, which is the standard format for most digital images.
+
+The shape of this array reveals the structure of the image data.
+
+```{python}
+img.shape
+```
+
+The three dimensions correspond to height (number of rows of pixels), width (number of columns), and color channels. Most color images use three channels: red, green, and blue (RGB). However, OpenCV reads images in BGR order (blue, green, red), a historical convention from early computer vision libraries. This ordering rarely matters for analysis but becomes important when displaying images or converting between color spaces.
+
+We can examine a small region of the array to see the actual pixel values. Here are the values for a 4×4 block of pixels in the upper-left corner.
+
+```{python}
+img[:4, :4, :]
+```
+
+Each pixel is represented by three values, one for each color channel. A pixel with values `[255, 255, 255]` would be pure white, while `[0, 0, 0]` would be pure black. Values like `[255, 0, 0]` represent pure blue (remember, OpenCV uses BGR ordering), `[0, 255, 0]` is green, and `[0, 0, 255]` is red.
+
+One of the simplest statistics we can compute from an image is the mean of all pixel values.
+
+```{python}
+img.mean()
+```
+
+This single number summarizes the overall intensity of the image. Higher values indicate brighter images (more pixels closer to 255), while lower values indicate darker images (more pixels closer to 0). While crude, this measure provides a starting point for understanding the visual characteristics of image collections.
+
+## Brightness
+
+Let's compute the mean brightness for every image in our bird dataset. This requires iterating through all images, loading each one, and computing its mean pixel value. We store the results and add them as a new column to our DataFrame.
+
+```{python}
+results = []
+
+for row in birds.iter_rows(named=True):
+    img = cv2.imread(row["filepath"])
+    results.append(img.mean())
+
+birds = birds.with_columns(brightness = pl.Series(results))
+birds
+```
+
+Now we have a brightness value for each image. What can this simple statistic tell us about our photographs? Let's examine the darkest images in the collection.
+
+```{python}
+(
+    birds
+    .sort(c.brightness)
+    .head(12)
+    .pipe(DSImage.plot_image_grid, ncol=4)
+)
+```
+
+We see that the darkest images tend to have black backgrounds. This makes sense: a large area of pure black pixels (value 0) dramatically reduces the mean. The birds themselves may be brightly colored, but the dark backgrounds dominate the overall brightness calculation.
+
+The brightest images show the opposite pattern.
+
+```{python}
+(
+    birds
+    .sort(c.brightness, descending=True)
+    .head(12)
+    .pipe(DSImage.plot_image_grid, ncol=4)
+)
+```
+
+These images feature white or light-colored backgrounds, which push the mean toward higher values. This observation reveals an important limitation of simple pixel statistics: they capture properties of the entire image, including background, lighting conditions, and photographic style, not just the subject we care about. A dark bird photographed against a white background will have a higher brightness score than the same bird against a dark background.
+
+Despite this limitation, brightness can reveal interesting patterns across categories. Here are the distributions of brightness by species.
+
+```{python}
+(
+    birds
+    .sort(c.brightness.mean().over(c.label), descending=True)
+    .pipe(ggplot, aes(c.label, c.brightness))
+    .geom_boxplot()
+)
+```
+
+The species are ordered here by their mean brightness, which is what the sort by `c.brightness.mean().over(c.label)` arranges before the plot is drawn. Ostrich images are the brightest on average, followed by robins and swallows, and peacock images are the darkest. Why might this be? Consider how each species is typically photographed. Ostriches are often captured outdoors in bright savanna settings, while peacocks with their dark iridescent plumage are sometimes photographed against dramatic dark backgrounds that emphasize their colorful displays. The brightness distribution reflects not just the birds themselves but the entire photographic context.
+
+## Hue, Saturation, and Value
+
+While brightness provides a single summary statistic, the RGB color model used by digital images is not ideal for describing color as humans perceive it. The HSV (Hue, Saturation, Value) color model offers a more intuitive representation that separates color information into three distinct components.
+
+**Hue** represents the pure color itself, independent of how light or vivid it appears. Hue is measured as an angle around a color wheel, typically ranging from 0° to 360°. Red appears at 0° (and wraps around to 360°), yellow at 60°, green at 120°, cyan at 180°, blue at 240°, and magenta at 300°. This circular representation explains why red and magenta appear adjacent: they are neighbors on the color wheel.
+
+**Saturation** measures the purity or intensity of a color. A fully saturated color contains no gray: it is vivid and intense. As saturation decreases, the color becomes more washed out, eventually becoming a pure gray at zero saturation. Saturation ranges from 0 (completely desaturated, gray) to 1 (fully saturated, pure color).
+
+**Value** (also called brightness or lightness in related color models) indicates how light or dark the color is. A value of 0 produces black regardless of hue or saturation, while a value of 1 produces the brightest possible version of that hue and saturation combination.
+
+The mathematical conversion from RGB to HSV proceeds as follows. Given RGB values normalized to the range [0, 1], we first compute:
+
+$$
+\begin{aligned}
+M &= \max(R, G, B) \\
+m &= \min(R, G, B) \\
+C &= M - m
+\end{aligned}
+$$
+
+The value $M$ is the maximum of the three channels, $m$ is the minimum, and $C$ (chroma) measures the range. The HSV components are then calculated as:
+
+$$
+V = M
+$$
+
+$$
+S = \begin{cases}
+0 & \text{if } V = 0 \\
+\frac{C}{V} & \text{otherwise}
+\end{cases}
+$$
+
+$$
+H = \begin{cases}
+0° & \text{if } C = 0 \\
+60° \times \frac{G - B}{C} \mod 360° & \text{if } M = R \\
+60° \times \left(\frac{B - R}{C} + 2\right) & \text{if } M = G \\
+60° \times \left(\frac{R - G}{C} + 4\right) & \text{if } M = B
+\end{cases}
+$$
+
+The value component is simply the maximum RGB value. Saturation measures how much the color differs from gray by comparing the range of RGB values to the maximum. Hue is computed by determining which RGB component is dominant and calculating the position around the color wheel.
+
+In practice we never write any of this out ourselves. The formulas are here so that the three components mean something concrete rather than arriving as three unexplained numbers; OpenCV applies them for us with a single function call, and there is no reason to memorize them.
+
+OpenCV provides built-in functions for color space conversion. Here is how to convert an image from BGR to HSV.
+
+```{python}
+img = cv2.imread(birds.select(c.filepath).row(0)[0])
+
+img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+img_hsv.shape
+```
+
+The resulting array has the same shape as the original, but now the three channels represent hue, saturation, and value instead of blue, green, and red. Note that OpenCV scales hue to the range [0, 179] (to fit in an 8-bit value while covering the full 360° range) and saturation and value to [0, 255].
+
+## Colors
+
+With images represented in HSV color space, we can classify pixels by their dominant color. The hue value tells us where each pixel falls on the color wheel, allowing us to count how many pixels are predominantly red, orange, yellow, green, and so on.
+
+Our helper method `DSImage.compute_colors` takes an HSV image and returns a dictionary with the proportion of pixels falling into each color category. It bins the hue values into segments corresponding to common color names and also accounts for the saturation and value (very dark or desaturated pixels are classified separately as black, white, or gray).
+
+```{python}
+DSImage.compute_colors(img_hsv)
+```
+
+The output shows what fraction of pixels in this image fall into each color category. The proportions sum to 1, giving us a complete description of the color distribution.
+
+We will cycle through the entire DataFrame and compute these color proportions for all images.
+
+```{python}
+results = []
+
+for row in birds.iter_rows(named=True):
+    img = cv2.imread(row["filepath"])
+    img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    results.append(DSImage.compute_colors(img_hsv))
+
+
+results = pl.DataFrame(results)
+birds = pl.concat([birds, results], how="horizontal")
+birds
+```
+
+Now our dataset includes columns for each color category, enabling systematic analysis of color distributions across species. Let's examine which images contain the most yellow.
+
+```{python}
+(
+    birds
+    .sort(c.yellow, descending=True)
+    .head(12)
+    .pipe(DSImage.plot_image_grid, ncol=4)
+)
+```
+
+The images with the highest yellow proportions include many hummingbirds photographed near yellow-green foliage, as well as the expected yellow birds. This demonstrates how color analysis captures not just the subject but the entire scene.
+
+We can compare the yellow content across species systematically.
+
+```{python}
+(
+    birds
+    .sort(c.yellow.mean().over(c.label), descending=True)
+    .pipe(ggplot, aes(c.label, c.yellow))
+    .geom_boxplot()
+)
+```
+
+Canaries, as expected, have the highest yellow content on average. Their bright yellow plumage dominates the images. Other species show less yellow, with the distribution reflecting both the birds' coloration and their typical photographic environments.
+
+Peacocks, known for their brilliant blue-green displays, should show high values in the cyan range.
+
+```{python}
+(
+    birds
+    .sort(c.cyan.mean().over(c.label), descending=True)
+    .pipe(ggplot, aes(c.label, c.cyan))
+    .geom_boxplot()
+)
+```
+
+Indeed, peacocks lead in cyan content, reflecting their characteristic iridescent feathers that shimmer between blue and green. Swallows come next, though in their case the cyan is more likely to be the sky they are photographed against than the bird itself. At the other end, kiwis and hummingbirds have almost no cyan in their images at all.
+
+These color features, while simple to compute, provide useful descriptors for organizing and exploring image collections. They can identify outliers (an unusually red canary might indicate a different subspecies or unusual lighting), reveal patterns across categories, and serve as features for further analysis.
+
+## Transfer Learning
+
+The pixel statistics developed so far describe images at the level of raw color. They are useful for exploring a collection, but they fall well short of the questions we usually want to ask. Brightness and color proportions cannot tell us whether a photograph contains a duck or an ostrich, and two photographs of different species taken against similar foliage may have nearly identical color profiles.
+
+We faced a similar gap with text in @sec-text-vec. There, the solution was to represent each document as a vector and let geometry do the rest: documents with similar vocabulary became nearby points, and distances, similarity scores, and two-dimensional maps of the collection all followed from that representation. We would like the same thing for images: a vector for each image such that pictures with similar content sit close together in space. For text, we could build the vectors ourselves by counting terms and applying TF-IDF weights. For images, no comparably simple recipe exists. Counting pixels by color, as we did above, is the visual analogue of counting words, but nearly all of the meaning in an image lies in how the pixels are arranged, and no small set of hand-written rules describes arrangement well.
+
+The tools that do capture arrangement are deep neural networks: large statistical models with millions of adjustable parameters that are fit (the machine learning term is *trained*) on enormous collections of labeled images. How these models are built and trained fills entire courses and is beyond the scope of this book. For our purposes, a rough picture is enough. A network trained to classify images processes each picture through a long sequence of stages. Early stages respond to simple patterns such as edges and textures. Later stages combine these into larger structures, such as an eye or a patch of feathers. The final stage converts this accumulated description into a prediction of the image's category. Just before that last step, the network has reduced the image to a fixed-length list of numbers summarizing its content. That list is an embedding in exactly the sense of @sec-text-vec: a vector representation in which similar objects are close together.
+
+Training such a network from scratch requires millions of labeled images and weeks of time on specialized hardware, resources far beyond a typical data analysis project. Fortunately, we do not have to train one. Research groups at large companies and universities have trained these models and released them publicly. The final predictions of a released model are usually not what we need, since the categories it was trained on rarely match the ones we care about. But the embedding computed just before the prediction is generic: it describes what is in the image, whatever the image happens to be. Reusing a model trained for one task as the starting point for a different task is called *transfer learning*, and in one form or another it accounts for the vast majority of practical applications of deep learning.
+
+## Image Embeddings
+
+Python is the de facto language for machine learning and AI research, which is one of the reasons we use it in this text. As a result, there are excellent ready-to-use libraries for loading and running pre-trained deep learning models. We have wrapped one of these models in a function called `ViTEmbedder` (the code to create it uses **pytorch** and is given in full in the practice notebooks). It implements Google's [Vision Transformer (ViT) model](https://huggingface.co/google/vit-base-patch16-224), which was trained on a dataset of 14 million images labeled with 21,843 classes. Here is all we need to load (and, if not already grabbed, download) the model:
+
+```{python}
+vit = ViTEmbedder()
+```
+
+The Vision Transformer works by dividing an image into a grid of small patches and treating each patch the way a language model treats a word. The patches are then processed through layers that let the model learn relationships between different parts of the image, so the resulting representation captures both local details and global structure.
+
+Calling the model on an image path returns a sequence of 768 numbers: the image's embedding. Unlike the TF-IDF vectors of @sec-text-vec, which were sparse and had one interpretable dimension for each term in the vocabulary, these embeddings are dense. Nearly every entry is non-zero, and no individual dimension has a meaning we can name. Only the geometry matters: two images that are visually similar will have embeddings that are close together in the 768-dimensional space, while dissimilar images will have embeddings that are far apart. We can see an example on the first few bird images:
+
+```{python}
+(
+    birds
+    .select(c.filepath, c.label)
+    .head(5)
+    .with_columns(
+        vit = c.filepath.map_elements(
+            vit, return_dtype=pl.List(pl.Float32)
+        )
+    )
+)
+```
+
+Computing embeddings for all images in the dataset takes some time, so we have precomputed these values. In fact, they have been sitting in our dataset since we loaded it at the start of the chapter, in the column named `vit`.
+
+```{python}
+birds.select(c.filepath, c.label, c.vit)
+```
+
+The precomputed embeddings are stored alongside the rest of the data in a Parquet file. Parquet is a columnar storage format that is particularly well-suited for analytical workloads. Unlike CSV files, Parquet preserves data types exactly, handles nested structures like lists efficiently, and compresses data effectively. This makes it an excellent choice for storing embeddings, which are arrays of floating-point numbers that would be awkward to represent in CSV format.
+
+What can we do with these vectors? Everything we did with document vectors. A natural first step is to visualize the whole collection at once. As in @sec-text-vec, UMAP can project the 768-dimensional embeddings down to two dimensions while preserving, as much as possible, the relative distances between points. This lets us see how the different bird species arrange themselves in the embedding space.
+
+```{python}
+(
+    birds
+    .pipe(
+        umap,
+        features=[c.vit]
+    )
+    .predict(full=True)
+    .pipe(ggplot, aes(c.dr0, c.dr1))
+    .geom_point(aes(color=c.label))
+)
+```
+
+Notice that the UMAP projection does an incredibly good job of separating the categories. Images of the same species cluster tightly together, while different species form distinct groups. This is worth pausing over: nothing in our code told the model anything about our ten species. The ViT model was trained on a different set of images with a different set of labels, yet its embeddings capture the visual features that distinguish a robin from a peacock. Compare this with the brightness and color boxplots earlier in the chapter, where the species distributions overlapped heavily. The embedding representation encodes far more of what the images actually show.
+
+## Zero-Shot Classification
+
+The UMAP plot shows that the embeddings separate the species, but it does not, on its own, tell us which cluster is which. To go from visualization to prediction, we will use an even newer class of deep learning models called zero-shot models. These allow us to classify images into categories that we describe in plain language, with no labeled examples and no additional training at all. The idea sounds almost magical at first.
+
+Zero-shot learning became practical with the development of multimodal models that learn to connect images and text in a shared embedding space. These models are trained on massive datasets of image-caption pairs scraped from the internet. By learning to match images with their textual descriptions, the models develop an understanding of concepts that can be expressed in natural language. To classify a new image, we simply compare its embedding to the embeddings of text descriptions of each possible category.
+
+We will use a model called SigLIP (Sigmoid Language-Image Pre-training), which represents the current state of the art in this type of approach. Like ViT, we have wrapped the model in a convenient interface that handles loading and embedding. The image embeddings from SigLIP are also precomputed for us, in the `siglip` column of our dataset.
+
+```{python}
+siglip = SigLIPEmbedder()
+```
+
+The SigLIP model can embed both images and text into the same space. Images that match a textual description will have embeddings that are close together. We measure this closeness with the dot product of the two embedding vectors. Recall from @sec-text-vec that the cosine similarity between two unit-length vectors is exactly their dot product; the SigLIP embeddings are scaled to unit length, so the dot product here is the same cosine similarity we used to compare documents. Values close to 1 indicate high similarity, while values close to 0 indicate the vectors are nearly orthogonal (unrelated).
+
+Let's start with a simple example: we will create a text embedding for "a photo of a canary" and see which images in our dataset are most similar to this description.
+
+```{python}
+embed = (
+    pl.DataFrame({"text": ["a photo of a canary"]})
+    .with_columns(
+        siglip_txt = c.text.map_elements(
+            siglip.embed_text,
+            return_dtype=pl.List(pl.Float32)
+        )
+    )
+)
+```
+
+Now we can compute the similarity between this text embedding and every image in our dataset.
+
+```{python}
+(
+    birds
+    .join(embed, how="cross")
+    .with_columns(
+        sim_score = dot_product(c.siglip, c.siglip_txt)   
+    )
+    .sort(c.sim_score, descending=True)
+)
+```
+
+Visualizing the similarity scores by bird species shows that canary images indeed have the highest similarity to our "a photo of a canary" text prompt. This demonstrates that the model has learned a meaningful connection between the visual appearance of canaries and the word "canary" without us ever explicitly teaching it this connection.
+
+```{python}
+(
+    birds
+    .join(embed, how="cross")
+    .with_columns(
+        sim_score = dot_product(c.siglip, c.siglip_txt)
+    )
+    .sort(c.sim_score.mean().over(c.label))
+    .pipe(ggplot, aes(c.sim_score, c.label))
+    .geom_point()
+)
+```
+
+To perform zero-shot classification on the entire dataset, we need to create text embeddings for all of our bird species categories. We can then assign each image to the category whose text embedding it is most similar to. This process requires no training data at all; we are simply leveraging the knowledge the model acquired during its original pre-training.
+
+```{python}
+embed = (
+    birds
+    .select(text = c.label.unique())
+    .with_columns(
+        siglip_txt = c.text.map_elements(
+            siglip.embed_text, return_dtype=pl.List(pl.Float32)
+        )
+    )    
+)
+```
+
+For each image, we compute its similarity to every category label, then select the label with the highest similarity as the predicted class. The classification rate tells us how often this zero-shot approach correctly identifies the bird species.
+
+```{python}
+(
+    birds
+    .join(embed, how="cross")
+    .with_columns(
+        sim_score = dot_product(c.siglip, c.siglip_txt)   
+    )
+    .sort(c.sim_score, descending=True)
+    .group_by(c.filepath)
+    .head(1)
+    .select(class_rate = (c.label == c.text).mean())
+)
+```
+
+The zero-shot classifier makes only a couple of errors. It is remarkable that we can achieve such a strong classification rate without a single labeled training example. This approach is particularly valuable when labeled data is expensive or impossible to obtain, when there are a very large number of categories, or when we need to quickly prototype a classification system for new categories.
+
+Let's examine the images that the zero-shot classifier got wrong. Understanding these errors can provide insight into the model's limitations and the ambiguity inherent in visual classification.
+
+```{python}
+(
+    birds
+    .join(embed, how="cross")
+    .with_columns(
+        sim_score = dot_product(c.siglip, c.siglip_txt)   
+    )
+    .sort(c.sim_score, descending=True)
+    .group_by(c.filepath)
+    .head(1)
+    .filter(c.label != c.text)
+    .with_columns(
+        desc = pl.concat_str("label", "text", separator=" => ")
+    )
+    .pipe(DSImage.plot_image_grid, label_name="desc", ncol=3)
+)
+```
+
+These misclassifications involve birds in strange positions or cropped at the edges of the frame, cutting off important features that differentiate the species.
+
+## Summary
+
+In this chapter, we treated images the way @sec-text-vec treated documents: first as raw material for hand-computed summaries, then as points in a vector space. Pixel statistics such as brightness and color proportions are fast to compute and easy to interpret, and they revealed real patterns in the bird photographs, but they describe the entire frame (background, lighting, and photographic style) rather than the subject. Embeddings from pre-trained neural networks close that gap. The ViT model, through transfer learning, converted each photograph into a dense 768-dimensional vector, and a UMAP projection of those vectors separated the ten species almost perfectly, using knowledge the model acquired long before it ever saw our data.
+
+The SigLIP model took the idea one step further by embedding images and text into a single shared space. There, the cosine similarities of @sec-text-vec became a classifier: each image was assigned the species name whose text embedding it sat closest to, with no labeled examples and no training on our part. The general lesson is that once complex objects, whether documents or photographs, are represented as vectors, the same small geometric toolkit of distances, similarities, and projections does most of the analytical work.

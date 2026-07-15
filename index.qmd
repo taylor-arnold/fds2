@@ -1,0 +1,67 @@
+# Welcome {-}
+
+## About This Book {-}
+
+This is a book about *exploratory data analysis* in Python. Exploratory data analysis, or EDA, is the approach described in John Tukey's classic text of the same name: examining data directly through visualizations and broad summary statistics in order to generate hypotheses and understand general trends, prior to and often in lieu of formal statistical modeling. As the volume and complexity of available data have grown, the need for careful application of these techniques has only increased.
+
+Our aim is to teach a small set of composable tools thoroughly rather than a large catalog of methods superficially. Nearly everything in the book is built from a handful of operations—selecting and filtering rows, grouping and aggregating, joining tables, reshaping between long and wide formats, and mapping columns to the visual properties of a plot. Once these operations are understood, they apply without modification to data that arrives as a spreadsheet, a map, a corpus of documents, a network of citations, or a collection of photographs. The second half of the book is essentially a demonstration of that claim.
+
+The book is written with the humanities and humanistic social sciences particularly in mind. Our examples are drawn from demographic indicators, census data, encyclopedia articles, citation structures, and image collections, and the questions we ask of them are the kinds of questions that arise in humanistic inquiry. No prior programming experience is assumed.
+
+## Software {-}
+
+All of the code in the book is written in Python. We use three libraries as our foundation:
+
+- **Polars** for representing and manipulating tabular data, using its expression system and method-chaining style.
+- **plotnine** for visualization, which implements Leland Wilkinson's grammar of graphics in the tradition of R's ggplot2.
+- **Quarto notebooks** (`.qmd` files) for mixing code, output, and prose in a single document.
+
+Additional libraries appear as the material requires them: GeoPandas for spatial geometry, `requests` for calling web APIs, spaCy for natural language processing, NetworkX for graphs, and OpenCV together with pre-trained neural networks for images. In each case we wrap the library behind a thin set of helper functions in a local `funs.py` module so that the analysis stays in the tabular, expression-based idiom established in Part I. The code behind each helper is shown before it is used; nothing is meant to be magic.
+
+Readers new to programming can run everything through Google Colab with no setup. Readers comfortable with the command line may prefer `uv` for managing a local Python installation. Every dataset used in the book is in the public domain and is distributed alongside the text.
+
+## Part I: Core {-}
+
+The first ten chapters develop the core grammar of data manipulation and visualization. They use a common running example—a dataset of 135 countries with demographic, economic, and well-being indicators—so that attention stays on the techniques rather than on learning a new dataset each week.
+
+**Chapter 1, Introduction**, situates EDA within the history of statistical computing, from the S language at Bell Labs through R and into the Python data science ecosystem. It covers running Python code, variables, functions, importing modules, reading a CSV file into a DataFrame, and the code formatting conventions used throughout the text.
+
+**Chapter 2, Organizing Data I**, covers the verbs that act on a single table: sorting rows, selecting columns, filtering rows, renaming, removing duplicates, and creating or modifying columns. It introduces the `c.` syntax for referring to a column and the pipe-and-chain style of writing analyses as a sequence of steps.
+
+**Chapter 3, Data Types and Expressions**, explains why every column carries a type, what goes wrong when the type is incorrect (a ZIP code silently converted to an integer loses its leading zero; a single `"n/a"` turns an entire numeric column into text), and how to cast between types. It then returns to the `c.` syntax from Chapter 2 and gives a proper account of it: these fragments are Polars expressions, the deferred descriptions of computation that underlie every operation in the rest of the book.
+
+**Chapter 4, Visualizing Data I: The Grammar of Graphics**, introduces plotnine. Rather than a menu of chart types, the grammar treats a plot as a mapping from columns to aesthetics—position, color, size, label—rendered by a choice of geometry. The chapter covers points, text, lines, and bars, along with layering multiple datasets in a single figure.
+
+**Chapter 5, Grouping and Aggregation**, introduces `group_by` and `agg`, the operations that collapse many rows into one summary row per group. It develops aggregation as a form of row reduction and covers counting, grouping by multiple columns, and aggregating expressions rather than bare columns.
+
+**Chapter 6, Window Functions**, addresses the complementary problem: computations that need group-level context but must return a value for every original row. It covers the `over` method, ordered windows and shifts, ranks and cumulative functions, rolling windows, and the choice between `agg` and `over`.
+
+**Chapter 7, Visualizing Data II: Statistics, Scales, and Polish**, returns to graphics with the statistical layer—histograms, density plots, boxplots, and fitted models—and then covers scales, facets, labels, and themes. It closes with a set of best practices for producing figures that communicate clearly.
+
+**Chapter 8, Combining Tables**, covers joins. It establishes primary and foreign keys, works through the family of equi-joins (inner, left, right, full, semi, anti, and cross), introduces filtering joins and conditional joins, and devotes a section to diagnosing joins that silently go wrong.
+
+**Chapter 9, Restructuring Data**, develops the concept of the unit of observation and the definition of tidy data. It covers pivoting and unpivoting between wide and long formats, reshaping specifically for plotting, expanding list columns, and the distinction between restructuring that is reversible and aggregation that is not.
+
+**Chapter 10, Collecting Data**, is about the practice rather than the theory: how to decide what tables you need, what variables and names they should have, how to store data in spreadsheets so it can be read cleanly, how to read imperfect files, and how to document decisions in a data dictionary. It engages directly with the questions of bias and power that arise whenever data is collected and organized.
+
+## Part II: Applications {-}
+
+The remaining chapters apply the core grammar to data types that do not arrive as a tidy CSV. Each introduces a new kind of object—a geometry, an HTTP response, a token, a document vector, an edge list, a pixel array—and shows how to bring it into the tabular framework already established.
+
+**Chapter 11, Spatial Data**, attaches a geometry to each observation. It covers points and polygons, coordinate reference systems and why projections matter, choropleth maps, interactive visualization, and the distinctively spatial operations: spatial joins, nearest-neighbor joins, buffers, dissolving boundaries, exploding multi-part geometries, and simplification. The examples use U.S. metropolitan statistical areas and census data.
+
+**Chapter 12, Data APIs and Corpus Construction**, moves from files to servers. It teaches the mechanics of HTTP requests, status codes, pagination, caching, and flattening nested JSON—and then uses them to build something. Over the course of the chapter we assemble a corpus of Wikipedia articles on nineteenth-century British and Irish novelists, collecting metadata, full text, internal links, revision histories, page views, and cross-language links. It also covers what it means to be a polite client, how to define a population, and how to make a snapshot reproducible.
+
+**Chapter 13, Textual Data: Annotations**, opens that corpus. Using spaCy, it turns unstructured prose into a table of annotated tokens with parts of speech, lemmas, named entities, and dependency relations. Once text is a table, the familiar operations apply: word frequencies, n-grams and collocations, keyword-in-context, and complexity metrics all become grouping and filtering problems.
+
+**Chapter 14, Textual Data: Documents as Vectors**, shifts from words within documents to documents themselves. It develops TF-IDF weighting, reinterprets weighted term counts geometrically so that each document becomes a point in a high-dimensional space, and uses that geometry to measure distances between documents, project the corpus into two dimensions, and compare the English and French Wikipedia treatments of the same authors.
+
+**Chapter 15, Network Data**, represents relationships as nodes and edges. Using the link structure of the same Wikipedia corpus, it covers building a network from an edge list, centrality measures, clustering, co-citation networks, and directed graphs. It then closes the loop with Part II's other chapters by constructing distance and nearest-neighbor networks from the document vectors of Chapter 14.
+
+**Chapter 16, Image Data**, treats images first as arrays of numbers—brightness, hue, saturation, and color distributions computed directly from pixels—and then as embeddings produced by large pre-trained neural networks. Because an embedding is just a vector, the geometric toolkit built for text carries over unchanged: images can be mapped with UMAP, compared by similarity, and classified into categories described in plain English without training a model.
+
+## A Note on Structure {-}
+
+The chapters build on one another and are best read in order. Part I is cumulative by design, and Part II depends on it throughout. Within Part II, the Wikipedia corpus constructed in Chapter 12 is the shared substrate for Chapters 13, 14, and 15, and the vector representation developed for text in Chapter 14 is the same idea applied to images in Chapter 16. The connections are the point: the chapters are not a survey of unrelated methods but a demonstration that one set of tools reaches a surprisingly wide range of data.
+
+Each chapter ends with a short **Extensions** section pointing to further reading, additional libraries, and methods that may be of interest for that specific kind of data.

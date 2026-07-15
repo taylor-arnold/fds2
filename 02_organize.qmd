@@ -1,0 +1,300 @@
+# Organizing Data I {#sec-organize}
+
+```{python}
+#| include: false
+import warnings
+warnings.filterwarnings('ignore')
+```
+
+## Setup
+
+We will begin this and every subsequent chapter by listing the core modules and datasets that must be loaded before getting started. Datasets and sources that require new functions will be loaded within the body of the text.
+
+```{python}
+#| output: false
+import polars as pl
+from plotnine import ggplot, aes
+from polars import col as c
+
+import funs
+
+country = pl.read_csv("data/countries.csv")
+```
+
+## Introduction
+
+This chapter covers the core methods for organizing a dataset: reordering its rows, choosing which columns to keep, and filtering down to the rows you care about. We will also look at how to create new columns from existing ones, rename columns, and remove duplicate rows. Every method in this chapter works on a single DataFrame at a time, one row or one column at a time, with no notion of groups. Later chapters build on these same methods once we start comparing categories of data against each other.
+
+All of the operations below come from the Polars library, the same one we used to read our data. Each takes a DataFrame as input and returns a modified DataFrame as output, which means the methods can be chained together in a single pipeline. Individually, these methods are simple. Chained together, they let you turn a raw dataset into exactly the shape you need for an analysis.
+
+## Referring to Columns
+
+Nearly every method in this chapter needs to be told which column to work on, so before we start we need a way of pointing at one. That is what the `c.` prefix is for. Writing `c.pop` refers to the column named `pop`, `c.region` to the column named `region`, and so on for any column in the dataset.
+
+A `c.` reference can carry more than just a name. We can attach a comparison to it, as in `c.hdi > 0.9`, which asks a yes-or-no question of every row. We can attach a method, as in `c.pop.sqrt()`, which takes the square root of every value. And we can do arithmetic with it, as in `c.pop * 1000`. In each case the result is a recipe rather than a number: Polars works through it one row at a time when we hand it to a DataFrame method, and the answer comes back with one entry per row.
+
+That is all we need for now. These `c.` fragments turn out to be genuine objects in their own right, with a name and a set of rules worth knowing, and the next chapter takes them apart properly. Here we will simply use them.
+
+## Sorting Rows
+
+We use the `.sort()` method to reorder the rows of a dataset according to one or more columns. This is useful for finding extreme values or scanning a dataset in a specific order. Let's sort the countries dataset by population and then walk through how the code works.
+
+```{python}
+(
+    country
+    .sort(c.pop)
+)
+```
+
+A few things to note in this code. The code is wrapped in a pair of parentheses, each on its own line, with every other line indented by four spaces. The dataset sits on its own line, followed by the `sort` method on the next. The column to sort by is given as `c.pop`, using the prefix we just met. The result is printed, but the original dataset is unchanged: after running this code, `country` still has its original row order. These conventions carry over to every DataFrame method in this chapter.
+
+You can reverse the sort order by setting the `descending` parameter to `True`.
+
+```{python}
+(
+    country
+    .sort(c.pop, descending=True)
+)
+```
+
+Now the countries with the largest population appear first. The code below sorts by region (alphabetically) and then, within each region, by population.
+
+```{python}
+(
+    country
+    .sort(c.region, c.pop)
+)
+```
+
+To keep a sorted dataset for later use, store it in a named variable:
+
+```{python}
+country_saved = (
+    country
+    .sort(c.region, c.pop)
+)
+```
+
+After running this code, `country_saved` holds the reordered dataset, while `country` still holds the original. The same pattern applies to the results of any method described in this chapter.
+
+## Selecting Columns
+
+When a dataset has many columns, it is often useful to select or reorder a subset of them. The `.select()` method does this: give it a set of columns and it returns a DataFrame containing exactly those, in the order listed.
+
+```{python}
+(
+    country
+    .select(c.iso, c.lat, c.lon)
+)
+```
+
+We will use `.select` throughout this text to point to the specific columns worth examining. It matters less in a typical data science pipeline, but it becomes important for more complex transformations, such as those in @sec-restructure.
+
+A related method, `.drop`, lets us specify columns to remove instead. This is handy when a dataset has many columns and only a few need to go.
+
+## Selecting Rows
+
+We often want a subset of a dataset's rows for a particular analysis or visualization. Which function to use depends on the selection criteria. The `.head()` method returns a specified number of rows from the top of the dataset. The example below selects the first four rows.
+
+```{python}
+(
+    country
+    .head(n=4)
+)
+```
+
+The `.tail(n=<int>)` method works the same way but starts from the bottom of the table. The `.drop_nulls()` and `.drop_nans()` methods take no arguments and return only rows without missing values or without invalid numeric results, respectively. Polars keeps those two kinds of gap separate, and the next chapter explains the difference; for now it is enough to know that both methods exist and that neither one removes what the other one does.
+
+The `.sample` method randomly selects rows. Specify the number of rows with `n=<int>` or a fraction with `fraction=<float>`. Below, we take a random 20% sample of the dataset.
+
+```{python}
+(
+    country
+    .sample(fraction=0.2)
+)
+```
+
+The `.filter()` method selects rows that meet a condition on the dataset's variables. It expects a condition of the kind we described above: a comparison such as `c.hdi > 0.9`, which Polars evaluates once per row and which answers `True` or `False` each time. The rows answering `True` are kept and the rest are discarded. Rows where the value being tested is missing are discarded as well, since a comparison against a missing value has no answer. The code below keeps only the rows where the Human Development Index (HDI) is greater than 0.9.
+
+```{python}
+(
+    country
+    .filter(c.hdi > 0.9)
+)
+```
+
+We can filter categorical variables with equality comparisons too. To keep the page from getting too cluttered, we will stop printing the result of every example from here on.
+
+```{python}
+#| eval: false
+(
+    country
+    .filter(c.region == "Europe")
+)
+```
+
+This keeps every row where `region == "Europe"`. Note the double-equals operator (`==`) for testing equality; a single equals sign (`=`) is reserved for assignment.
+
+We can combine multiple conditions with the `&` (and) and `|` (or) operators. Wrap each condition in parentheses when doing so:
+
+```{python}
+#| eval: false
+(
+    country
+    .filter((c.region == "Europe") & (c.hdi > 0.9))
+)
+```
+
+To check whether a value belongs to a larger set, use the `.is_in` method, passing the set of values in square brackets. 
+
+```{python}
+#| eval: true
+(
+    country
+    .filter(c.region.is_in(["Europe", "Africa"]))
+)
+```
+
+Together with `!=` (not equal) and `>=` (greater than or equal to), these operators let you select rows based on nearly any relationship present in the data.
+
+## Rename and Unique
+
+Two smaller methods round out this set of tools: `.rename()` and `.unique()`.
+
+Use `.rename()` to give one or more columns a new name, passing a dictionary that maps each old name to its replacement. This is useful when a column name is unclear, inconsistent with the rest of your naming scheme, or awkward to type.
+
+```{python}
+(
+    country
+    .rename({"pop": "population"})
+)
+```
+
+`.unique()` returns a dataset with duplicate rows removed. Called with no arguments, it compares entire rows and drops any repeats. Passing a `subset` of column names instead compares only those columns, which is a quick way to get one representative row per category. The example below returns one row for each region.
+
+```{python}
+(
+    country
+    .unique(subset=["region"])
+)
+```
+
+By default, `.unique()` keeps an arbitrary row from each set of duplicates. Set `keep="first"` or `keep="last"` if you need a specific one, and add a `.sort()` beforehand to control which row counts as first or last.
+
+## Modifying Columns
+
+Creating or modifying columns is a fundamental part of data analysis. You will often need to compute a new variable from existing columns, build an indicator (dummy) variable, or transform a variable before analysis.
+
+The basic pattern for adding a column is the `.with_columns()` method: specify each new or modified value, defined in terms of existing columns. Where `.select()` returns only the columns it is given, `.with_columns()` keeps the whole DataFrame and attaches the new columns to it, which is the only real difference between the two. Giving a new column the name of an existing one overwrites it. The example below multiplies the `pop` column (in millions) by 1,000 to get the population in thousands.
+
+```{python}
+(
+    country
+    .with_columns(population_1k = c.pop * 1000)
+)
+```
+
+Common mathematical transformations are available by adding a `.` after the column name, followed by a function such as `sqrt()` or `log10()`.
+
+The following example takes the square root and the sine of `population` and saves each as a new column. Neither transformation is meaningful here; they are only meant to show the technique.
+
+```{python}
+#| eval: false
+(
+    country
+    .with_columns(
+      pop_sqrt = c.pop.sqrt(),
+      pop_sin = c.pop.sin()
+    )
+)
+```
+
+Note the formatting: when a column definition is long, or when defining several columns at once, put each one on its own line, indented by four spaces.
+
+::: {.callout-note collapse="true"}
+## Alias method
+
+Polars includes a method called `.alias` that can be used within `.with_columns` to create or overwrite a column. It was the original standard technique but has largely been replaced by the equals-sign syntax used above, which most people find more intuitive. It's worth recognizing because you will still see it often in the Polars documentation.
+:::
+
+## Pipes
+
+Chaining methods together is a powerful pattern. It keeps code readable, avoids naming a pile of intermediate variables, and lets Polars optimize the whole sequence of operations internally. One limitation of method chaining is that it only gives you access to methods built into Polars. The `.pipe` method gets around this by letting you call an arbitrary function with the DataFrame as its first argument.
+
+The rule is simple: `df.pipe(f)` does the same thing as `f(df)`. The advantage is that it can be written as one more step in a chain rather than as a function wrapped around the outside of it. A quick way to see this is to pipe a DataFrame into `type`, the built-in Python function that reports what kind of object it has been given.
+
+```{python}
+(
+    country
+    .pipe(type)
+)
+```
+
+The DataFrame was handed to `type` as its argument, and `type` reported back what it was. Writing `type(country)` would have produced exactly the same answer. Nothing is special about `type` here; any function that accepts a DataFrame will do.
+
+`.pipe` takes the function to apply as its first argument, and passes any additional arguments straight through to that function. This is what makes it useful in practice, and we will lean on it in @sec-graphics, where `.pipe(ggplot, aes(...))` hands a DataFrame to `ggplot` along with the extra arguments that describe the plot, all without breaking out of the chain.
+
+Our `funs.py` file adds one small convenience of its own, as a method rather than through `.pipe`. Polars prints ten rows of a DataFrame by default; the `.print()` method lets us choose a different number. Here we ask for `4`, which shows the first two rows and the last two.
+
+```{python}
+(
+    country
+    .print(4)
+)
+```
+
+Leaving out the number prints eight rows. Pass a number larger than the height of the table to see all of it at once, which is useful once you have trimmed a dataset down to its final set of rows and columns and want to check the whole result.
+
+## Further Functions
+
+One more function is worth knowing before moving on: `pl.when`, which creates a column that depends on a condition elsewhere in the data. The example below builds a column equal to 1 for countries in the Northern Hemisphere and 0 for those in the Southern Hemisphere.
+
+```{python}
+#| eval: false
+(
+    country
+    .with_columns(
+        is_north = pl.when(c.lat >= 0).then(1).otherwise(0)
+    )
+)
+```
+
+The values we produce do not have to be numbers, but text takes one extra step. Writing `.then("north")` will not work: Polars reads a bare string as the *name of a column* and goes looking for one called `north`. To say that we mean the word itself, wrap it in `pl.lit`, short for literal.
+
+```{python}
+#| eval: false
+(
+    country
+    .with_columns(
+        hemisphere = pl.when(c.lat >= 0).then(pl.lit("north")).otherwise(pl.lit("south"))
+    )
+)
+```
+
+`pl.when` can also chain additional `.when().then()` pairs before the final `.otherwise()`, which makes it a compact way to build a column out of several conditions at once. The conditions are checked in order and the first one to match wins, so each `.when()` only ever sees the rows that the ones above it did not already claim. Below, a country's distance from the equator puts it in one of three climate zones.
+
+```{python}
+(
+    country
+    .with_columns(
+        zone = (
+            pl.when(c.lat.abs() < 23.5).then(pl.lit("tropical"))
+            .when(c.lat.abs() < 35).then(pl.lit("subtropical"))
+            .otherwise(pl.lit("temperate"))
+        )
+    )
+    .select(c.iso, c.lat, c.zone)
+)
+```
+
+Notice that the second condition, `c.lat.abs() < 35`, is written as if the tropical countries were not there. They have already been claimed by the first `.when()`, so the only rows it can still match are the ones lying at least 23.5 degrees from the equator. Writing each condition as a non-overlapping range would give the same answer, but it would be more work and easier to get wrong.
+
+## R's dplyr and Python Pandas
+
+If you're familiar with `dplyr` in R or `pandas` in Python, the code in this chapter should feel familiar. Function names differ, and each library has its own quirks, but the underlying task is the same: compose a set of methods to transform data into the shape a given analysis needs.
+
+Coming from dplyr, the main adjustments are prefixing column names with `c.`, using methods instead of pipes (the same idea, different syntax), and a few renamed functions—`sort` in place of `arrange`, for instance.
+
+Coming from Pandas involves a few more changes, most of which simplify the code. There is no index column to reset after every operation, no aggregation functions wrapped in tuples, and no `eval` or `query` methods buried behind an extra layer of quoted strings.
+
+As with Pandas and dplyr, Polars also provides functions for pivots and table joins, which we cover in @sec-restructure. The arguments differ slightly across the three libraries, but the underlying transformations are much the same.
