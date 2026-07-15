@@ -336,7 +336,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="setup" class="level2" data-number="2.1">
 <h2 data-number="2.1" class="anchored" data-anchor-id="setup"><span class="header-section-number">2.1</span> Setup</h2>
 <p>We will begin this and every subsequent chapter by listing the core modules and datasets that must be loaded before getting started. Datasets and sources that require new functions will be loaded within the body of the text.</p>
-<div id="640e0bfc" class="cell" data-execution_count="2">
+<div id="836e2f9f" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine <span class="im">import</span> ggplot, aes</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> polars <span class="im">import</span> col <span class="im">as</span> c</span>
@@ -360,7 +360,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="sorting-rows" class="level2" data-number="2.4">
 <h2 data-number="2.4" class="anchored" data-anchor-id="sorting-rows"><span class="header-section-number">2.4</span> Sorting Rows</h2>
 <p>We use the <code>.sort()</code> method to reorder the rows of a dataset according to one or more columns. This is useful for finding extreme values or scanning a dataset in a specific order. Let’s sort the countries dataset by population and then walk through how the code works.</p>
-<div id="f24a0747" class="cell" data-execution_count="3">
+<div id="38597d94" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    country</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    .sort(c.pop)</span>
@@ -606,7 +606,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>A few things to note in this code. The code is wrapped in a pair of parentheses, each on its own line, with every other line indented by four spaces. The dataset sits on its own line, followed by the <code>sort</code> method on the next. The column to sort by is given as <code>c.pop</code>, using the prefix we just met. The result is printed, but the original dataset is unchanged: after running this code, <code>country</code> still has its original row order. These conventions carry over to every DataFrame method in this chapter.</p>
 <p>You can reverse the sort order by setting the <code>descending</code> parameter to <code>True</code>.</p>
-<div id="4928a1a1" class="cell" data-execution_count="4">
+<div id="8fbbe789" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    country</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    .sort(c.pop, descending<span class="op">=</span><span class="va">True</span>)</span>
@@ -851,7 +851,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>Now the countries with the largest population appear first. The code below sorts by region (alphabetically) and then, within each region, by population.</p>
-<div id="96257ac3" class="cell" data-execution_count="5">
+<div id="caa150c4" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    country</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    .sort(c.region, c.pop)</span>
@@ -1096,7 +1096,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>To keep a sorted dataset for later use, store it in a named variable:</p>
-<div id="62df600e" class="cell" data-execution_count="6">
+<div id="ff1be456" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>country_saved <span class="op">=</span> (</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    country</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    .sort(c.region, c.pop)</span>
@@ -1107,7 +1107,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="selecting-columns" class="level2" data-number="2.5">
 <h2 data-number="2.5" class="anchored" data-anchor-id="selecting-columns"><span class="header-section-number">2.5</span> Selecting Columns</h2>
 <p>When a dataset has many columns, it is often useful to select or reorder a subset of them. The <code>.select()</code> method does this: give it a set of columns and it returns a DataFrame containing exactly those, in the order listed.</p>
-<div id="aecc8857" class="cell" data-execution_count="7">
+<div id="99677bce" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    country</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    .select(c.iso, c.lat, c.lon)</span>
@@ -1201,7 +1201,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="selecting-rows" class="level2" data-number="2.6">
 <h2 data-number="2.6" class="anchored" data-anchor-id="selecting-rows"><span class="header-section-number">2.6</span> Selecting Rows</h2>
 <p>We often want a subset of a dataset’s rows for a particular analysis or visualization. Which function to use depends on the selection criteria. The <code>.head()</code> method returns a specified number of rows from the top of the dataset. The example below selects the first four rows.</p>
-<div id="e550cab4" class="cell" data-execution_count="8">
+<div id="d48094aa" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    country</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    .head(n<span class="op">=</span><span class="dv">4</span>)</span>
@@ -1328,7 +1328,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>The <code>.tail(n=&lt;int&gt;)</code> method works the same way but starts from the bottom of the table. The <code>.drop_nulls()</code> and <code>.drop_nans()</code> methods take no arguments and return only rows without missing values or without invalid numeric results, respectively. Polars keeps those two kinds of gap separate, and the next chapter explains the difference; for now it is enough to know that both methods exist and that neither one removes what the other one does.</p>
 <p>The <code>.sample</code> method randomly selects rows. Specify the number of rows with <code>n=&lt;int&gt;</code> or a fraction with <code>fraction=&lt;float&gt;</code>. Below, we take a random 20% sample of the dataset.</p>
-<div id="55dbc322" class="cell" data-execution_count="9">
+<div id="978585a8" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    country</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    .sample(fraction<span class="op">=</span><span class="fl">0.2</span>)</span>
@@ -1381,191 +1381,191 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
-<td>"SEN"</td>
-<td>"Senegal"</td>
-<td>"Africa"</td>
-<td>"Western Africa"</td>
-<td>18.932</td>
-<td>70.43</td>
-<td>14.366667</td>
-<td>-14.283333</td>
-<td>0.53</td>
-<td>4871</td>
-<td>38.1</td>
-<td>50.93</td>
-<td>66.0</td>
-<td>54.93987</td>
-<td>"pbp|fra|wol"</td>
-</tr>
-<tr class="even">
-<td>"FIN"</td>
-<td>"Finland"</td>
-<td>"Europe"</td>
-<td>"Northern Europe"</td>
-<td>5.623</td>
-<td>82.84</td>
-<td>65.0</td>
-<td>27.0</td>
-<td>0.948</td>
-<td>57574</td>
-<td>27.7</td>
-<td>76.99</td>
-<td>156.4</td>
-<td>99.44798</td>
-<td>"fin|swe"</td>
-</tr>
-<tr class="odd">
-<td>"MWI"</td>
-<td>"Malawi"</td>
-<td>"Africa"</td>
-<td>"Eastern Africa"</td>
-<td>22.216</td>
-<td>66.2</td>
-<td>-13.0</td>
-<td>34.0</td>
-<td>0.517</td>
-<td>1689</td>
-<td>38.5</td>
-<td>32.72</td>
-<td>21.0</td>
-<td>38.45707</td>
-<td>"nya|nya|eng|eng|tum|tum"</td>
-</tr>
-<tr class="even">
-<td>"AUT"</td>
-<td>"Austria"</td>
-<td>"Europe"</td>
-<td>"Western Europe"</td>
-<td>9.114</td>
-<td>83.17</td>
-<td>48.0</td>
-<td>14.0</td>
-<td>0.93</td>
-<td>64665</td>
-<td>30.2</td>
-<td>66.36</td>
-<td>146.3</td>
-<td>99.97291</td>
-<td>"asq|deu"</td>
-</tr>
-<tr class="odd">
-<td>"BEN"</td>
-<td>"Benin"</td>
-<td>"Africa"</td>
-<td>"Western Africa"</td>
-<td>14.814</td>
-<td>65.71</td>
-<td>8.833333</td>
-<td>2.183333</td>
-<td>0.515</td>
-<td>4143</td>
-<td>37.8</td>
-<td>44.2</td>
-<td>72.2</td>
-<td>17.38065</td>
-<td>"fra"</td>
-</tr>
-<tr class="even">
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-</tr>
-<tr class="odd">
-<td>"IRL"</td>
-<td>"Ireland"</td>
-<td>"Europe"</td>
-<td>"Northern Europe"</td>
-<td>5.308</td>
-<td>82.94</td>
-<td>53.0</td>
-<td>-8.0</td>
-<td>0.949</td>
-<td>119406</td>
-<td>null</td>
-<td>68.17</td>
-<td>103.1</td>
-<td>89.3966</td>
-<td>"eng|gle"</td>
-</tr>
-<tr class="even">
-<td>"PRY"</td>
-<td>"Paraguay"</td>
+<td>"DOM"</td>
+<td>"Dominican Republic"</td>
 <td>"Americas"</td>
-<td>"South America"</td>
-<td>7.013</td>
-<td>77.36</td>
-<td>-23.5</td>
-<td>-58.0</td>
-<td>0.756</td>
-<td>17154</td>
-<td>43.5</td>
-<td>62.14</td>
-<td>103.2</td>
-<td>89.64469</td>
-<td>"grn|spa"</td>
-</tr>
-<tr class="odd">
-<td>"MAR"</td>
-<td>"Morocco"</td>
-<td>"Africa"</td>
-<td>"Northern Africa"</td>
-<td>38.431</td>
-<td>74.71</td>
-<td>32.0</td>
-<td>-6.0</td>
-<td>0.71</td>
-<td>9583</td>
-<td>39.5</td>
-<td>44.87</td>
-<td>98.5</td>
-<td>84.47591</td>
-<td>"ara|zgh"</td>
+<td>"Caribbean"</td>
+<td>11.52</td>
+<td>74.35</td>
+<td>18.8</td>
+<td>-70.2</td>
+<td>0.776</td>
+<td>25663</td>
+<td>39.6</td>
+<td>59.21</td>
+<td>90.6</td>
+<td>86.1939</td>
+<td>"spa"</td>
 </tr>
 <tr class="even">
-<td>"ALB"</td>
-<td>"Albania"</td>
-<td>"Europe"</td>
-<td>"Southern Europe"</td>
-<td>2.772</td>
-<td>79.67</td>
-<td>41.0</td>
-<td>20.0</td>
-<td>0.81</td>
-<td>20362</td>
-<td>30.8</td>
-<td>54.45</td>
-<td>91.9</td>
-<td>98.5473</td>
-<td>"sqi"</td>
-</tr>
-<tr class="odd">
-<td>"SLV"</td>
-<td>"El Salvador"</td>
+<td>"HND"</td>
+<td>"Honduras"</td>
 <td>"Americas"</td>
 <td>"Central America"</td>
-<td>6.366</td>
-<td>76.98</td>
-<td>13.668889</td>
-<td>-88.866111</td>
-<td>0.678</td>
-<td>12221</td>
-<td>38.3</td>
-<td>64.82</td>
-<td>126.9</td>
-<td>86.19786</td>
+<td>11.006</td>
+<td>72.93</td>
+<td>14.633333</td>
+<td>-86.816667</td>
+<td>0.645</td>
+<td>6863</td>
+<td>48.2</td>
+<td>58.61</td>
+<td>113.6</td>
+<td>80.26502</td>
 <td>"spa"</td>
+</tr>
+<tr class="odd">
+<td>"BFA"</td>
+<td>"Burkina Faso"</td>
+<td>"Africa"</td>
+<td>"Western Africa"</td>
+<td>24.075</td>
+<td>62.97</td>
+<td>12.266667</td>
+<td>-2.066667</td>
+<td>0.459</td>
+<td>2661</td>
+<td>47.3</td>
+<td>44.62</td>
+<td>35.3</td>
+<td>21.77792</td>
+<td>"bib|dyu|mos"</td>
+</tr>
+<tr class="even">
+<td>"FRA"</td>
+<td>"France"</td>
+<td>"Europe"</td>
+<td>"Western Europe"</td>
+<td>66.651</td>
+<td>83.77</td>
+<td>47.0</td>
+<td>2.0</td>
+<td>0.92</td>
+<td>56113</td>
+<td>32.4</td>
+<td>65.57</td>
+<td>91.1</td>
+<td>98.65001</td>
+<td>"fra"</td>
+</tr>
+<tr class="odd">
+<td>"POL"</td>
+<td>"Poland"</td>
+<td>"Europe"</td>
+<td>"Eastern Europe"</td>
+<td>38.141</td>
+<td>79.1</td>
+<td>52.0</td>
+<td>19.0</td>
+<td>0.906</td>
+<td>47892</td>
+<td>30.2</td>
+<td>66.85</td>
+<td>123.2</td>
+<td>98.79661</td>
+<td>"pol"</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"UKR"</td>
+<td>"Ukraine"</td>
+<td>"Europe"</td>
+<td>"Eastern Europe"</td>
+<td>38.98</td>
+<td>74.89</td>
+<td>49.0</td>
+<td>32.0</td>
+<td>0.779</td>
+<td>15014</td>
+<td>25.6</td>
+<td>46.72</td>
+<td>117.8</td>
+<td>97.58724</td>
+<td>"ukr"</td>
+</tr>
+<tr class="even">
+<td>"ROU"</td>
+<td>"Romania"</td>
+<td>"Europe"</td>
+<td>"Eastern Europe"</td>
+<td>18.909</td>
+<td>76.49</td>
+<td>46.0</td>
+<td>25.0</td>
+<td>0.845</td>
+<td>42605</td>
+<td>34.8</td>
+<td>64.89</td>
+<td>119.2</td>
+<td>84.84359</td>
+<td>"ron"</td>
+</tr>
+<tr class="odd">
+<td>"LUX"</td>
+<td>"Luxembourg"</td>
+<td>"Europe"</td>
+<td>"Western Europe"</td>
+<td>0.68</td>
+<td>83.82</td>
+<td>49.77</td>
+<td>6.13</td>
+<td>0.922</td>
+<td>131038</td>
+<td>34.9</td>
+<td>70.16</td>
+<td>143.3</td>
+<td>97.60054</td>
+<td>"fra|deu|ltz"</td>
+</tr>
+<tr class="even">
+<td>"GMB"</td>
+<td>"Gambia"</td>
+<td>"Africa"</td>
+<td>"Western Africa"</td>
+<td>2.822</td>
+<td>68.16</td>
+<td>13.5</td>
+<td>-15.5</td>
+<td>0.524</td>
+<td>3199</td>
+<td>null</td>
+<td>46.91</td>
+<td>76.7</td>
+<td>46.90722</td>
+<td>"eng"</td>
+</tr>
+<tr class="odd">
+<td>"MYS"</td>
+<td>"Malaysia"</td>
+<td>"Asia"</td>
+<td>"South-eastern Asia"</td>
+<td>35.978</td>
+<td>76.03</td>
+<td>3.7805111</td>
+<td>102.314362</td>
+<td>0.819</td>
+<td>35990</td>
+<td>46.2</td>
+<td>58.68</td>
+<td>118.2</td>
+<td>95.69194</td>
+<td>"msa"</td>
 </tr>
 </tbody>
 </table>
@@ -1573,7 +1573,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>The <code>.filter()</code> method selects rows that meet a condition on the dataset’s variables. It expects a condition of the kind we described above: a comparison such as <code>c.hdi &gt; 0.9</code>, which Polars evaluates once per row and which answers <code>True</code> or <code>False</code> each time. The rows answering <code>True</code> are kept and the rest are discarded. Rows where the value being tested is missing are discarded as well, since a comparison against a missing value has no answer. The code below keeps only the rows where the Human Development Index (HDI) is greater than 0.9.</p>
-<div id="cf7488d2" class="cell" data-execution_count="10">
+<div id="9919d40f" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    country</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.hdi <span class="op">&gt;</span> <span class="fl">0.9</span>)</span>
@@ -1818,7 +1818,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>We can filter categorical variables with equality comparisons too. To keep the page from getting too cluttered, we will stop printing the result of every example from here on.</p>
-<div id="9549b07c" class="cell" data-execution_count="11">
+<div id="8da810cf" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    country</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.region <span class="op">==</span> <span class="st">"Europe"</span>)</span>
@@ -1826,14 +1826,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>This keeps every row where <code>region == "Europe"</code>. Note the double-equals operator (<code>==</code>) for testing equality; a single equals sign (<code>=</code>) is reserved for assignment.</p>
 <p>We can combine multiple conditions with the <code>&amp;</code> (and) and <code>|</code> (or) operators. Wrap each condition in parentheses when doing so:</p>
-<div id="f3ba1381" class="cell" data-execution_count="12">
+<div id="65698f8e" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    country</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>((c.region <span class="op">==</span> <span class="st">"Europe"</span>) <span class="op">&amp;</span> (c.hdi <span class="op">&gt;</span> <span class="fl">0.9</span>))</span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>To check whether a value belongs to a larger set, use the <code>.is_in</code> method, passing the set of values in square brackets.</p>
-<div id="493286c3" class="cell" data-execution_count="13">
+<div id="168e0153" class="cell" data-execution_count="13">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    country</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.region.is_in([<span class="st">"Europe"</span>, <span class="st">"Africa"</span>]))</span>
@@ -2083,7 +2083,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 data-number="2.7" class="anchored" data-anchor-id="rename-and-unique"><span class="header-section-number">2.7</span> Rename and Unique</h2>
 <p>Two smaller methods round out this set of tools: <code>.rename()</code> and <code>.unique()</code>.</p>
 <p>Use <code>.rename()</code> to give one or more columns a new name, passing a dictionary that maps each old name to its replacement. This is useful when a column name is unclear, inconsistent with the rest of your naming scheme, or awkward to type.</p>
-<div id="0b804f25" class="cell" data-execution_count="14">
+<div id="203c9477" class="cell" data-execution_count="14">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    country</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    .rename({<span class="st">"pop"</span>: <span class="st">"population"</span>})</span>
@@ -2328,7 +2328,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p><code>.unique()</code> returns a dataset with duplicate rows removed. Called with no arguments, it compares entire rows and drops any repeats. Passing a <code>subset</code> of column names instead compares only those columns, which is a quick way to get one representative row per category. The example below returns one row for each region.</p>
-<div id="7ffda0ea" class="cell" data-execution_count="15">
+<div id="ba665c5b" class="cell" data-execution_count="15">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    country</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    .unique(subset<span class="op">=</span>[<span class="st">"region"</span>])</span>
@@ -2381,6 +2381,40 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
+<td>"SEN"</td>
+<td>"Senegal"</td>
+<td>"Africa"</td>
+<td>"Western Africa"</td>
+<td>18.932</td>
+<td>70.43</td>
+<td>14.366667</td>
+<td>-14.283333</td>
+<td>0.53</td>
+<td>4871</td>
+<td>38.1</td>
+<td>50.93</td>
+<td>66.0</td>
+<td>54.93987</td>
+<td>"pbp|fra|wol"</td>
+</tr>
+<tr class="even">
+<td>"AUS"</td>
+<td>"Australia"</td>
+<td>"Oceania"</td>
+<td>"Australia and New Zealand"</td>
+<td>26.974</td>
+<td>83.79</td>
+<td>-25.0</td>
+<td>133.0</td>
+<td>0.958</td>
+<td>61943</td>
+<td>32.4</td>
+<td>70.25</td>
+<td>101.6</td>
+<td>99.99923</td>
+<td>"asf"</td>
+</tr>
+<tr class="odd">
 <td>"LKA"</td>
 <td>"Sri Lanka"</td>
 <td>"Asia"</td>
@@ -2431,40 +2465,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>99.44798</td>
 <td>"fin|swe"</td>
 </tr>
-<tr class="even">
-<td>"SEN"</td>
-<td>"Senegal"</td>
-<td>"Africa"</td>
-<td>"Western Africa"</td>
-<td>18.932</td>
-<td>70.43</td>
-<td>14.366667</td>
-<td>-14.283333</td>
-<td>0.53</td>
-<td>4871</td>
-<td>38.1</td>
-<td>50.93</td>
-<td>66.0</td>
-<td>54.93987</td>
-<td>"pbp|fra|wol"</td>
-</tr>
-<tr class="odd">
-<td>"AUS"</td>
-<td>"Australia"</td>
-<td>"Oceania"</td>
-<td>"Australia and New Zealand"</td>
-<td>26.974</td>
-<td>83.79</td>
-<td>-25.0</td>
-<td>133.0</td>
-<td>0.958</td>
-<td>61943</td>
-<td>32.4</td>
-<td>70.25</td>
-<td>101.6</td>
-<td>99.99923</td>
-<td>"asf"</td>
-</tr>
 </tbody>
 </table>
 </div>
@@ -2476,7 +2476,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 data-number="2.8" class="anchored" data-anchor-id="modifying-columns"><span class="header-section-number">2.8</span> Modifying Columns</h2>
 <p>Creating or modifying columns is a fundamental part of data analysis. You will often need to compute a new variable from existing columns, build an indicator (dummy) variable, or transform a variable before analysis.</p>
 <p>The basic pattern for adding a column is the <code>.with_columns()</code> method: specify each new or modified value, defined in terms of existing columns. Where <code>.select()</code> returns only the columns it is given, <code>.with_columns()</code> keeps the whole DataFrame and attaches the new columns to it, which is the only real difference between the two. Giving a new column the name of an existing one overwrites it. The example below multiplies the <code>pop</code> column (in millions) by 1,000 to get the population in thousands.</p>
-<div id="75b2ca30" class="cell" data-execution_count="16">
+<div id="3b185049" class="cell" data-execution_count="16">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    country</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    .with_columns(population_1k <span class="op">=</span> c.pop <span class="op">*</span> <span class="dv">1000</span>)</span>
@@ -2735,7 +2735,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>Common mathematical transformations are available by adding a <code>.</code> after the column name, followed by a function such as <code>sqrt()</code> or <code>log10()</code>.</p>
 <p>The following example takes the square root and the sine of <code>population</code> and saves each as a new column. Neither transformation is meaningful here; they are only meant to show the technique.</p>
-<div id="e06c6823" class="cell" data-execution_count="17">
+<div id="45d13e6a" class="cell" data-execution_count="17">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    country</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
@@ -2766,7 +2766,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 data-number="2.9" class="anchored" data-anchor-id="pipes"><span class="header-section-number">2.9</span> Pipes</h2>
 <p>Chaining methods together is a powerful pattern. It keeps code readable, avoids naming a pile of intermediate variables, and lets Polars optimize the whole sequence of operations internally. One limitation of method chaining is that it only gives you access to methods built into Polars. The <code>.pipe</code> method gets around this by letting you call an arbitrary function with the DataFrame as its first argument.</p>
 <p>The rule is simple: <code>df.pipe(f)</code> does the same thing as <code>f(df)</code>. The advantage is that it can be written as one more step in a chain rather than as a function wrapped around the outside of it. A quick way to see this is to pipe a DataFrame into <code>type</code>, the built-in Python function that reports what kind of object it has been given.</p>
-<div id="9879433a" class="cell" data-execution_count="18">
+<div id="e0cd242a" class="cell" data-execution_count="18">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    country</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    .pipe(<span class="bu">type</span>)</span>
@@ -2778,7 +2778,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>The DataFrame was handed to <code>type</code> as its argument, and <code>type</code> reported back what it was. Writing <code>type(country)</code> would have produced exactly the same answer. Nothing is special about <code>type</code> here; any function that accepts a DataFrame will do.</p>
 <p><code>.pipe</code> takes the function to apply as its first argument, and passes any additional arguments straight through to that function. This is what makes it useful in practice, and we will lean on it in <a href="04_graphics.html" class="quarto-xref"><span>Chapter 4</span></a>, where <code>.pipe(ggplot, aes(...))</code> hands a DataFrame to <code>ggplot</code> along with the extra arguments that describe the plot, all without breaking out of the chain.</p>
 <p>Our <code>funs.py</code> file adds one small convenience of its own, as a method rather than through <code>.pipe</code>. Polars prints ten rows of a DataFrame by default; the <code>.print()</code> method lets us choose a different number. Here we ask for <code>4</code>, which shows the first two rows and the last two.</p>
-<div id="08ae6303" class="cell" data-execution_count="19">
+<div id="77a192fc" class="cell" data-execution_count="19">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    country</span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">print</span>(<span class="dv">4</span>)</span>
@@ -2920,12 +2920,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>Leaving out the number prints every row. This is useful once you have trimmed a dataset down to its final set of columns and rows and want to check the whole result at once.</p>
+<p>Leaving out the number prints eight rows. Pass a number larger than the height of the table to see all of it at once, which is useful once you have trimmed a dataset down to its final set of rows and columns and want to check the whole result.</p>
 </section>
 <section id="further-functions" class="level2" data-number="2.10">
 <h2 data-number="2.10" class="anchored" data-anchor-id="further-functions"><span class="header-section-number">2.10</span> Further Functions</h2>
 <p>One more function is worth knowing before moving on: <code>pl.when</code>, which creates a column that depends on a condition elsewhere in the data. The example below builds a column equal to 1 for countries in the Northern Hemisphere and 0 for those in the Southern Hemisphere.</p>
-<div id="f12870c7" class="cell" data-execution_count="20">
+<div id="085ac549" class="cell" data-execution_count="20">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    country</span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
@@ -2933,7 +2933,112 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p><code>pl.when</code> can chain additional <code>.when().then()</code> pairs before the final <code>.otherwise()</code>, which makes it a compact way to build a column out of several conditions at once.</p>
+<p>The values we produce do not have to be numbers, but text takes one extra step. Writing <code>.then("north")</code> will not work: Polars reads a bare string as the <em>name of a column</em> and goes looking for one called <code>north</code>. To say that we mean the word itself, wrap it in <code>pl.lit</code>, short for literal.</p>
+<div id="a592d333" class="cell" data-execution_count="21">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    country</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>        hemisphere <span class="op">=</span> pl.when(c.lat <span class="op">&gt;=</span> <span class="dv">0</span>).then(pl.lit(<span class="st">"north"</span>)).otherwise(pl.lit(<span class="st">"south"</span>))</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><code>pl.when</code> can also chain additional <code>.when().then()</code> pairs before the final <code>.otherwise()</code>, which makes it a compact way to build a column out of several conditions at once. The conditions are checked in order and the first one to match wins, so each <code>.when()</code> only ever sees the rows that the ones above it did not already claim. Below, a country’s distance from the equator puts it in one of three climate zones.</p>
+<div id="619f934a" class="cell" data-execution_count="22">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    country</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>        zone <span class="op">=</span> (</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>            pl.when(c.lat.<span class="bu">abs</span>() <span class="op">&lt;</span> <span class="fl">23.5</span>).then(pl.lit(<span class="st">"tropical"</span>))</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>            .when(c.lat.<span class="bu">abs</span>() <span class="op">&lt;</span> <span class="dv">35</span>).then(pl.lit(<span class="st">"subtropical"</span>))</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>            .otherwise(pl.lit(<span class="st">"temperate"</span>))</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>    .select(c.iso, c.lat, c.zone)</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="17">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (135, 3)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">iso</th>
+<th data-quarto-table-cell-role="th">lat</th>
+<th data-quarto-table-cell-role="th">zone</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>f64</td>
+<td>str</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"SEN"</td>
+<td>14.366667</td>
+<td>"tropical"</td>
+</tr>
+<tr class="even">
+<td>"VEN"</td>
+<td>8.0</td>
+<td>"tropical"</td>
+</tr>
+<tr class="odd">
+<td>"FIN"</td>
+<td>65.0</td>
+<td>"temperate"</td>
+</tr>
+<tr class="even">
+<td>"USA"</td>
+<td>39.828175</td>
+<td>"temperate"</td>
+</tr>
+<tr class="odd">
+<td>"LKA"</td>
+<td>7.0</td>
+<td>"tropical"</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"ALB"</td>
+<td>41.0</td>
+<td>"temperate"</td>
+</tr>
+<tr class="even">
+<td>"MYS"</td>
+<td>3.7805111</td>
+<td>"tropical"</td>
+</tr>
+<tr class="odd">
+<td>"SLV"</td>
+<td>13.668889</td>
+<td>"tropical"</td>
+</tr>
+<tr class="even">
+<td>"CYP"</td>
+<td>35.0</td>
+<td>"temperate"</td>
+</tr>
+<tr class="odd">
+<td>"PAK"</td>
+<td>30.0</td>
+<td>"subtropical"</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Notice that the second condition, <code>c.lat.abs() &lt; 35</code>, is written as if the tropical countries were not there. They have already been claimed by the first <code>.when()</code>, so the only rows it can still match are the ones lying at least 23.5 degrees from the equator. Writing each condition as a non-overlapping range would give the same answer, but it would be more work and easier to get wrong.</p>
 </section>
 <section id="rs-dplyr-and-python-pandas" class="level2" data-number="2.11">
 <h2 data-number="2.11" class="anchored" data-anchor-id="rs-dplyr-and-python-pandas"><span class="header-section-number">2.11</span> R’s dplyr and Python Pandas</h2>

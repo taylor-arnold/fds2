@@ -366,7 +366,7 @@ window.Quarto = {
 <section id="setup" class="level2" data-number="17.1">
 <h2 data-number="17.1" class="anchored" data-anchor-id="setup"><span class="header-section-number">17.1</span> Setup</h2>
 <p>Load all of the modules and datasets needed for the chapter. In addition to the standard tools, we will use OpenCV (cv2) for image processing and PIL for image display.</p>
-<div id="f2e600be" class="cell" data-execution_count="2">
+<div id="4a705aa2" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine <span class="im">import</span> ggplot, aes</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> polars <span class="im">import</span> col <span class="im">as</span> c</span>
@@ -389,7 +389,7 @@ window.Quarto = {
 <section id="image-arrays" class="level2" data-number="17.3">
 <h2 data-number="17.3" class="anchored" data-anchor-id="image-arrays"><span class="header-section-number">17.3</span> Image Arrays</h2>
 <p>We will work with the birds image dataset, which contains photographs of ten species of birds. Each image has been preprocessed to a standard size and format, making it suitable for comparative analysis. The dataset includes species with distinctive coloration, from the brilliant yellow of canaries to the iridescent blues and greens of peacocks.</p>
-<div id="d9840285" class="cell" data-execution_count="3">
+<div id="366158e6" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>birds</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
 <div><style>
@@ -502,7 +502,7 @@ window.Quarto = {
 </div>
 <p>The dataset contains a <code>filepath</code> column pointing to each image file and a <code>label</code> column identifying the species. It also contains two columns of precomputed numbers, <code>vit</code> and <code>siglip</code>, which we will set aside until the second half of the chapter. This structure, with metadata in a table and actual image files stored separately, is a common pattern for working with image datasets. It allows us to use familiar tabular data tools for filtering, grouping, and summarizing while keeping the image files in their native format.</p>
 <p>Before turning to the pixel data, let’s look at one example of each of the ten species. Examining the data visually gives us intuition about which categories might be easy or difficult to distinguish from one another.</p>
-<div id="2b800785" class="cell" data-execution_count="4">
+<div id="25d6989a" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>DSImage.plot_image_grid(birds.group_by(c.label).first(), ncol<span class="op">=</span><span class="dv">5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -513,7 +513,7 @@ window.Quarto = {
 </div>
 </div>
 <p>To work with an image programmatically, we need to read it into Python as a numerical array. The OpenCV library provides the <code>imread</code> function for this purpose. Let’s load the first image in our dataset.</p>
-<div id="a0c7c77b" class="cell" data-execution_count="5">
+<div id="003e9722" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>img <span class="op">=</span> cv2.imread(birds.select(c.filepath).row(<span class="dv">0</span>)[<span class="dv">0</span>])</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>img</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
@@ -570,7 +570,7 @@ window.Quarto = {
 </div>
 <p>What we see is a NumPy array filled with numbers. Each number represents the intensity of a color channel at a specific pixel location. The values range from 0 (no intensity) to 255 (maximum intensity), using 8 bits per channel, which is the standard format for most digital images.</p>
 <p>The shape of this array reveals the structure of the image data.</p>
-<div id="970384d4" class="cell" data-execution_count="6">
+<div id="40644061" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>img.shape</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="6">
 <pre><code>(224, 224, 3)</code></pre>
@@ -578,7 +578,7 @@ window.Quarto = {
 </div>
 <p>The three dimensions correspond to height (number of rows of pixels), width (number of columns), and color channels. Most color images use three channels: red, green, and blue (RGB). However, OpenCV reads images in BGR order (blue, green, red), a historical convention from early computer vision libraries. This ordering rarely matters for analysis but becomes important when displaying images or converting between color spaces.</p>
 <p>We can examine a small region of the array to see the actual pixel values. Here are the values for a 4×4 block of pixels in the upper-left corner.</p>
-<div id="c08d1f6f" class="cell" data-execution_count="7">
+<div id="900ea59a" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>img[:<span class="dv">4</span>, :<span class="dv">4</span>, :]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="7">
 <pre><code>array([[[18, 20, 21],
@@ -604,7 +604,7 @@ window.Quarto = {
 </div>
 <p>Each pixel is represented by three values, one for each color channel. A pixel with values <code>[255, 255, 255]</code> would be pure white, while <code>[0, 0, 0]</code> would be pure black. Values like <code>[255, 0, 0]</code> represent pure blue (remember, OpenCV uses BGR ordering), <code>[0, 255, 0]</code> is green, and <code>[0, 0, 255]</code> is red.</p>
 <p>One of the simplest statistics we can compute from an image is the mean of all pixel values.</p>
-<div id="09534baf" class="cell" data-execution_count="8">
+<div id="8de25ce4" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>img.mean()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="8">
 <pre><code>np.float64(119.86716757015306)</code></pre>
@@ -615,7 +615,7 @@ window.Quarto = {
 <section id="brightness" class="level2" data-number="17.4">
 <h2 data-number="17.4" class="anchored" data-anchor-id="brightness"><span class="header-section-number">17.4</span> Brightness</h2>
 <p>Let’s compute the mean brightness for every image in our bird dataset. This requires iterating through all images, loading each one, and computing its mean pixel value. We store the results and add them as a new column to our DataFrame.</p>
-<div id="d7727cab" class="cell" data-execution_count="9">
+<div id="2e20c967" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>results <span class="op">=</span> []</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> row <span class="kw">in</span> birds.iter_rows(named<span class="op">=</span><span class="va">True</span>):</span>
@@ -747,7 +747,7 @@ window.Quarto = {
 </div>
 </div>
 <p>Now we have a brightness value for each image. What can this simple statistic tell us about our photographs? Let’s examine the darkest images in the collection.</p>
-<div id="3f5acbe6" class="cell" data-execution_count="10">
+<div id="95c48f32" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    birds</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    .sort(c.brightness)</span>
@@ -764,7 +764,7 @@ window.Quarto = {
 </div>
 <p>We see that the darkest images tend to have black backgrounds. This makes sense: a large area of pure black pixels (value 0) dramatically reduces the mean. The birds themselves may be brightly colored, but the dark backgrounds dominate the overall brightness calculation.</p>
 <p>The brightest images show the opposite pattern.</p>
-<div id="0db5e4f9" class="cell" data-execution_count="11">
+<div id="3874c679" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    birds</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    .sort(c.brightness, descending<span class="op">=</span><span class="va">True</span>)</span>
@@ -781,10 +781,10 @@ window.Quarto = {
 </div>
 <p>These images feature white or light-colored backgrounds, which push the mean toward higher values. This observation reveals an important limitation of simple pixel statistics: they capture properties of the entire image, including background, lighting conditions, and photographic style, not just the subject we care about. A dark bird photographed against a white background will have a higher brightness score than the same bird against a dark background.</p>
 <p>Despite this limitation, brightness can reveal interesting patterns across categories. Here are the distributions of brightness by species.</p>
-<div id="9061a630" class="cell" data-execution_count="12">
+<div id="73cfa952" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    birds</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    .sort(c.brightness)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    .sort(c.brightness.mean().over(c.label), descending<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    .pipe(ggplot, aes(c.label, c.brightness))</span>
 <span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    .geom_boxplot()</span>
 <span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -796,7 +796,7 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>Ostriches have brighter images on average, followed by ducks and robins. Peacock images are the darkest. Why might this be? Consider how each species is typically photographed. Ostriches are often captured outdoors in bright savanna settings, while peacocks with their dark iridescent plumage are sometimes photographed against dramatic dark backgrounds that emphasize their colorful displays. The brightness distribution reflects not just the birds themselves but the entire photographic context.</p>
+<p>The species are ordered here by their mean brightness, which is what the sort by <code>c.brightness.mean().over(c.label)</code> arranges before the plot is drawn. Ostrich images are the brightest on average, followed by robins and swallows, and peacock images are the darkest. Why might this be? Consider how each species is typically photographed. Ostriches are often captured outdoors in bright savanna settings, while peacocks with their dark iridescent plumage are sometimes photographed against dramatic dark backgrounds that emphasize their colorful displays. The brightness distribution reflects not just the birds themselves but the entire photographic context.</p>
 </section>
 <section id="hue-saturation-and-value" class="level2" data-number="17.5">
 <h2 data-number="17.5" class="anchored" data-anchor-id="hue-saturation-and-value"><span class="header-section-number">17.5</span> Hue, Saturation, and Value</h2>
@@ -833,7 +833,7 @@ H = \begin{cases}
 <p>The value component is simply the maximum RGB value. Saturation measures how much the color differs from gray by comparing the range of RGB values to the maximum. Hue is computed by determining which RGB component is dominant and calculating the position around the color wheel.</p>
 <p>In practice we never write any of this out ourselves. The formulas are here so that the three components mean something concrete rather than arriving as three unexplained numbers; OpenCV applies them for us with a single function call, and there is no reason to memorize them.</p>
 <p>OpenCV provides built-in functions for color space conversion. Here is how to convert an image from BGR to HSV.</p>
-<div id="3c1f475e" class="cell" data-execution_count="13">
+<div id="651d11df" class="cell" data-execution_count="13">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>img <span class="op">=</span> cv2.imread(birds.select(c.filepath).row(<span class="dv">0</span>)[<span class="dv">0</span>])</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>img_hsv <span class="op">=</span> cv2.cvtColor(img, cv2.COLOR_BGR2HSV)</span>
@@ -848,7 +848,7 @@ H = \begin{cases}
 <h2 data-number="17.6" class="anchored" data-anchor-id="colors"><span class="header-section-number">17.6</span> Colors</h2>
 <p>With images represented in HSV color space, we can classify pixels by their dominant color. The hue value tells us where each pixel falls on the color wheel, allowing us to count how many pixels are predominantly red, orange, yellow, green, and so on.</p>
 <p>Our helper method <code>DSImage.compute_colors</code> takes an HSV image and returns a dictionary with the proportion of pixels falling into each color category. It bins the hue values into segments corresponding to common color names and also accounts for the saturation and value (very dark or desaturated pixels are classified separately as black, white, or gray).</p>
-<div id="754a6f97" class="cell" data-execution_count="14">
+<div id="65b39fcc" class="cell" data-execution_count="14">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>DSImage.compute_colors(img_hsv)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="14">
 <pre><code>{'red': np.float64(6.048708545918367),
@@ -864,7 +864,7 @@ H = \begin{cases}
 </div>
 <p>The output shows what fraction of pixels in this image fall into each color category. The proportions sum to 1, giving us a complete description of the color distribution.</p>
 <p>We will cycle through the entire DataFrame and compute these color proportions for all images.</p>
-<div id="4a11d446" class="cell" data-execution_count="15">
+<div id="972c67be" class="cell" data-execution_count="15">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>results <span class="op">=</span> []</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> row <span class="kw">in</span> birds.iter_rows(named<span class="op">=</span><span class="va">True</span>):</span>
@@ -1116,7 +1116,7 @@ H = \begin{cases}
 </div>
 </div>
 <p>Now our dataset includes columns for each color category, enabling systematic analysis of color distributions across species. Let’s examine which images contain the most yellow.</p>
-<div id="1f2a9b83" class="cell" data-execution_count="16">
+<div id="4fe21149" class="cell" data-execution_count="16">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    birds</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    .sort(c.yellow, descending<span class="op">=</span><span class="va">True</span>)</span>
@@ -1133,10 +1133,10 @@ H = \begin{cases}
 </div>
 <p>The images with the highest yellow proportions include many hummingbirds photographed near yellow-green foliage, as well as the expected yellow birds. This demonstrates how color analysis captures not just the subject but the entire scene.</p>
 <p>We can compare the yellow content across species systematically.</p>
-<div id="e8227c7d" class="cell" data-execution_count="17">
+<div id="96ee4927" class="cell" data-execution_count="17">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    birds</span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    .sort(c.yellow, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    .sort(c.yellow.mean().over(c.label), descending<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    .pipe(ggplot, aes(c.label, c.yellow))</span>
 <span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    .geom_boxplot()</span>
 <span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -1150,11 +1150,11 @@ H = \begin{cases}
 </div>
 <p>Canaries, as expected, have the highest yellow content on average. Their bright yellow plumage dominates the images. Other species show less yellow, with the distribution reflecting both the birds’ coloration and their typical photographic environments.</p>
 <p>Peacocks, known for their brilliant blue-green displays, should show high values in the cyan range.</p>
-<div id="8ba28ed1" class="cell" data-execution_count="18">
+<div id="35326fe1" class="cell" data-execution_count="18">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    birds</span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    .sort(c.cyan, descending<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    .pipe(ggplot, aes(c.label, <span class="st">"cyan"</span>))</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    .sort(c.cyan.mean().over(c.label), descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    .pipe(ggplot, aes(c.label, c.cyan))</span>
 <span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    .geom_boxplot()</span>
 <span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="18">
@@ -1165,7 +1165,7 @@ H = \begin{cases}
 </div>
 </div>
 </div>
-<p>Indeed, peacocks lead in cyan content, reflecting their characteristic iridescent feathers that shimmer between blue and green. Parrots also show substantial cyan, while species like robins and canaries have minimal cyan in their typical coloration.</p>
+<p>Indeed, peacocks lead in cyan content, reflecting their characteristic iridescent feathers that shimmer between blue and green. Swallows come next, though in their case the cyan is more likely to be the sky they are photographed against than the bird itself. At the other end, kiwis and hummingbirds have almost no cyan in their images at all.</p>
 <p>These color features, while simple to compute, provide useful descriptors for organizing and exploring image collections. They can identify outliers (an unusually red canary might indicate a different subspecies or unusual lighting), reveal patterns across categories, and serve as features for further analysis.</p>
 </section>
 <section id="transfer-learning" class="level2" data-number="17.7">
@@ -1178,7 +1178,7 @@ H = \begin{cases}
 <section id="image-embeddings" class="level2" data-number="17.8">
 <h2 data-number="17.8" class="anchored" data-anchor-id="image-embeddings"><span class="header-section-number">17.8</span> Image Embeddings</h2>
 <p>Python is the de facto language for machine learning and AI research, which is one of the reasons we use it in this text. As a result, there are excellent ready-to-use libraries for loading and running pre-trained deep learning models. We have wrapped one of these models in a function called <code>ViTEmbedder</code> (the code to create it uses <strong>pytorch</strong> and is given in full in the practice notebooks). It implements Google’s <a href="https://huggingface.co/google/vit-base-patch16-224">Vision Transformer (ViT) model</a>, which was trained on a dataset of 14 million images labeled with 21,843 classes. Here is all we need to load (and, if not already grabbed, download) the model:</p>
-<div id="9c8b06ce" class="cell" data-execution_count="19">
+<div id="65716dc2" class="cell" data-execution_count="19">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>vit <span class="op">=</span> ViTEmbedder()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <div class="ansi-escaped-output">
@@ -1187,7 +1187,7 @@ H = \begin{cases}
 
 Loading weights:   0%|          | 0/198 [00:00&lt;?, ?it/s]
 
-Loading weights: 100%|██████████| 198/198 [00:00&lt;00:00, 21075.30it/s]
+Loading weights: 100%|██████████| 198/198 [00:00&lt;00:00, 6836.57it/s]
 
 
 [transformers] <span class="ansi-bold">ViTModel LOAD REPORT</span> from: google/vit-base-patch16-224
@@ -1211,7 +1211,7 @@ Notes:
 </div>
 <p>The Vision Transformer works by dividing an image into a grid of small patches and treating each patch the way a language model treats a word. The patches are then processed through layers that let the model learn relationships between different parts of the image, so the resulting representation captures both local details and global structure.</p>
 <p>Calling the model on an image path returns a sequence of 768 numbers: the image’s embedding. Unlike the TF-IDF vectors of <a href="15_text_vectors.html" class="quarto-xref"><span>Chapter 15</span></a>, which were sparse and had one interpretable dimension for each term in the vocabulary, these embeddings are dense. Nearly every entry is non-zero, and no individual dimension has a meaning we can name. Only the geometry matters: two images that are visually similar will have embeddings that are close together in the 768-dimensional space, while dissimilar images will have embeddings that are far apart. We can see an example on the first few bird images:</p>
-<div id="492fb7cd" class="cell" data-execution_count="20">
+<div id="81ade9fc" class="cell" data-execution_count="20">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    birds</span>
 <span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    .select(c.filepath, c.label)</span>
@@ -1276,7 +1276,7 @@ Notes:
 </div>
 </div>
 <p>Computing embeddings for all images in the dataset takes some time, so we have precomputed these values. In fact, they have been sitting in our dataset since we loaded it at the start of the chapter, in the column named <code>vit</code>.</p>
-<div id="ea62e9a9" class="cell" data-execution_count="21">
+<div id="d2e517a0" class="cell" data-execution_count="21">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>birds.select(c.filepath, c.label, c.vit)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="21">
 <div><style>
@@ -1363,7 +1363,7 @@ Notes:
 </div>
 <p>The precomputed embeddings are stored alongside the rest of the data in a Parquet file. Parquet is a columnar storage format that is particularly well-suited for analytical workloads. Unlike CSV files, Parquet preserves data types exactly, handles nested structures like lists efficiently, and compresses data effectively. This makes it an excellent choice for storing embeddings, which are arrays of floating-point numbers that would be awkward to represent in CSV format.</p>
 <p>What can we do with these vectors? Everything we did with document vectors. A natural first step is to visualize the whole collection at once. As in <a href="15_text_vectors.html" class="quarto-xref"><span>Chapter 15</span></a>, UMAP can project the 768-dimensional embeddings down to two dimensions while preserving, as much as possible, the relative distances between points. This lets us see how the different bird species arrange themselves in the embedding space.</p>
-<div id="5be96855" class="cell" data-execution_count="22">
+<div id="02259fb6" class="cell" data-execution_count="22">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>    birds</span>
 <span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    .pipe(</span>
@@ -1389,19 +1389,19 @@ Notes:
 <p>The UMAP plot shows that the embeddings separate the species, but it does not, on its own, tell us which cluster is which. To go from visualization to prediction, we will use an even newer class of deep learning models called zero-shot models. These allow us to classify images into categories that we describe in plain language, with no labeled examples and no additional training at all. The idea sounds almost magical at first.</p>
 <p>Zero-shot learning became practical with the development of multimodal models that learn to connect images and text in a shared embedding space. These models are trained on massive datasets of image-caption pairs scraped from the internet. By learning to match images with their textual descriptions, the models develop an understanding of concepts that can be expressed in natural language. To classify a new image, we simply compare its embedding to the embeddings of text descriptions of each possible category.</p>
 <p>We will use a model called SigLIP (Sigmoid Language-Image Pre-training), which represents the current state of the art in this type of approach. Like ViT, we have wrapped the model in a convenient interface that handles loading and embedding. The image embeddings from SigLIP are also precomputed for us, in the <code>siglip</code> column of our dataset.</p>
-<div id="c23527fb" class="cell" data-execution_count="23">
+<div id="ccbf33fd" class="cell" data-execution_count="23">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>siglip <span class="op">=</span> SigLIPEmbedder()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>[transformers] Model config: bos_token_id must be `None` or an integer within the vocabulary (between 0 and 31999), got 49406. This may result in unexpected behavior.
 [transformers] Model config: eos_token_id must be `None` or an integer within the vocabulary (between 0 and 31999), got 49407. This may result in unexpected behavior.
 
 Loading weights:   0%|          | 0/408 [00:00&lt;?, ?it/s]
-Loading weights: 100%|██████████| 408/408 [00:00&lt;00:00, 23670.08it/s]</code></pre>
+Loading weights: 100%|██████████| 408/408 [00:00&lt;00:00, 7274.53it/s]</code></pre>
 </div>
 </div>
 <p>The SigLIP model can embed both images and text into the same space. Images that match a textual description will have embeddings that are close together. We measure this closeness with the dot product of the two embedding vectors. Recall from <a href="15_text_vectors.html" class="quarto-xref"><span>Chapter 15</span></a> that the cosine similarity between two unit-length vectors is exactly their dot product; the SigLIP embeddings are scaled to unit length, so the dot product here is the same cosine similarity we used to compare documents. Values close to 1 indicate high similarity, while values close to 0 indicate the vectors are nearly orthogonal (unrelated).</p>
 <p>Let’s start with a simple example: we will create a text embedding for “a photo of a canary” and see which images in our dataset are most similar to this description.</p>
-<div id="7a3d1d99" class="cell" data-execution_count="24">
+<div id="980d3781" class="cell" data-execution_count="24">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>embed <span class="op">=</span> (</span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>    pl.DataFrame({<span class="st">"text"</span>: [<span class="st">"a photo of a canary"</span>]})</span>
 <span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
@@ -1413,7 +1413,7 @@ Loading weights: 100%|██████████| 408/408 [00:00&lt;00:00, 2
 <span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Now we can compute the similarity between this text embedding and every image in our dataset.</p>
-<div id="d6e28be8" class="cell" data-execution_count="25">
+<div id="790cd2d9" class="cell" data-execution_count="25">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>    birds</span>
 <span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>    .join(embed, how<span class="op">=</span><span class="st">"cross"</span>)</span>
@@ -1701,16 +1701,17 @@ Loading weights: 100%|██████████| 408/408 [00:00&lt;00:00, 2
 </div>
 </div>
 <p>Visualizing the similarity scores by bird species shows that canary images indeed have the highest similarity to our “a photo of a canary” text prompt. This demonstrates that the model has learned a meaningful connection between the visual appearance of canaries and the word “canary” without us ever explicitly teaching it this connection.</p>
-<div id="790a78b9" class="cell" data-execution_count="26">
+<div id="eadfbaab" class="cell" data-execution_count="26">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>    birds</span>
 <span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>    .join(embed, how<span class="op">=</span><span class="st">"cross"</span>)</span>
 <span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
-<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>        sim_score <span class="op">=</span> dot_product(c.siglip, c.siglip_txt)   </span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>        sim_score <span class="op">=</span> dot_product(c.siglip, c.siglip_txt)</span>
 <span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>    .pipe(ggplot, aes(c.sim_score, c.label))</span>
-<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>    .geom_point()</span>
-<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>    .sort(c.sim_score.mean().over(c.label))</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>    .pipe(ggplot, aes(c.sim_score, c.label))</span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>    .geom_point()</span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="26">
 <div>
 <figure class="figure">
@@ -1720,7 +1721,7 @@ Loading weights: 100%|██████████| 408/408 [00:00&lt;00:00, 2
 </div>
 </div>
 <p>To perform zero-shot classification on the entire dataset, we need to create text embeddings for all of our bird species categories. We can then assign each image to the category whose text embedding it is most similar to. This process requires no training data at all; we are simply leveraging the knowledge the model acquired during its original pre-training.</p>
-<div id="13b21591" class="cell" data-execution_count="27">
+<div id="324fa43b" class="cell" data-execution_count="27">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>embed <span class="op">=</span> (</span>
 <span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>    birds</span>
 <span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>    .select(text <span class="op">=</span> c.label.unique())</span>
@@ -1732,7 +1733,7 @@ Loading weights: 100%|██████████| 408/408 [00:00&lt;00:00, 2
 <span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>For each image, we compute its similarity to every category label, then select the label with the highest similarity as the predicted class. The classification rate tells us how often this zero-shot approach correctly identifies the bird species.</p>
-<div id="ea6e3776" class="cell" data-execution_count="28">
+<div id="cc7a6dff" class="cell" data-execution_count="28">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>    birds</span>
 <span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>    .join(embed, how<span class="op">=</span><span class="st">"cross"</span>)</span>
@@ -1773,7 +1774,7 @@ Loading weights: 100%|██████████| 408/408 [00:00&lt;00:00, 2
 </div>
 <p>The zero-shot classifier makes only a couple of errors. It is remarkable that we can achieve such a strong classification rate without a single labeled training example. This approach is particularly valuable when labeled data is expensive or impossible to obtain, when there are a very large number of categories, or when we need to quickly prototype a classification system for new categories.</p>
 <p>Let’s examine the images that the zero-shot classifier got wrong. Understanding these errors can provide insight into the model’s limitations and the ambiguity inherent in visual classification.</p>
-<div id="a40a0ff0" class="cell" data-execution_count="29">
+<div id="9d55ad81" class="cell" data-execution_count="29">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>    birds</span>
 <span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>    .join(embed, how<span class="op">=</span><span class="st">"cross"</span>)</span>

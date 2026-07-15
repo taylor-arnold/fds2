@@ -337,7 +337,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="setup" class="level2" data-number="6.1">
 <h2 data-number="6.1" class="anchored" data-anchor-id="setup"><span class="header-section-number">6.1</span> Setup</h2>
 <p>This chapter uses two datasets: the <code>country</code> data and the <code>cellphone</code> data introduced in <a href="04_graphics.html" class="quarto-xref"><span>Chapter 4</span></a>, which records the number of cellphone subscriptions per one hundred people in each country from 2003 through 2022. We load plotnine as well, since the chapter ends with a plot.</p>
-<div id="617ef329" class="cell" data-execution_count="2">
+<div id="1c9fd765" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine <span class="im">import</span> ggplot, aes</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> polars <span class="im">import</span> col <span class="im">as</span> c</span>
@@ -356,7 +356,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="the-problem" class="level2" data-number="6.3">
 <h2 data-number="6.3" class="anchored" data-anchor-id="the-problem"><span class="header-section-number">6.3</span> The Problem</h2>
 <p>Suppose we want each country’s share of its region’s population. This is a perfectly ordinary question, and it needs two ingredients on every row: the country’s own population, which is already there, and the region’s total, which is not. With the tools of <a href="05_group.html" class="quarto-xref"><span>Chapter 5</span></a> we can compute the regional totals easily enough:</p>
-<div id="27df78b3" class="cell" data-execution_count="3">
+<div id="442d9bf3" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    country</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    .group_by(c.region)</span>
@@ -384,8 +384,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
-<td>"Africa"</td>
-<td>1330.091</td>
+<td>"Europe"</td>
+<td>733.183</td>
 </tr>
 <tr class="even">
 <td>"Asia"</td>
@@ -396,12 +396,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>32.226</td>
 </tr>
 <tr class="even">
-<td>"Europe"</td>
-<td>733.183</td>
-</tr>
-<tr class="odd">
 <td>"Americas"</td>
 <td>974.124</td>
+</tr>
+<tr class="odd">
+<td>"Africa"</td>
+<td>1330.091</td>
 </tr>
 </tbody>
 </table>
@@ -414,7 +414,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="the-over-method" class="level2" data-number="6.4">
 <h2 data-number="6.4" class="anchored" data-anchor-id="the-over-method"><span class="header-section-number">6.4</span> The over Method</h2>
 <p>The <code>.over()</code> method turns an aggregation into a window function. Written after an aggregation such as <code>.sum()</code>, it says: compute this separately within each group, then write the group’s answer onto every row of that group. The population-share problem becomes a single <code>with_columns</code>:</p>
-<div id="4a8f271a" class="cell" data-execution_count="4">
+<div id="d575049a" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    country</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
@@ -692,7 +692,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>To make the contrast with aggregation concrete, here is the same quantity, the average HDI of each region, computed both ways. First with <code>.agg()</code>, which returns one row per region:</p>
-<div id="0e0f7c56" class="cell" data-execution_count="5">
+<div id="cce485a5" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    country</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    .group_by(c.region)</span>
@@ -724,14 +724,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>0.760897</td>
 </tr>
 <tr class="even">
-<td>"Americas"</td>
-<td>0.783579</td>
-</tr>
-<tr class="odd">
-<td>"Africa"</td>
-<td>0.583351</td>
-</tr>
-<tr class="even">
 <td>"Oceania"</td>
 <td>0.948</td>
 </tr>
@@ -739,13 +731,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>"Europe"</td>
 <td>0.898895</td>
 </tr>
+<tr class="even">
+<td>"Africa"</td>
+<td>0.583351</td>
+</tr>
+<tr class="odd">
+<td>"Americas"</td>
+<td>0.783579</td>
+</tr>
 </tbody>
 </table>
 </div>
 </div>
 </div>
 <p>And now with <code>.over()</code> inside <code>with_columns</code>, which returns all 135 countries with the regional average written on each:</p>
-<div id="da49c4f0" class="cell" data-execution_count="6">
+<div id="ab26872f" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    country</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    .with_columns(hdi_avg <span class="op">=</span> c.hdi.mean().over(c.region))</span>
@@ -849,7 +849,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>The numbers are identical. What differs is the shape of the result, and which questions the result can answer. The aggregated table can tell us which region has the highest average; only the windowed table can tell us which countries sit above their own region’s average, because only it keeps the countries.</p>
 <p>That last question points to a third use. Since a windowed expression is still just an expression, it can go inside <code>.filter()</code>. The code below keeps the countries whose HDI is above the median for their region:</p>
-<div id="3db7c39c" class="cell" data-execution_count="7">
+<div id="d48bb15a" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    country</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.hdi <span class="op">&gt;</span> c.hdi.median().over(c.region))</span>
@@ -1099,7 +1099,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 data-number="6.5" class="anchored" data-anchor-id="shift-and-ordered-windows"><span class="header-section-number">6.5</span> Shift and Ordered Windows</h2>
 <p>The windows so far ignore the order of rows within a group; a sum is a sum however the rows are arranged. A second family of functions depends on order directly. The simplest is <code>.shift(&lt;i64&gt;)</code>, which moves a column’s values down by the given number of rows, so that each row sees the value from <code>&lt;i64&gt;</code> rows above it. Negative values shift upward instead.</p>
 <p>The example below, carried over from an earlier chapter’s brief preview of this idea, sorts countries from largest to smallest and asks how much larger each country is than the one just below it:</p>
-<div id="062f2555" class="cell" data-execution_count="8">
+<div id="7ea7f237" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    country</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    .sort(c.pop, descending<span class="op">=</span><span class="va">True</span>)</span>
@@ -1361,7 +1361,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>Because the meaning of “the row above” depends entirely on the sort order, a <code>.shift()</code> should almost always sit directly after the <code>.sort()</code> that gives it that meaning.</p>
 <p>Shifting becomes far more useful on time series, and this is where the <code>cellphone</code> data comes in. Each row records one country in one year, so the year-over-year change in subscriptions is each row’s value minus the value one row earlier, once the rows are sorted by year. But there is a trap. If we sort the whole table and shift, the first year of each country would subtract the last year of the <em>previous</em> country, producing one nonsense value at every seam. The shift needs to restart at each country boundary, and <code>.over()</code> is how we say so:</p>
-<div id="ee717dbc" class="cell" data-execution_count="9">
+<div id="74bcc95a" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    cellphone</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    .sort(c.iso, c.year)</span>
@@ -1468,7 +1468,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Within each country, every year now shows its gain over the previous year. The first year of each country has no previous year, so its change is <code>null</code>, and the null propagates through the subtraction just as <a href="03_types.html" class="quarto-xref"><span>Chapter 3</span></a> described. This combination, an ordered function scoped by <code>.over()</code>, is the workhorse pattern of the chapter, and it is worth pausing to read the expression again until both parts feel separate: <code>shift(1)</code> says <em>look one row up</em>, and <code>.over(c.iso)</code> says <em>but never across a country boundary</em>.</p>
 <p>Polars offers a shortcut, <code>.diff()</code>, that computes the difference with the shifted value in one step, but writing out the subtraction makes the mechanics visible, so we will keep doing that for now.</p>
 <p>The neighbor-based filling methods promised in <a href="03_types.html" class="quarto-xref"><span>Chapter 3</span></a> also live in this family. <code>.forward_fill()</code> replaces each missing value with the closest valid value above it, and <code>.backward_fill()</code> with the closest below. On the cellphone data, a country with a gap year can borrow its most recent known count:</p>
-<div id="e139e62f" class="cell" data-execution_count="10">
+<div id="a948d43d" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    cellphone</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    .sort(c.iso, c.year)</span>
@@ -1482,7 +1482,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="more-ordered-tools" class="level2" data-number="6.6">
 <h2 data-number="6.6" class="anchored" data-anchor-id="more-ordered-tools"><span class="header-section-number">6.6</span> More Ordered Tools</h2>
 <p>Two more ordered tools round out the family. The <code>.rank()</code> method assigns each value its position within the column, and takes a <code>descending</code> argument so that rank 1 can mean the largest value rather than the smallest. Scoped with <code>.over()</code>, it ranks within groups. The code below finds each country’s HDI rank within its region:</p>
-<div id="03d3e773" class="cell" data-execution_count="11">
+<div id="21526496" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    country</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
@@ -1589,7 +1589,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>Unlike <code>.shift()</code>, the <code>.rank()</code> method does not care how the rows are sorted; it computes positions from the values themselves. The final <code>.sort()</code> above only affects how the result is displayed.</p>
 <p>The <code>.cum_sum()</code> method computes a running total, where each row shows the sum of every value up to and including itself. Here order matters again. One revealing use is the cumulative share of world population after sorting countries from largest to smallest:</p>
-<div id="fe169d18" class="cell" data-execution_count="12">
+<div id="ec3c8c8d" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    country</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    .sort(c.pop, descending<span class="op">=</span><span class="va">True</span>)</span>
@@ -1688,7 +1688,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 data-number="6.7" class="anchored" data-anchor-id="rolling-windows"><span class="header-section-number">6.7</span> Rolling Windows</h2>
 <p>This short section can be skipped on a first reading; nothing later in the book depends on it.</p>
 <p>A rolling window computes a statistic over a fixed span of nearby rows, most commonly a mean, so that each row is replaced by the average of itself and its recent neighbors. The effect is to smooth out short-term fluctuations so that a longer trend is easier to see. The <code>.rolling_mean()</code> method takes the span as <code>window_size</code>:</p>
-<div id="c1a87746" class="cell" data-execution_count="13">
+<div id="fe72b293" class="cell" data-execution_count="13">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    cellphone</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.iso <span class="op">==</span> <span class="st">"USA"</span>)</span>
@@ -1800,7 +1800,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>With both tools in hand, the choice between them comes down to one question: what should the result look like? If the answer is a table of groups, one row each, use <code>group_by</code> and <code>agg</code>. If the answer is the original table with group information written onto it, or filtered by it, use <code>over</code>. Aggregation reduces rows, window functions preserve them, and neither is a substitute for the other. In practice the two often appear in the same analysis: an <code>agg</code> to report regional summaries, an <code>over</code> to flag which countries drive them.</p>
 <p>Readers coming from dplyr have seen the second pattern before under a different guise. A grouped tibble passed to <code>mutate()</code> or <code>filter()</code> behaves like our <code>over</code> expressions, computing within groups while keeping the rows. Polars simply attaches the grouping to the expression rather than to the table. The Pandas equivalent is <code>groupby()</code> followed by <code>.transform()</code>, which many Pandas users meet late or not at all; if that method never quite made sense, <code>over</code> is the same idea with the pieces laid out in the open.</p>
 <p>We close with a plot, partly as a preview of <a href="07_graphics_ii.html" class="quarto-xref"><span>Chapter 7</span></a> and partly because it shows a window that runs in the other direction. Every window so far grouped by country and looked across years. The plot below does the reverse: within each <em>year</em>, it computes each country’s share of the group’s combined subscriptions, then draws how those shares shift over time.</p>
-<div id="d31789dd" class="cell" data-execution_count="14">
+<div id="2ec93f99" class="cell" data-execution_count="14">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    cellphone</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.iso.is_in([<span class="st">"BRA"</span>, <span class="st">"CHN"</span>, <span class="st">"IND"</span>, <span class="st">"NGA"</span>, <span class="st">"USA"</span>]))</span>

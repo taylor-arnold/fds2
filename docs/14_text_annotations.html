@@ -368,7 +368,7 @@ window.Quarto = {
 <section id="setup" class="level2" data-number="14.1">
 <h2 data-number="14.1" class="anchored" data-anchor-id="setup"><span class="header-section-number">14.1</span> Setup</h2>
 <p>Load all of the modules and datasets needed for the chapter. We also load spacy, a module designed specifically for processing large collections of text.</p>
-<div id="f25d54aa" class="cell" data-execution_count="2">
+<div id="9a792104" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine <span class="im">import</span> ggplot, aes</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> polars <span class="im">import</span> col <span class="im">as</span> c</span>
@@ -393,7 +393,7 @@ window.Quarto = {
 <section id="nlp-pipeline" class="level2" data-number="14.3">
 <h2 data-number="14.3" class="anchored" data-anchor-id="nlp-pipeline"><span class="header-section-number">14.3</span> NLP Pipeline</h2>
 <p>We load spaCy’s English language model, which contains statistical models trained on large corpora of English text. The “sm” suffix indicates the small model, which balances accuracy with speed and memory usage. Larger models are available for applications requiring higher precision.</p>
-<div id="20852e5f" class="cell" data-execution_count="3">
+<div id="49566e14" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>nlp <span class="op">=</span> spacy.load(<span class="st">"en_core_web_sm"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-simple callout-note callout-titled">
@@ -413,7 +413,7 @@ window.Quarto = {
 </div>
 </div>
 <p>Our primary dataset consists of Wikipedia pages for authors from the United Kingdom. We have a metadata table containing information about each author.</p>
-<div id="8870e3bb" class="cell" data-execution_count="4">
+<div id="3caa039b" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>meta</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="4">
 <div><style>
@@ -551,7 +551,7 @@ window.Quarto = {
 </div>
 </div>
 <p>As well as a separate file giving each of the texts from the documents.</p>
-<div id="c7632229" class="cell" data-execution_count="5">
+<div id="3574d4fc" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>docs</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
 <div><style>
@@ -648,7 +648,7 @@ window.Quarto = {
 <span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>pl.DataFrame(tokens_list)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Two details deserve a comment. First, spaCy attributes that end in an underscore, such as <code>lemma_</code> and <code>pos_</code>, return human-readable strings; the same attributes without the underscore return integer codes that spaCy uses internally. Second, spaCy numbers tokens from the start of the entire document (<code>token.i</code>), while our table numbers them within each sentence. The wrapper subtracts the sentence’s starting position so that <code>tid</code> and <code>head_idx</code> share the same coordinate system, and it points the root token of each sentence at itself. This bookkeeping is exactly what makes the join-based analyses later in the chapter possible.</p>
 <p>The actual function stores a few extra token attributes beyond those shown above, but the structure is the same. We now run it on the full set of documents; this takes a minute or two because every page has to pass through the entire pipeline.</p>
-<div id="b06c8633" class="cell" data-execution_count="6">
+<div id="7a766eb3" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>anno <span class="op">=</span> DSText.process(docs, nlp)</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>anno</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="6">
@@ -910,7 +910,7 @@ window.Quarto = {
 <section id="word-frequencies" class="level2" data-number="14.4">
 <h2 data-number="14.4" class="anchored" data-anchor-id="word-frequencies"><span class="header-section-number">14.4</span> Word Frequencies</h2>
 <p>Many analyses can be performed on the features in the <code>anno</code> table using only the Polars operations covered in the first five chapters of this text, without any new text-specific functions. For example, we can find the most common nouns in the dataset by filtering on the universal part of speech and grouping by lemma with the code below.</p>
-<div id="0e60ef1d" class="cell" data-execution_count="7">
+<div id="3317fdfb" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    anno</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.upos <span class="op">==</span> <span class="st">"NOUN"</span>)</span>
@@ -987,7 +987,7 @@ window.Quarto = {
 </div>
 <p>The most frequent nouns across the set of documents roughly fall into one of two categories. Those such as “year”, “life”, “death”, and “family” are nouns that we would frequently associate with biographical entries for nearly any group of people. Others, such as “poem”, “book”, “poet”, and the somewhat more generic “work”, capture the specific objects that authors produce and would therefore be prominent on their Wikipedia pages. The fact that both types show up at the top of the list helps to verify that the dataset and the NLP pipeline are working as expected.</p>
 <p>We can use a similar technique to learn about the contents of each individual document. Suppose we wanted to know which adjectives are most used on each page. This can be done by a sequence of Polars operations. First, we filter the data by the part of speech and group the rows of the dataset by the document id and lemma. Then, we count the number of rows for each unique combination of document and lemma and arrange the dataset in descending order of count. We can use the <code>head()</code> method on grouped data to take the most frequent adjectives within each document:</p>
-<div id="6d4b02b4" class="cell" data-execution_count="8">
+<div id="249eef5c" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    anno</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.upos <span class="op">==</span> <span class="st">"ADJ"</span>)</span>
@@ -1021,48 +1021,48 @@ window.Quarto = {
 </thead>
 <tbody>
 <tr class="odd">
-<td>"James Boswell"</td>
-<td>"first; great; literary; old; o…</td>
+<td>"George Herbert"</td>
+<td>"english; first; many; musical;…</td>
 </tr>
 <tr class="even">
-<td>"Samuel Pepys"</td>
-<td>"detailed; few; first; great; i…</td>
+<td>"Elizabeth Barrett Browning"</td>
+<td>"early; first; great; large; li…</td>
 </tr>
 <tr class="odd">
-<td>"Samuel Johnson"</td>
-<td>"english; first; great; literar…</td>
+<td>"T. S. Eliot"</td>
+<td>"early; literary; many; more; m…</td>
 </tr>
 <tr class="even">
-<td>"Geoffrey Chaucer"</td>
-<td>"common; early; english; first;…</td>
+<td>"Katherine Philipps"</td>
+<td>"cavalier; female; french; lite…</td>
 </tr>
 <tr class="odd">
-<td>"Christina Rossetti"</td>
-<td>"devotional; early; female; fir…</td>
+<td>"John Clare"</td>
+<td>"english; first; later; major; …</td>
 </tr>
 <tr class="even">
 <td>…</td>
 <td>…</td>
 </tr>
 <tr class="odd">
-<td>"George Orwell"</td>
-<td>"-; english; first; good; liter…</td>
+<td>"Beatrix Potter"</td>
+<td>"artistic; first; interested; l…</td>
 </tr>
 <tr class="even">
-<td>"Ben Jonson"</td>
-<td>"classical; early; english; fir…</td>
+<td>"Christopher Isherwood"</td>
+<td>"-; american; few; first; many;…</td>
 </tr>
 <tr class="odd">
-<td>"John Milton"</td>
-<td>"blank; english; first; great; …</td>
+<td>"Thomas Hobbes"</td>
+<td>"civil; first; human; other; ow…</td>
 </tr>
 <tr class="even">
-<td>"Joseph Conrad"</td>
-<td>"british; first; french; litera…</td>
+<td>"Walter Raleigh"</td>
+<td>"eld; english; half; irish; man…</td>
 </tr>
 <tr class="odd">
-<td>"Charlotte Smith"</td>
-<td>"first; legal; literary; many; …</td>
+<td>"James Joyce"</td>
+<td>"british; english; first; irish…</td>
 </tr>
 </tbody>
 </table>
@@ -1077,7 +1077,7 @@ window.Quarto = {
 <p>So far we have analyzed individual words in isolation. But meaning often emerges from combinations of words. The phrase “New York” refers to a specific city, not something novel and a name. “Machine learning” describes a field of study, not appliances that acquire knowledge. “Poet laureate” is a title, not just any poet who happens to be a laureate. To capture these multi-word expressions, we turn to <em>n-grams</em>: contiguous sequences of n tokens.</p>
 <p>A unigram is a single token (what we have been working with). A bigram is a pair of adjacent tokens. A trigram is a sequence of three tokens. In general, an n-gram captures local word order, which is lost when we treat documents as unordered collections of words.</p>
 <p>Constructing n-grams requires us to look at tokens in context. The window functions that we introduced in <a href="06_window.html" class="quarto-xref"><span>Chapter 6</span></a> allow us to access neighboring rows, which we can use to pair each token with the tokens that follow it. There, we shifted page sizes to compare successive Wikipedia revisions; here, exactly the same <code>.shift()</code> and <code>.over()</code> methods align adjacent words on the same row. This is a nice illustration of the point made at the start of the temporal chapter: any dataset with a meaningful row ordering can be treated with temporal tools, and a text read token-by-token is exactly such a dataset.</p>
-<div id="c4f40c8e" class="cell" data-execution_count="9">
+<div id="87b44ad5" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>bigrams <span class="op">=</span> (</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    anno</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.is_alpha)</span>
@@ -1215,7 +1215,7 @@ window.Quarto = {
 </div>
 <p>The <code>shift(-1)</code> operation moves each column up by one position within each document and sentence, so that each row contains both the current token and the following token. We filter to keep only cases where both tokens are alphabetic, excluding bigrams that span punctuation or sentence boundaries.</p>
 <p>Now we can count bigram frequencies just as we counted unigram frequencies:</p>
-<div id="861f563b" class="cell" data-execution_count="10">
+<div id="6e415f5e" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    bigrams</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    .group_by(c.bigram)</span>
@@ -1297,7 +1297,7 @@ window.Quarto = {
 <p><span class="math display">\[ \text{PMI}(w_1, w_2) = \log_2 \frac{P(w_1, w_2)}{P(w_1) \cdot P(w_2)} \]</span></p>
 <p>A high PMI indicates that the words co-occur much more frequently than their individual frequencies would suggest. A PMI of zero means the words are independent. Negative PMI (rare in practice for bigrams that actually occur) would indicate the words avoid each other.</p>
 <p>To compute this we need a few intermediate steps. First of all, we can count the number of times each word appears in all of the texts.</p>
-<div id="579de0b9" class="cell" data-execution_count="11">
+<div id="2891727d" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>word_counts <span class="op">=</span> (</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    anno</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.is_alpha)</span>
@@ -1313,7 +1313,7 @@ window.Quarto = {
 <span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Then, we count the number of times each bigram occurs.</p>
-<div id="0b8ca451" class="cell" data-execution_count="12">
+<div id="861a8bdd" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>bigram_counts <span class="op">=</span> (</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    bigrams</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    .group_by(c.bigram, c.lemma, c.next_token)</span>
@@ -1323,7 +1323,7 @@ window.Quarto = {
 <span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>total_bigrams <span class="op">=</span> bigrams.select(pl.<span class="bu">len</span>()).item()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>And, finally, we can combine the data together to get the PMI scores for each bigram and sort to find those with the highest scores.</p>
-<div id="eefef8c0" class="cell" data-execution_count="13">
+<div id="82431084" class="cell" data-execution_count="13">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    bigram_counts</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    .join(</span>
@@ -1373,12 +1373,12 @@ window.Quarto = {
 </thead>
 <tbody>
 <tr class="odd">
-<td>"El Dorado"</td>
+<td>"Lang Syne"</td>
 <td>5</td>
 <td>16.27981</td>
 </tr>
 <tr class="even">
-<td>"Lang Syne"</td>
+<td>"El Dorado"</td>
 <td>5</td>
 <td>16.27981</td>
 </tr>
@@ -1393,8 +1393,8 @@ window.Quarto = {
 <td>16.016776</td>
 </tr>
 <tr class="odd">
-<td>"Biographia Literaria"</td>
-<td>6</td>
+<td>"Auld Lang"</td>
+<td>5</td>
 <td>16.016776</td>
 </tr>
 <tr class="even">
@@ -1403,18 +1403,18 @@ window.Quarto = {
 <td>…</td>
 </tr>
 <tr class="odd">
-<td>"Vox Clamantis"</td>
-<td>5</td>
+<td>"Chatterleys Lover"</td>
+<td>7</td>
 <td>15.794384</td>
 </tr>
 <tr class="even">
-<td>"Sweden Norway"</td>
+<td>"gross indecency"</td>
 <td>5</td>
 <td>15.794384</td>
 </tr>
 <tr class="odd">
-<td>"Spinozas Ethics"</td>
-<td>5</td>
+<td>"Encyclopædia Britannica"</td>
+<td>7</td>
 <td>15.794384</td>
 </tr>
 <tr class="even">
@@ -1423,8 +1423,8 @@ window.Quarto = {
 <td>15.794384</td>
 </tr>
 <tr class="odd">
-<td>"MolotovRibbentrop Pact"</td>
-<td>6</td>
+<td>"Spinozas Ethics"</td>
+<td>5</td>
 <td>15.794384</td>
 </tr>
 </tbody>
@@ -1434,7 +1434,7 @@ window.Quarto = {
 </div>
 <p>The high-PMI bigrams tell a different story than the high-frequency bigrams. These are phrases where the component words strongly predict each other: proper names, technical terms, and domain-specific expressions. Many of these would be good candidates for treating as single units in downstream analysis. Notice the <code>filter(c.bigram_count &gt;= 5)</code> step; without a minimum count, PMI is dominated by pairs of rare words that happen to appear together once, which are usually noise rather than genuine collocations.</p>
 <p>We can extend the same logic to trigrams by shifting twice:</p>
-<div id="2ffb66d6" class="cell" data-execution_count="14">
+<div id="5aaad4f7" class="cell" data-execution_count="14">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    anno</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.is_alpha)</span>
@@ -1528,7 +1528,7 @@ window.Quarto = {
 <section id="named-entity-recognition" class="level2" data-number="14.6">
 <h2 data-number="14.6" class="anchored" data-anchor-id="named-entity-recognition"><span class="header-section-number">14.6</span> Named Entity Recognition</h2>
 <p>Named entity recognition (NER) identifies and classifies proper nouns and other specific references in text. SpaCy’s NER model recognizes several entity types: people (PERSON), organizations (ORG), geopolitical entities like countries and cities (GPE), dates (DATE), works of art (WORK_OF_ART), and others. These annotations are stored in the <code>ent_type</code> column of our token table.</p>
-<div id="d835ae2d" class="cell" data-execution_count="15">
+<div id="aea54aaa" class="cell" data-execution_count="15">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    anno</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.ent_type <span class="op">!=</span> <span class="st">""</span>)</span>
@@ -1645,7 +1645,7 @@ window.Quarto = {
 </div>
 <p>Each token that is part of a named entity receives a type label. Multi-word entities like “United Kingdom” have the same label on each constituent token. To work with complete entities rather than individual tokens, we need to group consecutive tokens with the same entity type.</p>
 <p>This is where the <code>ent_iob</code> column earns its place in the table. A “B” marks the first token of each entity, so taking a cumulative sum of the indicator <code>c.ent_iob == "B"</code> within each document assigns every token of the first entity the id 1, every token of the second entity the id 2, and so on. Grouping by that id and joining the tokens back together with <code>str.join</code> reconstructs the full entity text.</p>
-<div id="6b9fe71d" class="cell" data-execution_count="16">
+<div id="87ba0228" class="cell" data-execution_count="16">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>entities <span class="op">=</span> (</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    anno</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.ent_type <span class="op">!=</span> <span class="st">""</span>)</span>
@@ -1685,59 +1685,59 @@ window.Quarto = {
 </thead>
 <tbody>
 <tr class="odd">
-<td>"Emilia Lanier"</td>
-<td>"GPE"</td>
-<td>"Bassano"</td>
-</tr>
-<tr class="even">
-<td>"Jonathan Swift"</td>
-<td>"FAC"</td>
-<td>"Swift"</td>
-</tr>
-<tr class="odd">
-<td>"T. S. Eliot"</td>
-<td>"CARDINAL"</td>
-<td>"one"</td>
-</tr>
-<tr class="even">
-<td>"Oscar Wilde"</td>
-<td>"DATE"</td>
-<td>"the early 1890s"</td>
-</tr>
-<tr class="odd">
-<td>"Charles Dickens"</td>
+<td>"George Orwell"</td>
 <td>"PERSON"</td>
-<td>"Dickens"</td>
-</tr>
-<tr class="even">
-<td>…</td>
-<td>…</td>
-<td>…</td>
-</tr>
-<tr class="odd">
-<td>"Rudyard Kipling"</td>
-<td>"ORG"</td>
-<td>"the English Channel"</td>
-</tr>
-<tr class="even">
-<td>"Walter Raleigh"</td>
-<td>"ORG"</td>
-<td>"Raleigh"</td>
-</tr>
-<tr class="odd">
-<td>"John Keats"</td>
-<td>"ORDINAL"</td>
-<td>"first"</td>
+<td>"Westropes"</td>
 </tr>
 <tr class="even">
 <td>"Charles Dickens"</td>
 <td>"FAC"</td>
-<td>"Centennial Park"</td>
+<td>"Furnivals Inn"</td>
 </tr>
 <tr class="odd">
-<td>"James Joyce"</td>
-<td>"GPE"</td>
-<td>"Dublin"</td>
+<td>"George Bernard Shaw"</td>
+<td>"ORG"</td>
+<td>"Shaw"</td>
+</tr>
+<tr class="even">
+<td>"Jane Austen"</td>
+<td>"DATE"</td>
+<td>"Five days later"</td>
+</tr>
+<tr class="odd">
+<td>"William Blake"</td>
+<td>"NORP"</td>
+<td>"British"</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"Percy Bysshe Shelley"</td>
+<td>"PERSON"</td>
+<td>"Shelley"</td>
+</tr>
+<tr class="even">
+<td>"D. H. Lawrence"</td>
+<td>"NORP"</td>
+<td>"German"</td>
+</tr>
+<tr class="odd">
+<td>"W. H. Auden"</td>
+<td>"CARDINAL"</td>
+<td>"seven"</td>
+</tr>
+<tr class="even">
+<td>"Christopher Isherwood"</td>
+<td>"PERSON"</td>
+<td>"Swami"</td>
+</tr>
+<tr class="odd">
+<td>"Ben Jonson"</td>
+<td>"LOC"</td>
+<td>"English Renaissance"</td>
 </tr>
 </tbody>
 </table>
@@ -1745,7 +1745,7 @@ window.Quarto = {
 </div>
 </div>
 <p>Now we can analyze entities at the appropriate level of granularity. For example, we can find the most frequently mentioned people across all documents:</p>
-<div id="930a3049" class="cell" data-execution_count="17">
+<div id="5efa5084" class="cell" data-execution_count="17">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    entities</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.ent_type <span class="op">==</span> <span class="st">"PERSON"</span>)</span>
@@ -1826,7 +1826,7 @@ window.Quarto = {
 </div>
 <p>The most frequently mentioned people likely include both the subjects of the Wikipedia pages and other figures who appear across multiple biographies: editors, patrons, family members, or influential contemporaries.</p>
 <p>We can also examine which entity types are most common overall. Because the summarized table has one row per entity type, this is a natural place for a bar plot, built with the same plotnine syntax from <a href="04_graphics.html" class="quarto-xref"><span>Chapter 4</span></a>. We pipe the aggregated table into <code>ggplot</code>, use a column geometry, and flip the coordinates so that the type labels are easy to read.</p>
-<div id="61c033bf" class="cell" data-execution_count="18">
+<div id="71e441d0" class="cell" data-execution_count="18">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    entities</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    .group_by(c.ent_type)</span>
@@ -1845,7 +1845,7 @@ window.Quarto = {
 </div>
 <p>Biographical articles naturally contain many dates (birth, death, publication) and references to people and places. The distribution of entity types provides a high-level characterization of the content; a corpus of corporate press releases or scientific abstracts would produce a very different profile.</p>
 <p>Entity co-occurrence within documents can reveal relationships. Which people are mentioned together? To find out, we build a table with one row per person mention, join it to itself by document, and count how often each pair shares a page. The filter <code>c.person &lt; c.person_2</code> keeps one copy of each pair and removes self-pairs.</p>
-<div id="f1244000" class="cell" data-execution_count="19">
+<div id="a52f77d9" class="cell" data-execution_count="19">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>people <span class="op">=</span> (</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    entities</span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.ent_type <span class="op">==</span> <span class="st">"PERSON"</span>)</span>
@@ -1954,7 +1954,7 @@ window.Quarto = {
 <li><strong>ROOT</strong>: The root of the sentence</li>
 </ul>
 <p>Let’s look at a particular example from the Seamus Heaney article.</p>
-<div id="3f2883ec" class="cell" data-execution_count="20">
+<div id="fe59da6c" class="cell" data-execution_count="20">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    anno</span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.doc_id <span class="op">==</span> <span class="st">"Seamus Heaney"</span>)</span>
@@ -2071,7 +2071,7 @@ window.Quarto = {
 </div>
 </div>
 <p>We can use dependency relations to extract specific grammatical patterns. For example, to find what subjects do what actions, we can look for subject-verb pairs. A subject’s <code>head_idx</code> points at the verb it belongs to, and because <code>DSText.process</code> put <code>tid</code> and <code>head_idx</code> in the same sentence-level coordinate system, matching them up is an ordinary join.</p>
-<div id="85c0eb93" class="cell" data-execution_count="21">
+<div id="0da91b60" class="cell" data-execution_count="21">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>verbs <span class="op">=</span> (</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    anno</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.upos <span class="op">==</span> <span class="st">"VERB"</span>)</span>
@@ -2176,7 +2176,7 @@ window.Quarto = {
 </div>
 <p>This reveals the typical actions associated with different subjects in our corpus. We might see that authors “write”, “publish”, and “die”, while works “appear”, “receive”, and “influence”.</p>
 <p>We can also extract adjective-noun pairs to see how different concepts are described:</p>
-<div id="a6de4806" class="cell" data-execution_count="22">
+<div id="abf8c64a" class="cell" data-execution_count="22">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    anno</span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.dep <span class="op">==</span> <span class="st">"amod"</span>, c.is_alpha)</span>
@@ -2230,13 +2230,13 @@ window.Quarto = {
 <td>50</td>
 </tr>
 <tr class="odd">
-<td>"early"</td>
-<td>"work"</td>
+<td>"same"</td>
+<td>"time"</td>
 <td>44</td>
 </tr>
 <tr class="even">
-<td>"same"</td>
-<td>"time"</td>
+<td>"early"</td>
+<td>"work"</td>
 <td>44</td>
 </tr>
 <tr class="odd">
@@ -2260,13 +2260,13 @@ window.Quarto = {
 <td>33</td>
 </tr>
 <tr class="odd">
-<td>"young"</td>
-<td>"man"</td>
+<td>"literary"</td>
+<td>"critic"</td>
 <td>32</td>
 </tr>
 <tr class="even">
-<td>"literary"</td>
-<td>"critic"</td>
+<td>"young"</td>
+<td>"man"</td>
 <td>32</td>
 </tr>
 </tbody>
@@ -2296,7 +2296,7 @@ window.Quarto = {
 <span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># split the window into tokens before and after the keyword,</span></span>
 <span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># then print one line: doc_id:sid   left context [keyword] right context</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Because the window is defined by <code>sid</code> and <code>tid</code>, the context never crosses a sentence boundary; a keyword near the start of a sentence simply has a shorter left context. Note also that this function prints its results rather than returning a table. The printed output pads each piece to a fixed width so that the keywords line up vertically, which is what makes a concordance readable.</p>
-<div id="1d67faad" class="cell" data-execution_count="23">
+<div id="8ff21980" class="cell" data-execution_count="23">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>DSText.kwic(anno, <span class="st">"poetry"</span>, max_num<span class="op">=</span><span class="dv">15</span>, window<span class="op">=</span><span class="dv">5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Marie de France:101                             exhibit a form of lyrical [poetry] that influenced the way that            
@@ -2322,7 +2322,7 @@ Edmund Spenser:84                            scholars have noted that his [poetr
 <h2 data-number="14.9" class="anchored" data-anchor-id="complexity-metrics"><span class="header-section-number">14.9</span> Complexity Metrics</h2>
 <p>Beyond analyzing content, we can characterize the <em>style</em> of texts using quantitative measures of readability and complexity. These metrics, originally developed to assess the difficulty of reading materials for educational purposes, provide useful descriptive statistics for comparing texts.</p>
 <p>For example, sentence length is one of the simplest style measures. Longer sentences tend to be more complex and harder to read.</p>
-<div id="8375754c" class="cell" data-execution_count="24">
+<div id="f8892011" class="cell" data-execution_count="24">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    anno</span>
 <span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    .group_by([c.doc_id, c.sid])</span>
@@ -2430,7 +2430,7 @@ Edmund Spenser:84                            scholars have noted that his [poetr
 </div>
 </div>
 <p>Type-token ratio (TTR) measures vocabulary richness: the number of unique words (types) divided by the total number of words (tokens). A higher TTR indicates more varied vocabulary.</p>
-<div id="907a9169" class="cell" data-execution_count="25">
+<div id="6c53f0a4" class="cell" data-execution_count="25">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>    anno</span>
 <span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.is_alpha)</span>
@@ -2537,7 +2537,7 @@ Edmund Spenser:84                            scholars have noted that his [poetr
 </div>
 <p>TTR is sensitive to document length: longer documents naturally have lower TTR because common words get repeated. For fair comparison across documents of different lengths, we can compute TTR on a fixed-size sample of tokens.</p>
 <p>Average word length correlates with vocabulary sophistication. Documents using more polysyllabic, Latinate vocabulary will have higher average word lengths.</p>
-<div id="72d6d98f" class="cell" data-execution_count="26">
+<div id="45e83dab" class="cell" data-execution_count="26">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    anno</span>
 <span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.is_alpha)</span>
@@ -2618,7 +2618,7 @@ Edmund Spenser:84                            scholars have noted that his [poetr
 </div>
 </div>
 <p>Finally, function word ratio measures the proportion of grammatical words (articles, prepositions, pronouns) versus content words (nouns, verbs, adjectives). Different genres and styles have characteristic function word profiles.</p>
-<div id="64315235" class="cell" data-execution_count="27">
+<div id="35a5335d" class="cell" data-execution_count="27">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>content_pos <span class="op">=</span> [<span class="st">"NOUN"</span>, <span class="st">"VERB"</span>, <span class="st">"ADJ"</span>, <span class="st">"ADV"</span>]</span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -2729,7 +2729,7 @@ Edmund Spenser:84                            scholars have noted that his [poetr
 </div>
 </div>
 <p>Tables of the top ten documents show the extremes, but the metrics are easier to interpret when we look at the whole corpus at once. The chain below computes two of the measures for every document, joins them into a single table, and pipes the result into a scatter plot. Each point is one author’s page.</p>
-<div id="7c7b205e" class="cell" data-execution_count="28">
+<div id="5163316e" class="cell" data-execution_count="28">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>    anno</span>
 <span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.is_alpha)</span>
