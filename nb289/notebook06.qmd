@@ -1,0 +1,266 @@
+---
+title: "Notebook06"
+solutions-release-date: "2026-09-16"
+---
+
+### Setup
+
+Run all of the following before starting the notebook.
+
+```{python}
+#| tags: [noclear]
+#| eval: false
+! wget -q -nc https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/funs.py
+```
+
+```{python}
+#| tags: [noclear]
+import polars as pl
+from plotnine import ggplot, aes
+from polars import col as c
+
+import funs
+
+ub = "https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"
+```
+
+```{python}
+#| tags: [remove]
+#| include: false
+ub = ""
+```
+
+```{python}
+#| tags: [noclear]
+storm = pl.read_csv(ub + "data/storms.csv")
+```
+
+### Questions
+
+This notebook uses the record of North Atlantic tropical cyclones kept by the
+U.S. National Hurricane Center. A row is not a storm. It is one observation of
+one storm at one moment: where the center of the storm was (`lon` and `lat`,
+in degrees), how fast its winds were blowing (`wind`, in knots), what
+Saffir-Simpson `category` it had reached, and a two-letter `status` code, where
+`TD` is a tropical depression, `TS` a tropical storm, and `HU` a hurricane. The
+remaining status codes describe systems that are not quite tropical. Positions
+are logged every six hours, so a storm that lasts a week leaves behind about
+thirty rows. The columns `year`, `month`, `day`, and `hour` give the time of the
+observation, and `doy` gives the day of the year, counting from 1 on the first
+of January.
+
+Unless a question says otherwise, just print the result of each block; do not
+save it to a variable.
+
+1. Make a scatter plot of all 25,112 observations with longitude on the x-axis
+and latitude on the y-axis.
+
+```{python}
+(
+    storm
+    .pipe(ggplot, aes(c.lon, c.lat))
+    .geom_point()
+)
+```
+
+Nothing in that code knows what a map is, and yet the outline of one is there.
+The points fan out from the tropics on the lower left, bunch up over the Gulf
+and the Caribbean, and drift northeast into the open Atlantic, which is the path
+storms take. The middle of the plot is a solid black mass, so this is the last
+plot we can read this way.
+
+2. There are too many points to follow any single storm. Plot the same two
+columns again, but only for the 2005 season, which produced 688 observations
+across 21 named storms.
+
+```{python}
+(
+    storm
+    .filter(c.year == 2005)
+    .pipe(ggplot, aes(c.lon, c.lat))
+    .geom_point()
+)
+```
+
+3. One of those 2005 storms was Katrina. Filter down to the rows where `name` is
+`"Katrina"` and plot the track. The result is not one storm. What happened?
+
+```{python}
+(
+    storm
+    .filter(c.name == "Katrina")
+    .pipe(ggplot, aes(c.lon, c.lat))
+    .geom_point()
+)
+```
+
+**Answer**: The filter returns 70 rows describing three different storms. The
+Hurricane Center recycles names on a six-year rotation, so a name is reused
+until a storm is bad enough to have its name retired. There was a Katrina in
+1981 and another in 1999 before the one in 2005. The name alone does not
+identify a storm. The name and the year together do.
+
+4. Fix the previous plot by filtering on the name and the year at once. You
+should be left with 34 observations.
+
+```{python}
+(
+    storm
+    .filter((c.name == "Katrina") & (c.year == 2005))
+    .pipe(ggplot, aes(c.lon, c.lat))
+    .geom_point()
+)
+```
+
+Now the shape of the storm's path is clear. Katrina formed near the Bahamas,
+crossed the southern tip of Florida, turned northwest into the Gulf of Mexico,
+and came ashore in Louisiana before running up into the Ohio valley.
+
+5. The plot above shows where Katrina went but says nothing about how strong it
+was. Using the same two filters, plot the day of the year on the x-axis and the
+wind speed on the y-axis.
+
+```{python}
+(
+    storm
+    .filter((c.name == "Katrina") & (c.year == 2005))
+    .pipe(ggplot, aes(c.doy, c.wind))
+    .geom_point()
+)
+```
+
+The whole life of the storm took nine days, from day 235 to day 243. It
+strengthened slowly, crossed Florida, then doubled in strength in about
+forty-eight hours over the warm water of the Gulf, peaking at 150 knots. The
+collapse on the right of the plot is landfall. Each point is a separate reading
+taken six hours after the last one, which is why they are evenly spaced. Drawing
+a line between them is the obvious next thing to want, and it is the first thing
+we will do next class.
+
+6. Which observation recorded the highest wind speed in the whole dataset? Sort
+the data by wind speed, largest first, keep the first five rows, and print the
+name, year, status, category, and wind columns.
+
+```{python}
+(
+    storm
+    .sort(c.wind, descending=True)
+    .head(5)
+    .select(c.name, c.year, c.status, c.category, c.wind)
+)
+```
+
+7. The record belongs to Hurricane Allen in 1980, at 165 knots, which is about
+190 miles per hour. Plot its track.
+
+```{python}
+(
+    storm
+    .filter((c.name == "Allen") & (c.year == 1980))
+    .pipe(ggplot, aes(c.lon, c.lat))
+    .geom_point()
+)
+```
+
+Allen ran almost the entire length of the basin, from the open Atlantic through
+the Caribbean and into southern Texas.
+
+8. Make a scatter plot with `category` on the x-axis and `wind` on the y-axis,
+using every row of the data. What does this plot tell you about hurricanes?
+
+```{python}
+(
+    storm
+    .pipe(ggplot, aes(c.category, c.wind))
+    .geom_point()
+)
+```
+
+**Answer**: Nothing. The seven columns of points do not overlap at all, because
+the category is not a second measurement of the storm. It is calculated from the
+wind speed by looking up which band the speed falls into: 65 to 80 knots is a
+category 1, 140 knots and above is a category 5, and anything under 35 knots is
+recorded as a -1, meaning the system was not yet a tropical storm. A plot of two
+columns usually tells you how two things relate to each other in the world. Here
+it tells you the definition of a word. It is worth knowing which of your columns
+were measured and which were derived from the others, because only the first
+kind can surprise you.
+
+9. Since the category is just the wind speed in disguise, it makes a convenient
+filter. Plot the location of every observation that reached category 5.
+
+```{python}
+(
+    storm
+    .filter(c.category == 5)
+    .pipe(ggplot, aes(c.lon, c.lat))
+    .geom_point()
+)
+```
+
+There are only 136 such observations in seventy years. They are spread across
+the Caribbean, the Gulf, and the open Atlantic, but they all sit low on the
+plot: not one of them is north of 30.3 degrees of latitude, which is roughly the
+level of Jacksonville. Storms this size need very warm water underneath them,
+and it runs out long before they reach the latitude of New York.
+
+10. Now look at the season. Plot the day of the year against the wind speed for
+every row in the dataset.
+
+```{python}
+(
+    storm
+    .pipe(ggplot, aes(c.doy, c.wind))
+    .geom_point()
+)
+```
+
+The outline of the hurricane season is the upper edge of this cloud. The record
+starts in early May and runs to the end of December, but almost everything above
+100 knots happens between day 220 and day 295, which is mid-August to late
+October. Notice also that the points fall into rows rather than spreading out
+smoothly. Wind speed is reported in five-knot steps, so thousands of
+observations land on the same handful of values and sit exactly on top of one
+another. Twenty-five thousand points went into this plot and you cannot tell
+which parts of it are crowded. The tools for fixing that come later.
+
+There is one other thing to see here: a small clump of points off on its own at
+the far left, before day 20, cut off from the season by three empty months. Find
+out what those are by filtering the data and taking one row per storm.
+
+```{python}
+(
+    storm
+    .filter(c.doy < 100)
+    .unique(subset=["name", "year"])
+    .select(c.name, c.year, c.month, c.day, c.wind, c.status)
+)
+```
+
+Two storms, seventy years apart. Alice arrived on New Year's Day of 1955, and
+Alex was a genuine January hurricane in 2016. A plot of 25,112 points led us to
+the two strangest rows in the data, which is a good argument for plotting things
+before you summarize them.
+
+11. Do hurricanes weaken as they travel north? Take the observations from 1990
+onward where the status was `"HU"`, add a column giving the wind speed in miles
+per hour instead of knots (multiply by 1.15078), and plot latitude against that
+new column.
+
+```{python}
+(
+    storm
+    .filter((c.status == "HU") & (c.year >= 1990))
+    .with_columns(wind_mph = c.wind * 1.15078)
+    .pipe(ggplot, aes(c.lat, c.wind_mph))
+    .geom_point()
+)
+```
+
+The answer is yes, but the shape is a ceiling rather than a slope. Weak
+hurricanes turn up at every latitude, so the bottom of the plot stays flat. The
+top does not. The strongest winds, up around 185 miles per hour, only ever
+appear between about 12 and 30 degrees, and by 40 degrees nothing in the record
+has passed 115. Try the plot once more with `c.wind` in place of `c.wind_mph`.
+It is the same picture with different numbers on the axis, which is all that
+changing a unit should ever do to a graphic.

@@ -1,0 +1,499 @@
+---
+title: "Notebook19"
+solutions-release-date: "2026-11-09"
+---
+
+### Setup
+
+Run all of the following before starting the notebook.
+
+```{python}
+#| tags: [noclear]
+#| eval: false
+! wget -q -nc https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/funs.py
+```
+
+```{python}
+#| tags: [noclear]
+import polars as pl
+from plotnine import ggplot, aes
+from polars import col as c
+
+import funs
+
+ub = "https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"
+```
+
+```{python}
+#| tags: [remove]
+#| include: false
+ub = ""
+```
+
+```{python}
+#| tags: [noclear]
+rva = pl.read_csv(ub + "data/flightsrva_flights.csv.gz", null_values=["NA"])
+airline = pl.read_csv(ub + "data/flightsrva_airlines.csv.gz", null_values=["NA"])
+airport = pl.read_csv(ub + "data/flightsrva_airports.csv.gz", null_values=["NA"])
+plane = pl.read_csv(ub + "data/flightsrva_planes.csv.gz", null_values=["NA"])
+weather = pl.read_csv(ub + "data/flightsrva_weather.csv.gz", null_values=["NA"])
+```
+
+### Questions
+
+The same five tables as last time: 24,808 flights out of Richmond in 2019, plus lookup
+tables for the airlines, the airports, the aircraft, and the weather.
+
+Last class every join we wrote either worked or failed loudly enough to notice. The row
+count dropped and we went looking for the missing airline. This class is about the joins
+that do not do you the courtesy. A join can hand back more rows than you gave it, or match
+every single row and still be wrong, and in both cases the summary that comes out the other
+end looks exactly like a summary that came out right.
+
+Three tools, in the order the chapter introduces them: the key check that catches a join
+before it multiplies your data, the conditional joins that match on "near" instead of
+"equal," and the choice between attaching a group summary with `.over()` and attaching it
+with a join.
+
+Unless a question says otherwise, print the result of each block; do not save it.
+
+1. Suppose we want every flight to know what the weather was like on the day it flew. The
+obvious key is the date: `year`, `month`, and `day` are in both tables. Before writing that
+join, run the chapter's key check on `weather`, first for the four-column key we settled on
+last class, then for the three-column date key.
+
+```{python}
+(
+    weather
+    .select(c.year, c.month, c.day, c.hour)
+    .n_unique() == len(weather)
+)
+```
+
+```{python}
+(
+    weather
+    .select(c.year, c.month, c.day)
+    .n_unique() == len(weather)
+)
+```
+
+```{python}
+(
+    weather
+    .select(c.year, c.month, c.day)
+    .n_unique()
+)
+```
+
+**Answer**: The four-column key passes. Every one of the 8,735 rows is a distinct hour, so
+`[year, month, day, hour]` is a primary key in `weather` and the table is safe on the right
+side of a join.
+
+The date key fails, and the third block says why: there are only 364 distinct dates. Each
+one has about 24 rows behind it, one per hour. So the date is not a primary key in `weather`.
+It is a column that repeats 24 times, and Polars will happily match a flight against every
+one of those rows.
+
+This check took one line and it has already told us what the join in the next question is
+going to do.
+
+2. Write the join anyway, on `year`, `month`, and `day`. Print the number of rows.
+
+```{python}
+(
+    rva
+    .join(
+        weather.select(c.year, c.month, c.day, c.hour, c.visib),
+        on=[c.year, c.month, c.day]
+    )
+    .height
+)
+```
+
+**Answer**: 594,122 rows, from a flights table with 24,808 in it. Every flight was matched
+against all 24 hours of its own day and copied 24 times. This is a fan-out, and it is the
+join bug you are most likely to write.
+
+Notice what did not happen. No error. No warning. No message. Polars did precisely what the
+code asked for, which was to match every row on the left against every matching row on the
+right, and there were two dozen of them.
+
+The row count is the only thing that spoke up here, and the row count is a number you have
+to actually look at.
+
+3. Suppose you did not look. Compute the mean departure delay for each carrier on the
+fanned-out table, and compare it to the answer you would get from the flights table alone.
+
+```{python}
+(
+    rva
+    .join(
+        weather.select(c.year, c.month, c.day, c.hour, c.visib),
+        on=[c.year, c.month, c.day]
+    )
+    .group_by(c.carrier)
+    .agg(
+        n = pl.len(),
+        mean_dep_delay = c.dep_delay.mean().round(2)
+    )
+    .sort(c.n, descending=True)
+    .print(15)
+)
+```
+
+```{python}
+(
+    rva
+    .group_by(c.carrier)
+    .agg(
+        n = pl.len(),
+        mean_dep_delay = c.dep_delay.mean().round(2)
+    )
+    .sort(c.n, descending=True)
+    .print(15)
+)
+```
+
+**Answer**: The counts are absurd. SkyWest shows 94,357 flights out of an airport that
+handled 24,808 all year. But look at the delays. SkyWest is 13.55 minutes in both tables.
+Delta is 1.66 in both. ExpressJet is 23.02 against 23.06. The corrupted table gives you the
+right answer to three significant figures.
+
+It has to. Every flight was duplicated the same number of times, so the mean is computed over
+the same values with every one of them counted 24 times, and multiplying every weight by 24
+changes nothing. The tiny wobbles are the days with 23 hours of weather instead of 24.
+
+This is worth sitting with. The table is wrong by half a million rows, the summary you would
+have published is correct, and the only reason you know is that you counted. If you had
+reported the mean delay and never printed `n`, you would have shipped a correct number from a
+broken pipeline, and the next question you asked of that table would have been the one that
+bit you.
+
+4. Ask the next question. On the fanned-out table, count the flights that departed in
+visibility under five miles. Last class, the correct four-column join put that number
+at 1,254.
+
+```{python}
+(
+    rva
+    .join(
+        weather.select(c.year, c.month, c.day, c.hour, c.visib),
+        on=[c.year, c.month, c.day]
+    )
+    .filter(c.visib < 5)
+    .height
+)
+```
+
+**Answer**: 26,097, which is twenty times the true figure and larger than the number of
+flights in the year.
+
+Here is why this one breaks and the delay summary did not. The mean delay never touched a
+column that came from `weather`, so the duplication cancelled out. This filter is *about* a
+column that came from `weather`, and each copy of a flight carries a different hour's
+visibility. A flight is counted once for every foggy hour of its day, whether it was in the
+air or not.
+
+The fanned table is not nonsense. It is one row per flight and hour, which is a perfectly
+respectable unit of observation. It is just not the one you asked for, and nothing in the
+column names says so.
+
+5. Fix it. Collapse `weather` down to one row per day before joining, keeping the mean and
+the worst visibility of the day. Check the key on the result, then join it to the flights and
+count the flights that flew on a day whose worst hour was under five miles.
+
+```{python}
+weather_day = (
+    weather
+    .group_by(c.year, c.month, c.day)
+    .agg(
+        mean_visib = c.visib.mean(),
+        min_visib = c.visib.min()
+    )
+)
+
+(
+    weather_day
+    .select(c.year, c.month, c.day)
+    .n_unique() == len(weather_day)
+)
+```
+
+```{python}
+(
+    rva
+    .join(weather_day, on=[c.year, c.month, c.day])
+    .filter(c.min_visib < 5)
+    .height
+)
+```
+
+**Answer**: The key check now passes, because `.group_by()` returns one row per group and
+that is what makes a primary key. The join gives back 24,758 rows, one per flight, and 5,945
+of them flew on a day that had at least one hour of visibility under five miles.
+
+The repair was to change the right-hand table rather than the join. If the key you want to
+join on is not unique in the right table, aggregate that table until it is. The grain you
+aggregate to is the grain you can join at.
+
+Two things to notice in passing. The 5,945 is a real answer to a real question, and it is not
+the answer to question 4's question. "Flew on a foggy day" and "took off in fog" are different
+claims about different units, and the fanned table was quietly answering the first while we
+asked for the second. Also, 24,758 is 50 short of 24,808, which is last class's December 31
+flights falling out of an inner join because the weather feed stops on the 30th.
+
+6. Now for a join where the keys do not have to match exactly. The `weather` table has a
+`temp` column. Find out how much of it there actually is, then attach a temperature to every
+flight with `.join_asof()`, matching each departure to the most recent temperature reading
+taken before it.
+
+```{python}
+(
+    weather
+    .select(c.temp.is_null().sum(), pl.len())
+)
+```
+
+```{python}
+temp_obs = (
+    weather
+    .with_columns(temp = c.temp.cast(pl.Float64, strict=False))
+    .drop_nulls(c.temp)
+    .with_columns(stamp = pl.datetime(c.year, c.month, c.day, c.hour))
+    .select(c.stamp, c.temp)
+    .sort(c.stamp)
+)
+
+flights_stamped = (
+    rva
+    .with_columns(stamp = pl.datetime(c.year, c.month, c.day, c.hour, c.minute))
+    .select(c.stamp, c.carrier, c.dest, c.dep_delay)
+    .sort(c.stamp)
+)
+
+(
+    flights_stamped
+    .join_asof(temp_obs, on=c.stamp, strategy="backward")
+    .select(
+        n = pl.len(),
+        mean_temp = c.temp.mean().round(1)
+    )
+)
+```
+
+**Answer**: The station recorded a temperature 57 times all year, and left the column `null`
+in the other 8,678 rows. An equi-join on the hour would therefore match almost nothing, which
+is what `.join_asof()` is for: it takes the nearest value rather than the equal one.
+
+Note the `.cast()`. Because nearly every value is missing, Polars read the whole column as
+`str`, so it needs a cast before it is a temperature. That is chapter 3 arriving in the middle
+of a chapter 8 problem, which is how it usually arrives.
+
+The result has 24,808 rows and a mean temperature of 61.2 degrees. Every flight in the year
+got a temperature, and 61.2 is an entirely reasonable annual mean for Richmond, Virginia.
+
+Both tables had to be sorted by the join key first. `.join_asof()` requires it and will not
+sort for you.
+
+7. Something is wrong with question 6 and the row count will never tell you, because
+`.join_asof()` always returns one row per row of the left table. Run it again with
+`coalesce=False`, which keeps the matched row's own timestamp, and measure how far away each
+match actually was.
+
+```{python}
+(
+    flights_stamped
+    .join_asof(temp_obs, on=c.stamp, strategy="backward", coalesce=False)
+    .with_columns(stale_hours = (c.stamp - c.stamp_right).dt.total_hours())
+    .select(
+        no_match = c.temp.is_null().sum(),
+        within_1_hour = (c.stale_hours <= 1).sum(),
+        within_1_day = (c.stale_hours <= 24).sum(),
+        over_1_week = (c.stale_hours > 168).sum(),
+        median_hours = c.stale_hours.median(),
+        worst_hours = c.stale_hours.max()
+    )
+)
+```
+
+```{python}
+(
+    flights_stamped
+    .join_asof(temp_obs, on=c.stamp, strategy="backward", coalesce=False)
+    .with_columns(stale_hours = (c.stamp - c.stamp_right).dt.total_hours())
+    .drop_nulls(c.stale_hours)
+    .sort(c.stale_hours, descending=True)
+    .select(c.stamp, c.stamp_right, c.temp, c.stale_hours)
+    .head(3)
+)
+```
+
+**Answer**: The median flight was handed a temperature reading taken 394 hours earlier, which
+is sixteen days. Only 266 flights got a reading from within an hour of leaving, and just
+under 16,000 of them, roughly two thirds of the year, got one more than a week old. Another
+3,493 flights got no reading at all, because they departed before February 25, which is when
+the station first bothered to write a temperature down.
+
+The second block is the whole lesson in one row. A flight leaving at 2:05pm on August 21 was
+matched to a reading from 5am on June 22, sixty days earlier, and told that the temperature
+was 66.2 degrees. In Richmond, in August, in the afternoon.
+
+`.join_asof()` cannot fail. That is its design and it is also the problem: it will always find
+you a nearest value, however far away, and it will never say how far. The 61.2 degree mean from
+question 6 is arithmetic performed on sixty-day-old measurements, and it came out plausible,
+which is exactly what made it dangerous. The distance is a column you have to ask for, and
+`coalesce=False` is how you ask.
+
+If you want a rule: after any asof join, compute the gap and look at it. A match is only as
+good as its distance, and a join that always succeeds is a join that has told you nothing by
+succeeding.
+
+8. Last class the map showed two dots almost on top of each other in Florida, and we noted by
+eye that Tampa and St Petersburg are fifteen miles apart. Find every such pair without looking
+at a picture. Cut `airport` down to the 22 destinations Richmond actually serves, then use
+`.join_where()` to find all pairs within one degree of latitude and one degree of longitude of
+each other.
+
+```{python}
+dest_ap = (
+    airport
+    .join(rva, left_on=c.faa, right_on=c.dest, how="semi")
+    .select(c.faa, c.lat, c.lon)
+)
+
+(
+    dest_ap
+    .join_where(
+        dest_ap,
+        c.faa < c.faa_right,
+        (c.lat - c.lat_right).abs() < 1,
+        (c.lon - c.lon_right).abs() < 1
+    )
+    .select(c.faa, c.faa_right)
+    .print(12)
+)
+```
+
+**Answer**: Eight pairs, and every one of them is real. The three New York airports account
+for three of the pairs (`EWR` with `JFK`, `EWR` with `LGA`, `JFK` with `LGA`). Fort Lauderdale
+pairs with Miami. Orlando pairs with Orlando Sanford. And the Tampa Bay trio gives the last
+three: St Petersburg with Tampa, St Petersburg with Sarasota, Sarasota with Tampa.
+
+Three things in that code are worth naming. The semi-join filters `airport` down to rows that
+appear as a destination, which is last class's tool doing the boring job it is best at. The
+table is joined to *itself*, which is legal and which is how you ask a question about pairs of
+rows. And `c.faa < c.faa_right` is doing two jobs at once: it stops an airport from pairing
+with itself, and it keeps only one of `(TPA, PIE)` and `(PIE, TPA)`, since without it every
+pair would come back twice.
+
+`.join_where()` checks every combination of rows, so it is slow on big tables. On 22 rows it
+is instant, and it expresses a condition no equi-join can.
+
+9. Those pairs are not redundancy. Find out who flies to them: count the flights to each
+airport in the Tampa Bay and Orlando pairs, broken down by carrier.
+
+```{python}
+(
+    rva
+    .filter(c.dest.is_in(["TPA", "PIE", "SRQ", "MCO", "SFB"]))
+    .join(airline, on=c.carrier)
+    .group_by(c.dest, c.name)
+    .agg(n = pl.len())
+    .sort(c.dest, c.n, descending=[False, True])
+    .print(12)
+)
+```
+
+**Answer**: The split is total. Orlando International gets JetBlue, Spirit and Southwest;
+Tampa International gets Southwest. The other three airports, St Petersburg and Orlando Sanford
+and Sarasota, are served by exactly one airline between them, and it is Allegiant, which flies
+to all three and to neither of the big ones.
+
+So the near-duplicate airports are a business model, drawn in coordinates. A low-cost carrier
+does not compete for a gate at Tampa International. It flies to the cheap field fifteen miles
+away and lets you drive the rest. Allegiant went to four places from Richmond in 2019 and three
+of them are on this list.
+
+Which is the same airline whose 396 flights vanished from last class's inner join without a word.
+The four destinations that disappeared with it were these three and Nashville.
+
+10. Finally, compare the two ways of attaching a group summary. Add each carrier's mean
+departure delay to every flight, first with `.over()`, then by aggregating and joining. Then
+build the day-level table that `.over()` cannot build: mean departure delay against mean
+visibility, one row per day, and plot it.
+
+```{python}
+(
+    rva
+    .with_columns(carrier_mean = c.dep_delay.mean().over(c.carrier).round(2))
+    .select(c.carrier, c.dep_delay, c.carrier_mean)
+    .head(5)
+)
+```
+
+```{python}
+carrier_mean = (
+    rva
+    .group_by(c.carrier)
+    .agg(carrier_mean = c.dep_delay.mean().round(2))
+)
+
+(
+    rva
+    .join(carrier_mean, on=c.carrier)
+    .select(c.carrier, c.dep_delay, c.carrier_mean)
+    .head(5)
+)
+```
+
+```{python}
+flight_day = (
+    rva
+    .group_by(c.year, c.month, c.day)
+    .agg(
+        n = pl.len(),
+        mean_dep_delay = c.dep_delay.mean()
+    )
+)
+
+(
+    flight_day
+    .join(weather_day, on=[c.year, c.month, c.day])
+    .pipe(ggplot, aes(c.mean_visib, c.mean_dep_delay))
+    .geom_point(aes(size=c.n), alpha=0.5)
+    .geom_smooth(method="lm", se=False)
+    .labs(
+        x = "Mean visibility that day (miles)",
+        y = "Mean departure delay that day (minutes)",
+        title = "Richmond, 2019: one point per day"
+    )
+)
+```
+
+**Answer**: The first two blocks are the same table. `.over()` computes the group mean and
+writes it back onto every row; the aggregate-then-join does it in two steps and arrives at the
+same place. When the summary is all you want, `.over()` is shorter and you should use it. Reach
+for the join when you need the summary table for its own sake, to print it or plot it or join it
+to something else, because `.group_by().agg()` hands you that table and `.over()` never builds it.
+
+But there is a harder distinction underneath, and the plot is it. `.over()` can only group rows
+that are already in the table. The mean visibility of a day is computed from rows that live in
+`weather`, and no expression written over `rva` can reach them. That summary has to be an
+aggregate and a join, and questions 5 and 10 are both doing this. A join is not just a tidier
+`.over()`. It is the only option once the group you want to summarize is in another table.
+
+Now read the plot, which is a warning. There is a mild downward slope, and if you squint you can
+believe that bad visibility costs you time. Look at the points instead. Most of the year sits in a
+solid vertical wall at exactly ten miles of visibility, spanning delays from five minutes early to
+forty minutes late, which means that visibility explains essentially nothing about how late
+Richmond ran on a clear day. The worst day of the year was July 26, at an average of 41.9 minutes
+late, and it had perfect visibility all day. Summer thunderstorm delays do not come from fog in
+Richmond; they come from weather somewhere else, in an airspace this dataset cannot see.
+
+Last class the hourly join found a real effect, that flights taking off in fog leave about five
+minutes later than flights that do not. This plot is built from the same two tables and the effect
+has mostly evaporated, because averaging a day of weather into one number averages the fog away
+with it. Nothing here was joined incorrectly. The keys were unique, the row count was right, and
+the grain was wrong, and the grain is a choice you make when you decide what to aggregate before
+you join.

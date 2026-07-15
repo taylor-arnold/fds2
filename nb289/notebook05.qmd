@@ -1,0 +1,264 @@
+---
+title: "Notebook05"
+solutions-release-date: "2026-09-09"
+---
+
+### Setup
+
+Run all of the following before starting the notebook.
+
+```{python}
+#| tags: [noclear]
+#| eval: false
+! wget -q -nc https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/funs.py
+```
+
+```{python}
+#| tags: [noclear]
+import polars as pl
+from plotnine import ggplot, aes
+from polars import col as c
+
+import funs
+
+ub = "https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"
+```
+
+```{python}
+#| tags: [remove]
+#| include: false
+ub = ""
+```
+
+```{python}
+#| tags: [noclear]
+covid = pl.read_csv(ub + "data/france_departement_covid.csv")
+```
+
+### Questions
+
+This notebook uses a record of the first months of the COVID-19 pandemic in
+France. Each row reports the situation in one *département* (the administrative
+region France is divided into, of which there are 101) on one date between March
+and October of 2020. The columns `deceased` and `recovered` are running totals,
+while `hospitalised` and `reanimation` are snapshots of how many patients were
+in the hospital and in intensive care on that day. The two columns ending in
+`_new` count new admissions that day.
+
+This is real data, downloaded as it was published, and it has all the type
+problems the chapter warns about.
+
+1. Start by printing the schema of the dataset. Three of the columns have a type
+that is not what you would expect from the description above. Which ones?
+
+```{python}
+covid.schema
+```
+
+**Answer**: `date` is a `str` rather than a date, and both `hospitalised_new`
+and `reanimation_new` are `str` rather than integers. (The `departement` column
+is also a string, but that one is correct, as we will see in question 8.)
+
+2. `hospitalised_new` counts new hospital admissions, so it should be a number.
+Print the rows where that column is equal to the text `"NA"`, and explain what
+those rows have to do with the type Polars chose.
+
+```{python}
+(
+    covid
+    .filter(c.hospitalised_new == "NA")
+)
+```
+
+**Answer**: There are 784 rows where the count was not reported and the value
+`"NA"` was written into the file instead. A column can only have one type, and
+`"NA"` is not a number, so Polars widened the whole column to `str` to
+accommodate it. A few hundred unreported values changed the type of all 19,998.
+
+3. Cast `hospitalised_new` to an integer, printing the date, département, and
+the repaired column. You will need `strict=False`, which replaces any value that
+cannot be converted with a `null` instead of raising an error. Once your code
+works, try it without `strict=False` and read the error message you get.
+
+```{python}
+(
+    covid
+    .select(
+        c.date,
+        c.departement,
+        hospitalised_new = c.hospitalised_new.cast(pl.Int64, strict=False)
+    )
+)
+```
+
+4. How many rows ended up with a missing value? Repeat the cast and then filter
+down to the rows where the result `.is_null()`. You do not need to count the
+rows yourself; Polars prints the shape of the table above the output.
+
+```{python}
+(
+    covid
+    .select(
+        c.date,
+        c.departement,
+        hospitalised_new = c.hospitalised_new.cast(pl.Int64, strict=False)
+    )
+    .filter(c.hospitalised_new.is_null())
+)
+```
+
+The 784 rows are exactly the ones we found in question 2.
+
+5. Now repeat the cast, but chain `.fill_null(0)` onto the end of the expression
+to replace the missing values with zero.
+
+```{python}
+(
+    covid
+    .select(
+        c.date,
+        c.departement,
+        hospitalised_new = c.hospitalised_new.cast(pl.Int64, strict=False).fill_null(0)
+    )
+)
+```
+
+Be careful with this one. Filling with zero says that no patients were admitted
+that day, when what the data actually says is that nobody reported a number. If
+you go on to add up admissions, the two are indistinguishable in the total.
+
+6. Print the date, département, and `reanimation` columns, along with a new
+column named `icu_busy` that records whether more than 20 patients were in
+intensive care. Look at the type Polars gives the new column.
+
+```{python}
+(
+    covid
+    .select(
+        c.date,
+        c.departement,
+        c.reanimation,
+        icu_busy = c.reanimation > 20
+    )
+)
+```
+
+7. That comparison is an object in its own right. Type it alone in a cell, with
+no DataFrame in sight, and see what Polars prints.
+
+```{python}
+c.reanimation > 20
+```
+
+Because it is an ordinary Python object, we can give it a name and hand the same
+name to two different methods. Save the comparison as `icu_busy`, then use it
+once inside `.select()` to build a column and once inside `.filter()` to keep
+only the busy days.
+
+```{python}
+icu_busy = c.reanimation > 20
+
+(
+    covid
+    .select(c.date, c.departement, c.reanimation, is_busy = icu_busy)
+)
+```
+
+```{python}
+(
+    covid
+    .filter(icu_busy)
+)
+```
+
+The expression never changes. What changes is the context it is given to:
+`.select()` turns it into a column of `True` and `False` values, while
+`.filter()` uses those same values to decide which rows to keep.
+
+8. The `departement` column holds codes such as `"01"` and `"75"`, which look
+like numbers. Cast the column to `pl.Int64` with `strict=False` and print it
+next to the original along with the département name. What two things go wrong?
+
+```{python}
+(
+    covid
+    .select(
+        c.departement,
+        c.departement_name,
+        dep_int = c.departement.cast(pl.Int64, strict=False)
+    )
+)
+```
+
+**Answer**: The leading zeros disappear, so the code `"01"` for Ain becomes the
+number `1`. Worse, Corsica is divided into two départements whose codes are
+`"2A"` and `"2B"`; those are not numbers at all, so `strict=False` quietly
+converts them to `null` and Corsica drops out of the data entirely. Département
+codes are labels that happen to be mostly digits, which is exactly why the file
+stores them as text.
+
+9. Build a column `icu_share` equal to `reanimation` divided by `hospitalised`:
+the share of hospitalised patients who were in intensive care. Then filter to
+the rows where the result `.is_nan()` and look at what those rows have in
+common.
+
+```{python}
+(
+    covid
+    .with_columns(
+        icu_share = c.reanimation / c.hospitalised
+    )
+    .filter(c.icu_share.is_nan())
+)
+```
+
+Every one of these rows has zero patients in the hospital, mostly in the first
+days of the pandemic. Zero divided by zero has no answer, so the division
+produces a `NaN`. Note that this is not the same thing as the nulls in question
+4: nothing is missing from these rows. We asked the data a question that has no
+answer, and got one back.
+
+10. Removing the invalid rows is the job of `.drop_nans()`. Add it to the
+previous answer, in place of the filter, to see how many rows survive.
+
+```{python}
+(
+    covid
+    .with_columns(
+        icu_share = c.reanimation / c.hospitalised
+    )
+    .drop_nans()
+)
+```
+
+The `icu_share` column also holds fifteen values printed as `inf`, which
+`.drop_nans()` leaves behind: they come from the handful of days that record ICU
+patients while the hospital count is zero, and dividing a positive number by
+zero gives infinity rather than `NaN`. Swap `.is_nan()` for `.is_infinite()` in
+the previous question if you want to see them. Those days are a reporting
+inconsistency, not a computation that broke.
+
+11. Finally, put the chapter together. Build a table of the pandemic in Paris
+(département `"75"`) that has a real date column, parsed from the text with
+`.str.to_date()`, alongside the deceased count and the repaired count of new
+hospital admissions. Sort the result by date and print the first rows.
+
+```{python}
+(
+    covid
+    .filter(c.departement == "75")
+    .select(
+        date = c.date.str.to_date(),
+        deceased = c.deceased,
+        hospitalised_new = c.hospitalised_new.cast(pl.Int64, strict=False)
+    )
+    .sort(c.date)
+)
+```
+
+Check the type under `date`: it is now `date` rather than `str`. Sorting these
+particular strings happened to give the right answer even before we parsed them,
+because a date written year-month-day sorts alphabetically in the same order it
+sorts chronologically. That is a lucky property of the format, not a fact about
+dates. Written `24/06/1626`, the same trick would fail badly, and a real date
+column would not care.

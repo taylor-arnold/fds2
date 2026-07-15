@@ -1,0 +1,421 @@
+---
+title: "Notebook14"
+solutions-release-date: "2026-10-21"
+---
+
+### Setup
+
+Run all of the following before starting the notebook.
+
+```{python}
+#| tags: [noclear]
+#| eval: false
+! wget -q -nc https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/funs.py
+```
+
+```{python}
+#| tags: [noclear]
+import polars as pl
+from plotnine import ggplot, aes
+from polars import col as c
+
+import funs
+
+ub = "https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"
+```
+
+```{python}
+#| tags: [remove]
+#| include: false
+ub = ""
+```
+
+```{python}
+#| tags: [noclear]
+play = pl.read_csv(ub + "data/shakespeare_plays.csv")
+char = pl.read_csv(ub + "data/shakespeare_characters.csv")
+line = pl.read_csv(ub + "data/shakespeare_lines.csv.gz")
+word = pl.read_csv(ub + "data/shakespeare_words.csv.gz")
+```
+
+### Questions
+
+Four tables this week, from the Folger Shakespeare Library's editions of the plays. They
+are not four datasets. They are one corpus, recorded four times over at four levels of
+detail: the plays, the characters in them, the lines those characters speak, and the words
+in those lines. Nothing else changes between the tables.
+
+That makes this the right corpus for the only question this chapter asks: what is a row?
+Every table has an answer, and getting it wrong does not raise an error. It gives you a
+number that looks fine.
+
+There is no new Polars method in this notebook. Everything below is `filter`, `sort`,
+`group_by`, `agg`, `n_unique`, and `pl.len()`, which you already have. What is new is what
+you point them at.
+
+Unless a question says otherwise, just print the result of each block; do not save it to a
+variable.
+
+1. Look at all four tables and write down, in words, what a single row of each one is.
+
+```{python}
+print(play.shape, char.shape, line.shape, word.shape)
+
+play.head(3)
+```
+
+```{python}
+char.head(3)
+```
+
+```{python}
+line.head(3)
+```
+
+```{python}
+word.head(3)
+```
+
+**Answer**: A row of `play` is a play (37 of them). A row of `line` is one line as it is
+printed on the page (80,592). A row of `word` is one word (599,864). A row of `char` is a
+character, or so it looks: 1,126 of them, each with an id, a play, and a name.
+
+Hold on to that last one. It is wrong, and question 3 is where it breaks.
+
+The chapter calls this the *unit of observation*: the "who" or "what" that each row stands
+for. Notice that the four units here are nested, each one a finer grain of the one above,
+and that the corpus keeps them in four separate tables rather than one enormous table with
+a column for everything. That is the third tidy rule in practice. One table, one unit.
+
+2. A primary key is the column, or set of columns, that uniquely identifies the unit of
+observation. So a claim about the unit is a claim you can test: count the distinct values
+of the id and compare it to the number of rows. Do that for each table.
+
+```{python}
+print(play.select(rows = pl.len(), ids = c.play_id.n_unique()))
+print(char.select(rows = pl.len(), ids = c.character_id.n_unique()))
+print(line.select(rows = pl.len(), ids = c.line_id.n_unique()))
+print(word.select(rows = pl.len(), ids = c.word_id.n_unique()))
+```
+
+**Answer**: Three of the four pass. `play_id`, `line_id`, and `word_id` each have exactly
+as many distinct values as their table has rows, so each one identifies a row and the unit
+of observation is what we said it was.
+
+`character_id` does not. There are 1,126 rows and only 1,066 distinct ids, so some ids are
+being used by more than one row. That makes `character_id` not a key, which means a row of
+this table is not a character. It is something else, and we do not know what yet.
+
+3. Find the ids that repeat, then go look at the rows behind the worst offender.
+
+```{python}
+(
+    char
+    .group_by(c.character_id)
+    .agg(n = pl.len())
+    .filter(c.n > 1)
+    .sort(c.n, descending=True)
+    .head(5)
+)
+```
+
+```{python}
+(
+    char
+    .filter(c.character_id == "Bardolph_1H4")
+)
+```
+
+**Answer**: Four rows, one id, four different plays. Bardolph drinks his way through
+*Henry IV Part 1*, *Part 2*, *Henry V*, and *The Merry Wives of Windsor*, and the Folger
+gives him one id in all four.
+
+So the unit of observation of `char` is not a character. It is a *character × play*: one row
+for each appearance of a character in a play. Thirty-nine characters cross plays this way and
+account for the sixty extra rows. Thirty-six of them are in the English histories, where the
+same nobles fight the same wars across eight plays. The other three are Antony, Octavius, and
+Lepidus, who carve up the Roman world at the end of *Julius Caesar* and are still arguing
+about it in *Antony and Cleopatra*.
+
+Look closely at the id itself. It is `Bardolph_1H4`, and one of those four rows has
+`play_id` equal to `2h4`. The id encodes the play where the character *first shows up*, not
+the play the row is about. A column that looks like a label for the row is really a label
+for something else, and the only way to find that out was to count.
+
+4. If `character_id` is not the key, what is? Test the obvious candidate. Then test the one
+a human would have picked, the character's name within their play.
+
+```{python}
+(
+    char
+    .group_by(c.character_id, c.play_id)
+    .agg(n = pl.len())
+    .filter(c.n > 1)
+)
+```
+
+```{python}
+(
+    char
+    .group_by(c.name, c.play_id)
+    .agg(n = pl.len())
+    .filter(c.n > 1)
+    .sort(c.n, descending=True)
+    .head(5)
+)
+```
+
+**Answer**: The first returns nothing, which is the answer: no pair of `character_id` and
+`play_id` occurs twice, so together they are the key, and they name the unit exactly.
+
+The second returns fourteen rows, so name-within-play is *not* a key. *Pericles* has two
+characters called Gentlemen, *Coriolanus* has two called Lieutenant, and *As You Like It*
+has two Second Lords. Shakespeare gives a great many people no name at all, and a table
+cannot tell two nameless gentlemen apart. Print the two Gentlemen if you want to see how
+the Folger solved it: their ids are `GENTLEMEN.EPHESUS_Per` and `GENTLEMEN.MYTILENE_Per`,
+which is a librarian doing by hand what the data could not do on its own.
+
+5. Now watch what the broken key does to an ordinary question. Which characters have the
+most lines? Count the lines per character, first the obvious way, then at the grain you
+established in question 4.
+
+```{python}
+(
+    line
+    .group_by(c.character_id)
+    .agg(n_lines = pl.len())
+    .sort(c.n_lines, descending=True)
+    .head(8)
+)
+```
+
+```{python}
+(
+    line
+    .group_by(c.character_id, c.play_id)
+    .agg(n_lines = pl.len())
+    .sort(c.n_lines, descending=True)
+    .head(8)
+)
+```
+
+**Answer**: Both tables are sorted, both look reasonable, and they disagree about almost
+everything. Hamlet is fifth in the first one and second in the second.
+
+The first table pools each id across every play it appears in, because that is what
+grouping by a non-key does. So `Antony_JC` shows 1,148 lines, which is 823 lines in *Antony
+and Cleopatra* plus 325 in *Julius Caesar*, two plays and about fourteen years apart in the
+story. `HenryV_H5` shows 1,132, which is Prince Hal drinking in the taverns of the two
+*Henry IV* plays added to the king who gives the speech at Agincourt. Best of all,
+`HenryIV_1H4` shows 1,044 lines and the largest block of them, 411, is in *Richard II*,
+where he is Bolingbroke and not yet king, has not usurped anything, and is nobody's Henry
+IV.
+
+None of those three are parts. They are actors' careers. A part is a character in a play,
+the second grouping asks for exactly that, and the numbers it returns are ones you could
+check against a script.
+
+6. On to the first tidy rule: every variable gets its own column. Print the lines of
+*Hamlet*, Act 3 Scene 1, in order. Sort them by `line_number`, which is the column that
+appears to hold the order.
+
+```{python}
+(
+    line
+    .filter(c.play_id == "ham", c.act == 3, c.scene == 1)
+    .sort(c.line_number)
+    .select(c.line_number, c.character_id, c.text)
+    .head(6)
+)
+```
+
+```{python}
+(
+    line
+    .filter(c.play_id == "ham", c.act == 3, c.scene == 1)
+    .sort(c.line_id)
+    .select(c.line_number, c.character_id, c.text)
+    .head(6)
+)
+```
+
+**Answer**: The first sort gives you 3.1.1, then 3.1.10, then 3.1.100, then 3.1.101. It is
+alphabetical order, because `line_number` is a `str`, and as text "3.1.10" really does come
+before "3.1.2".
+
+It is text because it is not one variable. It is three, glued together with periods: act,
+scene, and the line's position in the scene. Two of the three already have honest columns
+of their own, `act` and `scene`, both `i64`. The third one, the number that actually orders
+the speeches, exists only inside that string, and there is no column you can sort on to get
+it. The second block works around the problem by sorting on `line_id` instead, which
+happens to be zero-padded and so happens to sort correctly. That is luck, not design. It
+also tells you where the famous line lives: 3.1.64, "To be or not to be".
+
+We cannot fix this yet. Prying the three numbers out of one cell needs a method that splits
+a string into a list and another that gives each list element its own row, and both are in
+the second half of this chapter. Notice for now that a packed cell is not a cosmetic
+problem. It cost us the ability to sort a scene.
+
+7. Same rule, worse violation. Count the speakers in *Macbeth* from the lines table, and
+compare that with the number of characters the dramatis personae lists for it.
+
+```{python}
+print(char.filter(c.play_id == "mac").select(listed = pl.len()))
+print(line.filter(c.play_id == "mac").select(speakers = c.character_id.n_unique()))
+
+(
+    line
+    .filter(c.play_id == "mac")
+    .group_by(c.character_id)
+    .agg(n_lines = pl.len())
+    .sort(c.n_lines, descending=True)
+    .head(20)
+    .print(20)
+)
+```
+
+**Answer**: The personae lists 28 characters. The lines table has 49 distinct speakers. The
+two tables disagree by 21 about who is even in the play, and both are right.
+
+Two things in that list explain it. The first is the Witches. `WITCHES.1_Mac`,
+`WITCHES.2_Mac`, and `WITCHES.3_Mac` speak 59, 25, and 24 lines, three separate speakers. In
+`char` they are a single row, `WITCHES_Mac`, named "Three Witches, the Weïrd Sisters". A
+cast list can name the Witches once. A script has to know which of them is talking. Neither
+table is wrong, and whether the Weïrd Sisters are one character or three depends on what
+you are doing with them.
+
+The second is the row near the bottom, the one Polars had to cut off to fit:
+
+    WITCHES.1_Mac #WITCHES.2_Mac #WITCHES.3_Mac    21
+
+Go look at what it says.
+
+```{python}
+(
+    line
+    .filter(c.character_id == "WITCHES.1_Mac #WITCHES.2_Mac #WITCHES.3_Mac")
+    .select(c.line_number, c.text)
+    .head(4)
+)
+```
+
+That is not a speaker. It is three speakers in a single cell, hashes and all, and it is how
+the Folger records the Witches chanting in unison: "Fair is foul, and foul is fair", and
+the refrain of "Double, double toil and trouble" they say three times over the cauldron in
+4.1. Every count in this question has been quietly treating that cell as a fourth witch.
+
+There are 177 such lines in the corpus and 75 distinct combinations of speakers. The worst
+of them is in *Antony and Cleopatra* at 2.7.138, where ten characters, drunk on Pompey's
+galley, sing "Cup us till the world go round" out of a single cell.
+
+So `character_id` does not hold one value per row. It sometimes holds a set, which breaks
+the first tidy rule about as plainly as it can be broken, and it is why `n_unique` said 49.
+The honest count of Macbeth's speaking parts is lower than that, and we cannot compute it
+today: separating those three names into three rows is the same missing method that would
+have unpacked `line_number` in question 6.
+
+8. One more column to look at, and this one is a warning about the opposite mistake. Count
+the distinct values of `line_type`.
+
+```{python}
+(
+    line
+    .select(
+        rows = pl.len(),
+        line_types = c.line_type.n_unique(),
+        acts = c.act.n_unique(),
+    )
+)
+```
+
+**Answer**: `line_type` has exactly one distinct value across all 80,592 rows. Every line in
+the table is labeled `verse`.
+
+A column with one value is not a variable. It cannot vary. It tells you nothing about any
+row, it cannot be filtered on, grouped by, or plotted, and it would survive a tidy-data
+inspection untouched, because the rule is that every variable gets a column and says
+nothing about columns that are not variables. The tidy rules are about shape. They cannot
+tell you what a one-value column means, and no rule can. You have to look.
+
+So look. A label that never changes is either a genuine constant or the fossil of a filter
+somebody already ran, and those are very different things. Here is a first clue about which
+one this is. The cast list of *Macbeth* includes a Porter. Ask the lines table how many lines
+he speaks.
+
+```{python}
+print(char.filter(c.character_id == "Porter_Mac").select(c.character_id, c.name))
+print(line.filter(c.character_id == "Porter_Mac").select(porter_lines = pl.len()))
+```
+
+Zero. The Porter is one of the most famous speaking parts in the play, the drunk answering the
+knock at the gate, and there is not a single line of his in this table. What the Porter speaks
+is prose. We cannot prove the pattern yet, because pinning it down needs a column we have to
+build out of `line_number`, and that is the second half of this chapter. But keep the
+suspicion: `verse` may not be a broken label at all. It may be an honest record of a decision
+that was made before we ever got the data, which is that the prose was left out.
+
+9. Draw the twelve biggest parts. Use the grain from question 5, and remember that a
+categorical axis takes its order from the rows of the table.
+
+```{python}
+(
+    line
+    .group_by(c.character_id, c.play_id)
+    .agg(n_lines = pl.len())
+    .sort(c.n_lines, descending=True)
+    .head(12)
+    .sort(c.n_lines)
+    .pipe(ggplot, aes(c.character_id, c.n_lines))
+    .geom_col(fill="#F5276C")
+    .coord_flip()
+    .labs(
+        x="",
+        y="Lines spoken",
+        title="The twelve biggest parts in Shakespeare",
+        caption="Folger Shakespeare Library"
+    )
+    .theme_tufte()
+)
+```
+
+Richard III is a runaway, with 1,148 lines to Hamlet's 873, and the rest of the list is
+tragedy after tragedy. Note the double sort: descending to pick the top twelve, then
+ascending so the bars come out longest-first once `coord_flip` turns them sideways.
+
+The title on that chart is a small overstatement, and question 8 is the reason. Every line in
+this table is verse, so what we have drawn is the twelve biggest *verse* parts. It happens to
+be all tragic leads, who speak in verse anyway, so the top of the list would look much the
+same either way. But a great comic role that lives in prose would count for far less here than
+it does on the stage, and one is missing from this list who might not belong off it. Hold that
+thought until we come back to this corpus.
+
+Now read the axis labels, because one of them is lying to you. The fifth bar says
+`Antony_JC` and those 823 lines are from *Antony and Cleopatra*. The label is the id, the id
+was minted in *Julius Caesar*, and the `play_id` column sitting right next to it in the
+grouped table says `ant`. The bar is correct and its name is not.
+
+The fix is to label each bar with the character's `name`, which lives in `char`, one table
+over. Pulling a column from another table by matching on a key is a join, and it is the
+chapter after this one.
+
+10. Last question, and it is a written one. This corpus is stored long, four tables deep,
+one unit of observation each. Suppose you wanted a table with one row per play and one
+column per act, holding the number of lines. Could you build it with what you know today?
+
+**Answer**: Half of it. `group_by(c.play_id, c.act).agg(n_lines = pl.len())` gets you the
+numbers, but it gets them long: one row per play × act, 185 rows, an `act` column and an
+`n_lines` column. Turning that into five columns named `1` through `5`, one per act, is a
+*pivot*, and we do not have it yet.
+
+Which is the honest place to end. Everything we did today was diagnosis. We counted rows
+and distinct ids until the tables confessed what a row was, and every time we found a
+table in the wrong shape, we worked around it or wrote an IOU. Next class on this chapter
+we get the three methods that actually change a table's shape: `pivot` to go wide,
+`unpivot` to go long, and `explode` to give each element of a packed cell its own row.
+
+Worth noticing before then: aggregation also changes the unit of observation, and we have
+had it since chapter 5. The difference is that aggregation only goes one way. When we
+counted lines per character in question 5, the lines themselves were gone, and no method
+brings them back. A pivot loses nothing and can be undone. That asymmetry is the argument
+for storing data long, the way the Folger did, and letting each analysis reshape it as
+needed.

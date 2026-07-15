@@ -1,0 +1,321 @@
+---
+title: "Notebook08"
+solutions-release-date: "2026-09-23"
+---
+
+### Setup
+
+Run all of the following before starting the notebook.
+
+```{python}
+#| tags: [noclear]
+#| eval: false
+! wget -q -nc https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/funs.py
+```
+
+```{python}
+#| tags: [noclear]
+import polars as pl
+from plotnine import ggplot, aes
+from polars import col as c
+
+import funs
+
+ub = "https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"
+```
+
+```{python}
+#| tags: [remove]
+#| include: false
+ub = ""
+```
+
+```{python}
+#| tags: [noclear]
+metro = (
+    pl.read_csv(ub + "data/acs_cbsa.csv")
+    .select(
+        c.name,
+        c.quad,
+        c.division,
+        c.pop,
+        c.density,
+        c.age_median,
+        c.hh_income_median,
+        c.percent_own,
+        c.rent_1br_median,
+        c.rent_perc_income
+    )
+)
+```
+
+### Questions
+
+This notebook uses the American Community Survey data on U.S. metropolitan
+areas. Each row is one metro region: a city and the ring of counties around it
+that commute into it. There are 934 of them, and they cover most of the country's
+population. The `pop` column is in millions, so New York's 20.0 means twenty
+million people, and `density` is people per square kilometer. The Census Bureau
+puts every metro in one of nine `division` groups and one of five `quad` groups,
+which are the coarser regions: `NE`, `NC` (north central), `S`, `W`, and `O` for
+the ones that fit nowhere, meaning Alaska, Hawaii, and Puerto Rico. The rest of
+the columns describe the people who live there: the median age, the median
+household income in dollars, the percent of homes that are owned rather than
+rented, the median rent on a one-bedroom apartment, and `rent_perc_income`, the
+share of a typical renter's income that the rent eats.
+
+Everything this week splits the rows into groups and asks one question of each
+group. Unless a question says otherwise, just print the result of each block; do
+not save it to a variable.
+
+1. Group the metros by division and take the first row of each group with
+`.head(n=1)`. Print only the name, the division, and the population, so that the
+result is readable.
+
+```{python}
+(
+    metro
+    .group_by(c.division)
+    .head(n=1)
+    .select(c.division, c.name, c.pop)
+)
+```
+
+New York, Los Angeles, Chicago, Dallas, Boston. That is a list of the biggest
+metro in each division, and it looks like a real answer to a real question. We
+never asked for the biggest one.
+
+2. Run exactly the same code again, but sort the metros alphabetically by name
+first. Then explain where the answer to question 1 actually came from.
+
+```{python}
+(
+    metro
+    .sort(c.name)
+    .group_by(c.division)
+    .head(n=1)
+    .select(c.division, c.name, c.pop)
+)
+```
+
+**Answer**: Now we get Aberdeen, Albertville, and Alamogordo. Grouping does not
+put the rows in any order, and `.head(n=1)` keeps the first row of each group as
+the rows happen to arrive. The file we loaded is stored sorted by population,
+largest first, so question 1 gave us the largest metros by accident. Sorting by
+name destroys that and the same code now answers a different question. The first
+row of a group means nothing until you decide what "first" means.
+
+3. Do it on purpose. Sort by population, largest first, and then take the top row
+of each division.
+
+```{python}
+(
+    metro
+    .sort(c.pop, descending=True)
+    .group_by(c.division)
+    .head(n=1)
+    .select(c.division, c.name, c.pop)
+)
+```
+
+The answer is the same as question 1, but now the code says why. Sorting and then
+taking the head of each group is a standard move, and it is worth recognizing on
+sight.
+
+4. The shape of that chain is reusable. Change one line and find the metro with
+the highest median rent in each division instead. Sort the result too, so that
+the divisions come out ranked.
+
+```{python}
+(
+    metro
+    .sort(c.rent_1br_median, descending=True)
+    .group_by(c.division)
+    .head(n=1)
+    .select(c.division, c.name, c.rent_1br_median)
+    .sort(c.rent_1br_median, descending=True)
+)
+```
+
+San Jose is the most expensive place in the country at $2,227, which is more than
+half again what you pay in New York. Notice how often the answer is not the
+region's biggest city: Boulder outranks Denver, Ann Arbor outranks Chicago and
+Detroit, Austin outranks Houston and Dallas. Small metros with a university or a
+tech industry in them can be expensive out of proportion to their size.
+
+5. What happens if you group and then stop? Run the block below and describe what
+comes back.
+
+```{python}
+#| eval: false
+(
+    metro
+    .group_by(c.division)
+)
+```
+
+**Answer**: Not a table. You get one line naming a `GroupBy` object and a memory
+address, with no rows and no columns to print. This is the thing to remember about
+grouping in Polars: `.group_by()` does not compute anything. It returns an
+instruction saying that whatever comes next should run once per group, and that
+instruction has to be consumed by the method on the following line. In questions
+1 through 4 the `.head()` was doing the consuming. There is no grouped table
+sitting in memory, and nothing to ungroup afterwards. The grouping exists only in
+the gap between two lines.
+
+6. Now aggregate. Count the metros in each division with `pl.len()` and sort the
+result from most to fewest.
+
+```{python}
+(
+    metro
+    .group_by(c.division)
+    .agg(n = pl.len())
+    .sort(c.n, descending=True)
+)
+```
+
+South Atlantic has 162 metros and New England has 26. These are counts of metro
+areas, not of people, and the two rankings are not the same.
+
+7. Add the money. For each division compute the mean and the median of
+`hh_income_median`, keep the count, and sort by the mean. Pass
+`maintain_order=True` to the grouping this time.
+
+```{python}
+(
+    metro
+    .group_by(c.division, maintain_order=True)
+    .agg(
+        income_avg = c.hh_income_median.mean(),
+        income_med = c.hh_income_median.median(),
+        n = pl.len()
+    )
+    .sort(c.income_avg, descending=True)
+)
+```
+
+New England comes out on top at about $73,900 and East South Central at the
+bottom at about $49,300, a gap of roughly $24,600 between the richest and the
+poorest division. If you run question 6 a few times you may see its rows come back
+in different orders, because Polars builds the groups in parallel and does not
+promise to return them in any particular sequence. That is what `maintain_order`
+fixes. Here we sorted the result anyway, so it makes no difference to what we see.
+
+8. A number in a table is worth being suspicious of. New England's mean income is
+the mean of what, exactly? Print the New England metros, one row each, sorted by
+population, and then answer.
+
+```{python}
+(
+    metro
+    .filter(c.division == "New England")
+    .select(c.name, c.pop, c.hh_income_median)
+    .sort(c.pop, descending=True)
+)
+```
+
+**Answer**: It is the mean of 26 numbers, one per metro, and every metro counts
+once. Boston has 4.9 million people and Vineyard Haven has 20,000, and they
+contribute equally to the average. So $73,900 is the income of the typical New
+England metro area, which is not the income of the typical New England household.
+Aggregation always answers a question about the rows you gave it. Here a row is a
+place, not a person.
+
+9. A group can be defined by more than one column. Add a column marking whether a
+metro has more than a million people, then group by that column and `quad`
+together and compute the mean income and the count of each combination.
+
+```{python}
+(
+    metro
+    .with_columns(big = c.pop > 1.0)
+    .group_by(c.quad, c.big, maintain_order=True)
+    .agg(
+        income_avg = c.hh_income_median.mean(),
+        n = pl.len()
+    )
+    .sort(c.quad, c.big)
+)
+```
+
+Ten rows, one for each combination that occurs in the data. The pattern is the
+same in all five regions: the big metros are richer than the small ones, by about
+$12,000 in the north central states and by nearly $21,000 in the west. Only 57 of
+the 934 metros clear a million people.
+
+10. The thing you aggregate does not have to be a column. It can be an expression.
+Count, in each division, how many metros have a median one-bedroom rent above
+$1,200. Keep `pl.len()` alongside it so you can see the count against the size of
+the division.
+
+```{python}
+(
+    metro
+    .group_by(c.division, maintain_order=True)
+    .agg(
+        n_expensive = (c.rent_1br_median > 1200).sum(),
+        n = pl.len()
+    )
+    .sort(c.n_expensive, descending=True)
+)
+```
+
+The comparison builds a column of true and false values, and `.sum()` on a boolean
+column counts the trues. We never had to add an "expensive" column to the data.
+There are only 28 such metros in the whole country and 15 of them are Pacific;
+three divisions have none at all.
+
+11. Rent is not the same as being able to afford rent. Compute the mean rent and
+the mean of `rent_perc_income` for each division, and sort by rent.
+
+```{python}
+(
+    metro
+    .group_by(c.division, maintain_order=True)
+    .agg(
+        rent_avg = c.rent_1br_median.mean(),
+        burden_avg = c.rent_perc_income.mean()
+    )
+    .sort(c.rent_avg, descending=True)
+)
+```
+
+Read down the two columns. Mean rent runs from $937 in the Pacific division to
+$561 in East South Central, a difference of about two thirds. The share of income
+that rent consumes runs from 30.7 percent to 26.9 percent, which is barely a
+difference at all. Rents are not high or low on their own; they are high or low
+against local incomes, and the two move together closely enough that the burden
+comes out nearly flat across the country. The expensive divisions are also the
+ones where people earn more. If you want to find the places where housing is
+actually a strain, the rent column is the wrong one to sort on.
+
+12. Aggregation gives you a small table, and a small table is something you can
+plot. Take the mean income by division from question 7 and draw it as a bar chart,
+division on the x-axis and mean income on the y-axis, flipped so the names are
+readable. Remember from last week that bars follow the row order of the data, so
+sort before you plot.
+
+```{python}
+(
+    metro
+    .group_by(c.division)
+    .agg(income_avg = c.hh_income_median.mean())
+    .sort(c.income_avg)
+    .pipe(ggplot, aes(c.division, c.income_avg))
+    .geom_col()
+    .coord_flip()
+    .labs(
+        x="Census division",
+        y="Mean of metro median household income (USD)",
+        title="Metro incomes by census division"
+    )
+)
+```
+
+The grouping is doing the work that makes this plot possible. There is no way to
+draw nine bars from a table of 934 metros without first turning it into a table of
+nine rows, and that reduction, many rows in and one row per group out, is what
+aggregation is for. Note also where the `.sort()` sits. It orders the aggregated
+result, because by the time the bars are drawn there are only nine rows left to
+put in order.

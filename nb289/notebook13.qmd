@@ -1,0 +1,367 @@
+---
+title: "Notebook13"
+solutions-release-date: "2026-10-19"
+---
+
+### Setup
+
+Run all of the following before starting the notebook.
+
+```{python}
+#| tags: [noclear]
+#| eval: false
+! wget -q -nc https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/funs.py
+```
+
+```{python}
+#| tags: [noclear]
+import polars as pl
+from plotnine import ggplot, aes
+from polars import col as c
+
+import funs
+
+ub = "https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"
+```
+
+```{python}
+#| tags: [remove]
+#| include: false
+ub = ""
+```
+
+```{python}
+#| tags: [noclear]
+food = (
+    pl.read_csv(ub + "data/wweia_food.csv", ignore_errors=True)
+    .select(
+        c.id, c.day_of_week, c.time, c.meal_name, c.food_source,
+        c.at_home, c.grams, c.kcal, c.protein, c.carbs, c.sugar, c.fat
+    )
+)
+```
+
+### Questions
+
+Same table as last time: 173,174 food items reported by 11,925 people, one row per item,
+one day of recall per person. The zeros are still there and the skew is still there.
+
+Last week we drew things. This week we adjust how the drawing is done: which colors a
+scale hands out, how an axis is spaced, how a plot splits into panels, and what the
+labels say. None of it changes the data, which makes this the part of graphics where it
+is easiest to mislead someone by accident. Two of the scales below quietly delete rows.
+
+Unless a question says otherwise, just print the result of each block; do not save it to
+a variable.
+
+1. Build the canvas for the first half of the notebook. Reduce the table to one row per
+person, carrying the day's calories, the day's mass, and the calories that person ate at
+home. Turn that last one into a share and then into a label. Save it as `person`.
+
+```{python}
+person = (
+    food
+    .group_by(c.id)
+    .agg(
+        kcal = c.kcal.sum(),
+        grams = c.grams.sum(),
+        n_items = pl.len(),
+        home_kcal = pl.when(c.at_home == "Yes").then(c.kcal).otherwise(0).sum(),
+    )
+    .filter(c.kcal > 0)
+    .with_columns(home_share = c.home_kcal / c.kcal * 100)
+    .with_columns(
+        where = pl.when(c.home_share >= 50)
+                  .then(pl.lit("Mostly at home"))
+                  .otherwise(pl.lit("Mostly out"))
+    )
+)
+
+(
+    person
+    .group_by(c.where)
+    .agg(n = pl.len(), med_kcal = c.kcal.median())
+)
+```
+
+There are 8,613 people who took most of their calories at home and 3,311 who took most of
+them elsewhere, and the second group reports about 200 calories more: a median of 1,978
+against 1,779.
+
+The `.filter(c.kcal > 0)` is not decoration. One participant, id 112482, reported a
+single item all day and it had no calories, so their `home_share` is a zero divided by a
+zero. That is a `NaN`, not a `null`, so nothing would have caught it, and `NaN >= 50` is
+false, which means `pl.when` would have quietly filed them under "Mostly out". One row in
+11,925 will not move a median. It is still a person, and it is still wrong.
+
+2. Map that share to color. It is a number, so the scale that turns it into color is a
+continuous one, and you get a color bar rather than a set of swatches.
+
+```{python}
+(
+    person
+    .pipe(ggplot, aes(c.grams, c.kcal))
+    .geom_point(aes(color=c.home_share), alpha=0.4)
+)
+```
+
+**Answer**: You get a legend and very little else. Nearly 12,000 points are stacked on
+top of each other, and the color of the one you can see is decided by whichever row
+happened to be drawn last. The pattern from question 1 is somewhere in that cloud and no
+reader will ever find it.
+
+This is the best-practices rule from the end of the chapter, met the hard way: color is a
+third channel, and it is a weak one. The x and y aesthetics are already carrying mass and
+calories. Asking a smear of overlapping dots to also carry a percentage is asking too
+much.
+
+3. Cut the share down to the two-level label and give it to a geometry that summarizes
+instead of one that draws every row. Add `scale_color_cmap_d()`, the discrete color scale
+the chapter recommends, and then set the colors yourself with `scale_color_manual()`.
+
+```{python}
+(
+    person
+    .sort(c.where)
+    .pipe(ggplot, aes(c.kcal))
+    .geom_density(aes(color=c.where), adjust=0.8)
+    .scale_color_cmap_d()
+)
+```
+
+```{python}
+(
+    person
+    .sort(c.where)
+    .pipe(ggplot, aes(c.kcal))
+    .geom_density(aes(color=c.where), adjust=0.8)
+    .scale_color_manual(values={
+        "Mostly at home": "#2C7BB6",
+        "Mostly out": "#D7191C"
+    })
+)
+```
+
+Two curves, and now the 200 calories are visible: the "Mostly out" curve peaks slightly
+lower and sits to the right of the other one all the way up through 4,000 calories. The
+same fact that was invisible as a color bar is legible as two lines, because a summary of
+each group is a far smaller thing to draw than 12,000 people.
+
+Two notes on the color. The `.sort(c.where)` is what fixes the legend order, for the same
+reason a sort fixed the bar order last week: a color scale is a categorical axis and it
+takes its order from the data. And `scale_color_cmap_d()` will look like it did nothing,
+because it did nothing: viridis is already what a categorical color gets by default, as
+the chapter says. Naming it is still worth the line when the palette matters, and it is
+the handle you turn to change it, either with a different color map inside the same scale
+or with a different scale such as `scale_color_brewer()`. `scale_color_manual` is the
+blunt one, and it earns its place when the groups have colors of their own, the way
+parties and teams and brands do.
+
+4. Now break the rule on purpose. Go back to the item table and color the points by
+`food_source`.
+
+```{python}
+(
+    food
+    .filter(c.kcal > 0)
+    .pipe(ggplot, aes(c.grams, c.kcal))
+    .geom_point(aes(color=c.food_source), size=0.5)
+)
+```
+
+**Answer**: The legend eats the figure. `food_source` has 27 categories, the legend needs
+two columns to list them, and the plot itself is squeezed into a strip on the left so
+narrow that the x-axis labels print on top of each other. The colors are also useless: 27
+shades of one gradient, most of them a few pixels apart in color space, several
+represented by a handful of points somewhere under the pile.
+
+The chapter's rule of thumb is eight categories, and it is generous. Nothing here raised
+an error, and there is no way to fix this plot by adjusting the scale. The plot is wrong
+before the colors are chosen.
+
+5. Scales can also change an axis. The calorie histogram from last week was a single bar
+because of the skew, and we dealt with that by throwing away the zeros and the tail.
+There is a scale for exactly this shape of data. Put the x-axis on a log scale instead.
+
+```{python}
+(
+    food
+    .pipe(ggplot, aes(c.kcal))
+    .geom_histogram(fill="white", color="black", bins=40)
+    .scale_x_log10()
+)
+```
+
+**Answer**: Read the warning, because the plot will not tell you: `Removed 23132 rows
+containing non-finite values`. The log of zero is negative infinity, so a log scale
+cannot draw a zero, ever. Every one of those water glasses left the figure without being
+mentioned.
+
+What is left is worth the trip. The whole range from 1 calorie to 5,000 now fits, and the
+distribution turns out to have two humps: the big one around 100 to 200 calories, which
+is food, and a smaller one down between 1 and 10 calories, which is 20,135 items of
+brewed coffee, lettuce and tomato "for use on a sandwich", mustard, ketchup, and hot
+sauce. The linear axis in notebook12 could not have shown you that. It had them all
+piled in the first bin with the water.
+
+If you want the zeros gone, then, drop them yourself with a `.filter(c.kcal > 0)` in
+front of the plot. The result is identical and the deletion is now in your code where a
+reader can see it, rather than in a warning nobody reads.
+
+6. Two more scale arguments, and a trap. `breaks` sets where the grid lines and labels
+fall, and `limits` sets the ends of the axis. Draw the mass-against-calories scatter from
+last week, with its fitted line, over a window that stops at 5,000 on both axes. Do it
+first with `limits`, then again with `coord_cartesian`.
+
+```{python}
+(
+    person
+    .pipe(ggplot, aes(c.grams, c.kcal))
+    .geom_point(alpha=0.05)
+    .geom_smooth(method="lm", se=False)
+    .scale_x_continuous(breaks=[0, 1000, 2000, 3000, 4000, 5000], limits=(0, 5000))
+    .scale_y_continuous(limits=(0, 5000))
+)
+```
+
+```{python}
+(
+    person
+    .pipe(ggplot, aes(c.grams, c.kcal))
+    .geom_point(alpha=0.05)
+    .geom_smooth(method="lm", se=False)
+    .scale_x_continuous(breaks=[0, 1000, 2000, 3000, 4000, 5000])
+    .coord_cartesian(xlim=(0, 5000), ylim=(0, 5000))
+)
+```
+
+**Answer**: The two plots show the same window and they do not show the same line. Setting
+`limits` does not crop the picture, it deletes the rows outside the range: 1,076 people
+left the table, and the model was then fitted to whoever was left. Because the people it
+removed are the heavy, watery, low-calorie-per-gram end of the data, the line it fits is
+steeper. It rises about 0.41 calories per gram instead of the 0.34 the full data gives,
+and it starts nearly 200 calories lower. `coord_cartesian` is the one that crops: every
+row is still in the model, and you are simply looking at part of the result.
+
+A scale limit is a filter wearing the clothes of a zoom. If you mean to drop rows, drop
+them with `.filter()` where it shows. If you mean to look closer, look closer.
+
+7. Facets split one plot into a grid of panels, one per level of a variable, instead of
+crowding every group into the same axes. Total each person's calories and mass at each of
+the four main meals, then give every meal its own panel and its own fitted line.
+
+```{python}
+(
+    food
+    .filter(c.meal_name.is_in(["Breakfast", "Lunch", "Dinner", "Snack"]))
+    .group_by(c.id, c.meal_name)
+    .agg(kcal = c.kcal.sum(), grams = c.grams.sum())
+    .sort(c.meal_name)
+    .pipe(ggplot, aes(c.grams, c.kcal))
+    .geom_point(aes(color=c.meal_name), alpha=0.15, show_legend=False)
+    .geom_smooth(method="lm", se=False)
+    .facet_wrap("meal_name")
+)
+```
+
+The four lines have visibly different slopes, and they say something real. A gram of
+dinner carries about 0.72 calories and a gram of lunch 0.65, but a gram of breakfast
+carries only 0.33. Breakfast is the wettest meal in the American day: coffee, milk,
+juice. It weighs a lot and it is mostly water, so the same mass buys half the calories it
+would at dinner.
+
+Note the color and the `show_legend=False` together. The color is not carrying any
+information that the panel titles do not already carry, so the legend would be pure
+duplication. It is there to make the panels easy to tell apart at a glance, which is the
+one job color should be given when it is redundant.
+
+8. `facet_grid` takes two variables and lays the panels out in rows and columns. Split the
+item-level calorie histogram by meal across the columns and by `at_home` down the rows,
+keeping the log axis from question 5.
+
+```{python}
+(
+    food
+    .filter(c.kcal > 0, c.meal_name.is_in(["Breakfast", "Lunch", "Dinner", "Snack"]))
+    .sort(c.meal_name)
+    .pipe(ggplot, aes(c.kcal))
+    .geom_histogram(fill="white", color="black", bins=25)
+    .scale_x_log10()
+    .facet_grid("at_home", "meal_name")
+)
+```
+
+Eight panels, and the comparison the grid is for is the vertical one. Breakfast, dinner,
+and snacks are home affairs: each has roughly three times as many items logged at home as
+away. Lunch is the exception, and it is the one panel pair of equal height. Americans
+report 15,254 lunch items eaten at home and 15,620 eaten somewhere else, which is as
+close to a coin flip as this dataset gets. Lunch is the meal that left the house.
+
+The condiment-and-coffee hump from question 5 is in every panel, but it is visibly
+smaller under `Snack`: about 7 percent of snack items come in under 10 calories, against
+13 to 17 percent for the three real meals. A snack is a thing you eat. A meal comes with
+ketchup, and coffee, and a leaf of lettuce that somebody wrote down.
+
+All eight panels share one x-axis and one y-axis, which is what makes those heights
+comparable at a glance. `facet_wrap` and `facet_grid` both take a `scales` argument
+(`"free_x"`, `"free_y"`, `"free"`) that gives each panel its own range. It makes small
+panels legible and it destroys exactly the comparison you built the grid to make, so
+reach for it rarely and say so when you do.
+
+9. Prepare one plot for someone else. Take the density from question 3, label every part
+of it, and set a theme.
+
+```{python}
+(
+    person
+    .sort(c.where)
+    .pipe(ggplot, aes(c.kcal))
+    .geom_density(aes(color=c.where), adjust=0.8)
+    .scale_color_manual(values={
+        "Mostly at home": "#2C7BB6",
+        "Mostly out": "#D7191C"
+    })
+    .coord_cartesian(xlim=(0, 6000))
+    .labs(
+        x="Reported calories for the day",
+        y="Density",
+        color="Where the calories came from",
+        title="People who eat out report more calories",
+        subtitle="One day of dietary recall, 11,924 participants",
+        caption="What We Eat in America, NHANES"
+    )
+    .theme_tufte()
+)
+```
+
+The default labels were the column names, which were written for us, not for a reader.
+`kcal` becomes "Reported calories for the day", and the word "reported" is doing a lot of
+work in that phrase: it is the difference between what this survey measured and what
+people ate. The window is set with `coord_cartesian` rather than `limits`, for the reason
+question 6 gave.
+
+The title is the part to be careful with. "People who eat out report more calories" is a
+description of the two curves and it is true. "Eating out makes you eat more" would be a
+claim about cause, and nothing in this figure supports it: people who eat most of their
+meals out are younger and more likely to be working, and either of those could produce
+the same picture. Every other layer in the grammar of graphics is constrained by the
+data. `labs` is the one place where you can write anything you like, which is why it is
+where charts usually start lying.
+
+10. Look back over the plots you have made in the last two notebooks. Which of the
+chapter's best practices did we break, and where? Write down two.
+
+**Answer**: Several are open to argument, but two are not.
+
+The color scale in question 4 breaks the rule about using color with a small set of
+categories, and it breaks the rule that color is an extra layer rather than the primary
+one. Twenty-seven food sources is more than three times the suggested limit, and the plot
+does not degrade gracefully; it dies.
+
+The other is the boxplot of calories per item by meal in notebook12, which used a
+boxplot to compare a numeric variable across a category, exactly as the chapter suggests,
+and still produced four squashed boxes with a spray of outliers running off to 8,000
+calories. The rule was followed and the plot was poor, because the rule assumes a
+variable that is not skewed across four orders of magnitude. That is what the last line
+of the chapter means about learning when to break these rules. The log scale from question
+5 is the tool that plot actually needed.

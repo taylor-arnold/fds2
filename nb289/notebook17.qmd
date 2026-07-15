@@ -1,0 +1,463 @@
+---
+title: "Notebook17"
+solutions-release-date: "2026-11-02"
+---
+
+### Setup
+
+Run all of the following before starting the notebook.
+
+```{python}
+#| tags: [noclear]
+#| eval: false
+! wget -q -nc https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/funs.py
+```
+
+```{python}
+#| tags: [noclear]
+import polars as pl
+from plotnine import ggplot, aes
+from polars import col as c
+
+import funs
+
+ub = "https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"
+```
+
+```{python}
+#| tags: [remove]
+#| include: false
+ub = ""
+```
+
+```{python}
+#| tags: [noclear]
+fsac_url = ub + "data/fsac_export.csv"
+```
+
+### Questions
+
+Notice that the setup did not load a table. It loaded a *path*. That is the whole point of
+this notebook: getting the file into Python is the assignment, not the thing you do before
+the assignment starts.
+
+The file is a metadata export from the Library of Congress, covering 500 color photographs
+taken between 1939 and 1943 for the Farm Security Administration and its successor, the
+Office of War Information. The FSA sent photographers out to document rural poverty during
+the Depression. After Pearl Harbor the unit was folded into the OWI and the cameras were
+turned on aircraft plants and rail yards instead, with some of the same photographers
+carrying straight over: Jack Delano is in this file in 1940 and again in 1943, doing a
+different job. The collection is famous for its black-and-white work, and these are the rare
+Kodachromes.
+
+A row is one photograph. The columns are a `filepath` pointing at the image itself, a
+`call_number` (the archive's catalogue id), the `photographer`, a `caption` written by the
+archive, the `year` and `month` it was taken, the `state`, `city` and `county` where it was
+taken, and a `longitude` and `latitude`.
+
+At least, that is what the columns will be once you can read them. Right now you have a URL
+and a promise.
+
+Unless a question says otherwise, print the result of each block; do not save it.
+
+1. Try the obvious thing first.
+
+```{python}
+#| error: true
+pl.read_csv(fsac_url)
+```
+
+**Answer**: `ComputeError: invalid utf-8 sequence`.
+
+That is a good error, and worth a moment. Polars is not saying the file is bad. It is saying
+that somewhere in these bytes is a sequence that is not valid UTF-8, and UTF-8 is what
+`read_csv` assumes unless you tell it otherwise. The file was written by some other program,
+years ago, under some other assumption, and nothing in a CSV records which one.
+
+Note also what the error does *not* tell you. It stops at the first problem it hits. There
+may be others behind it.
+
+2. Before guessing at arguments, look at the file. You can make `read_csv` hand you the raw
+lines by giving it a separator the file does not contain (there are no tabs in this one),
+turning off the header, and reading with `encoding="utf8-lossy"`, which replaces any byte it
+cannot decode instead of raising. Every line then comes back as a single string.
+
+```{python}
+raw = pl.read_csv(
+    fsac_url,
+    separator="\t",
+    has_header=False,
+    encoding="utf8-lossy",
+    quote_char=None,
+)
+
+print(raw.item(0, 0))
+print(raw.item(1, 0))
+print(raw.item(2, 0))
+```
+
+**Answer**: Three problems, visible in three lines.
+
+The first two lines are not data. They are a title and an export stamp, which is the kind of
+thing an export tool adds because a human is expected to open the file and read it. The real
+header is on the third line. That is what `skip_rows=2` is for.
+
+The header on line three is separated by pipes, not commas. That is not perverse: 495 of the
+500 captions contain a comma and 54 contain a semicolon, so whoever wrote this file picked a
+character the text could not contain. Pass `separator="|"`.
+
+And the encoding is still wrong. We only got this far by telling Polars to paper over the
+bad bytes.
+
+3. Fix two of the three and leave the encoding papered over. Read the file with the pipe
+separator, the two skipped rows, and `encoding="utf8-lossy"`. Print the shape and schema,
+then pull out the one caption about the tracks at the Proviso rail yard and read it.
+
+```{python}
+bad = pl.read_csv(
+    fsac_url,
+    separator="|",
+    skip_rows=2,
+    encoding="utf8-lossy",
+)
+
+print(bad.shape)
+
+bad.schema
+```
+
+```{python}
+(
+    bad
+    .filter(c.caption.str.contains("Tracks at C"))
+    .item(0, "caption")
+)
+```
+
+**Answer**: 500 rows, 11 columns, and the types are all sensible: the coordinates are `f64`,
+the year and month are `i64`, everything else is `str`. It looks like a clean load.
+
+It is not. Look at the caption: `Tracks at C &amp; NW RR�s Proviso yard, Chicago, Ill.` That
+black diamond is `�`, the Unicode replacement character, and it is standing where an
+apostrophe used to be. `utf8-lossy` did exactly what it promised. It did not decode the byte,
+it threw the byte away and put a marker in the hole, and it did that in 98 of the 500
+captions without a word of complaint.
+
+This is the trap worth remembering. The error is gone and the data is worse than it was when
+the error was there, because now nothing is going to tell you. A fix that silences a symptom
+is not the same thing as a fix that gets the right answer.
+
+4. Now decode the bytes properly. The file was written in `windows-1252`, the default
+encoding of Windows text editors for about twenty years. Read it again, save the result as
+`photos`, and look at the same caption.
+
+```{python}
+#| tags: [noclear]
+photos = pl.read_csv(
+    fsac_url,
+    separator="|",
+    skip_rows=2,
+    encoding="windows-1252",
+)
+
+(
+    photos
+    .filter(c.caption.str.contains("Tracks at C"))
+    .item(0, "caption")
+)
+```
+
+**Answer**: `Tracks at C &amp; NW RR’s Proviso yard, Chicago, Ill.` The apostrophe is back,
+and it is a typographic one, which is what the archive actually typed.
+
+How would you have known to try `windows-1252`? By trying it. It and `latin1` cover most of
+what you will meet from an American or Western European source, and the way you check is by
+reading a value you can recognize. That last step is not optional. An encoding argument that
+loads without an error has proved nothing except that it did not raise one.
+
+5. The apostrophe is fixed and the caption is still wrong. `&amp;` is HTML for `&`, and it
+has survived into the data as five literal characters. Count how many captions carry it,
+then repair the column with `.str.replace_all()`, which takes the text to find and the text
+to put in its place. Save the repaired table back over `photos`.
+
+```{python}
+photos.filter(c.caption.str.contains("&amp;")).height
+```
+
+```{python}
+#| tags: [noclear]
+photos = photos.with_columns(
+    caption = c.caption.str.replace_all("&amp;", "&")
+)
+
+(
+    photos
+    .filter(c.caption.str.contains("Tracks at C"))
+    .item(0, "caption")
+)
+```
+
+**Answer**: 45 captions, and no `read_csv` argument would have touched them.
+
+The distinction is worth being precise about. `encoding=` tells Polars how to turn *bytes*
+into characters. `&amp;` is not an encoding problem; the bytes are fine, and they spell an
+ampersand the long way round. Some pipeline between the archive and this file decoded the
+quotes and the apostrophes and then stopped, which is what a half-finished unescaping looks
+like, and it is extremely common.
+
+Reading an imperfect file is rarely one function call. It is three arguments, then a look at
+the data, then a `replace_all`, and the only reason you caught this one is that you read a
+caption instead of trusting the shape.
+
+6. The file is loaded. Now find out whether a row is what the archive says it is. Two columns
+claim to identify a photograph: `call_number` and `filepath`. Test them both against the row
+count.
+
+```{python}
+photos.select(rows = pl.len(), calls = c.call_number.n_unique(), files = c.filepath.n_unique())
+```
+
+Something is duplicated. Print the rows whose filepath is near `1a3543`, sorted, and look at
+the two columns side by side.
+
+```{python}
+(
+    photos
+    .filter(c.filepath.str.contains("1a3543"))
+    .sort(c.filepath)
+    .select(c.filepath, c.call_number, c.city, c.year)
+)
+```
+
+**Answer**: 500 rows, 499 distinct call numbers, 499 distinct filepaths. The same row is in
+the file twice.
+
+The printed neighborhood is better than the count. Look down the two columns: `1a35430` goes
+with `LC-DIG-fsac-1a35430`, `1a35431` with `...1a35431`, `1a35432` with `...1a35432`,
+`1a35433` with `...1a35433`. Every row in this run has a call number that matches its
+filename digit for digit. Then `1a35434v.jpg` arrives carrying `LC-DIG-fsac-1a35424`, and it
+arrives twice.
+
+So this is not one error, it is two. The row was entered twice, and on the way in somebody
+transposed the third and fourth digits of the call number. And you can say *which* field is
+wrong, which you almost never can: the pattern of the neighbors, plus the fact that a file
+named `1a35434v.jpg` exists and one named `1a35424v.jpg` does not, puts the error in the
+call number rather than in the path.
+
+Two of section 10.8's special considerations are colliding here. The multimedia rule says to
+store the file name in a column, and the archive did. What the rule does not mention is the
+side effect: once the file name is in the table, the photograph's identity is recorded twice,
+by two systems that had no reason to agree. That is the only reason the typo is visible at
+all. If the archive had stored the images as `1.jpg`, `2.jpg`, `3.jpg`, the call number would
+have been the sole witness and the error would still be sitting there.
+
+7. Now the dates, which are section 10.8's first special consideration. The chapter gives two
+approved options: record each element in its own column, or use a full ISO 8601 string.
+Build a monthly count of photographs and plot it.
+
+```{python}
+(
+    photos
+    .group_by(c.year, c.month)
+    .agg(n = pl.len())
+    .with_columns(date = pl.date(c.year, c.month, 1))
+    .sort(c.date)
+    .pipe(ggplot, aes(c.date, c.n))
+    .geom_line()
+    .geom_point()
+    .labs(x = "Month photographed", y = "Photographs")
+)
+```
+
+**Answer**: This file takes the first option, and it takes it because it has to. The archive
+knows the month a photograph was taken and does not know the day, and there is no such thing
+as an ISO 8601 date with the day left off. Had someone insisted on a `date_taken` column in
+`YYYY-MM-DD` form, they would have had to invent 500 days.
+
+Notice that we invented one anyway, in `pl.date(c.year, c.month, 1)`, because plotnine needs
+a point on an axis. That is fine for a chart and would be a lie in a data file. The rule
+underneath both of the chapter's options is the same: store the precision you have, not the
+precision your date library wants.
+
+The chart itself is worth reading. From 1939 through the first half of 1942 the counts sit in
+the single digits and low teens, and then from mid-1942 the line swings violently between 1
+and 61 from one month to the next. That is the FSA becoming the OWI, and rural poverty giving
+way to war production.
+
+The two tallest points are not trends, though, and it is worth knowing why before you say
+anything about them. October 1940 is 49 photographs, and 39 of them are Russell Lee in Pie
+Town, New Mexico, on a single trip. October 1942 is 61, mostly Alfred Palmer and Howard
+Hollem standing inside aircraft plants in Long Beach, Inglewood, and Fort Worth. A monthly
+count of an archive measures where the photographers went and what somebody later chose to
+keep. It does not measure what the country looked like.
+
+8. Section 10.8's second special consideration is missing values, and the rule is that a
+blank cell is the only portable way to write one. Check whether this file has any.
+
+```{python}
+photos.null_count()
+```
+
+Now look at the five photographs taken in the District of Columbia.
+
+```{python}
+(
+    photos
+    .filter(c.state == "District of Columbia")
+    .select(c.city, c.county, c.photographer)
+)
+```
+
+Read the file one more time, this time telling Polars that the placeholder is a missing
+value, and save the result as `photos`. You will need to redo the ampersand repair.
+
+```{python}
+#| tags: [noclear]
+photos = (
+    pl.read_csv(
+        fsac_url,
+        separator="|",
+        skip_rows=2,
+        encoding="windows-1252",
+        null_values=["US.DC.001"],
+    )
+    .with_columns(caption = c.caption.str.replace_all("&amp;", "&"))
+)
+
+photos.null_count()
+```
+
+**Answer**: The first block reports zero nulls in every column. Do not believe it. Washington
+has no county, because the District of Columbia is not in one, so five rows here have no
+county to record. The file records one anyway. It says `US.DC.001`, which is a geocoder's
+internal code sitting in a column of English county names.
+
+`null_values=["US.DC.001"]` fixes it at the door, and now `null_count()` reports 5.
+
+`null_values` has a sibling, `schema_overrides`, and they are the same idea: prevent the
+damage at read time rather than repair it afterward. You have met the case for it already.
+The Paris Métro file stored `line` as an integer, and an integer column cannot hold `3bis`,
+so those seven stations were never in the file at all. Reading that column with
+`schema_overrides={"line": pl.String}` is the version of that file where they exist. Casting
+afterward would not have brought them back, because by then they were gone.
+
+9. Section 10.3 says to use an external standard for a character variable when one exists.
+Take the chapter at its word and audit `county`. Start with the values that do not end in the
+word `County`.
+
+```{python}
+(
+    photos
+    .filter(~c.county.str.ends_with("County"))
+    .group_by(c.county)
+    .agg(n = pl.len())
+    .sort(c.n, descending=True)
+)
+```
+
+That is a reasonable-looking list. Now print the county of every photograph taken in
+California.
+
+```{python}
+(
+    photos
+    .filter(c.state == "California")
+    .group_by(c.county, c.city)
+    .agg(n = pl.len())
+    .sort(c.n, descending=True)
+)
+```
+
+**Answer**: The first list is mostly harmless. Louisiana has parishes rather than counties,
+which is correct. Virginia has independent cities that belong to no county, and the file
+writes those back to front, so "City of Hampton" arrives as `City Hampton` and "City of
+Newport News" arrives as `City News`. `Palm Beach` has simply lost the word County.
+
+The California table is the one that should worry you. Ten rows, and three counties:
+
+`Shasta County` is right. Redding is in Shasta County.
+
+`Los County` is not a place. Los Angeles, Long Beach, Burbank, and Inglewood are all in **Los
+Angeles County**, and 40 photographs are filed under a county that has never existed.
+
+`San County` is not a place either. Cajon, Redlands, Cadiz, Alray, and Bagdad are all in
+**San Bernardino County**, and there are 11 more.
+
+Put the three side by side and the rule falls out. Every value in this column is exactly two
+words long, all 495 of them, and that is not a fact about American county names. Shasta
+County survived because its name was already two words. Los Angeles County and San Bernardino
+County did not.
+
+Now look back at the first test, the one that passed. `Los County` ends in the word `County`.
+It has the right shape, it has no nulls, it sorts and groups without complaint, and it is
+false. A format check cannot catch this, because the format is fine.
+
+This is the argument for section 10.3's rule about standards, and it is not a matter of
+tidiness. Had the archive recorded the county FIPS code, Los Angeles County would be `06037`,
+and `06037` has no first word to be sheared down to. The English name would then have lived
+in another table, one row per county, where getting it wrong costs you one row instead of 40.
+
+10. Write the data dictionary. First, run one more test on the coordinates: they look like a
+fact about the photograph, so check whether they vary within a city.
+
+```{python}
+(
+    photos
+    .group_by(c.state, c.city)
+    .agg(coords = c.longitude.n_unique(), photos = pl.len())
+    .filter(c.coords > 1)
+)
+```
+
+Now, in a few sentences, write the dictionary this file should have shipped with. For each
+column: what it holds, what type it is, and what decision or defect a reader has to know
+about.
+
+**Answer**: The test returns nothing. Not one of the 108 cities in this file has two
+coordinates, so `longitude` and `latitude` do not vary within a city. They are not the
+position of the camera. They are the centroid of the town, copied onto every photograph taken
+there, and the dictionary has to say so, because a map of these points is a map of where the
+towns are.
+
+That is the same test we ran on the Paris Métro, and it comes out the other way. There,
+Châtelet had five different longitudes and the coordinates turned out to be platform
+positions, so they were a fact about the unit and belonged in the table. Here they are a fact
+about the city. The test does not tell you what a column means. It tells you what a column
+*cannot* mean, and you supply the rest.
+
+A dictionary that would have saved you this notebook:
+
+`filepath` (str) is the image file, relative to the archive's media directory, so the table
+is only usable next to that directory. It is also the most reliable identifier here.
+
+`call_number` (str) is the archive's catalogue id, and it is the primary key with one known
+defect: `LC-DIG-fsac-1a35424` is a typo for `...1a35434` and appears on a row that was
+entered twice.
+
+`photographer` (str) is a free-text name, 17 distinct, spelled consistently but with no
+authority id behind it.
+
+`caption` (str) is written by the archive, is HTML-escaped in places, and was exported in
+windows-1252.
+
+`year` and `month` (i64) are the date. There is no day, and there is no day because the
+archive does not know it.
+
+`state` (str) is a full English name rather than the USPS code, and `city` (str) carries
+disambiguators in parentheses (`Washington (DC)`, `Bar Harbor (Town)`).
+
+`county` (str) is truncated to two words and is therefore wrong for every county whose name
+is longer than that. Do not group on it.
+
+`longitude` and `latitude` (f64) are city centroids, not photograph locations.
+
+Every line of that took a query to find and one sentence to write down, and together they
+would have saved you an afternoon.
+
+That asymmetry is the argument for the data dictionary, and it is why the chapter gives it a
+section rather than a footnote. Not one of those facts is recoverable from the file. The file
+can tell you that `county` holds two words; it cannot
+tell you that two words is wrong. It can tell you there is no `day` column; it cannot tell
+you whether that is because the day is unknown or because somebody forgot. The collector knew
+all of it and wrote none of it down, and you have just spent ten questions reconstructing
+what they could have typed in five minutes.

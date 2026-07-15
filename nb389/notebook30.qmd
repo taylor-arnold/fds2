@@ -1,0 +1,458 @@
+---
+title: "Notebook30"
+solutions-release-date: "2026-07-01"
+---
+
+### Setup
+
+Run all of the following before starting the notebook.
+
+```{python}
+#| tags: [noclear]
+#| eval: false
+! wget -q -nc https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/funs.py
+```
+
+```{python}
+#| tags: [noclear]
+import polars as pl
+from plotnine import ggplot, aes
+from polars import col as c
+
+import funs
+
+ub = "https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"
+```
+
+```{python}
+#| tags: [remove]
+#| include: false
+ub = ""
+```
+
+```{python}
+#| tags: [noclear]
+rva = pl.read_csv(ub + "data/flightsrva_flights.csv.gz", null_values=["NA"])
+airline = pl.read_csv(ub + "data/flightsrva_airlines.csv.gz", null_values=["NA"])
+airport = pl.read_csv(ub + "data/flightsrva_airports.csv.gz", null_values=["NA"])
+plane = pl.read_csv(ub + "data/flightsrva_planes.csv.gz", null_values=["NA"])
+```
+
+### Questions
+
+This notebook is a review of the whole first semester: types, filtering and
+sorting, plotting, grouping, windows, joins, and reshaping. Nothing here is
+new. The dataset is four tables about commercial flights out of Richmond
+(RIC) in 2019. `rva` is the main table, one row per flight, with scheduled
+and actual times, delays in minutes, the carrier, the tail number of the
+aircraft, the destination, and the distance flown. `airline` maps a
+two-letter `carrier` code to a full company name. `airport` maps a
+three-letter FAA code to a name, a location, and a time zone; `rva`'s
+`dest` column matches `airport`'s `faa` column, not its own name. `plane`
+is a registry of individual aircraft, keyed by `tailnum`, with the
+manufacturer, model, and seat count. Print results unless a question says
+otherwise.
+
+1. Sort `rva` by distance, longest flight first. Select just `carrier`,
+`dest`, and `distance`, and print the top 5.
+
+```{python}
+(
+    rva
+    .sort(c.distance, descending=True)
+    .select(c.carrier, c.dest, c.distance)
+    .head(5)
+)
+```
+
+The top 5 are all the same flight, UA to Denver. Distance belongs to the
+route, not the individual flight, so every flight on a route ties.
+
+2. Filter to flights headed to Atlanta (`ATL`) or Chicago O'Hare (`ORD`)
+using `.is_in()`. Print how many there are with `.select(pl.len())`.
+
+```{python}
+(
+    rva
+    .filter(c.dest.is_in(["ATL", "ORD"]))
+    .select(pl.len())
+)
+```
+
+3. Rename `dep_delay` to `delay_departure` and `arr_delay` to
+`delay_arrival`. Print `carrier` and the two renamed columns for the first
+5 rows.
+
+```{python}
+(
+    rva
+    .rename({"dep_delay": "delay_departure", "arr_delay": "delay_arrival"})
+    .select(c.carrier, c.delay_departure, c.delay_arrival)
+    .head(5)
+)
+```
+
+4. How many distinct aircraft, by `tailnum`, flew out of Richmond in 2019?
+Answer it two ways: once with `.select(c.tailnum.n_unique())`, and once
+with `.unique(subset="tailnum", keep="first")` followed by
+`.select(pl.len())`. Confirm the two numbers agree.
+
+```{python}
+rva.select(c.tailnum.n_unique())
+```
+
+```{python}
+(
+    rva
+    .unique(subset="tailnum", keep="first")
+    .select(pl.len())
+)
+```
+
+5. Add a `delay_total` column (`dep_delay` plus `arr_delay`), and a
+`status` column built with a chained `pl.when().then().otherwise()`:
+`"cancelled"` when `dep_delay` is null, `"delayed"` when `dep_delay` is
+over 15, and `"on time"` otherwise. Print `carrier`, `dep_delay`,
+`delay_total`, and `status` for 5 rows, then count how many flights fall
+into each status.
+
+```{python}
+q5 = rva.with_columns(
+    delay_total = c.dep_delay + c.arr_delay,
+    status = pl.when(c.dep_delay.is_null())
+        .then(pl.lit("cancelled"))
+        .when(c.dep_delay > 15)
+        .then(pl.lit("delayed"))
+        .otherwise(pl.lit("on time"))
+)
+q5.select(c.carrier, c.dep_delay, c.delay_total, c.status).head(5)
+```
+
+```{python}
+q5["status"].value_counts()
+```
+
+6. Print `rva.schema`. Then count the nulls in `dep_time` and in
+`dep_delay` and check that the two counts match.
+
+```{python}
+rva.schema
+```
+
+```{python}
+rva.select(
+    n_null_dep_time = c.dep_time.is_null().sum(),
+    n_null_dep_delay = c.dep_delay.is_null().sum()
+)
+```
+
+The counts match because both columns go missing for the same reason: a
+cancelled flight was never scheduled to depart, so it has no actual
+departure time and no delay to measure.
+
+7. Uppercase every `carrier` code in `rva` with `.str.to_uppercase()` and
+print the distinct values (they should look unchanged, since the codes are
+already uppercase). Then, in `plane`, use `.str.contains()` to filter to
+aircraft whose `manufacturer` contains `"BOEING"`, and print how many
+distinct `model` values come back.
+
+```{python}
+rva.select(c.carrier.str.to_uppercase().unique())
+```
+
+```{python}
+(
+    plane
+    .filter(c.manufacturer.str.contains("BOEING"))
+    .select(c.model.n_unique())
+)
+```
+
+8. Plot `dep_delay` against `arr_delay` with `geom_point()`, using
+`alpha=0.1` so the overplotting is readable, and add a `geom_smooth()`
+trend line with `method="lm"` and `se=False`.
+
+```{python}
+(
+    ggplot(rva, aes(c.dep_delay, c.arr_delay))
+    .geom_point(alpha=0.1)
+    .geom_smooth(method="lm", se=False, color="red")
+)
+```
+
+9. Count flights per carrier, sort ascending, and plot as a bar chart with
+`geom_col()` and `coord_flip()`.
+
+```{python}
+(
+    rva
+    .group_by(c.carrier)
+    .agg(n = pl.len())
+    .sort(c.n)
+    .pipe(ggplot, aes(c.carrier, c.n))
+    .geom_col()
+    .coord_flip()
+)
+```
+
+10. Build a `date` column with `pl.date(c.year, c.month, c.day)`. Group by
+`date`, count the flights on each day, sort by date, and plot the daily
+count with `geom_line()`.
+
+```{python}
+(
+    rva
+    .with_columns(date = pl.date(c.year, c.month, c.day))
+    .group_by(c.date)
+    .agg(n = pl.len())
+    .sort(c.date)
+    .pipe(ggplot, aes(c.date, c.n))
+    .geom_line()
+)
+```
+
+11. Group by `carrier` and compute the mean and median `dep_delay`, plus a
+count, sorted by the mean, worst first.
+
+```{python}
+(
+    rva
+    .group_by(c.carrier, maintain_order=True)
+    .agg(
+        delay_avg = c.dep_delay.mean(),
+        delay_med = c.dep_delay.median(),
+        n = pl.len()
+    )
+    .sort(c.delay_avg, descending=True)
+)
+```
+
+Every median is negative while several means are well above zero. Most
+flights leave a little early or on time, and a smaller number of very late
+flights pull the mean up without moving the median much.
+
+12. Group by `carrier` and `month` together. In each group, count the
+flights and count how many had `dep_delay` over 15. Add a `prop_delayed`
+column (the second count divided by the first) and sort by it, worst
+first.
+
+```{python}
+(
+    rva
+    .group_by(c.carrier, c.month, maintain_order=True)
+    .agg(
+        n = pl.len(),
+        n_delayed = (c.dep_delay > 15).sum()
+    )
+    .with_columns(prop_delayed = c.n_delayed / c.n)
+    .sort(c.prop_delayed, descending=True)
+    .head(5)
+)
+```
+
+13. Without any grouping, use `.select()` with aggregating expressions to
+find the minimum, mean, and maximum `distance`, the 90th percentile of
+`dep_delay`, and the correlation between `dep_delay` and `arr_delay`
+(`pl.corr()`).
+
+```{python}
+rva.select(
+    dist_min = c.distance.min(),
+    dist_mean = c.distance.mean(),
+    dist_max = c.distance.max(),
+    delay_p90 = c.dep_delay.quantile(0.9),
+    delay_corr = pl.corr(c.dep_delay, c.arr_delay)
+)
+```
+
+14. Cancelled flights have no delay to speak of, so drop the rows where
+`dep_delay` is null first. Then add a `delay_dev` column: each flight's
+`dep_delay` minus its own carrier's mean `dep_delay`, computed with
+`.over()`. Sort descending and print the 5 flights that ran latest
+relative to their own carrier's usual performance.
+
+```{python}
+(
+    rva
+    .filter(c.dep_delay.is_not_null())
+    .with_columns(
+        delay_dev = c.dep_delay - c.dep_delay.mean().over(c.carrier)
+    )
+    .sort(c.delay_dev, descending=True)
+    .select(c.carrier, c.dest, c.dep_delay, c.delay_dev)
+    .head(5)
+)
+```
+
+15. Sort `rva` by `dep_delay`, descending, and print the top 5. Then
+explain what went wrong.
+
+```{python}
+(
+    rva
+    .sort(c.dep_delay, descending=True)
+    .select(c.carrier, c.dest, c.dep_delay)
+    .head(5)
+)
+```
+
+**Answer**: Every row is a cancelled flight with a null `dep_delay`, not the
+latest flight of the year. A descending sort puts nulls first, the same
+trap as `notebook09`'s `.max()` versus `.sort()` mismatch. Filter the nulls
+out before sorting to get a real answer.
+
+```{python}
+(
+    rva
+    .filter(c.dep_delay.is_not_null())
+    .sort(c.dep_delay, descending=True)
+    .select(c.carrier, c.dest, c.dep_delay)
+    .head(5)
+)
+```
+
+The worst flight of the year left almost 30 hours late.
+
+16. Build the same daily table as question 10, but keep `dep_delay`'s mean
+as well as the count. Sort by date, then add `n_cum` (`.cum_sum()` on the
+daily count) and `delay_roll` (a 7-day `.rolling_mean()` of the daily mean
+delay). Plot `delay_roll` against `date` with `geom_line()`.
+
+```{python}
+q16 = (
+    rva
+    .with_columns(date = pl.date(c.year, c.month, c.day))
+    .group_by(c.date, maintain_order=True)
+    .agg(n = pl.len(), delay_avg = c.dep_delay.mean())
+    .sort(c.date)
+    .with_columns(
+        n_cum = c.n.cum_sum(),
+        delay_roll = c.delay_avg.rolling_mean(window_size=7)
+    )
+)
+q16.head(5)
+```
+
+```{python}
+(
+    ggplot(q16, aes(c.date, c.delay_roll))
+    .geom_line()
+)
+```
+
+17. Plot a histogram of `dep_delay` with `geom_histogram()`, `binwidth=10`
+and `boundary=0`.
+
+```{python}
+(
+    ggplot(rva, aes(c.dep_delay))
+    .geom_histogram(binwidth=10, boundary=0)
+)
+```
+
+18. Plot `dep_delay` by `carrier` with `geom_boxplot()`. The worst outliers
+stretch the y-axis until the boxes themselves are unreadable, so crop the
+view with `.coord_cartesian(ylim=(-30, 60))` rather than filtering the
+data or setting scale limits, both of which would throw out the extreme
+flights before the boxes are even computed.
+
+```{python}
+(
+    ggplot(rva, aes(c.carrier, c.dep_delay))
+    .geom_boxplot()
+    .coord_cartesian(ylim=(-30, 60))
+)
+```
+
+19. Facet the same histogram from question 17 by `carrier` with
+`.facet_wrap("carrier")`.
+
+```{python}
+(
+    ggplot(rva, aes(c.dep_delay))
+    .geom_histogram(binwidth=15, boundary=0)
+    .facet_wrap("carrier")
+)
+```
+
+20. Join `rva` to `airline` on `carrier`, and print `carrier`, `name`, and
+`dest` for 5 rows.
+
+```{python}
+(
+    rva
+    .join(airline, on="carrier", how="left")
+    .select(c.carrier, c.name, c.dest)
+    .head(5)
+)
+```
+
+21. Before joining to `airport`, check that `faa` is actually a key there
+with `.select(c.faa.n_unique(), pl.len())`. Then join `rva` to `airport`
+with `left_on="dest"` and `right_on="faa"`, group by the airport `name`,
+count the flights to each, and print the 10 busiest destinations.
+
+```{python}
+airport.select(c.faa.n_unique(), pl.len())
+```
+
+```{python}
+(
+    rva
+    .join(airport, left_on="dest", right_on="faa", how="left")
+    .group_by(c.name, maintain_order=True)
+    .agg(n = pl.len())
+    .sort(c.n, descending=True)
+    .head(10)
+)
+```
+
+22. Use `how="anti"` to join `rva` to `plane` on `tailnum` and find the
+flights whose aircraft has no matching row in the registry. Print how many
+flights and how many distinct tail numbers that is.
+
+```{python}
+(
+    rva
+    .join(plane, on="tailnum", how="anti")
+    .select(c.tailnum.n_unique(), pl.len())
+)
+```
+
+23. Drop cancelled flights, then `.unpivot()` `dep_delay` and `arr_delay`
+into a `delay_type`/`minutes` pair, keeping `carrier` as the index. Plot
+`minutes` by `delay_type` with `geom_boxplot()`, cropped the same way as
+question 18. Then group the long table by `carrier` and `delay_type`,
+take the mean `minutes`, and `.pivot()` it back to one row per carrier
+with a column for each delay type.
+
+```{python}
+q23 = (
+    rva
+    .filter(c.dep_delay.is_not_null())
+    .unpivot(
+        on=["dep_delay", "arr_delay"],
+        index="carrier",
+        variable_name="delay_type",
+        value_name="minutes"
+    )
+)
+q23.head(5)
+```
+
+```{python}
+(
+    ggplot(q23, aes(c.delay_type, c.minutes))
+    .geom_boxplot()
+    .coord_cartesian(ylim=(-30, 60))
+)
+```
+
+```{python}
+(
+    q23
+    .group_by(c.carrier, c.delay_type, maintain_order=True)
+    .agg(delay_avg = c.minutes.mean())
+    .pivot(index="carrier", on="delay_type", values="delay_avg")
+)
+```

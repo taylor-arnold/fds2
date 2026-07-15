@@ -1,0 +1,338 @@
+---
+title: "Notebook07"
+solutions-release-date: "2026-09-21"
+---
+
+### Setup
+
+Run all of the following before starting the notebook.
+
+```{python}
+#| tags: [noclear]
+#| eval: false
+! wget -q -nc https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/funs.py
+```
+
+```{python}
+#| tags: [noclear]
+import polars as pl
+from plotnine import ggplot, aes
+from polars import col as c
+
+import funs
+
+ub = "https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"
+```
+
+```{python}
+#| tags: [remove]
+#| include: false
+ub = ""
+```
+
+```{python}
+#| tags: [noclear]
+storm = pl.read_csv(ub + "data/storms.csv")
+```
+
+### Questions
+
+We are staying with the North Atlantic storms from last time. Each row is one
+observation of one storm at one moment, taken every six hours, with the position
+of the storm's center (`lon`, `lat`), its wind speed in knots (`wind`), its
+Saffir-Simpson `category`, a two-letter `status` code, and the `name` and `year`
+that together identify which storm it belongs to. The column `doy` gives the day
+of the year.
+
+Last time we had only one geometry and one color of point. This notebook adds
+the rest of the layer: the aesthetics that carry extra columns into the plot, and
+the geometries other than points.
+
+Unless a question says otherwise, just print the result of each block; do not
+save it to a variable.
+
+1. Plot the tracks of the 2005 season again, longitude against latitude, but map
+the `name` column to the color aesthetic so that each storm gets its own color.
+Remember that every aesthetic other than x and y goes inside a second call to
+`aes()`, placed inside the geometry.
+
+```{python}
+(
+    storm
+    .filter(c.year == 2005)
+    .pipe(ggplot, aes(c.lon, c.lat))
+    .geom_point(aes(color=c.name))
+)
+```
+
+Last week these 688 points were an anonymous tangle. One aesthetic separates them
+into 21 storms, and the legend tells you which is which.
+
+2. A color can also be set to a fixed value rather than mapped to a column, and
+the same is true of `alpha`, which controls how transparent each point is. Recall
+that the very first plot of the last notebook, all 25,112 observations at once,
+came out as a solid black mass. Draw it again with `alpha` fixed at `0.05`.
+
+```{python}
+(
+    storm
+    .pipe(ggplot, aes(c.lon, c.lat))
+    .geom_point(alpha=0.05)
+)
+```
+
+Twenty points must now stack up before the ink is fully black, so the darkness of
+a region tells you how many storms have passed through it. The corridor from the
+Caribbean through the Gulf is the darkest part of the plot. You can also pick out
+the storms that form off the coast of Africa on the right and run west across the
+open ocean, and the pale fan at the top where the survivors curve away to the
+northeast and die in the cold water.
+
+Note the syntax: `alpha=0.05` sits inside `geom_point()` but outside `aes()`. A
+value inside `aes()` is a column name; a value outside it is a constant. This is
+the single most common mistake people make with this package.
+
+3. Map the color aesthetic to `category` instead, for the 2005 season. The legend
+comes out looking quite different from the one in question 1. Why?
+
+```{python}
+(
+    storm
+    .filter(c.year == 2005)
+    .pipe(ggplot, aes(c.lon, c.lat))
+    .geom_point(aes(color=c.category))
+)
+```
+
+**Answer**: The legend is a continuous color bar rather than a list of labeled
+swatches, because `category` has type `i64`. The package looks at the type of the
+column, sees a number, and assumes the values fall on a scale where 4 lies
+between 3 and 5. It cannot know that there are only seven possible values and
+that they are really labels. With `name`, a `str`, it had no choice but to treat
+each value as a separate group.
+
+4. The fix is a cast, from Chapter 3. Convert `category` to a string inside
+`.with_columns()` before you plot it, and compare the result with question 3.
+
+```{python}
+(
+    storm
+    .filter(c.year == 2005)
+    .with_columns(category = c.category.cast(pl.String))
+    .pipe(ggplot, aes(c.lon, c.lat))
+    .geom_point(aes(color=c.category))
+)
+```
+
+Seven discrete colors, one legend entry each. It is easier now to see that the
+strongest parts of a storm happen in short bursts: most of every track is dark
+purple, and the two or three days at category 4 or 5 are a small bright stretch
+in the middle. The type of a column is not just a storage detail. It decides what
+the plot looks like.
+
+5. Now put names on the map. We want one row per storm, positioned at the moment
+that storm was at its strongest. Sort the 2005 season by wind, largest first, and
+then keep the first row for each name. Save the result as `peak`, since we will
+use it several times, and print it.
+
+```{python}
+peak = (
+    storm
+    .filter(c.year == 2005)
+    .sort(c.wind, descending=True)
+    .unique(subset=["name"], keep="first", maintain_order=True)
+    .select(c.name, c.lon, c.lat, c.wind, c.status)
+)
+
+peak
+```
+
+The `maintain_order=True` argument is what makes this work. Without it Polars is
+free to return the rows of a `.unique()` in whatever order is fastest, and "keep
+the first row" would stop meaning "keep the strongest".
+
+Use the text geometry to label each storm's peak on the map. The text geometry
+needs a third aesthetic, `label`, in addition to x and y.
+
+```{python}
+(
+    peak
+    .pipe(ggplot, aes(c.lon, c.lat))
+    .geom_text(aes(label=c.name))
+)
+```
+
+6. The labels tell you which storm is which but not exactly where it was, since a
+word has no obvious center. Add a point geometry underneath the text, then shrink
+the labels and nudge them upward so they sit above their points.
+
+```{python}
+(
+    peak
+    .pipe(ggplot, aes(c.lon, c.lat))
+    .geom_point()
+    .geom_text(aes(label=c.name), size=8, nudge_y=1.0)
+)
+```
+
+The 2005 season is famous for having exhausted the alphabet, and the plot shows
+where it spent itself. Most of these storms peaked in the Gulf of Mexico or the
+Caribbean, packed into the left half of the plot. Only four peaked east of 60
+degrees, and one of them, Vince, is out near the coast of Portugal at longitude
+-19, which is a strange place for a hurricane to be.
+
+The crowding on the left is the weakness of this geometry. Katrina and Arlene
+peaked close enough together that their labels collide, and Jose, Bret, and Stan
+are piled on top of one another in the Bay of Campeche. Nudging helps, but it
+cannot untangle labels that genuinely overlap. The honest fix is usually to label
+fewer things, which is what question 11 does.
+
+7. Back to a single storm. In the last notebook we plotted Katrina's wind speed
+against the day of the year and said that connecting the points was the obvious
+next thing to want. Do that now with `geom_line`.
+
+```{python}
+(
+    storm
+    .filter((c.name == "Katrina") & (c.year == 2005))
+    .pipe(ggplot, aes(c.doy, c.wind))
+    .geom_line()
+)
+```
+
+8. The line geometry takes a color aesthetic just as the point geometry does.
+Plot wind against day of the year for the four strongest storms of 2005, Dennis,
+Katrina, Rita, and Wilma, with one colored line each.
+
+```{python}
+(
+    storm
+    .filter(c.year == 2005)
+    .filter(c.name.is_in(["Dennis", "Katrina", "Rita", "Wilma"]))
+    .pipe(ggplot, aes(c.doy, c.wind))
+    .geom_line(aes(color=c.name))
+)
+```
+
+Four storms, four lives, spread across three months. Dennis comes and goes in
+July, Katrina and Rita overlap in the same terrible fortnight at the end of
+August, and Wilma, the strongest of the four, does not even begin until October.
+
+9. If a line can connect a storm's wind speeds in order, it ought to be able to
+connect its positions in order. Try it: take Katrina again and draw her track,
+longitude against latitude, with `geom_line`. Look closely at what comes back and
+explain what the geometry has done.
+
+```{python}
+(
+    storm
+    .filter((c.name == "Katrina") & (c.year == 2005))
+    .pipe(ggplot, aes(c.lon, c.lat))
+    .geom_line()
+)
+```
+
+**Answer**: The track has been replaced by a sawtooth. The line geometry does not
+connect the rows in the order they appear in the data; it connects them in order
+from left to right along the x-axis. For wind against `doy` that is the same
+thing, because the day of the year only ever increases. Longitude does not.
+Katrina ran west across Florida into the Gulf and then curved back to the
+northeast, so she visited the same longitudes twice, and the geometry has stitched
+her early points to her late ones. Reach for a line when the x-axis is time, or
+something else that only moves one way. A path across a map is not that, which is
+why last week's track had to be points.
+
+10. Bars. Using the `peak` table from question 5, draw one bar per storm whose
+length is that storm's peak wind speed. Put the name on the x-axis and the wind
+on the y-axis, then add `.coord_flip()` so the names are readable.
+
+```{python}
+(
+    peak
+    .pipe(ggplot, aes(c.name, c.wind))
+    .geom_col()
+    .coord_flip()
+)
+```
+
+The bars come out neatly ranked, strongest at the bottom, and the four storms that
+dominated the season separate themselves from the other seventeen at a glance.
+Nothing in the plotting code asked for that ranking. Where did it come from?
+
+Sort `peak` alphabetically and draw exactly the same plot again.
+
+```{python}
+(
+    peak
+    .sort(c.name)
+    .pipe(ggplot, aes(c.name, c.wind))
+    .geom_col()
+    .coord_flip()
+)
+```
+
+**Answer**: The bars are drawn in the order the rows appear in the table. The
+first plot was ranked by wind because `peak` still carried the sort from question
+5, and the second is alphabetical because we just re-sorted it. The geometry has
+no opinion about which order is right; it takes the one you hand it. So the order
+of the bars is a real choice you are making, whether or not you realize you are
+making it, and `.sort()` is how you make it deliberately. Chapter 7 returns to
+this with categories whose order depends on a summary of the group itself, such
+as its count or its median, rather than on a column you can sort directly.
+
+11. Any geometry can be given its own dataset with the `data=` argument, which is
+the standard way to make one part of a plot stand out from the rest. Draw all the
+2005 tracks as faint points, then draw Katrina's track on top of them in
+`"#F5276C"` with her name beside her peak. You will need to save Katrina's rows to
+a variable first, and you can reuse `peak` for the label by filtering it.
+
+```{python}
+katrina = storm.filter((c.name == "Katrina") & (c.year == 2005))
+katrina_peak = peak.filter(c.name == "Katrina")
+
+(
+    storm
+    .filter(c.year == 2005)
+    .pipe(ggplot, aes(c.lon, c.lat))
+    .geom_point(alpha=0.2)
+    .geom_point(color="#F5276C", data=katrina)
+    .geom_text(
+        aes(label=c.name),
+        color="#F5276C",
+        nudge_y=2.5,
+        size=10,
+        data=katrina_peak
+    )
+)
+```
+
+12. Every plot so far has been labeled with raw column names, which is fine while
+you are the only person looking. This one is worth showing to someone else. Take
+the previous plot and add a `.labs()` layer giving the axes real names and the
+plot a title.
+
+```{python}
+(
+    storm
+    .filter(c.year == 2005)
+    .pipe(ggplot, aes(c.lon, c.lat))
+    .geom_point(alpha=0.2)
+    .geom_point(color="#F5276C", data=katrina)
+    .geom_text(
+        aes(label=c.name),
+        color="#F5276C",
+        nudge_y=2.5,
+        size=10,
+        data=katrina_peak
+    )
+    .labs(
+        x="Longitude",
+        y="Latitude",
+        title="The 2005 Atlantic hurricane season",
+        subtitle="Katrina's track shown in pink"
+    )
+)
+```
+
+Nothing about the data changed between the last two blocks. The difference is who
+the plot is for.

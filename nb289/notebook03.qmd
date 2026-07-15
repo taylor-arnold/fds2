@@ -1,0 +1,212 @@
+---
+title: "Notebook03"
+solutions-release-date: "2026-09-02"
+---
+
+### Setup
+
+Run all of the following before starting the notebook.
+
+```{python}
+#| tags: [noclear]
+#| eval: false
+! wget -q -nc https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/funs.py
+```
+
+```{python}
+#| tags: [noclear]
+import polars as pl
+from plotnine import ggplot, aes
+from polars import col as c
+
+import funs
+
+ub = "https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"
+```
+
+```{python}
+#| tags: [remove]
+#| include: false
+ub = ""
+```
+
+```{python}
+#| tags: [noclear]
+film = (
+    pl.read_csv(ub + "data/criterion.csv")
+    .select(
+        c.title, c.year, c.director, c.country, c.language, c.genre,
+        c.runtime_raw, c.imdb_votes, c.rating_imdb, c.rating_rt, c.rating_mc
+    )
+    .drop_nulls(subset=["runtime_raw", "imdb_votes", "rating_imdb"])
+)
+```
+
+### Questions
+
+The `film` dataset describes the films released by the Criterion Collection, a
+distribution company that publishes restored editions of films it considers
+important. Each row is one film, with its `title`, `year` of release,
+`director`, `country` of production, `language`, and `genre`, along with its
+`runtime_raw` (in minutes) and three critical scores: `rating_imdb` (0-10),
+`rating_rt` (Rotten Tomatoes, 0-100), and `rating_mc` (Metacritic, 0-100). The
+column `imdb_votes` records how many IMDb users rated the film, which is a
+rough measure of how widely seen it is.
+
+Unless a question says otherwise, just print the result of each block; do not
+save it to a variable.
+
+1. Start by sorting the films by year, with the oldest films at the top.
+
+```{python}
+(
+    film
+    .sort(c.year)
+)
+```
+
+2. Now sort the films by their IMDb rating, with the highest rated films at the
+top.
+
+```{python}
+(
+    film
+    .sort(c.rating_imdb, descending=True)
+)
+```
+
+3. Sort the films by country (alphabetically) and then, within each country, by
+year. Note: when we say "sort" without qualification, we mean ascending order.
+
+```{python}
+(
+    film
+    .sort(c.country, c.year)
+)
+```
+
+4. The dataset has more columns than we can comfortably read at once. Take just
+the title, director, and year columns. Notice how similar this code is to the
+code in the previous question.
+
+```{python}
+(
+    film
+    .select(c.title, c.director, c.year)
+)
+```
+
+5. Let's chain several methods together. Print the ten films with the most IMDb
+votes, showing only the title and the number of votes.
+
+```{python}
+(
+    film
+    .sort(c.imdb_votes, descending=True)
+    .head(n=10)
+    .select(c.title, c.imdb_votes)
+)
+```
+
+6. Now select just those films that run longer than 200 minutes.
+
+```{python}
+(
+    film
+    .filter(c.runtime_raw > 200)
+)
+```
+
+7. Select the films whose country is Japan. There should be 172 of them.
+
+```{python}
+(
+    film
+    .filter(c.country == "Japan")
+)
+```
+
+8. Our dataset actually contains 198 films that Japan had a hand in producing,
+but the previous question found only 172. Look closely at the values in the
+`country` column. Why does our filter miss the other 26 films?
+
+**Answer**: Films with more than one production country store all of them in a
+single value, separated by a vertical bar: `"Japan|France"`, `"Japan|United
+States"`, and so on. The test `c.country == "Japan"` asks whether the whole
+value is exactly the four letters `Japan`, so a co-production like
+`"Japan|France"` answers `False` and is dropped. Data stored this way is
+annoying to work with, and we will see how to split it apart later in the
+semester.
+
+9. Select the Japanese films released before 1960, sorted from the highest IMDb
+rating to the lowest. Use a single call to `.filter` with the `&` (and)
+operator.
+
+```{python}
+(
+    film
+    .filter((c.country == "Japan") & (c.year < 1960))
+    .sort(c.rating_imdb, descending=True)
+)
+```
+
+10. Now select the films made in one of the three Scandinavian countries
+(Sweden, Denmark, or Norway) and sort them by year. Use the `.is_in` method
+rather than the `|` (or) operator.
+
+```{python}
+(
+    film
+    .filter(c.country.is_in(["Sweden", "Denmark", "Norway"]))
+    .sort(c.year)
+)
+```
+
+11. Among the twenty longest films in the collection, which one has the highest
+IMDb rating? Print only that single row. Hint: you will need to sort the data
+twice.
+
+```{python}
+(
+    film
+    .sort(c.runtime_raw, descending=True)
+    .head(n=20)
+    .sort(c.rating_imdb, descending=True)
+    .head(n=1)
+)
+```
+
+12. Finally, print the five films with the highest Metacritic score, showing
+only the title, year, and score. Start by doing the obvious thing: sort by
+`rating_mc` in descending order and take the first five rows.
+
+```{python}
+(
+    film
+    .sort(c.rating_mc, descending=True)
+    .head(n=5)
+    .select(c.title, c.year, c.rating_mc)
+)
+```
+
+13. That did not work. More than half of the films have no Metacritic score, and
+a missing value is not smaller than 100; it is unknown, so Polars sets those
+rows aside at the top of a descending sort rather than guessing where they
+belong. Fix the previous answer by selecting the three columns and then calling
+`.drop_nulls()` to remove the films with no score before sorting.
+
+```{python}
+(
+    film
+    .select(c.title, c.year, c.rating_mc)
+    .drop_nulls()
+    .sort(c.rating_mc, descending=True)
+    .head(n=5)
+)
+```
+
+The order of the first two methods matters here. `.drop_nulls()` looks at every
+column it is given, so calling it on the whole dataset would also throw away
+films that are missing only a Rotten Tomatoes score, even though we never asked
+about Rotten Tomatoes. Narrowing to the three columns we care about first keeps
+the method from removing more than we intended.

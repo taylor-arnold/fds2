@@ -1,0 +1,384 @@
+---
+title: "Notebook15"
+solutions-release-date: "2026-10-26"
+---
+
+### Setup
+
+Run all of the following before starting the notebook.
+
+```{python}
+#| tags: [noclear]
+#| eval: false
+! wget -q -nc https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/funs.py
+```
+
+```{python}
+#| tags: [noclear]
+import polars as pl
+from plotnine import ggplot, aes
+from polars import col as c
+
+import funs
+
+ub = "https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"
+```
+
+```{python}
+#| tags: [remove]
+#| include: false
+ub = ""
+```
+
+```{python}
+#| tags: [noclear]
+metro = pl.read_csv(ub + "data/paris_metro_stops.csv")
+```
+
+### Questions
+
+This week: the Paris Métro, as a file. Nothing has been cleaned for you. What arrives is
+what was published, and the file is the point of the class.
+
+The chapter is about the decisions you make *before* any data exists: what tables to build,
+what columns to put in them, what to call those columns. Those decisions are invisible once
+the file is written, which is exactly the problem. You inherit somebody's schema and you
+live with it. So the way to learn the rules is to take a real file and work out which rules
+its author followed, which ones they broke, and what the breakage cost them.
+
+There is no new Polars method here. Everything below is `filter`, `sort`, `group_by`, `agg`,
+`n_unique`, `over`, `shift`, and `cast`, all of which you have. What is new is that you are
+auditing a schema rather than answering a question about the world.
+
+Unless a question says otherwise, print the result of each block; do not save it.
+
+1. Start by looking. Print the shape, the first few rows, and the schema.
+
+```{python}
+print(metro.shape)
+
+metro.head(4)
+```
+
+```{python}
+metro.schema
+```
+
+**Answer**: 371 rows and seven columns: a station `name`, a `line`, a `line_color`, a
+longitude and latitude, and then `lon_end` and `lat_end`.
+
+Two things are already odd. The file is called `paris_metro_stops`, so a row should be a
+stop, but a stop does not have an "end". Those last two columns describe some *other* place.
+And they came in as `str` while `lon` and `lat` came in as `f64`, even though all four hold
+the same kind of number. Both oddities are schema decisions. Hold on to them.
+
+2. Before anything else, find the unit of observation. If a row is a station, then `name`
+identifies a row. Test it, then test the pair you would reach for next.
+
+```{python}
+metro.select(rows = pl.len(), names = c.name.n_unique(), lines = c.line.n_unique())
+```
+
+```{python}
+(
+    metro
+    .group_by(c.name, c.line)
+    .agg(n = pl.len())
+    .filter(c.n > 1)
+)
+```
+
+**Answer**: 371 rows, 298 distinct names. So a row is not a station, and the file name is
+already lying to you in a small way.
+
+The second block returns nothing, which is the result you want: no station-and-line pair
+occurs twice, so together they are the key. A row is a *station on a line*. Châtelet is one
+station, and it is five rows, because five lines run through it.
+
+That is a perfectly good unit of observation, and the rest of this notebook is about whether
+each column has any business sitting next to it.
+
+3. Here is the rule from 10.2, in one sentence: **only record data that describes the whole
+unit of observation.** Our unit is station × line. So `line_color` is suspect, because it
+looks like a fact about the line and nothing else. Test it. A column that describes the line
+alone cannot vary within a line.
+
+```{python}
+(
+    metro
+    .group_by(c.line)
+    .agg(colors = c.line_color.n_unique(), stops = pl.len())
+    .sort(c.line)
+    .head(5)
+)
+```
+
+Now build the table the chapter says should have existed, and save this one.
+
+```{python}
+#| tags: [noclear]
+lines = (
+    metro
+    .unique(subset=c.line, keep="first")
+    .sort(c.line)
+    .select(c.line, c.line_color)
+)
+
+lines
+```
+
+**Answer**: Every line has exactly one color, so `line_color` never varies within a line. It
+fails the test. It is fourteen facts, and the file writes them down 371 times.
+
+The fix is the `lines` table above: fourteen rows, two columns. The chapter's argument for
+splitting it out is not that the copies waste space, because they do not waste much. It is
+that copies can *disagree*. Line 6 has 28 stops, so line 6's color is written 28 times, and
+recoloring it means changing 28 cells correctly. Change 27 and the file now says line 6 is
+two colors at once, and nothing in Polars will stop you or tell you.
+
+4. Run the same test on `lon` and `lat`. They look like facts about the station, so by the
+same logic they should be redundant across Châtelet's five rows. Check.
+
+```{python}
+(
+    metro
+    .group_by(c.name)
+    .agg(rows = pl.len(), lons = c.lon.n_unique())
+    .filter(c.rows > 1)
+    .sort(c.lons, descending=True)
+    .head(5)
+)
+```
+
+```{python}
+(
+    metro
+    .filter(c.name == "Chatelet")
+    .select(c.name, c.line, c.lon, c.lat)
+)
+```
+
+**Answer**: They are not redundant. Châtelet has five rows and five different longitudes,
+and 49 of the 53 multi-line stations behave the same way.
+
+So the same test that condemned `line_color` acquits `lon` and `lat`. They vary within a
+station, which means they are not describing the station. Ask what they *are* describing and
+the answer is the platform: line 4's platform at Châtelet is not line 14's platform at
+Châtelet, and the file is recording where each one sits. That is a fact about station × line,
+which is our unit, so the columns belong exactly where they are.
+
+This is worth slowing down on. "Respect the unit of observation" sounds like a rule you apply
+by looking at a column and thinking about what it means. It is not. It is a rule you apply by
+grouping and counting, and here the counting overturns the thinking.
+
+5. How far apart are those platforms? A degree of latitude is about 111 km, and at the
+latitude of Paris a degree of longitude is about 73 km. Convert and sort.
+
+```{python}
+(
+    metro
+    .group_by(c.name)
+    .agg(
+        rows = pl.len(),
+        lon_m = (c.lon.max() - c.lon.min()) * 73_000,
+        lat_m = (c.lat.max() - c.lat.min()) * 111_000,
+    )
+    .filter(c.rows > 1)
+    .with_columns(spread = ((c.lon_m ** 2) + (c.lat_m ** 2)).sqrt().round(0))
+    .sort(c.spread, descending=True)
+    .select(c.name, c.rows, c.spread)
+    .head(6)
+)
+```
+
+**Answer**: The median multi-line station spreads its platforms over about 43 metres. The
+worst is Montparnasse-Bienvenüe at 312 metres, then Gare de Lyon at 268 and Châtelet at 207.
+
+Those are not rounding errors, and the ranking is checkable against the world: anyone who has
+changed from line 4 to line 12 at Montparnasse has walked that corridor and can tell you it
+is real. The numbers are measuring something.
+
+Notice what the file therefore does *not* contain. There is no station-level coordinate
+anywhere in it, and no station id either. If you want to put one dot on a map for Châtelet,
+this file has five answers and no way to choose between them, and no column that says the
+five belong together except a name with the accents knocked out of it.
+
+6. Back to `lon_end` and `lat_end`, which arrived as text. Find out why, using the tool from
+Chapter 3, and count what you find.
+
+```{python}
+(
+    metro
+    .with_columns(
+        c.lon_end.cast(pl.Float64, strict=False),
+        c.lat_end.cast(pl.Float64, strict=False),
+    )
+    .select(missing = c.lon_end.is_null().sum(), rows = pl.len())
+)
+```
+
+```{python}
+(
+    metro
+    .filter(c.lon_end == "NA")
+    .select(c.name, c.line, c.lon_end, c.lat_end)
+    .head(4)
+)
+```
+
+**Answer**: Eighteen rows have the literal string `"NA"` where a coordinate should be. That
+is all it takes. Two columns of perfectly good numbers load as text, and until you cast them
+you cannot do arithmetic on them, cannot plot them, and cannot sort them without getting
+alphabetical order.
+
+This is the missing-value rule and the "prefer numeric" rule breaking at the same time.
+Whoever built this file chose a placeholder that a human reads instantly and a computer reads
+as a word. A blank cell would have cost them nothing and cost us nothing.
+
+7. Now work out what `lon_end` actually is. Look again at the first rows of line 1 in question
+1: each row's `lon_end` is the *next* row's `lon`. If that is true in general, then a column
+you already have, offset by one row, reproduces it. Test that with the window tools from
+Chapter 6. Sort is not needed, since we are trusting the file's own row order.
+
+```{python}
+(
+    metro
+    .with_columns(
+        c.lon_end.cast(pl.Float64, strict=False),
+        guess = c.lon.shift(-1).over(c.line),
+    )
+    .select(
+        agree = (c.lon_end == c.guess).sum(),
+        both_missing = (c.lon_end.is_null() & c.guess.is_null()).sum(),
+        file_missing_only = (c.lon_end.is_null() & c.guess.is_not_null()).sum(),
+        guess_missing_only = (c.lon_end.is_not_null() & c.guess.is_null()).sum(),
+    )
+)
+```
+
+**Answer**: 352 rows agree exactly, 13 more are missing in both, and 6 disagree. So `lon_end`
+is, almost entirely, a copy of another row's `lon`. The file stores every stop's coordinates
+twice: once on its own row, and once on the row of the stop before it.
+
+That is the same disease as `line_color`, in a form the chapter does not name. Nothing in the
+last two columns is new information. It is the table quoting itself, and the same argument
+applies: a coordinate written in two places can be corrected in one of them.
+
+8. Six rows disagree, and they are the interesting ones. Print them.
+
+```{python}
+(
+    metro
+    .with_columns(
+        c.lon_end.cast(pl.Float64, strict=False),
+        guess = c.lon.shift(-1).over(c.line),
+    )
+    .filter(c.lon_end.is_null() != c.guess.is_null())
+    .select(c.name, c.line, c.lon_end, c.guess)
+)
+```
+
+**Answer**: Five rows say `NA` where the shift found a next stop, and one row, Porte
+d'Orléans on line 4, has a coordinate where the shift found nothing.
+
+Every one of them is a branch or a seam. Line 7 splits in the south, so the file stores the
+Mairie d'Ivry branch first, ends it at Porte d'Italie with an `NA`, and then starts the trunk
+again at Villejuif. Line 13 forks in the north at a station called La Fourche, which is French
+for "the fork", and the file chops it into three chains. Line 4's southern terminus, Mairie de
+Montrouge, is stored as the *first* row of line 4's block, so the chain runs off the bottom of
+the block and wraps back around to it. And line 1 is stranger still: the chain skips Porte
+Maillot entirely and leaves it stranded at the end of the block with no successor.
+
+Here is what that means. The order of the stops along a route is real information, and this
+file has no column for it. It lives in the row order, and row order is not data: any `.sort()`
+destroys it and nothing warns you. The one thing the author needed to record, the sequence, is
+the one thing they did not have a column for, so they smuggled it into `lon_end` and `lat_end`
+by writing each stop's coordinates onto its predecessor's row. The duplication is not
+laziness. It is a workaround for a missing variable, and the six rows above are where the
+workaround leaks.
+
+9. Draw the stops. Use the `lines` table from question 3 to get the real Métro colors, and
+remember from Chapter 7 that an integer column gets a continuous color bar, which is not what
+you want for fourteen lines.
+
+```{python}
+palette = dict(zip(
+    lines["line"].cast(pl.String).to_list(),
+    lines["line_color"].to_list(),
+))
+
+(
+    metro
+    .with_columns(c.line.cast(pl.String))
+    .pipe(ggplot, aes(c.lon, c.lat, color=c.line))
+    .geom_point(size=1.5)
+    .scale_color_manual(values=palette)
+    .labs(
+        x="Longitude",
+        y="Latitude",
+        color="Line",
+        title="Paris Métro, 371 platforms",
+        caption="RATP",
+    )
+    .theme_tufte()
+)
+```
+
+That is Paris. The dense knot in the middle is the old city, and the long tails running off it
+are line 1 heading west to La Défense and line 8 heading south-east to Créteil.
+
+Note the small joke in the code. The column we spent question 3 calling redundant is the column
+that draws this, and the two-column `lines` table is a perfectly convenient place to keep it.
+Splitting a table out is not a punishment. It is where the fourteen colors go so that they can
+be looked up once instead of maintained 371 times.
+
+10. Last question, and it is a written one. Design the schema this file should have had. Say
+what tables you would build, what the unit of observation of each one is, and what columns go
+in it.
+
+**Answer**: Three tables.
+
+`lines`, one row per line, fourteen rows: the line's label and its color. This is the table we
+already built, and it exists so that a color is stored once.
+
+`stations`, one row per station, 298 rows: a station id and a name. A station-level coordinate
+would go here too, and note that we cannot supply one from this file, because it does not have
+one. Also note that we would have to *invent* the station id, since the only thing identifying
+a station in this file is a display name with the accents stripped, which is a fragile key and
+a poor one. Chapter 10 calls that a synthetic key.
+
+`stops`, one row per station × line, 371 rows: the station id, the line, the platform's
+longitude and latitude, and the two columns this file never had, a branch and a position along
+the route.
+
+What that buys is everything we spent the notebook failing to do. `lon_end` becomes a
+`.shift()` over line and branch, sorted by position, so it can never disagree with the
+coordinates it is copied from, because it is not stored at all. The route order stops depending
+on nobody ever sorting the rows. And a station's location is a fact you can look up in one place
+instead of five.
+
+What it costs is that no single table answers a question any more. Drawing the map now needs
+columns from `stops` and `lines` at once, and the method for that is a join, which is the
+chapter after this one. Notice that this is the same trade the Folger made with Shakespeare
+last week, and the same one the chapter recommends: store data at the grain it actually has,
+and put it back together at analysis time. The file we were handed made the opposite choice.
+It flattened everything into one table so that no join would ever be needed, and it paid for
+that with a color repeated 371 times, a coordinate written twice, an ordering that survives
+only as long as nobody sorts the rows, and seven stations that do not exist.
+
+Which is the last thing, and you can check it yourself. The Paris Métro has sixteen lines. This
+file has fourteen.
+
+```{python}
+(
+    metro
+    .filter(c.name.is_in(["Pelleport", "Botzaris", "Bolivar", "Danube"]))
+)
+```
+
+The two missing lines are 3bis and 7bis, and they are missing because `line` was stored as an
+integer. "3bis" is not an integer, so it could not be written down, so those stops were not
+collected. Seven stations that exist in Paris and take passengers every day are absent from
+this file, and the reason is a type decision made before anyone entered a single row. "Prefer
+numeric" is good advice about quantities. A line number is not a quantity. Nobody rides the
+mean of line 4 and line 8.

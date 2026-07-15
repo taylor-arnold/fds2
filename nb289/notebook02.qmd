@@ -1,0 +1,127 @@
+---
+title: "Notebook02"
+solutions-release-date: "2026-08-31"
+---
+
+### Setup
+
+Run all of the following before starting the notebook.
+
+```{python}
+#| tags: [noclear]
+#| eval: false
+! wget -q -nc https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/funs.py
+```
+
+```{python}
+#| tags: [noclear]
+import polars as pl
+from plotnine import ggplot, aes
+from polars import col as c
+
+import funs
+
+ub = "https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"
+```
+
+```{python}
+#| tags: [remove]
+#| include: false
+ub = ""
+```
+
+```{python}
+#| tags: [noclear]
+country = pl.read_csv(ub + "data/countries.csv")
+```
+
+### Questions
+
+Last time we used Python as a calculator. Today we load a real dataset and look
+at it. The setup cell already read a file called `countries.csv` into a variable
+named `country`. This is the same dataset used in the chapter. Each row is one
+country and each column is one measurement recorded about that country, such as
+its name, its region of the world, its population, and its life expectancy.
+
+One note about the code that loaded the data. The variable `ub` was set in the
+setup to the web address where the course files live. Adding it in front of a file
+name lets Colab download the file before reading it. You do not need to think about
+`ub` beyond that.
+
+Unless a question says otherwise, just run each block and read the result; do not
+save it to a variable.
+
+1. Display the dataset by typing its name and running the cell.
+
+```{python}
+country
+```
+
+2. Look at the output from the previous question. Polars prints the size of the
+dataset at the top. How many observations (rows) and how many variables (columns)
+does it have?
+
+**Answer**: There are 135 observations and 15 variables. The book calls a row an
+observation and a column a variable, so this dataset records 15 measurements for
+each of 135 countries.
+
+3. In your own words, what does a single row of this dataset represent, and what
+does a single column represent?
+
+**Answer**: A single row represents one country, together with everything we
+measured about it. A single column represents one measurement, such as population
+or life expectancy, recorded across every country in the dataset.
+
+4. Loading data is done with the `pl.read_csv` function, and it works on any file.
+Practice it by loading a second dataset from the book, `data/food.csv`, into a
+variable named `food`, and then display it.
+
+```{python}
+food = pl.read_csv(ub + "data/food.csv")
+food
+```
+
+5. Read the size of the `food` dataset from its output. How many rows and columns
+does it have?
+
+**Answer**: It has 61 rows and 17 columns, so the book records 17 variables about
+each of 61 food items.
+
+6. Look at the short labels printed just under the column names in the `country`
+output, such as `str`, `i64`, and `f64`. These are the data types. Columns of
+text are marked `str`, and columns of numbers are marked `i64` or `f64`. Name one
+text column and one number column.
+
+**Answer**: Text columns include `full_name`, `region`, and `lang`. Number
+columns include `pop`, `lexp`, and `gdp`. We will look at what the different
+number types mean later in the course; for now it is enough to tell text from
+numbers.
+
+7. The chapter lists a few rules for formatting code. One rule is to put a single
+space before and after the equals sign and around math operators. The line below
+breaks that rule. Rewrite it with correct spacing.
+
+```{python}
+#| eval: false
+pop=45* 2
+```
+
+```{python}
+pop = 45 * 2
+```
+
+8. Another rule is to name variables with lowercase letters and underscores, and
+to start every name with a letter. Of the four names below, which two follow the
+book's advice?
+
+```
+MyData      my_data      2nd_country      country_pop
+```
+
+**Answer**: `my_data` and `country_pop` follow the advice: both are lowercase with
+underscores and both start with a letter. `MyData` uses capital letters, which the
+book recommends against, and `2nd_country` starts with a number, which Python does
+not allow at all.
+
+That is the whole notebook. Starting next time, we will begin reshaping and
+sorting datasets rather than just looking at them.

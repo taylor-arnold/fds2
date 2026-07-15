@@ -1,0 +1,206 @@
+---
+title: "Notebook04"
+solutions-release-date: "2026-09-07"
+---
+
+### Setup
+
+Run all of the following before starting the notebook.
+
+```{python}
+#| tags: [noclear]
+#| eval: false
+! wget -q -nc https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/funs.py
+```
+
+```{python}
+#| tags: [noclear]
+import polars as pl
+from plotnine import ggplot, aes
+from polars import col as c
+
+import funs
+
+ub = "https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"
+```
+
+```{python}
+#| tags: [remove]
+#| include: false
+ub = ""
+```
+
+```{python}
+#| tags: [noclear]
+film = (
+    pl.read_csv(ub + "data/criterion.csv")
+    .select(
+        c.title, c.year, c.director, c.country, c.runtime_raw,
+        c.imdb_votes, c.rating_imdb, c.rating_rt, c.budget_raw, c.box_office_raw
+    )
+    .drop_nulls(subset=["runtime_raw", "imdb_votes", "rating_imdb"])
+)
+```
+
+### Questions
+
+We will keep working with the Criterion Collection films from last time. The
+dataset has two new columns: `budget_raw`, what the film cost to make, and
+`box_office_raw`, what it earned. As before, print your results rather than
+saving them.
+
+1. The column `runtime_raw` has an awkward name. Rename it to `runtime`.
+
+```{python}
+(
+    film
+    .rename({"runtime_raw": "runtime"})
+)
+```
+
+2. Print one film from each country in the collection.
+
+```{python}
+(
+    film
+    .unique(subset=["country"])
+)
+```
+
+3. The row you get back for each country is an arbitrary one. Modify the
+previous answer so that the film you see from each country is its *earliest*
+film. Print only the country, title, and year.
+
+```{python}
+(
+    film
+    .sort(c.year)
+    .unique(subset=["country"], keep="first")
+    .select(c.country, c.title, c.year)
+)
+```
+
+4. Create two new columns at the same time: `hours`, the runtime measured in
+hours rather than minutes, and `votes_1k`, the number of IMDb votes measured in
+thousands.
+
+```{python}
+(
+    film
+    .with_columns(
+        hours = c.runtime_raw / 60,
+        votes_1k = c.imdb_votes / 1000
+    )
+)
+```
+
+5. Create a column `decade` holding the decade the film was released in, so that
+1957 becomes 1950 and 1962 becomes 1960. Hint: Python's `//` operator divides
+and throws away the remainder, so `1957 // 10` is `195`.
+
+```{python}
+(
+    film
+    .with_columns(
+        decade = (c.year // 10) * 10
+    )
+)
+```
+
+6. Rotten Tomatoes scores run from 0 to 100 and IMDb ratings from 0 to 10, so
+dividing the first by ten puts them on the same scale. Build a column `gap` that
+subtracts the IMDb rating from the rescaled Rotten Tomatoes score. Then print
+the five films with the largest gap, showing only the title, year, and gap. A
+large positive gap means the critics liked the film much more than the audience
+did.
+
+```{python}
+(
+    film
+    .with_columns(
+        gap = (c.rating_rt / 10) - c.rating_imdb
+    )
+    .select(c.title, c.year, c.gap)
+    .drop_nulls()
+    .sort(c.gap, descending=True)
+    .head(n=5)
+)
+```
+
+Sorting in the other direction gives the films the audience preferred. Try it.
+
+7. Create a column `profit` equal to the box office earnings minus the budget,
+and print the five most profitable films (title, year, and profit only).
+
+```{python}
+(
+    film
+    .with_columns(
+        profit = c.box_office_raw - c.budget_raw
+    )
+    .select(c.title, c.year, c.profit)
+    .drop_nulls()
+    .sort(c.profit, descending=True)
+    .head(n=5)
+)
+```
+
+Take these numbers with a grain of salt. The budget and box office figures come
+from IMDb, where contributors report them in the local currency of the
+production, so the yen figures for the Japanese films at the top of this list
+are not comparable to the dollar figures elsewhere in the column. A column of
+numbers can be perfectly clean and still be measuring several different things.
+
+8. Create an indicator column named `is_long` that is equal to 1 when a film
+runs longer than two hours and 0 otherwise.
+
+```{python}
+(
+    film
+    .with_columns(
+        is_long = pl.when(c.runtime_raw > 120).then(1).otherwise(0)
+    )
+)
+```
+
+9. Now build a column named `era` that labels each film `"classic"` if it was
+released before 1950, `"modern"` if it was released before 1990, and
+`"contemporary"` otherwise. Print only the title, year, and era. This needs a
+chained `.when().then()` pair and the `pl.lit` from the climate zone example in
+the chapter.
+
+```{python}
+(
+    film
+    .with_columns(
+        era = (
+            pl.when(c.year < 1950).then(pl.lit("classic"))
+            .when(c.year < 1990).then(pl.lit("modern"))
+            .otherwise(pl.lit("contemporary"))
+        )
+    )
+    .select(c.title, c.year, c.era)
+)
+```
+
+Because the conditions are checked in order, the second one only ever sees the
+films the first did not already claim, which is why `c.year < 1990` does not need
+to say anything about 1950.
+
+10. Finally, print *every* film that runs longer than 200 minutes, showing the
+title, director, and runtime. There are eleven of them, and Polars hides the
+middle of any table longer than a handful of rows, so end the chain with the
+`.print()` method from `funs.py` and ask it for eleven rows.
+
+```{python}
+(
+    film
+    .filter(c.runtime_raw > 200)
+    .select(c.title, c.director, c.runtime_raw)
+    .print(11)
+)
+```
+
+`.print()` is a method we wrote ourselves in `funs.py` rather than one that comes
+with Polars. It is the last step of the chain because it displays the table and
+hands nothing back, so there is nothing left to add a method to.
