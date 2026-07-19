@@ -1,0 +1,326 @@
+---
+title: "Notebook41"
+solutions-release-date: "2026-10-14"
+---
+
+### Setup
+
+Run all of the following before starting the notebook.
+
+```{python}
+#| tags: [noclear]
+#| eval: false
+! wget -q -nc https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/funs.py
+```
+
+```{python}
+#| tags: [noclear]
+import polars as pl
+from plotnine import ggplot, aes
+from polars import col as c
+
+import funs
+from funs import DSText
+
+import spacy
+
+ub = "https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"
+```
+
+```{python}
+#| tags: [remove]
+#| include: false
+ub = ""
+```
+
+```{python}
+#| tags: [noclear]
+docs = (
+    pl.read_parquet(ub + "data/agnews_pca.parquet")
+    .filter(c.index == "test")
+    .select(c.id, c.label, c.text)
+    .rename({"id": "doc_id"})
+    .sort(c.doc_id)
+    .group_by(c.label, maintain_order=True)
+    .head(50)
+)
+```
+
+```{python}
+#| tags: [noclear]
+nlp = spacy.load("en_core_web_sm")
+```
+
+```{python}
+#| tags: [noclear]
+anno = DSText.process(docs.select(c.doc_id, c.text), nlp)
+```
+
+### Questions
+
+`docs` and `anno` hold 200 AG News articles, 50 each labeled `"Business"`,
+`"Sci/Tech"`, `"Sports"`, or `"World"`, drawn deterministically from the
+benchmark's held-out test partition. Each row of `docs` is one short wire
+article: a `doc_id`, its true topic `label`, and the raw `text` sent by a
+news service. This is a different corpus from both the Wikipedia author
+pages the chapter itself builds its TF-IDF examples on and the IMDb reviews
+of the last two notebooks, and it comes with a mess of its own: several
+articles still carry a literal backslash character where the original source
+wrapped a line, fusing two words together with no space between them. A
+later question deals with that mess directly. Print results unless a
+question says otherwise.
+
+1. Filter `anno` to alphabetic tokens, group by `lemma`, and count. Print the
+15 most frequent lemmas in the whole corpus.
+
+```{python}
+(
+    anno
+    .filter(c.is_alpha)
+    .group_by(c.lemma)
+    .agg(count = pl.len())
+    .sort(c.count, descending=True)
+    .head(15)
+)
+```
+
+2. Look at the list from question 1. How many of these 15 words have
+anything to do with business, technology, sports, or world news?
+
+Not one. Every entry is a determiner, preposition, conjunction, or auxiliary
+verb, plus two wire-service names (`AP`, `Reuters`) that are really metadata
+about where the article came from rather than what it is about. This is a
+sharper version of the chapter's own "publisher" example: with IMDb, the raw
+frequency list at least surfaced `movie` and `film` near the top, because
+every review in that corpus was about the same kind of thing. AG News mixes
+four unrelated subjects by design, so a corpus-wide raw count has no single
+dominant noun to lean on. Only weighting by document frequency, the whole
+point of TF-IDF, will separate the four topics from each other.
+
+3. Compute the TF-IDF table with `DSText.compute_tfidf(anno, min_df=0.01, max_df=1.0)`,
+matching the chapter's own call. Then build the top-10-terms-per-document
+table the same way the chapter does, and print its shape.
+
+```{python}
+tfidf = DSText.compute_tfidf(anno, min_df=0.01, max_df=1.0)
+
+top_terms = (
+    tfidf
+    .sort([c.doc_id, c.tfidf], descending=[False, True])
+    .group_by(c.doc_id)
+    .head(10)
+    .group_by(c.doc_id)
+    .agg(top_lemmas = c.lemma.str.join("; "))
+)
+top_terms.shape
+```
+
+4. Pick two articles from each label (eight total, the first two `doc_id`s
+within each label) and print their `top_lemmas` alongside the true `label`.
+Before checking the `label` column, try to guess each article's topic from
+its term list alone.
+
+```{python}
+sample_docs = (
+    docs
+    .sort(c.label, c.doc_id)
+    .group_by(c.label, maintain_order=True)
+    .head(2)
+    .select(c.doc_id, c.label)
+)
+
+(
+    top_terms
+    .join(sample_docs, on=c.doc_id)
+    .select(c.doc_id, c.label, c.top_lemmas)
+    .sort(c.label, c.doc_id)
+)
+```
+
+Some of these give themselves away immediately: `Phelps; Gold; minute;
+medley; individual; ...; medal` is unmistakably Sports, and `chief;
+Canadian; Press; die; police; man; who; ...` reads as World news even before
+checking. Others are harder. `doc120028`'s list (`Law; he; his; good; field;
+football; choose; component; that; look`) is Sports too, but three of its
+ten top terms (`he`, `his`, `that`) are exactly the kind of function word
+question 2 found polluting the raw frequency count, and TF-IDF has not
+fully removed them here.
+
+5. Investigate the backslash artifact. Count how many of the 200 raw
+articles contain a literal `\` character, grouped by `label`. Then filter
+`anno` to tokens containing a `\` and confirm that every single one is
+tagged `is_alpha == False`.
+
+```{python}
+(
+    docs
+    .with_columns(has_backslash = c.text.str.contains(r"\\"))
+    .group_by(c.label)
+    .agg(n = pl.len(), pct_backslash = c.has_backslash.mean())
+    .sort(c.pct_backslash, descending=True)
+)
+```
+
+```{python}
+bad_tokens = anno.filter(c.token.str.contains(r"\\"))
+print(bad_tokens.height, "tokens out of", anno.height)
+bad_tokens.select(c.is_alpha.any()).item()
+```
+
+```{python}
+docs.filter(c.text.str.contains(r"\\")).select(c.doc_id, c.text).row(0, named=True)
+```
+
+23 of the 200 articles carry the artifact, ranging from 20% of Business
+articles down to none at all in Sports, a real difference in how each wire
+service's copy was originally formatted, not in what the articles are about.
+`doc120042`'s text shows why: `"hoping their\back-to-school fashions"`
+glues `their` to `back-to-school` with no space, and spaCy's tokenizer
+correctly refuses to call `their\back` a normal word; it marks the whole
+fused token non-alphabetic instead. Every one of the 65 fused tokens in the
+corpus gets the same treatment, which is exactly why none of them showed up
+anywhere in question 1 or question 3. The `is_alpha` filter both
+`DSText.compute_tfidf` and a plain word count rely on silently drops them,
+with no error and no warning that a real word from the original sentence
+never made it into either table.
+
+6. For the words `he`, `his`, `who`, `they`, `at`, `with`, `for`, `that`,
+`AP`, `Reuters`, and `AFP`, compute what proportion of the 200 documents
+each one appears in.
+
+```{python}
+candidates = ["he", "his", "who", "they", "at", "with", "for", "that", "AP", "Reuters", "AFP"]
+
+(
+    anno
+    .filter(c.is_alpha)
+    .group_by(c.lemma)
+    .agg(n_docs = c.doc_id.n_unique())
+    .with_columns(df_prop = c.n_docs / 200)
+    .filter(c.lemma.is_in(candidates))
+    .sort(c.df_prop, descending=True)
+)
+```
+
+Not one of these clears 40% document frequency, and `he`, `who`, and `they`
+sit at 10% or below. The book's own `max_df` example works because
+"publisher" appears on almost every Wikipedia biography; a `max_df` cutoff
+anywhere above 0.4 would leave every word on this list untouched. Pronouns
+and prepositions do not need to be common across a topically diverse news
+corpus to be uninformative within the handful of articles that use them.
+They just need to be common within one short document, which document-level
+frequency has no way of measuring.
+
+7. Recompute the TF-IDF table with a much stricter `max_df=0.2` and rebuild
+the top-10 list for the same eight sample documents from question 4. Does
+the aggressive cutoff clean up `doc120028`'s list?
+
+```{python}
+tfidf_strict = DSText.compute_tfidf(anno, min_df=0.01, max_df=0.2)
+
+top_terms_strict = (
+    tfidf_strict
+    .sort([c.doc_id, c.tfidf], descending=[False, True])
+    .group_by(c.doc_id)
+    .head(10)
+    .group_by(c.doc_id)
+    .agg(top_lemmas_strict = c.lemma.str.join("; "))
+)
+
+(
+    top_terms_strict
+    .join(sample_docs, on=c.doc_id)
+    .select(c.doc_id, c.label, c.top_lemmas_strict)
+    .sort(c.label, c.doc_id)
+)
+```
+
+No. `doc120028` still lists `he`, `his`, and `that` even after dropping
+every term that appears in more than a fifth of the corpus, because question
+6 already showed all three sit well under that line. A `max_df` cutoff can
+only remove words that are common across many documents; it cannot touch a
+word that happens to be common *within* one short document but rare
+everywhere else, which is precisely `doc120028`'s problem.
+
+8. Redefine what counts as a "document." Join `label` onto `anno`, drop the
+original `doc_id`, and rename `label` to `doc_id`, so every article sharing
+a topic is now treated as one pooled document. Recompute TF-IDF on this
+table with `max_df=0.75`, and print the top 10 terms for each of the four
+categories.
+
+```{python}
+anno_cat = (
+    anno
+    .join(docs.select(c.doc_id, c.label), on=c.doc_id)
+    .drop("doc_id")
+    .rename({"label": "doc_id"})
+)
+
+cat_tfidf = DSText.compute_tfidf(anno_cat, min_df=0.0, max_df=0.75, doc_name="doc_id")
+
+top_cat = (
+    cat_tfidf
+    .sort([c.doc_id, c.tfidf], descending=[False, True])
+    .group_by(c.doc_id)
+    .head(10)
+    .group_by(c.doc_id)
+    .agg(top_lemmas = c.lemma.str.join("; "))
+)
+top_cat
+```
+
+9. Compare this category-level list to question 4's per-article lists. Does
+pooling all 50 articles into one document surface anything that wasn't
+already visible at the single-article level?
+
+Some of it was already there: `doc120027`'s own top-10 list had `Phelps`,
+`Gold`, and `medal`, and the pooled Sports list adds `olympic` and `Athens`
+on top of those, the same event described from a wider angle. But the
+Sci/Tech list (`IBM; some; service; network; company; I; he; Girafa; Mars;
+include`) is not something any single sample article predicted. No article
+in question 4 mentioned IBM, Mars, or the search engine `Girafa`, because
+each of those companies only dominates a handful of the 50 Sci/Tech
+articles, not the topic as a whole. The chapter's own line about how "the
+result depends on how we define a document" turns out to be literal here:
+treating 50 articles as one document changes which words count as `tf`,
+changes `N` from 200 to 4, and produces a genuinely different, and more
+useful, picture of each category. It also does not fully solve question 7's
+pronoun problem: `he`, `his`, and `I` still turn up in three of the four
+category lists, since a word common in 3 of 4 pooled documents clears a
+0.75 cutoff exactly as easily as one common in 150 of 200 articles.
+
+10. Plot the top 10 terms per category from question 8 as a bar chart with
+`geom_col()` and `coord_flip()`, faceting by `doc_id` with free scales.
+
+```{python}
+plot_terms = (
+    cat_tfidf
+    .sort([c.doc_id, c.tfidf], descending=[False, True])
+    .group_by(c.doc_id)
+    .head(10)
+)
+
+(
+    plot_terms
+    .pipe(ggplot, aes("lemma", "tfidf"))
+    .geom_col()
+    .coord_flip()
+    .facet_wrap("doc_id", scales="free")
+    .labs(title="Top 10 TF-IDF Terms by AG News Category", x="Term", y="TF-IDF")
+)
+```
+
+11. Spot-check one of question 8's surprising terms against the actual
+text. Find an article in the Sports category whose text contains `"Athens"`
+and print it.
+
+```{python}
+docs.filter(c.label == "Sports", c.text.str.contains("Athens")).select(c.doc_id, c.text).row(0, named=True)
+```
+
+The article confirms it: a 100-meter world champion is banned from "the
+Athens Olympics" after a drug appeal is dismissed, which places the article
+squarely at the 2004 Games. `olympic` and `Athens` land near the top of the
+Sports list for a real reason, not a coincidence of the ranking, and reading
+the sentence behind the score is what confirms that rather than the score
+on its own.

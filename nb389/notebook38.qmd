@@ -1,0 +1,460 @@
+---
+title: "Notebook38"
+solutions-release-date: "2026-09-30"
+---
+
+### Setup
+
+Run all of the following before starting the notebook.
+
+```{python}
+#| tags: [noclear]
+#| eval: false
+! wget -q -nc https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/funs.py
+```
+
+```{python}
+#| tags: [noclear]
+import polars as pl
+from plotnine import ggplot, aes
+from polars import col as c
+
+import funs
+
+ub = "https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"
+```
+
+```{python}
+#| tags: [remove]
+#| include: false
+ub = ""
+```
+
+```{python}
+#| tags: [noclear]
+klog = pl.read_csv(ub + "data/keylog.csv.gz")
+meta = pl.read_csv(ub + "data/keylog-meta.csv.gz")
+```
+
+### Questions
+
+`klog` is a keystroke log of 823 people typing in English, one row per key
+press. `t0` and `t1` give the moment of the press and the release, `dur` is
+the hold time in between, and `dur_after` is a second duration column
+already sitting in the file, which question 3 asks you to check rather than
+trust. `input` is the resulting character, `null` for space and every other
+key that produces no character, and `code` is the physical key. `meta`
+carries three facts about each of the 823 people behind `id`: `age`, native
+`lang`, and `cefr`, a proficiency band for English (`A1/A2` weakest,
+`C1/C2` strongest). One thing to know before question 1: `t0` and `t1` are
+milliseconds elapsed since each person's recording started, not a wall-clock
+time, so there is no year, month, or day hiding in them anywhere. Print
+results unless a question says otherwise.
+
+1. `t0` and `t1` cannot become real dates, since no calendar sits behind
+them, but they can still become real `Datetime` objects: casting elapsed
+milliseconds to an integer and then to `pl.Datetime("ms")` is exactly how a
+Unix timestamp already works, it just anchors the clock at 1970-01-01
+instead of the moment recording began. Add `press` and `release` columns to
+`klog` this way, from `t0` and `t1`, and overwrite `klog` with the result.
+Then filter to the one session stored in `klog["id"][0]`, truncate `press`
+to 10-second bins with `.dt.truncate("10s")`, group by the bucket, count the
+keystrokes in each one, and sort by bucket.
+
+```{python}
+klog = klog.with_columns(
+    press = c.t0.cast(pl.Int64).cast(pl.Datetime("ms")),
+    release = c.t1.cast(pl.Int64).cast(pl.Datetime("ms"))
+)
+
+one_id = klog["id"][0]
+
+q1 = (
+    klog
+    .filter(c.id == one_id)
+    .with_columns(
+        bucket = c.press.dt.truncate("10s")
+    )
+    .group_by(c.bucket)
+    .agg(
+        n_keys = pl.len()
+    )
+    .sort(c.bucket)
+)
+q1
+```
+
+**Answer**: This one session runs 57 ten-second bins. Counts swing from 1
+key in the quietest bin up to 39 in the busiest one, which falls in the
+second bucket of the session (`00:00:30`, ten to twenty seconds after the
+first keystroke), an opening burst before the pace settles down. The 1970
+date on every bucket is not a typo; it is the anchor, and the only part of
+`bucket` worth reading is the time of day.
+
+2. The anchor in question 1 is arbitrary, but it is the *same* arbitrary
+moment for all 823 sessions, so a bucket built the same way pools everyone's
+first minute together, everyone's second minute together, and so on. Truncate
+the full `klog` (not just one session) to 1-minute bins, group by the
+bucket, and compute the number of distinct sessions still active and the
+average `dur` in each one. Sort by bucket and print the first 15 rows.
+
+```{python}
+q2 = (
+    klog
+    .with_columns(
+        bucket = c.press.dt.truncate("1m")
+    )
+    .group_by(c.bucket)
+    .agg(
+        n_sessions = c.id.n_unique(),
+        avg_dur = c.dur.mean().round(1)
+    )
+    .sort(c.bucket)
+)
+q2.head(15)
+```
+
+**Answer**: 595 sessions are still going in minute 0, rising to a peak of
+770 in minute 3 as slower typists catch up to the same elapsed-time bucket,
+then falling off as people finish. Average hold time climbs the whole way
+across these 15 minutes, from 73.7 to 81.7 milliseconds, a small but steady
+slowdown as the session wears on. Past roughly minute 20 the bucket holds
+fewer than 100 sessions, and by minute 40 barely a handful, so any trend out
+there is a handful of stragglers, not a corpus-wide pattern.
+
+3. Before trusting `dur_after`, check it. Sort `klog` by `id` and `press`,
+compute `c.dur.shift(-1).over(c.id)`, and count how many rows disagree with
+the stored `dur_after` by more than 0.05.
+
+```{python}
+klog = klog.sort(c.id, c.press)
+
+check = (
+    klog
+    .with_columns(
+        dur_next = c.dur.shift(-1).over(c.id)
+    )
+    .with_columns(
+        mismatch = (c.dur_after - c.dur_next).abs() > 0.05
+    )
+)
+
+check.select(c.mismatch.sum(), pl.len())
+```
+
+**Answer**: Zero mismatches out of 1,145,051 rows. `dur_after` is exactly
+`dur` shifted back one row within a session, nothing more, which is worth
+confirming before building on it rather than assuming a column means what
+its name suggests.
+
+4. Build a `gap` column on `klog`: the time between when the previous key
+was released and this one was pressed, `c.press - c.release.shift(1).over(c.id)`.
+Overwrite `klog` with it and print `id`, `press`, `release`, and `gap` for
+the first 5 rows of the session from question 1.
+
+```{python}
+klog = klog.with_columns(
+    gap = c.press - c.release.shift(1).over(c.id)
+)
+
+(
+    klog
+    .filter(c.id == one_id)
+    .select(c.id, c.press, c.release, c.gap)
+    .head(5)
+)
+```
+
+5. Filter `klog` to rows where `gap` exceeds 2 seconds, a real pause in
+typing rather than ordinary key-to-key rhythm. Group by `id`, count the
+pauses per person, and print the 5 people with the most.
+
+```{python}
+pauses = klog.filter(c.gap > pl.duration(seconds=2))
+
+(
+    pauses
+    .group_by(c.id)
+    .agg(n_pauses = pl.len())
+    .sort(c.n_pauses, descending=True)
+    .head(5)
+)
+```
+
+38,324 pauses turn up across the corpus, a median of well under a hundred
+per person, so the busiest pauser above (176) is a genuine outlier, not the
+typical rhythm of even a hesitant typist.
+
+6. Compute each person's average `gap` in milliseconds
+(`.dt.total_milliseconds()`), join the result onto `meta`, group by `cefr`,
+and compute the number of participants and the average gap per group. Sort
+by average gap.
+
+```{python}
+avg_gap = (
+    klog
+    .drop_nulls(c.gap)
+    .group_by(c.id)
+    .agg(
+        avg_gap_ms = c.gap.dt.total_milliseconds().mean()
+    )
+)
+
+(
+    avg_gap
+    .join(meta, on="id")
+    .group_by(c.cefr)
+    .agg(
+        participants = pl.len(),
+        avg_gap_ms = c.avg_gap_ms.mean().round(1)
+    )
+    .sort(c.avg_gap_ms)
+)
+```
+
+**Answer**: The gap rises exactly as CEFR falls: 402.1 ms for the 550 people
+at `C1/C2`, 585.9 ms for the 260 at `B1/B2`, and 667.4 ms for the 13 at
+`A1/A2`. Milliseconds is the right unit here, since most gaps are well under
+a second; asking for `.dt.total_seconds()` instead would floor almost every
+one of them to 0 and erase this pattern entirely, the same truncation trap
+the book raises for day-scale durations. The `A1/A2` row is worth a second
+look regardless: 13 people is a thin group to average, and the true weakest
+tier could look quite different with a few more participants in it.
+
+7. Durations aggregate like any other number, which means a single extreme
+value can dominate one person's average even while barely touching the
+whole corpus's. Sort the per-person average from question 6's setup by
+`avg_gap_ms` descending and find the single largest `gap` in all of `klog`
+alongside the `id` it belongs to. Then compare the corpus-wide average gap
+with and without that one person's rows.
+
+```{python}
+avg_gap_ranked = (
+    klog
+    .drop_nulls(c.gap)
+    .group_by(c.id)
+    .agg(
+        avg_gap_ms = c.gap.dt.total_milliseconds().mean()
+    )
+    .sort(c.avg_gap_ms, descending=True)
+)
+avg_gap_ranked.head(3)
+```
+
+```{python}
+worst_gap = klog.drop_nulls(c.gap).sort(c.gap, descending=True).head(1)
+worst_id = worst_gap["id"][0]
+worst_gap.select(c.id, c.press, c.gap, c.dur)
+```
+
+```{python}
+all_rows = klog.drop_nulls(c.gap)
+
+(
+    all_rows
+    .with_columns(
+        excl = c.id != worst_id
+    )
+    .group_by(c.excl)
+    .agg(
+        avg_gap_ms = c.gap.dt.total_milliseconds().mean().round(1),
+        n = pl.len()
+    )
+)
+```
+
+```{python}
+all_rows.select(
+    avg_gap_ms = c.gap.dt.total_milliseconds().mean().round(1),
+    n = pl.len()
+)
+```
+
+**Answer**: The single largest gap in the whole corpus is 42 minutes 57.8
+seconds, one row belonging to `R_3m3ibeMP74Zoz1W`, whose entire session
+lasts 52 minutes 30 seconds, so this one pause swallows 82% of their
+recorded time. That one row alone is enough to push this person's average
+gap (2209.6 ms) to the third highest of all 823 people, ahead of everyone
+who paused often but never paused this *long*. Yet the corpus-wide average
+across all 1,144,228 gaps is 457.7 ms, and dropping this one person's rows
+entirely moves it to only 455.6 ms. The same duration column is fragile at
+the individual level and almost immovable in bulk.
+
+8. `.rolling_mean_by()` smooths a series by a span of time rather than a
+count of rows, the right tool here since keystrokes are not evenly spaced.
+For the session from question 1, compute `gap` in milliseconds and a 15-second
+rolling mean of it with `by=c.press`. Plot the raw values in grey and the
+smoothed line in red against `press`.
+
+```{python}
+one = (
+    klog
+    .filter(c.id == one_id)
+    .with_columns(
+        gap_ms = c.gap.dt.total_milliseconds()
+    )
+    .with_columns(
+        gap_smooth = c.gap_ms.rolling_mean_by(by=c.press, window_size="15s")
+    )
+)
+
+(
+    one
+    .pipe(ggplot, aes(c.press, c.gap_ms))
+    .geom_line(color="grey")
+    .geom_line(aes(y=c.gap_smooth), color="red")
+    .scale_x_datetime(date_labels="%M:%S")
+    .labs(
+        title="Inter-Key Gap, Raw and 15-Second Rolling Mean",
+        x="Press Time (mm:ss)",
+        y="Gap (ms)"
+    )
+)
+```
+
+The red line surfaces the handful of real hesitations inside all the grey
+jitter, the same way the book's rolling mean pulled Chaucer's trajectory out
+of a jagged edit history.
+
+9. Question 8 filtered to one session before rolling, which is the only
+reason no `.over()` was needed. Compute the same 15-second rolling mean of
+`gap_ms` across the *entire* `klog`, first with `.over(c.id)` and then
+without it, and compare both versions restricted back down to the session
+from question 1 (its first 10 rows). Then count how many distinct `id`s
+have a keystroke landing inside that session's own first 15 seconds of
+anchor time.
+
+```{python}
+klog = klog.with_columns(gap_ms = c.gap.dt.total_milliseconds())
+
+correct = (
+    klog
+    .sort(c.press)
+    .with_columns(
+        gap_smooth_grouped = c.gap_ms.rolling_mean_by(by=c.press, window_size="15s").over(c.id)
+    )
+    .filter(c.id == one_id)
+)
+
+wrong = (
+    klog
+    .sort(c.press)
+    .with_columns(
+        gap_smooth_pooled = c.gap_ms.rolling_mean_by(by=c.press, window_size="15s")
+    )
+    .filter(c.id == one_id)
+)
+
+(
+    correct
+    .select(c.press, c.gap_ms, c.gap_smooth_grouped)
+    .join(wrong.select(c.press, c.gap_smooth_pooled), on="press")
+    .head(10)
+)
+```
+
+```{python}
+first_press = one["press"].min()
+
+(
+    klog
+    .filter(
+        (c.press >= first_press) & (c.press < first_press + pl.duration(seconds=15))
+    )
+    .select(c.id.n_unique())
+)
+```
+
+**Answer**: Grouped, the smoothed gap for this session moves the way
+question 8's plot showed, tracking real hesitations. Pooled, it barely
+moves at all, sitting near 164-170 ms almost every row, because the anchor
+from question 1 puts *everyone's* first few seconds at the same clock
+reading. 393 different people have a keystroke inside just this one
+session's opening 15 seconds, so the ungrouped rolling mean is averaging
+this person together with 392 strangers who happen to share their elapsed
+time, not their session. `.over(c.id)` is not a nicety here; without it the
+result is a different, meaningless quantity that still runs without error.
+
+10. `.join_asof()` matches each row to the nearest value in another table
+rather than an exact one. Build a table of "resume" moments: every row from
+question 5's pause filter, keeping only `id` and `press` (renamed
+`pause_press`). Asof-join all of `klog` to it, backward, matched by `id`,
+and compute `since_pause`, the milliseconds between each keystroke and the
+most recent pause that preceded it. Group by whether `since_pause` is under
+1000 (recently resumed) and compare the average `dur` and count in each
+group, including the group where no pause has happened yet at all.
+
+```{python}
+resumes = (
+    pauses
+    .select(c.id, pause_press = c.press)
+    .sort(c.id, c.pause_press)
+)
+
+with_resume = (
+    klog
+    .sort(c.id, c.press)
+    .join_asof(resumes, left_on="press", right_on="pause_press", by="id", strategy="backward")
+    .with_columns(
+        since_pause = (c.press - c.pause_press).dt.total_milliseconds()
+    )
+)
+
+(
+    with_resume
+    .with_columns(
+        just_resumed = c.since_pause < 1000
+    )
+    .group_by(c.just_resumed)
+    .agg(
+        n = pl.len(),
+        avg_dur = c.dur.mean().round(1)
+    )
+)
+```
+
+**Answer**: `just_resumed` comes back with three groups, not two, since
+`since_pause` is `null` for the 42,678 keystrokes typed before anyone's
+first pause. Those `null` rows hold the shortest average, 74.2 ms, keys
+typed within a second of resuming hold the longest, 80.8 ms, and everything
+typed a full second or more after resuming sits in between at 76.9 ms. That
+ordering is suggestive of a real restart cost, but read it cautiously:
+question 2 already showed hold times climbing as a session goes on, and by
+the time most people have hit even one 2-second pause they are already well
+past their first minute, so part of this gap could be question 2's slowdown
+showing up again rather than a genuine cost of resuming. Separating the two
+would need controlling for elapsed time directly, which is more than this
+question asks for.
+
+11. `.join_where()` keeps every pair of rows satisfying a condition, not
+just an equality. Physical key rollover, pressing the next key before
+releasing the last one, would show up as one row's `press` (renamed
+`press_right` after a self-join) falling before another row's `release`
+while that same row's `release_right` falls after the first row's `press`.
+Add a row index to the session from question 1 and self-join it with
+`.join_where()` on that overlap condition, excluding a row pairing with
+itself. Then confirm the finding holds for the whole corpus by checking the
+smallest value `gap` ever takes.
+
+```{python}
+indexed = one.with_row_index("rn")
+
+overlaps = indexed.join_where(
+    indexed,
+    (c.press_right < c.release) & (c.release_right > c.press) & (c.rn != c.rn_right)
+)
+
+overlaps.select(pl.len())
+```
+
+```{python}
+klog.select(c.gap.dt.total_milliseconds().min())
+```
+
+**Answer**: Zero overlapping pairs in this session, and the corpus-wide
+minimum `gap` is exactly 0 milliseconds, never negative, which is the same
+finding stated the fast way: nobody in this dataset ever presses a key
+before releasing the last one. Running the full interval self-join on all
+823 sessions to double check would mean joining some sessions against
+themselves at over a thousand rows apiece, far more computation than the
+single-column minimum needed to answer the same question.

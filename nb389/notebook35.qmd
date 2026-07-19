@@ -1,0 +1,427 @@
+---
+title: "Notebook35"
+solutions-release-date: "2026-09-16"
+---
+
+### Setup
+
+Run all of the following before starting the notebook.
+
+```{python}
+#| tags: [noclear]
+#| eval: false
+! wget -q -nc https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/funs.py
+```
+
+```{python}
+#| tags: [noclear]
+import time
+
+import polars as pl
+from plotnine import ggplot, aes
+from polars import col as c
+
+import funs
+
+import requests
+import requests_cache
+```
+
+```{python}
+#| tags: [noclear]
+session = requests_cache.CachedSession(
+    cache_name="data/turing/requests_cache",
+    backend="sqlite",
+    allowable_methods=("GET", "HEAD", "POST"),
+    allowable_codes=(200, 404),
+    expire_after=None
+)
+
+base_url = "https://en.wikipedia.org/w/api.php"
+headers = {
+    "User-Agent": "DataScienceBook/1.0 (yourname@example.edu)"
+}
+```
+
+### Questions
+
+This notebook does not read a table from `data/`; it builds one, over the
+network, the same way the chapter itself does. The population is every
+direct member of `Category:Turing Award laureates` on English Wikipedia: the
+recipients of the ACM's annual computing prize, which one of their own
+Wikipedia articles describes as "informally considered the Nobel Prize of
+computer science." That gives a population small enough to collect politely
+in one sitting and, unlike the chapter's own novelist categories, drawn from
+a single official award list with essentially no ambiguity about who
+belongs. Two tables come out of this notebook: `laureates`, a spine with a
+`page_id` and a `doc_id` for every recipient, and `texts`, each laureate's
+article body. Notebook36 reuses both to collect the links, revision
+histories, page views, and language links the rest of the chapter covers, so
+nothing here is thrown away once the notebook ends. Print results unless a
+question says otherwise.
+
+1. Send a single request for `"Donald Knuth"`'s page info (`action="query"`,
+`prop="info"`) with `session.get()`. Print the status code, then parse
+`.json()` and pull `page_id`, `title`, `length`, and `touched` out of it into
+a one-row `pl.DataFrame`.
+
+```{python}
+params = {
+    "action": "query",
+    "format": "json",
+    "prop": "info",
+    "titles": "Donald Knuth"
+}
+response = session.get(base_url, params=params, headers=headers)
+response.status_code
+```
+
+```{python}
+data = response.json()
+page = list(data["query"]["pages"].values())[0]
+pl.DataFrame([{
+    "page_id": page["pageid"],
+    "title": page["title"],
+    "length": page["length"],
+    "touched": page["touched"]
+}])
+```
+
+2. Wikimedia asks clients to send a descriptive `User-Agent`, request
+serially, and cache what comes back; clearing `session.cookies` before every
+request matters too, since Wikimedia's `Vary: Cookie` header means a
+leftover cookie would quietly defeat the cache on every rerun. Write a
+`polite_get(url, params)` helper that clears cookies, calls `session.get()`,
+raises on a bad status with `.raise_for_status()`, and sleeps 0.2 seconds
+only when the response did not come from the cache. Call it twice in a row
+for `"Barbara Liskov"`'s page info and print `.from_cache` for both calls.
+
+```{python}
+def polite_get(url, params=None):
+    session.cookies.clear()
+    response = session.get(url, params=params, headers=headers)
+    response.raise_for_status()
+    if not getattr(response, "from_cache", False):
+        time.sleep(0.2)
+    return response
+```
+
+```{python}
+params = {
+    "action": "query",
+    "format": "json",
+    "prop": "info",
+    "titles": "Barbara Liskov"
+}
+r1 = polite_get(base_url, params)
+r2 = polite_get(base_url, params)
+r1.from_cache, r2.from_cache
+```
+
+**Answer**: The first call reaches the network (`False`); the second, sent
+with identical parameters, is answered entirely out of the local SQLite
+cache (`True`). This is what lets the whole notebook re-run in seconds
+instead of minutes once the cache is warm.
+
+3. Write `category_members(category)`: loop over `list="categorymembers"`
+with `cmtype="page"` (excludes subcategories and files) and `cmlimit="max"`,
+following the `continue` block until it disappears. Run it for
+`"Category:Turing Award laureates"`, build a `laureates` table with
+`page_id` and `doc_id` columns, drop any duplicate `page_id` with
+`.unique(subset="page_id", keep="first")`, and sort by `doc_id`. Print the
+shape, then the first and last 5 rows.
+
+```{python}
+def category_members(category):
+    members = []
+    params = {
+        "action": "query",
+        "format": "json",
+        "list": "categorymembers",
+        "cmtitle": category,
+        "cmtype": "page",
+        "cmlimit": "max"
+    }
+    while True:
+        data = polite_get(base_url, params).json()
+        members.extend(data["query"]["categorymembers"])
+        if "continue" not in data:
+            break
+        params.update(data["continue"])
+    return members
+```
+
+```{python}
+members = category_members("Category:Turing Award laureates")
+
+laureates = (
+    pl.DataFrame([
+        {"page_id": m["pageid"], "doc_id": m["title"]}
+        for m in members
+    ])
+    .unique(subset="page_id", keep="first")
+    .sort(c.doc_id)
+)
+laureates.select(pl.len())
+```
+
+```{python}
+laureates.head(5)
+```
+
+```{python}
+laureates.tail(5)
+```
+
+**Answer**: 81 laureates, and deduplicating on `page_id` did not drop a
+single row; a single category, unlike the chapter's two overlapping ones,
+lists each person once.
+
+4. Filter `laureates` to titles containing a parenthesis with
+`.filter(c.doc_id.str.contains(r"\("))`. Print the result. Why would
+Wikipedia need extra text in some of these article titles but not the
+other 75?
+
+```{python}
+laureates.filter(c.doc_id.str.contains(r"\("))
+```
+
+**Answer**: The parenthetical is a Wikipedia disambiguator, added whenever
+the plain form of a name is already taken by some other notable person:
+`John McCarthy` alone belongs to more than one person with a Wikipedia
+article, so the laureate's page lives at `John McCarthy (computer
+scientist)` instead. The other 75 laureates have names specific enough that
+no such collision exists, so nothing needs to be added to theirs.
+
+5. Someone typing this population from memory would not always type the
+canonical title. Send one `prop="info"` request with `redirects=1` for
+`"Vinton Cerf"`, `"Ronald Rivest"`, `"Edsger Dijkstra"`, and a fake title,
+`"Not A Real Turing Laureate Page"`. Print the `redirects` block, then the
+`pages` entries flagged `missing`.
+
+```{python}
+params = {
+    "action": "query",
+    "format": "json",
+    "prop": "info",
+    "redirects": 1,
+    "titles": "Vinton Cerf|Ronald Rivest|Edsger Dijkstra|Not A Real Turing Laureate Page"
+}
+data = polite_get(base_url, params).json()
+data["query"]["redirects"]
+```
+
+```{python}
+{k: v for k, v in data["query"]["pages"].items() if "missing" in v}
+```
+
+**Answer**: All three informal names resolve through a genuine redirect page
+(`Vinton Cerf` to `Vint Cerf`, `Ronald Rivest` to `Ron Rivest`, `Edsger
+Dijkstra` to `Edsger W. Dijkstra`), and the fake title comes back flagged
+`missing` with no crash. These are exactly the two outcomes the chapter's
+own redirect section describes, landing on this corpus's names instead of
+the book's.
+
+6. Two of question 4's disambiguated laureates, `John McCarthy (computer
+scientist)` and `David Patterson (computer scientist)`, are also the
+*plain* form of a name some other Wikipedia article uses. Request
+`prop="info"` with `redirects=1` for the plain titles `"John McCarthy"` and
+`"David Patterson"` (no parentheses), and print the `pageid` each resolves
+to. Compare those IDs against the `page_id` values `laureates` has on file
+for the same two people, then request `prop="extracts"` (`exintro=1`) for
+the two plain-title page IDs and print the start of each extract. What
+happened, and why wouldn't question 5's check have caught it?
+
+```{python}
+params = {
+    "action": "query",
+    "format": "json",
+    "prop": "info",
+    "redirects": 1,
+    "titles": "John McCarthy|David Patterson"
+}
+data = polite_get(base_url, params).json()
+{p["title"]: p["pageid"] for p in data["query"]["pages"].values()}
+```
+
+```{python}
+laureates.filter(
+    c.doc_id.is_in(["John McCarthy (computer scientist)", "David Patterson (computer scientist)"])
+)
+```
+
+```{python}
+params = {
+    "action": "query",
+    "format": "json",
+    "prop": "extracts",
+    "explaintext": 1,
+    "exintro": 1,
+    "pageids": "58841|811552"
+}
+data = polite_get(base_url, params).json()
+for page in data["query"]["pages"].values():
+    print(page["title"], "->", page["extract"][:60])
+```
+
+**Answer**: The plain titles resolve to page IDs 58841 and 811552, neither
+of which matches the corpus's own 308362 (`John McCarthy (computer
+scientist)`) or 816239 (`David Patterson (computer scientist)`). Nothing
+raised an error and nothing came back `missing`; both are real, live
+Wikipedia pages, just not the ones this population means. The extracts show
+why: both open with "X may refer to:", which marks a disambiguation page
+listing several unrelated people who share the name. Question 5's check
+would not have caught this, because a disambiguation page is neither a
+redirect nor a `missing` page. A collection loop that only screens for
+those two failure modes would silently pull disambiguation-page metadata
+into the corpus under an innocent-looking title. Requesting the exact
+titles the category itself supplied, the way `laureates` already does,
+sidesteps the trap entirely.
+
+7. Loop over every `page_id` in `laureates`, request `prop="extracts"` with
+`explaintext=1`, and collect each `page_id` with its plain-text `text`.
+Join the result back to `laureates` to attach `doc_id`, keeping `page_id`
+and `doc_id` as the first two columns. Print the shape, then filter to
+`c.text == ""` and print how many rows come back.
+
+```{python}
+rows = []
+for page_id in laureates["page_id"]:
+    params = {
+        "action": "query",
+        "format": "json",
+        "prop": "extracts",
+        "explaintext": 1,
+        "pageids": page_id
+    }
+    data = polite_get(base_url, params).json()
+    page = data["query"]["pages"][str(page_id)]
+    rows.append({"page_id": page_id, "text": page.get("extract", "")})
+
+texts = (
+    pl.DataFrame(rows)
+    .join(laureates, on=c.page_id)
+    .select(c.page_id, c.doc_id, c.text)
+)
+texts.select(pl.len())
+```
+
+```{python}
+texts.filter(c.text == "").select(pl.len())
+```
+
+**Answer**: 81 rows in, 81 rows of text out, and zero of them empty; every
+laureate in the population has a real article body, so this table needs no
+second pass the way an unmatched spatial join or a broken key would.
+
+8. Print the first 300 characters of Donald Knuth's collected text and
+check it against what you already know about him.
+
+```{python}
+print(texts.filter(c.doc_id == "Donald Knuth")["text"].item()[:300])
+```
+
+**Answer**: The opening lines match the standard biographical summary,
+Stanford professor emeritus and 1974 Turing Award recipient, and the
+extract even states outright that the award is "informally considered the
+Nobel Prize of computer science," the same framing this notebook's
+introduction used. That line was recovered from the API, not typed by us,
+which is itself a small check that the collection pipeline is pulling real
+article content.
+
+9. Add an `n_chars` column to `texts` with `.str.len_chars()`. Sort
+descending and print the 5 laureates with the longest collected articles,
+then sort ascending and print the 5 shortest. What seems to drive the
+difference?
+
+```{python}
+texts = texts.with_columns(n_chars = c.text.str.len_chars())
+
+(
+    texts
+    .select(c.doc_id, c.n_chars)
+    .sort(c.n_chars, descending=True)
+    .head(5)
+)
+```
+
+```{python}
+(
+    texts
+    .select(c.doc_id, c.n_chars)
+    .sort(c.n_chars)
+    .head(5)
+)
+```
+
+**Answer**: Herbert A. Simon's article leads at roughly 31,000 characters,
+well clear of Edsger W. Dijkstra, Douglas Engelbart, Kenneth E. Iverson, and
+Geoffrey Hinton. The shortest, around 2,000 to 3,000 characters apiece,
+belong to Richard E. Stearns, John Cocke, Amir Pnueli, Manuel Blum, and E.
+Allen Emerson. Article length here is not a ranking of computer-science
+importance; it tracks how much biographical and popular-press material
+exists to write about someone. Simon crosses into economics (he won a Nobel
+there too) and organizational theory, which pulls in more editors and more
+sources, and Hinton's place near the top owes as much to the attention his
+recent 2024 Nobel Prize in Physics brought his page as to the Turing Award
+itself. The laureates at the bottom did foundational, frequently cited work
+that most Wikipedia readers never go looking for by name.
+
+10. Filter `texts` to rows whose `text` contains `"Bell Labs"` with
+`.str.contains()`. Print the matching `doc_id` values and the count.
+
+```{python}
+bell_labs = texts.filter(c.text.str.contains("Bell Labs"))
+bell_labs.select(c.doc_id)
+```
+
+```{python}
+bell_labs.select(pl.len())
+```
+
+**Answer**: 12 laureates' articles mention Bell Labs, including Dennis
+Ritchie and Ken Thompson, who built Unix there, and Richard Hamming, who
+spent his whole research career at Bell Labs, exactly the names a search
+like this ought to surface if the collected text is trustworthy. It also
+catches laureates whose Bell Labs connection is a smaller detail in a much
+longer career, such as Yann LeCun's early research post there, which is why
+a keyword search over the full article text is worth running instead of
+relying on a mental list of who worked where.
+
+11. Request `prop="info"` for every `page_id` in `laureates`, batching up to
+50 IDs per request with `"|".join()`, and collect each page's `length` (the
+size of the wiki markup, in bytes) into a `wiki_length` column. Join it onto
+`texts` and compute `pl.corr()` between `n_chars` (our own extracted plain
+text) and `wiki_length` (the server's own count of the raw markup).
+
+```{python}
+ids = laureates["page_id"].to_list()
+batches = [ids[i:(i + 50)] for i in range(0, len(ids), 50)]
+
+rows = []
+for batch in batches:
+    params = {
+        "action": "query",
+        "format": "json",
+        "prop": "info",
+        "pageids": "|".join(str(i) for i in batch)
+    }
+    data = polite_get(base_url, params).json()
+    for p in data["query"]["pages"].values():
+        rows.append({"page_id": p["pageid"], "wiki_length": p["length"]})
+
+lengths = pl.DataFrame(rows)
+(
+    texts
+    .join(lengths, on="page_id")
+    .select(pl.corr(c.n_chars, c.wiki_length))
+)
+```
+
+**Answer**: A correlation of about 0.88. The two numbers come from
+completely different requests, one measuring the plain-text extract we
+built and the other the raw wiki markup size the server reports for the
+same page, so this is not a circular check; it is a second, independent
+measurement agreeing with the first, which is the same kind of
+spot-checking question 9's word counts and question 10's keyword search
+already relied on, applied here as a number instead of a name.

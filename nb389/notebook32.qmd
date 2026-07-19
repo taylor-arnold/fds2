@@ -1,0 +1,302 @@
+---
+title: "Notebook32"
+solutions-release-date: "2026-09-02"
+---
+
+### Setup
+
+Run all of the following before starting the notebook.
+
+```{python}
+#| tags: [noclear]
+#| eval: false
+! wget -q -nc https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/funs.py
+```
+
+```{python}
+#| tags: [noclear]
+import polars as pl
+from plotnine import ggplot, aes
+from polars import col as c
+
+import funs
+
+ub = "https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"
+```
+
+```{python}
+#| tags: [noclear]
+import warnings
+warnings.filterwarnings("ignore")
+```
+
+```{python}
+#| tags: [remove]
+#| include: false
+ub = ""
+```
+
+```{python}
+#| tags: [noclear]
+prov = funs.read_file(ub + "data/it_province.geojson")
+covid = pl.read_csv(ub + "data/it_province_covid.csv")
+```
+
+### Questions
+
+This notebook uses two tables. `prov` is a GeoJSON file of Italy's 107
+provinces, the administrative unit roughly equivalent to a US county. It has
+one row per province with a `province` name, a `geometry` column, and the
+`_crs` helper column; the geometries are polygons, not the points from last
+time, so each one traces a whole boundary rather than marking a single spot.
+`covid` is a daily record of new COVID-19 cases per province from February
+2020 through November 2021, with columns `date`, `region`, `province`, and
+`cases`. The `province` column is the shared key between the two tables.
+
+As in the last notebook, a few answers get saved back into `prov` — the
+projection step and the metric columns built on top of it — because later
+questions reuse them. Anything that is not a geometry- or column-building
+step should just be printed.
+
+1. Print `prov`. Then select `province` and the first 15 characters of each
+`geometry` string (`c.geometry.str.slice(0, 15)`) to see how the polygons
+begin. What geometry type are these, and why can't they be drawn with
+`geom_point()` the way the city points were?
+
+```{python}
+prov
+```
+
+```{python}
+(
+    prov
+    .select(c.province, c.geometry.str.slice(0, 15))
+    .head(5)
+)
+```
+
+**Answer**: Every string starts with `MULTIPOLYGON`, not `POINT`. A point is
+two numbers, so `geom_point()` has an x and a y to place; a polygon is an
+ordered list of many coordinate pairs tracing a closed boundary, and some
+provinces are made of several disconnected pieces (the *multi* part), like a
+mainland province plus its offshore islands. There is no single (x, y) to
+scatter. Drawing these needs `geom_map()`, which knows how to follow the
+vertices around each shape.
+
+2. Draw the provinces with `geom_map(fill="white", color="black")` and
+`coord_fixed()`, in the raw coordinates the file loaded in.
+
+```{python}
+(
+    ggplot(prov)
+    .geom_map(fill="white", color="black")
+    .coord_fixed()
+)
+```
+
+The file loaded in EPSG:4326, plain longitude and latitude, which you can see
+in the `_crs` column from question 1. The outline is recognizably Italy, but
+the axis numbers are degrees, and with `coord_fixed()` locking one degree of
+longitude to the same length as one degree of latitude, the boot comes out a
+little wider and flatter than it should be — at 42°N a degree of longitude
+covers noticeably less ground than a degree of latitude, and this plot
+pretends they are equal.
+
+3. Before projecting, try to compute each province's area with `prov.geo.area`
+while it is still in EPSG:4326. Sort by the new `area` column, smallest first,
+and print `province` and `area`. Do the numbers make sense as areas?
+
+```{python}
+(
+    prov
+    .geo.area
+    .sort(c.area)
+    .select(c.province, c.area)
+    .head(5)
+)
+```
+
+**Answer**: No. The smallest "area" comes out around 0.02, and the largest is
+only a few units. These are squared *degrees* of longitude and latitude, not a
+real surface area, and a degree is not even a fixed distance — it shrinks as
+you move north. Computed this way the numbers are meaningless for comparing
+provinces, exactly the trap the chapter warns about: area and distance only
+make sense in a projected CRS. Nothing raised an error, though; `geo.area`
+happily returned nonsense, which is why the next step projects first.
+
+4. Project `prov` into EPSG:7791, Italy's national reference system, and save
+the result back into `prov`. Draw it again with `geom_map(fill="white",
+color="black")` and `coord_fixed()`, and compare the shape to question 2.
+
+```{python}
+prov = prov.geo.to_crs(7791)
+```
+
+```{python}
+(
+    ggplot(prov)
+    .geom_map(fill="white", color="black")
+    .coord_fixed()
+)
+```
+
+**Answer**: The peninsula now stands more upright and slightly narrower; the
+flattening from question 2 is gone. The axis numbers are meters instead of
+degrees. Projection reshapes polygons more visibly than it moved the city
+points in the last notebook, because a polygon's whole outline gets bent, not
+just a scatter of dots — the change is most noticeable across the wide
+northern provinces, where lines of longitude are converging fastest.
+
+5. Make an interactive map of the provinces with `.geo.explore(tooltip=
+["province"])`. Zoom in on a province you can place from memory and check that
+its boundary sits where it should.
+
+```{python}
+prov.geo.explore(tooltip=["province"])
+```
+
+6. Now that `prov` is projected, compute `prov.geo.area` again, save it back
+into `prov`, and print the five largest provinces by area (`province` and
+`area`, sorted descending). The chapter noted the units; what are they here?
+
+```{python}
+prov = prov.geo.area
+```
+
+```{python}
+(
+    prov
+    .sort(c.area, descending=True)
+    .select(c.province, c.area)
+    .head(5)
+)
+```
+
+**Answer**: The numbers are now in square meters, the default for a projected
+CRS; dividing by 1,000,000 gives square kilometers, so Sassari's roughly
+7.7 billion m² is about 7,700 km². The largest provinces are Sassari (northern
+Sardinia), Bolzano/Bozen (the Alpine north), and Foggia (in Puglia) — all
+sparsely settled and rural. The biggest province is not a big city; that turns
+out to matter in the choropleth section below.
+
+7. Print the five *smallest* provinces by area the same way. These are the
+ones a national map will barely show.
+
+```{python}
+(
+    prov
+    .sort(c.area)
+    .select(c.province, c.area)
+    .head(5)
+)
+```
+
+**Answer**: Trieste, at about 212 km², is the smallest, followed by Prato and
+Monza e della Brianza. These are dense urban provinces carved out around a
+single city, physically tiny but heavily populated — the mirror image of
+Sassari. On a map of the whole country they shrink to a speck, which is the
+first hint that visual area and importance can pull in opposite directions.
+
+8. Replace each province's polygon with its centroid using the `centroid`
+property (`prov.geo.centroid` — a property, so no parentheses), and print
+`province` and the first 12 characters of the new `geometry`. What kind of
+geometry is the result now?
+
+```{python}
+(
+    prov
+    .geo.centroid
+    .select(c.province, c.geometry.str.slice(0, 12))
+    .head(5)
+)
+```
+
+**Answer**: The `geometry` strings now start with `POINT`: each polygon has
+been collapsed to a single point at its geometric center. We did not assign
+this back, so `prov` still holds the full polygons. For a compact, roughly
+convex province the centroid lands near the middle; for a province shaped like
+a crescent or split across islands it can fall outside the province entirely,
+which is worth remembering before using a centroid to stand in for a region.
+
+9. Build a `total` column: the sum of `cases` per province over the whole
+period. Before joining it to `prov`, confirm `province` is a clean key in the
+polygon table with `.select(c.province.n_unique(), pl.len())`. Then join the
+totals on and make a choropleth with `geom_map(color="white")`, `coord_fixed()`,
+and `fill=c.total`.
+
+```{python}
+prov.select(c.province.n_unique(), pl.len())
+```
+
+```{python}
+prov = prov.join(
+    covid.group_by(c.province).agg(total = c.cases.sum()),
+    on="province",
+    how="left"
+)
+```
+
+```{python}
+(
+    ggplot(prov, aes(fill=c.total))
+    .geom_map(color="white")
+    .coord_fixed()
+)
+```
+
+**Answer**: The key check returns 107 and 107, so every province name is
+unique and the left join can match at most one total to each polygon. The map
+lights up over Rome, Milan, Turin, and Naples: the totals are dominated by a
+handful of big-city provinces, as `total`'s own top rows confirm (Roma
+≈305,000, Milano ≈299,000, Napoli ≈288,000).
+
+10. Total cases is an absolute count, and the chapter warns that choropleths of
+absolute counts mislead. Build `dens`, cases per square kilometer
+(`c.total / (c.area / 1_000_000)`), and make the same choropleth with
+`fill=c.dens`. How does the picture change, and which map is the more honest
+one?
+
+```{python}
+prov = prov.with_columns(dens = c.total / (c.area / 1_000_000))
+```
+
+```{python}
+(
+    ggplot(prov, aes(fill=c.dens))
+    .geom_map(color="white")
+    .coord_fixed()
+)
+```
+
+**Answer**: The two maps tell different stories. A choropleth fills each
+province with a flat color, so a physically large province like Sassari
+occupies a lot of the reader's eye no matter how few cases it had, while tiny
+Trieste is almost invisible even if it was hit hard. Dividing by area removes
+that bias: the density map collapses the big rural south into near-darkness and
+makes Naples — small and dense — the brightest region, with the compact
+northern provinces around Milan and Monza close behind. The density map is the
+more honest one for reading intensity off the page, which is the chapter's rule
+of thumb: colors should encode an area-based rate, not a raw total. (The truly
+correct normalization for disease would be cases *per person*, but these tables
+carry no province population, so per-area is as far as we can honestly go here.)
+
+11. Confirm the density story numerically: sort `prov` by `dens`, descending,
+and print the five densest provinces (`province` and `dens`). Does the top of
+this list match the bright spots on the map from question 10?
+
+```{python}
+(
+    prov
+    .sort(c.dens, descending=True)
+    .select(c.province, c.dens)
+    .head(5)
+)
+```
+
+**Answer**: Naples leads at about 245 cases per km², then Monza e della
+Brianza, Milano, Trieste, and Varese — every one of them a small, dense,
+urban province, and every one a bright cell on the density map. Naples was only
+third by raw total but jumps to first once area is taken out, and Sassari, the
+single largest province by area, appears nowhere near the top. That gap between
+the two rankings is the whole lesson of the section: on a choropleth, *what you
+divide by* decides what the reader sees.

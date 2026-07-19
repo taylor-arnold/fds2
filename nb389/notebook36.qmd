@@ -1,0 +1,679 @@
+---
+title: "Notebook36"
+solutions-release-date: "2026-09-21"
+---
+
+### Setup
+
+Run all of the following before starting the notebook.
+
+```{python}
+#| tags: [noclear]
+#| eval: false
+! wget -q -nc https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/funs.py
+```
+
+```{python}
+#| tags: [noclear]
+import time
+
+import polars as pl
+from plotnine import ggplot, aes
+from polars import col as c
+
+import funs
+
+import requests
+import requests_cache
+```
+
+```{python}
+#| tags: [noclear]
+session = requests_cache.CachedSession(
+    cache_name="data/turing/requests_cache",
+    backend="sqlite",
+    allowable_methods=("GET", "HEAD", "POST"),
+    allowable_codes=(200, 404),
+    expire_after=None
+)
+
+base_url = "https://en.wikipedia.org/w/api.php"
+headers = {
+    "User-Agent": "DataScienceBook/1.0 (yourname@example.edu)"
+}
+```
+
+### Questions
+
+This notebook picks up the Turing Award laureate corpus notebook35 started:
+the same 81 recipients of `Category:Turing Award laureates`, the same
+`data/turing/requests_cache` cache file, and the same identifier pair
+(`page_id` stable, `doc_id` readable). Nothing here starts a second
+population; every question below attaches new data to the 81 rows already
+defined. That includes rebuilding `laureates` itself in question 1 exactly as
+notebook35 did, since a notebook cannot assume another notebook's Python
+session is still around, only its cache file. Print results unless a
+question says otherwise.
+
+1. Rewrite `polite_get` and `category_members` exactly as in notebook35. Send
+one `list="categorymembers"` request for `"Category:Turing Award
+laureates"` on its own first, and print `.from_cache` for that single call,
+before rebuilding the full `laureates` table. Print `laureates`' shape.
+
+```{python}
+def polite_get(url, params=None):
+    session.cookies.clear()
+    response = session.get(url, params=params, headers=headers)
+    response.raise_for_status()
+    if not getattr(response, "from_cache", False):
+        time.sleep(0.2)
+    return response
+```
+
+```{python}
+params = {
+    "action": "query",
+    "format": "json",
+    "list": "categorymembers",
+    "cmtitle": "Category:Turing Award laureates",
+    "cmtype": "page",
+    "cmlimit": "max"
+}
+first_call = polite_get(base_url, params)
+first_call.from_cache
+```
+
+```{python}
+def category_members(category):
+    members = []
+    params = {
+        "action": "query",
+        "format": "json",
+        "list": "categorymembers",
+        "cmtitle": category,
+        "cmtype": "page",
+        "cmlimit": "max"
+    }
+    while True:
+        data = polite_get(base_url, params).json()
+        members.extend(data["query"]["categorymembers"])
+        if "continue" not in data:
+            break
+        params.update(data["continue"])
+    return members
+
+members = category_members("Category:Turing Award laureates")
+
+laureates = (
+    pl.DataFrame([
+        {"page_id": m["pageid"], "doc_id": m["title"]}
+        for m in members
+    ])
+    .unique(subset="page_id", keep="first")
+    .sort(c.doc_id)
+)
+laureates.select(pl.len())
+```
+
+**Answer**: `first_call.from_cache` is already `True`. Notebook35 sent this
+exact request weeks ago and `expire_after=None` means it never expired, so
+this notebook reaches the network zero times for the population itself; the
+81 rows come back from disk in a couple of milliseconds. This is what the
+cache-as-raw-layer idea buys across separate notebooks, not just separate
+cells of the same one.
+
+2. Collect each laureate's outgoing internal links with `prop="links"`,
+`plnamespace=0`, `pllimit="max"`, paginating with `continue` the same way
+category members did. Attach `doc_id` with a small `add_doc_id` helper (a
+join back to `laureates`, keyed on `page_id`, with both key columns moved to
+the front). Print the shape of the resulting `links` table.
+
+```{python}
+def add_doc_id(df, spine=None):
+    spine = laureates if spine is None else spine
+    return (
+        df
+        .join(spine.select(c.page_id, c.doc_id), on=c.page_id)
+        .select(c.page_id, c.doc_id, pl.exclude("page_id", "doc_id"))
+    )
+```
+
+```{python}
+rows = []
+for page_id in laureates["page_id"]:
+    params = {
+        "action": "query",
+        "format": "json",
+        "prop": "links",
+        "plnamespace": 0,
+        "pllimit": "max",
+        "pageids": page_id
+    }
+    while True:
+        data = polite_get(base_url, params).json()
+        page = data["query"]["pages"][str(page_id)]
+        for link in page.get("links", []):
+            rows.append({"page_id": page_id, "link_title": link["title"]})
+        if "continue" not in data:
+            break
+        params.update(data["continue"])
+
+links = add_doc_id(pl.DataFrame(rows))
+links.select(pl.len())
+```
+
+**Answer**: 27,626 rows. Most targets are places, universities, and other
+topics outside the corpus, which is expected; the next question narrows this
+to author-to-author edges.
+
+3. Join `links` back onto `laureates` (matching `link_title` to `doc_id`) to
+keep only the edges that land on another laureate. Group the result by
+`doc_id`, count edges per laureate into `n_links`, and print `.describe()`
+for that column. Something about the numbers should look wrong before you
+even check a single row. Use `prop="templates"` on one flagged laureate's
+page to find the explanation, and print the offending template's title.
+
+```{python}
+links_internal = links.join(
+    laureates.select(
+        link_title = c.doc_id,
+        to_page_id = c.page_id,
+        to_doc_id = c.doc_id
+    ),
+    on=c.link_title
+)
+links_internal.select(pl.len())
+```
+
+```{python}
+(
+    links_internal
+    .group_by(c.doc_id)
+    .agg(pl.len().alias("n_links"))
+    .select(c.n_links)
+    .describe()
+)
+```
+
+```{python}
+params = {
+    "action": "query",
+    "format": "json",
+    "prop": "templates",
+    "titles": "Martin Hellman",
+    "tllimit": "max"
+}
+data = polite_get(base_url, params).json()
+page = list(data["query"]["pages"].values())[0]
+[t["title"] for t in page["templates"] if "Turing" in t["title"]]
+```
+
+**Answer**: `links_internal` has exactly 6,480 rows, which is $81 \times 80$,
+and `.describe()` shows every laureate links to precisely 80 others: mean
+80.0, standard deviation 0.0, minimum and maximum both 80. A real citation
+network does not look like this; nobody's Wikipedia article organically
+mentions all 80 of their award-mates in running prose. `prop="templates"`
+on Martin Hellman's page turns up `Template:Turing Award laureates`, a
+navigation box transcluded onto every laureate's article that links to
+every other laureate. `prop="links"` reports links from the rendered page,
+template included, so the "network" question 1 seemed to be answering was
+actually measuring which pages share a navbox, not who cites whom. The
+row-count-too-clean-to-be-real check that caught notebook33's spatial joins
+catches the same kind of problem here.
+
+4. Collect the full revision history for every laureate (`prop="revisions"`,
+`rvprop="ids|timestamp|user|size|comment"`, `rvlimit="max"`, paginating on
+`continue`), and parse `timestamp` into a real datetime. Print the shape,
+then group by `doc_id` and take the earliest `timestamp` per laureate as
+that article's creation date. Print the 5 earliest-created articles and the
+5 most recently created.
+
+```{python}
+rows = []
+for page_id in laureates["page_id"]:
+    params = {
+        "action": "query",
+        "format": "json",
+        "prop": "revisions",
+        "rvprop": "ids|timestamp|user|size|comment",
+        "rvlimit": "max",
+        "pageids": page_id
+    }
+    while True:
+        data = polite_get(base_url, params).json()
+        page = data["query"]["pages"][str(page_id)]
+        for rev in page.get("revisions", []):
+            rows.append({
+                "page_id": page_id,
+                "rev_id": rev["revid"],
+                "timestamp": rev["timestamp"],
+                "user": rev.get("user"),
+                "size": rev["size"],
+                "comment": rev.get("comment")
+            })
+        if "continue" not in data:
+            break
+        params.update(data["continue"])
+
+revisions = (
+    pl.DataFrame(rows)
+    .pipe(add_doc_id)
+    .with_columns(
+        timestamp = c.timestamp.str.to_datetime("%Y-%m-%dT%H:%M:%SZ")
+    )
+)
+revisions.select(pl.len())
+```
+
+```{python}
+created = (
+    revisions
+    .group_by(c.doc_id)
+    .agg(c.timestamp.min().alias("created"))
+    .sort(c.created)
+)
+created.head(5)
+```
+
+```{python}
+created.tail(5)
+```
+
+**Answer**: 43,103 revisions across 81 pages. The five earliest-created
+articles (Tim Berners-Lee, Vint Cerf, Dennis Ritchie, Ken Thompson, Alan
+Kay) all date to May through August 2001, only months after Wikipedia itself
+launched in January 2001, plausible for names that famous. The most
+recently created is Yoshua Bengio's article (2015), years before his 2018
+award, since he was already known for deep learning research by then. More
+striking are the three articles in between: Edmund M. Clarke, E. Allen
+Emerson, and Joseph Sifakis were all created on 2008-02-04, within about two
+minutes of each other. All three shared the 2007 Turing Award for model
+checking, and that shared award, not a coincidence, is why an editor
+created all three pages back to back on the same day the announcement
+would have been news.
+
+5. Collect daily page views for every laureate from the REST API over the
+same 2025 window the chapter uses (`all-access`, `user`, `daily`,
+`20250101` to `20251231`), skipping any 404 the way the chapter does. Print the
+shape, then sum `views` per laureate and print the 5 highest totals.
+
+```{python}
+from urllib.parse import quote
+
+pv_base = (
+    "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/"
+    "en.wikipedia/all-access/user/{article}/daily/20250101/20251231"
+)
+
+rows = []
+for doc_id in laureates["doc_id"]:
+    article = quote(doc_id.replace(" ", "_"), safe="")
+    session.cookies.clear()
+    response = session.get(pv_base.format(article=article), headers=headers)
+    if not getattr(response, "from_cache", False):
+        time.sleep(0.2)
+    if response.status_code == 404:
+        continue
+    response.raise_for_status()
+    for item in response.json()["items"]:
+        rows.append({
+            "article": item["article"],
+            "date": item["timestamp"],
+            "views": item["views"]
+        })
+
+views = (
+    pl.DataFrame(rows)
+    .with_columns(date = c.date.str.slice(0, 8).str.to_date("%Y%m%d"))
+    .join(
+        laureates.select(
+            c.page_id,
+            article = c.doc_id.str.replace_all(" ", "_")
+        ),
+        on=c.article
+    )
+    .select(c.page_id, c.date, c.views)
+    .pipe(add_doc_id)
+)
+views.select(pl.len())
+```
+
+```{python}
+(
+    views
+    .group_by(c.doc_id)
+    .agg(c.views.sum().alias("total_views"))
+    .sort(c.total_views, descending=True)
+    .head(5)
+)
+```
+
+**Answer**: 29,565 rows, exactly $81 \times 365$, so every laureate has a
+full year of view data and none returned a 404. That is worth noting
+against the chapter's own corpus, where a handful of authors have no page
+view history at all; this smaller, more recently and consistently edited
+population has none of that gap. Geoffrey Hinton leads with over one
+million views, ahead of Tim Berners-Lee, Yann LeCun, Marvin Minsky, and
+Yoshua Bengio.
+
+6. Plot Geoffrey Hinton's daily 2025 page views with `geom_line()`, save it,
+and look at it. Hinton's total comfortably beat Tim Berners-Lee's in
+question 5 despite Berners-Lee's article having a 15-year head start and
+far more interwiki reach (144 language editions, from question 7, against
+65 for Hinton). What does the rest of the corpus already on hand suggest
+about why, and what does the plot itself leave unexplained?
+
+```{python}
+hinton = views.filter(c.doc_id == "Geoffrey Hinton")
+
+(
+    ggplot(hinton, aes(c.date, c.views))
+    .geom_line()
+)
+```
+
+**Answer**: Hinton's own collected text calls him a "Nobel Prize laureate,"
+for the 2024 Nobel Prize in Physics, a fact recoverable from this corpus
+without leaving it, and residual attention from an award that recent is a
+plausible driver of elevated 2025 English-Wikipedia traffic even without
+Berners-Lee's decades of accumulated fame or translations. What the plot
+does not explain is the sharp spike in mid-June, more than 13,000 views in
+a single day against a baseline in the hundreds. Nothing in this notebook's
+tables says what happened that week, and a rendered line plot cannot answer
+a question the corpus was never built to answer; that is squarely the
+business of the temporal data chapter, not this one.
+
+7. Collect `langlinks` for every laureate (batched 50 page IDs per request,
+paginating with `continue`), and count distinct languages per laureate.
+Print the 6 laureates with the most language editions and the 6 with the
+fewest.
+
+```{python}
+ids = laureates["page_id"].to_list()
+batches = [ids[i:(i + 50)] for i in range(0, len(ids), 50)]
+
+rows = []
+for batch in batches:
+    params = {
+        "action": "query",
+        "format": "json",
+        "prop": "langlinks",
+        "lllimit": "max",
+        "pageids": "|".join(str(i) for i in batch)
+    }
+    while True:
+        data = polite_get(base_url, params).json()
+        for page in data["query"]["pages"].values():
+            for link in page.get("langlinks", []):
+                rows.append({
+                    "page_id": page["pageid"],
+                    "lang": link["lang"],
+                    "lang_title": link["*"]
+                })
+        if "continue" not in data:
+            break
+        params.update(data["continue"])
+
+langlinks = add_doc_id(pl.DataFrame(rows))
+
+lang_counts = (
+    langlinks
+    .group_by(c.doc_id)
+    .agg(pl.len().alias("n_langs"))
+    .sort(c.n_langs, descending=True)
+)
+lang_counts.head(6)
+```
+
+```{python}
+lang_counts.sort(c.n_langs).head(6)
+```
+
+**Answer**: Tim Berners-Lee tops the list at 144 language editions, well
+ahead of Dennis Ritchie, Donald Knuth, Douglas Engelbart, Geoffrey Hinton,
+and Edsger W. Dijkstra. The bottom of the list is Andrew Barto and Richard
+S. Sutton, the 2024 laureates, and Charles H. Bennett and Gilles Brassard,
+the 2025 laureates: their own collected extracts confirm those award years,
+and having an award only months or a year old has left translators far less
+time to work than Berners-Lee or Ritchie have had since the 1990s. Language
+count here tracks time-since-recognition at least as much as raw
+significance.
+
+8. A hand-typed list of names, unlike a category listing, comes with typos,
+casual capitalization, and titles that belong to someone else entirely.
+Write `resolve_titles(titles)`: send one batched request with `redirects=1`,
+walk the `normalized` and `redirects` maps until they stop changing (exactly
+as the book does for its second corpus), and return each title's resolved
+title and page ID. Run it on `"donald knuth"`, `"Edsger_W_Dijkstra"`,
+`"Herbert Simon"`, `"Alan Turing"`, and `"Not A Real Laureate Page"`, then
+add a column checking whether each resolved `page_id` is one of `laureates`'
+own. What happened to each of the five, and why isn't "resolves to a real,
+unambiguous page" the same test as "belongs to this population"?
+
+```{python}
+def resolve_titles(titles):
+    rows = []
+    params = {
+        "action": "query",
+        "format": "json",
+        "prop": "info",
+        "redirects": 1,
+        "titles": "|".join(titles)
+    }
+    data = polite_get(base_url, params).json()
+
+    followed = {}
+    for kind in ("normalized", "redirects"):
+        for step in data["query"].get(kind, []):
+            followed[step["from"]] = step["to"]
+
+    pages = {p["title"]: p for p in data["query"]["pages"].values()}
+    for title in titles:
+        final = title
+        while final in followed:
+            final = followed[final]
+        rows.append({
+            "doc_id": title,
+            "resolved": final,
+            "page_id": pages.get(final, {}).get("pageid")
+        })
+    return pl.DataFrame(rows)
+
+titles = [
+    "donald knuth",
+    "Edsger_W_Dijkstra",
+    "Herbert Simon",
+    "Alan Turing",
+    "Not A Real Laureate Page"
+]
+resolved = resolve_titles(titles)
+
+resolved.with_columns(
+    in_laureates = c.page_id.is_in(laureates["page_id"].to_list())
+)
+```
+
+**Answer**: `"donald knuth"` and `"Edsger_W_Dijkstra"` each take two hops
+(a mechanical `normalized` fix for casing or underscores, then a real
+`redirects` pointer) and land back on page IDs already in `laureates`,
+exactly the corpus members they were casual stand-ins for. The other three
+land on real, live, unflagged page IDs that are not a typo or a missing
+title, and none of them belong in `laureates`, for three different
+reasons. `"Not A Real Laureate Page"` has a null `page_id`, the familiar
+missing case. `"Herbert Simon"` (dropping the "A.") resolves cleanly to
+page ID 35817808, a short disambiguation page listing an economist and an
+unrelated real-estate developer, the same silent substitution trap
+notebook35 hit with John McCarthy and David Patterson, just triggered here
+by an abbreviated name instead of a shared one. `"Alan Turing"` is the most
+interesting failure: it resolves to a real, single, entirely unambiguous
+article, the person the award is named after, who is not himself a
+recipient of it, since he died in 1954 and the award was not established
+until 1966. A clean resolution with no redirect, no disambiguation, and no
+missing flag can still be the wrong page for a population question, which
+is exactly why the `in_laureates` check against the corpus's own spine
+table, not the resolution outcome alone, has to be the last word.
+
+9. Rebuild `texts` exactly as notebook35 did (it should be fast; the cache
+already has every request). Write `laureates`, `texts`, `links`,
+`revisions`, `views`, and `langlinks` to `data/turing/` as Parquet files,
+then write a short manifest recording the retrieval date, the population
+definition, and each table's row count. Print the manifest.
+
+```{python}
+rows = []
+for page_id in laureates["page_id"]:
+    params = {
+        "action": "query",
+        "format": "json",
+        "prop": "extracts",
+        "explaintext": 1,
+        "pageids": page_id
+    }
+    data = polite_get(base_url, params).json()
+    page = data["query"]["pages"][str(page_id)]
+    rows.append({"page_id": page_id, "text": page.get("extract", "")})
+
+texts = (
+    pl.DataFrame(rows)
+    .join(laureates, on=c.page_id)
+    .select(c.page_id, c.doc_id, c.text)
+)
+texts.select(pl.len())
+```
+
+```{python}
+#| eval: false
+from pathlib import Path
+
+Path("data/turing").mkdir(parents=True, exist_ok=True)
+
+laureates.write_parquet("data/turing/laureates.parquet")
+texts.write_parquet("data/turing/texts.parquet")
+links.write_parquet("data/turing/links.parquet")
+revisions.write_parquet("data/turing/revisions.parquet")
+views.write_parquet("data/turing/views.parquet")
+langlinks.write_parquet("data/turing/langlinks.parquet")
+```
+
+```{python}
+#| eval: false
+from datetime import date
+
+manifest = f"""# Turing Award laureate corpus
+
+Retrieved: {date.today().isoformat()}
+Source: MediaWiki Action API (en.wikipedia.org) and
+  Wikimedia REST API v1 (wikimedia.org/api/rest_v1)
+Population: direct article members of Category:Turing Award laureates
+  (no subcategories)
+Pages: {len(laureates)}
+Revisions: {len(revisions)}
+Pageview window: 2025-01-01 to 2025-12-31 (all-access, user agent class)
+Tables: laureates, texts, links, revisions, views, langlinks
+Raw responses: data/turing/requests_cache.sqlite
+"""
+
+with open("data/turing/MANIFEST.md", "w") as f:
+    f.write(manifest)
+
+print(manifest)
+```
+
+**Answer**: 81 rows of text, none of it recomputed over the network; the
+whole loop finishes as fast as question 1's single cached request did. The
+manifest states the same three facts the chapter's own version does for its
+own corpus: what was collected, from where, and how much of it there is,
+which is what turns six Parquet files sitting in a folder into something a
+later reader can check rather than take on faith.
+
+10. Pull the most recent `rev_id` for `"Donald Knuth"` out of `revisions`,
+then request that exact revision's wikitext with `revids=` and
+`prop="revisions"`, `rvprop="ids|timestamp|content"`, `rvslots="main"`.
+Print the returned timestamp and the first 200 characters, and confirm the
+timestamp matches the row `revisions` already had for that ID. Separately,
+resend question 1's population request with `formatversion=2` added and
+print the type of `data["query"]["pages"]` next to what it was without the
+parameter. Why does pinning a revision ID matter more here than pinning a
+format version, even though the callout on API versioning treats them side
+by side?
+
+```{python}
+latest = (
+    revisions
+    .filter(c.doc_id == "Donald Knuth")
+    .sort(c.timestamp, descending=True)
+    .head(1)
+)
+rev_id = latest["rev_id"].item()
+
+params = {
+    "action": "query",
+    "format": "json",
+    "revids": rev_id,
+    "rvprop": "ids|timestamp|content",
+    "rvslots": "main",
+    "prop": "revisions"
+}
+data = polite_get(base_url, params).json()
+page = list(data["query"]["pages"].values())[0]
+pinned = page["revisions"][0]
+pinned["timestamp"], pinned["slots"]["main"]["*"][:200]
+```
+
+```{python}
+params_v1 = {
+    "action": "query",
+    "format": "json",
+    "list": "categorymembers",
+    "cmtitle": "Category:Turing Award laureates",
+    "cmtype": "page",
+    "cmlimit": "max"
+}
+params_v2 = params_v1 | {"formatversion": 2}
+
+data_v1 = polite_get(base_url, params_v1).json()
+data_v2 = polite_get(base_url, params_v2).json()
+
+type(data_v1["query"]["categorymembers"]), type(data_v2["query"]["categorymembers"])
+```
+
+**Answer**: The pinned revision's timestamp matches `latest`'s exactly, and
+the returned wikitext opens with the same infobox and short description
+`add_doc_id` would already show for Donald Knuth today, confirming
+`revids=` really does hand back one immutable version rather than whatever
+the live article currently says. `formatversion=2` does not change the
+`categorymembers` list's Python type here (both are already lists in this
+particular response shape); the difference formatversion changes is in how
+`prop="info"`'s `pages` block is keyed, a dict by page ID under the
+default and a plain list under version 2. The revision ID matters more for
+reproducibility because it names one fixed version of the *data itself*:
+without recording it, a rerun of this notebook next year gets a different
+Donald Knuth. The format version only fixes the *shape of the response
+envelope*; whichever version is requested, the underlying page content is
+identical. Losing track of a format version breaks the parsing code;
+losing track of a revision ID breaks the claim about what was actually
+measured.
+
+11. Between notebook35 and this one, the corpus grew from a page ID and a
+title to six tables covering text, links, revisions, views, and
+languages, all traceable back to one category listing. Name one place in
+this corpus where that population definition (direct members of a single,
+official award category, no subcategories) worked in the corpus's favor
+compared to the chapter's own novelist categories, and one place a
+different population would have changed an answer you printed in this
+notebook.
+
+**Answer**: In its favor: `Category:Turing Award laureates` is small and
+official enough that deduplication in notebook35 dropped nothing (81 in,
+81 out) and every laureate had view data for all 365 days in question 5,
+neither of which the chapter's own two-category, subcategory-free
+novelist corpus can promise as cleanly. Against it: question 7's
+language-count ranking is really a ranking by *time since the award*, not
+by importance, because a population defined by one ongoing prize always
+has a long tail of very recent members: Bennett and Brassard (2025) and
+Barto and Sutton (2024) anchor the bottom of that list for no reason other
+than having been added to the category most recently. A population spread
+evenly across a century, the way the chapter's own second, hand-curated
+corpus is, would not have that same tail, and the same question asked of
+it would answer something closer to "who is more famous" than "who was
+recognized more recently."

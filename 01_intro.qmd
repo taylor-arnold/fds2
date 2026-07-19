@@ -96,10 +96,10 @@ Once all modules are available, we'll run code to load the modules we need into 
 
 ```{python}
 import polars as pl
-
-from funs import *
-from plotnine import *
+from plotnine import ggplot, aes
 from polars import col as c
+
+import funs
 ```
 
 The lines that start with `import` make a module available for use in Python. Any function available within the module can be accessed by writing the module name followed by a dot and the function name. The `as` clause creates a shortcut that makes the code easier to type. For example, after running the code above, we can call the `read_csv` function from Polars by typing `pl.read_csv`. Code that starts with `from` imports specific functions from the given libraries, making them available without needing to prefix them with the library name. The asterisk statements imports all the functions from the corresponding packages so you don't have to import each one individually. The second-to-last line imports the `col` function from Polars and aliases it as `c`. We will use this function extensively throughout the book; the shorthand will greatly reduce clutter in our code. The final line loads all of the custom functions in a local file called `funs.py`. These are wrapper functions we have created to help simplify the code in this text. Each wrapper will be explained as they arise and can be directly inspected by opening the Python script directly. Other modules, such as NumPy, will be imported in later chapters as soon as we need them.
@@ -148,9 +148,9 @@ The following example applies these formatting rules in practice. Do not worry i
 (
     country
     .filter(c.region == "Europe")
-    .pipe(ggplot, aes("hdi", "happy"))
-    + geom_point()
-    + geom_text(aes(label="iso"), size=6, nudge_y=0.5)
+    .pipe(ggplot, aes(c.hdi, c.happy))
+    .geom_point()
+    .geom_text(aes(label=c.iso), size=6, nudge_y=0.5)
 )
 ```
 

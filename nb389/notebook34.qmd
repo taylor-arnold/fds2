@@ -1,0 +1,330 @@
+---
+title: "Notebook34"
+solutions-release-date: "2026-09-09"
+---
+
+### Setup
+
+Run all of the following before starting the notebook.
+
+```{python}
+#| tags: [noclear]
+#| eval: false
+! wget -q -nc https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/funs.py
+```
+
+```{python}
+#| tags: [noclear]
+import polars as pl
+from plotnine import ggplot, aes
+from polars import col as c
+
+import funs
+
+ub = "https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"
+```
+
+```{python}
+#| tags: [noclear]
+import warnings
+warnings.filterwarnings("ignore")
+```
+
+```{python}
+#| tags: [remove]
+#| include: false
+ub = ""
+```
+
+```{python}
+#| tags: [noclear]
+it_city = pl.read_csv(ub + "data/it_cities.csv")
+prov = funs.read_file(ub + "data/it_province.geojson")
+covid = pl.read_csv(ub + "data/it_province_covid.csv")
+```
+
+### Questions
+
+This is the last notebook built on the Italy family, so it brings back all
+three tables at once. `it_city` is the 388-city point table (`city_name`,
+`lon`, `lat`, `pop`); `prov` is the 107-province polygon table (`province`,
+`geometry`); `covid` is the daily case series from notebook32, but today only
+its `region` column matters. Every province in `covid` carries a `region`
+name, one of Italy's 21 official statistical regions (21, not the usual 20,
+because Trentino-Alto Adige's two autonomous provinces, Trento and Bolzano,
+are tracked as their own regions). `covid` has no polygon of its own, so
+region is a grouping that has to be joined onto `prov` before it can be
+mapped. Print results unless a question says otherwise.
+
+1. Build a point `geometry` for `it_city`, then project both `it_city` and
+`prov` into EPSG:7791. Print both `_crs` columns to confirm they agree.
+
+```{python}
+it_city = it_city.geo.points_from_xy("lon", "lat").geo.to_crs(7791)
+prov = prov.geo.to_crs(7791)
+```
+
+```{python}
+it_city.select(c._crs.first())
+```
+
+```{python}
+prov.select(c._crs.first())
+```
+
+2. Buffer every city by 20 kilometers with `it_city.geo.buffer(20_000)` and
+plot the result with `geom_map(alpha=0.3)` and `coord_fixed()`. Where do the
+discs overlap the most, and where do they stay isolated?
+
+```{python}
+(
+    ggplot(it_city.geo.buffer(20_000))
+    .geom_map(alpha=0.3)
+    .coord_fixed()
+)
+```
+
+**Answer**: The discs pile into solid, near-black clusters across the Po
+Valley in the north and the coastal stretch from Naples down toward Bari,
+while Sardinia and the mountainous interior of the south show mostly
+separate, barely touching circles. The 20-kilometer radius is fixed, so the
+darkness is really a map of how close together the cities themselves are,
+not of anything about the discs.
+
+3. Compare `it_city.geo.sjoin(prov)` to `it_city.geo.buffer(20_000).geo.sjoin(
+prov)`. Print the row count of each. What does the jump mean?
+
+```{python}
+it_city.geo.sjoin(prov).select(pl.len())
+```
+
+```{python}
+it_city.geo.buffer(20_000).geo.sjoin(prov).select(pl.len())
+```
+
+**Answer**: The plain join returns 388 rows, one per city, the same result as
+notebook33. The buffered join returns 1,110: once each city becomes a
+20-kilometer disc instead of a single point, thousands of cities near a
+province line now overlap two or more provinces at once, so they show up more
+than once in the result. Nothing here is wrong; a buffered join answers a
+different question ("which provinces are within 20 km of this city?") than a
+plain containment join does ("which province contains this city?"), and the
+two are not expected to agree.
+
+4. Group the buffered join from question 3 by `city_name` and print the five
+cities with the most province matches.
+
+```{python}
+(
+    it_city
+    .geo.buffer(20_000)
+    .geo.sjoin(prov)
+    .group_by(c.city_name)
+    .agg(n = pl.len())
+    .sort(c.n, descending=True)
+    .head(5)
+)
+```
+
+**Answer**: Rovereto, Brugherio, Cologno Monzese, and Vignola each land within
+20 km of eight different provinces, and Massa tops the list at ten. Rovereto,
+Brugherio, and Cologno Monzese all sit in the ring of small, tightly packed
+provinces around Milan and Trento, so a 20-kilometer disc genuinely reaches
+several neighbors there. Massa's count is inflated for a different reason:
+notebook33 found three separate cities named Massa in three different
+provinces, and grouping by name here quietly merges their match counts
+together, the same duplicate-name trap from last time showing up in a new
+spot.
+
+5. Build a province-to-region lookup from `covid` (`select` `region` and
+`province`, then `.unique()`) and check it is a clean key with
+`.select(c.province.n_unique(), pl.len())`. Then join it onto `prov` and print
+how many provinces failed to match (`c.region.is_null().sum()`) and how many
+distinct regions came through (`c.region.n_unique()`).
+
+```{python}
+region_map = covid.select(c.region, c.province).unique()
+region_map.select(c.province.n_unique(), pl.len())
+```
+
+```{python}
+prov = prov.join(region_map, on="province", how="left")
+prov.select(
+    n_missing = c.region.is_null().sum(),
+    n_region = c.region.n_unique()
+)
+```
+
+**Answer**: The lookup has exactly 107 rows for 107 distinct provinces, so it
+is a clean key with nothing to collapse. The join onto `prov` leaves zero
+missing regions and recovers all 21, the same join-key discipline from
+earlier chapters applied before trusting a spatial grouping.
+
+6. Compute each province's area with `.geo.area`, then `.geo.dissolve(
+by="region", aggfunc={"area": "sum"})` to merge the provinces into their 21
+regions. Print the regions sorted by total area (in square kilometers,
+dividing by 1e6), largest first.
+
+```{python}
+prov = prov.geo.area
+region = prov.geo.dissolve(by="region", aggfunc={"area": "sum"})
+(
+    region
+    .select(c.region, (c.area / 1e6).round(0).alias("area_km2"))
+    .sort(c.area_km2, descending=True)
+)
+```
+
+**Answer**: Sicilia comes out on top at roughly 25,800 square kilometers,
+just ahead of Piemonte, Sardegna, Lombardia, and Toscana, with Valle d'Aosta
+smallest at around 3,300. Sicily leading is a real fact about Italy, not an
+artifact of summing province areas: it is genuinely the largest of the 20
+traditional regions, and the sum here recovers that from 9 separate province
+polygons without ever being told the answer directly.
+
+7. Plot the dissolved `region` table with `geom_map(fill="white", color=
+"black")` and `coord_fixed()`. Compare the row count of `region` to the row
+count of `prov`. What happened to the province borders?
+
+```{python}
+(
+    ggplot(region)
+    .geom_map(fill="white", color="black")
+    .coord_fixed()
+)
+```
+
+```{python}
+region.select(pl.len())
+```
+
+**Answer**: `region` has 21 rows against `prov`'s 107, and the plot shows why:
+the lines separating provinces inside the same region are gone, leaving only
+the 21 regional outlines. `dissolve` did to the polygons what a `group_by`
+does to a table, merging every row that shares a key into one and discarding
+the internal structure that key no longer distinguishes.
+
+8. Explode the full `prov` table with `.geo.explode()` and print the row
+count before and after. Then group the exploded table by `province`, count
+the parts, and print the five provinces with the most.
+
+```{python}
+prov.select(pl.len())
+```
+
+```{python}
+prov.geo.explode().select(pl.len())
+```
+
+```{python}
+(
+    prov
+    .geo.explode()
+    .group_by(c.province)
+    .agg(n = pl.len())
+    .sort(c.n, descending=True)
+    .head(5)
+)
+```
+
+**Answer**: 107 rows become 526, so on average each province is made of about
+five separate polygon pieces even though most provinces are a single solid
+shape. Sassari leads with 124 parts, followed by Trieste, Sud Sardegna,
+Livorno, and Trapani, all provinces whose coastline includes islands or
+scattered offshore rock.
+
+9. Filter the exploded table to `province == "Napoli"`, recompute `.geo.area`,
+and print the four largest parts in square kilometers. Do the sizes match
+what is known about Naples's islands?
+
+```{python}
+(
+    prov
+    .filter(c.province == "Napoli")
+    .geo.explode()
+    .geo.area
+    .select((c.area / 1e6).round(1).alias("area_km2"))
+    .sort(c.area_km2, descending=True)
+    .head(4)
+)
+```
+
+**Answer**: The largest part is about 1,115 square kilometers, the mainland
+province itself. The next three, at roughly 46, 11, and 3 square kilometers,
+line up almost exactly with the real areas of Ischia (about 46 km²), Capri
+(about 10 km²), and Procida (about 4 km²), the three inhabited islands in the
+Bay of Naples. Exploding turned a single "Napoli" row into pieces small
+enough to check against places most people have actually heard of.
+
+10. Filter the exploded table to `province == "Trieste"` instead, recompute
+`.geo.area`, and print the five largest parts. Does a high part count always
+mean real islands, the way it did for Naples?
+
+```{python}
+(
+    prov
+    .filter(c.province == "Trieste")
+    .geo.explode()
+    .geo.area
+    .select((c.area / 1e6).round(2).alias("area_km2"))
+    .sort(c.area_km2, descending=True)
+    .head(5)
+)
+```
+
+**Answer**: No. The mainland part is about 212 square kilometers, and every
+other part is a sliver of two hundredths of a square kilometer or smaller,
+too small to be a real offshore island. Trieste has no islands at all. The
+41 parts question 8 found for Trieste are almost entirely digitization noise
+in the boundary file, not geography. Part count alone cannot tell the two
+situations apart; only looking at the actual areas, as Naples's answer just
+did, can. This is the polygon-validity caution from the chapter's Best
+Practices section in concrete form: an operation like `explode` can run
+cleanly and still hand back results that need a second look before they are
+trusted.
+
+11. Count total vertices in `prov` with `.geo.count_coordinates()`
+(`.select(c.count_coordinates.sum())`), then repeat after
+`.geo.simplify(5_000)`. Print both totals, then plot the simplified provinces
+with `geom_map(fill="white", color="black")` and `coord_fixed()`.
+
+```{python}
+prov.geo.count_coordinates().select(c.count_coordinates.sum())
+```
+
+```{python}
+prov.geo.simplify(5_000).geo.count_coordinates().select(c.count_coordinates.sum())
+```
+
+```{python}
+(
+    ggplot(prov.geo.simplify(5_000))
+    .geom_map(fill="white", color="black")
+    .coord_fixed()
+)
+```
+
+**Answer**: The unsimplified boundaries carry 147,591 vertices; a 5-kilometer
+tolerance cuts that to 3,346, a 44-fold reduction. The map is still
+recognizably Italy, with every region and every named island from earlier in
+the notebook still in place, but the coastlines have visibly straightened
+into short, angular segments. Real work would use a tolerance closer to the
+width of a plotted line rather than one deliberately this coarse, but the
+same trade (fewer vertices for a small, controlled loss of detail) is what
+`simplify` is doing either way.
+
+12. Check that every polygon in `prov` is actually valid with `.geo.is_valid`
+before trusting anything computed above. Print how many are not.
+
+```{python}
+prov.geo.is_valid.select(n_invalid = (~c.is_valid).sum())
+```
+
+**Answer**: Zero. Every one of the 107 province polygons is topologically
+valid, which is worth confirming rather than assuming: an invalid polygon
+(one with a self-intersection or a similar defect) can make `area`,
+`dissolve`, or `explode` silently return wrong numbers instead of raising an
+error, the same way the CRS mismatch in notebook33 and the empty-buffer trap
+in question 3 above could both run without complaint while quietly answering
+the wrong question. A dataset earns the right to be trusted at this scale
+only after a check like this one comes back clean.

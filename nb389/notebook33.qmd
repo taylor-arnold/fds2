@@ -1,0 +1,320 @@
+---
+title: "Notebook33"
+solutions-release-date: "2026-09-04"
+---
+
+### Setup
+
+Run all of the following before starting the notebook.
+
+```{python}
+#| tags: [noclear]
+#| eval: false
+! wget -q -nc https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/funs.py
+```
+
+```{python}
+#| tags: [noclear]
+import polars as pl
+from plotnine import ggplot, aes
+from polars import col as c
+
+import funs
+
+ub = "https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"
+```
+
+```{python}
+#| tags: [noclear]
+import warnings
+warnings.filterwarnings("ignore")
+```
+
+```{python}
+#| tags: [remove]
+#| include: false
+ub = ""
+```
+
+```{python}
+#| tags: [noclear]
+it_city = pl.read_csv(ub + "data/it_cities.csv")
+prov = funs.read_file(ub + "data/it_province.geojson")
+```
+
+### Questions
+
+This notebook brings back both Italy tables from the last two notebooks and
+puts them together. `it_city` is the table of 388 cities, with `city_name`,
+`lon`, `lat`, and `pop`; `prov` is the GeoJSON of Italy's 107 provinces, with
+a `province` name and a polygon `geometry`. A row of `it_city` is one city; a
+row of `prov` is one whole province boundary. The two are not linked by any
+shared key column this time: there is no province name on the city table.
+What links them is geography: each city sits inside exactly one province, and
+the point of a spatial join is to recover that relationship from the
+geometries alone.
+
+Spatial operations only work when both tables are in the same coordinate
+system, so the first question projects both into EPSG:7791 and saves them
+back. After that, the join and geometry-building steps get reassigned; the
+plain lookups and counts should just be printed.
+
+1. Build a point `geometry` for `it_city` with `it_city.geo.points_from_xy(
+"lon", "lat")`, then project it into EPSG:7791 and save it back. Project
+`prov` into EPSG:7791 as well and save that too. Print both `_crs` columns to
+confirm they now agree.
+
+```{python}
+it_city = it_city.geo.points_from_xy("lon", "lat").geo.to_crs(7791)
+prov = prov.geo.to_crs(7791)
+```
+
+```{python}
+it_city.select(c._crs.first())
+```
+
+```{python}
+prov.select(c._crs.first())
+```
+
+**Answer**: Both tables now report EPSG:7791. That agreement is the
+precondition for everything below: a spatial join reads coordinates from both
+tables and compares them directly, so if one were still in degrees and the
+other in meters the numbers would not line up and the match would be garbage.
+Projecting both to the same CRS first is the spatial version of making sure
+two key columns hold the same kind of value before a regular join.
+
+2. Join the cities into the provinces with `it_city.geo.sjoin(prov)` and print
+the result. Each city point gets matched to the province polygon that contains
+it. Look at the columns: what does a row mean now, and what are `index_right`
+and the `geometry` column showing?
+
+```{python}
+it_city.geo.sjoin(prov)
+```
+
+**Answer**: Each row is now a city paired with the province it falls inside,
+carrying the city's four original columns plus the `province` name it landed
+in. `index_right` records which row of the `prov` table matched, a bookkeeping
+column GeoPandas adds. The `geometry` column holds the city *point*, not the
+province polygon, because the left table's geometry is the one that survives a
+spatial join. So this is still one row per city, now labeled with its
+province.
+
+3. A spatial join is an inner join by default, so a city that fell outside
+every province polygon would be dropped with no error. Guard against that:
+compare the row count of the join to the row count of `it_city`. Did every
+city match?
+
+```{python}
+it_city.geo.sjoin(prov).select(pl.len())
+```
+
+```{python}
+it_city.select(pl.len())
+```
+
+**Answer**: Both come back 388, so no city was dropped: every one of the 388
+cities fell inside some province. That is the check worth building a habit
+around. A regular join tells you nothing went wrong by matching on a key you
+can see; a spatial join matches on geometry you can't eyeball, and a point
+sitting just off the coast or in a gap between polygons would simply vanish
+from the result without complaint. Counting rows before and after is the
+geometry version of the `n_unique() == len()` key check from the last
+notebook.
+
+4. Reverse the join with `prov.geo.sjoin(it_city)`, so the province polygons
+are kept instead. This gives one row per city again, but now the province
+geometry is repeated for each city inside it. Group by `province` and count
+the cities per province, then print the five provinces with the most.
+
+```{python}
+(
+    prov
+    .geo.sjoin(it_city)
+    .group_by(c.province)
+    .agg(n = pl.len())
+    .sort(c.n, descending=True)
+    .head(5)
+)
+```
+
+**Answer**: Naples leads with 36 cities over 20,000 people, then Milan (23),
+Bari (18), Rome (15), and Turin (14). Putting the polygon table first flips
+which geometry is kept. Now each row carries a province boundary, duplicated
+once per city it contains, the same one-to-many shape a regular left join
+produces when the right table has several matches per key. Napoli topping the
+list fits the map: the area around Naples is one of the most densely
+town-packed corners of the country.
+
+5. Use the join to answer a question neither table can answer alone: how much
+of each province's population lives in these cities? Join the cities into the
+provinces, group by `province`, sum `pop`, and print the six provinces with
+the largest urban population.
+
+```{python}
+(
+    it_city
+    .geo.sjoin(prov)
+    .group_by(c.province)
+    .agg(urban_pop = c.pop.sum())
+    .sort(c.urban_pop, descending=True)
+    .head(6)
+)
+```
+
+**Answer**: Rome's province tops the list at about 2.96 million, then Naples
+(2.35M), Milan (2.05M), Turin (1.32M), Bari (0.87M), and Palermo (0.81M). This
+number could not be read off either table by itself: the population lives on
+the city table, the province boundary lives on the polygon table, and only the
+spatial join tells us which cities belong to which province. Note the count is
+population in *towns over 20,000*, not the full province population, since the
+city table left out everything smaller, the same 20,000 floor from
+notebook31 that a raw sum quietly inherits.
+
+6. The city table has repeated names. Filter the join to the rows where
+`city_name` is `"Massa"` and print `city_name`, `pop`, and `province`. Two
+things are worth noticing: which provinces the three Massas land in, and what
+their `pop` values are.
+
+```{python}
+(
+    it_city
+    .geo.sjoin(prov)
+    .filter(c.city_name == "Massa")
+    .select(c.city_name, c.pop, c.province)
+)
+```
+
+**Answer**: Three separate points named Massa land in three different
+provinces (Massa-Carrara, Pistoia, and Macerata), and the spatial join sends
+each to the right one from its coordinates, which a join on the name alone
+could never do. But all three carry the identical population 64,783, which is
+the figure for the real Massa in Massa-Carrara. That repetition is a data
+error: the population was copied onto every place sharing the name rather than
+measured for each. The join is what exposes it, because the same number sitting
+next to three different provinces is only obvious once each point is in its
+geographic context. It is also a reason to treat the per-province sums from
+question 5 as a little high: a few of those towns are carrying a population
+that is not really theirs.
+
+7. Provinces can be joined to *themselves*. Use `prov.geo.sjoin(prov,
+predicate="touches")` to find every pair of provinces that share a border, and
+print how many rows come back.
+
+```{python}
+prov.geo.sjoin(prov, predicate="touches").select(pl.len())
+```
+
+**Answer**: 476 rows. The `touches` predicate matches two polygons whenever
+they share at least one point of their boundaries, so this pairs each province
+with every neighbor it shares a line with. The count is even because every
+border shows up twice: if Milan touches Pavia then Pavia touches Milan, and
+both directed pairs are in the table. There are 238 actual borders here; the
+join reports each one from both sides, which is something to remember before
+counting anything off a self-join like this.
+
+8. Pull out one province's neighbors. Filter the `touches` self-join to the
+rows where `province_left` is `"Milano"` and print the `province_right`
+values. Do these match what you would expect from a map of Lombardy?
+
+```{python}
+(
+    prov
+    .geo.sjoin(prov, predicate="touches")
+    .filter(c.province_left == "Milano")
+    .select(c.province_right)
+    .sort(c.province_right)
+)
+```
+
+**Answer**: Milan borders seven provinces: Bergamo, Cremona, Lodi, Monza e
+della Brianza, Novara, Pavia, and Varese. Every one is a real neighbor: Monza
+and Lodi were carved out of Milan's own hinterland, Pavia and Cremona sit to
+the south, and Novara is just across the boundary into Piedmont. Because the
+suffix landed on both name columns in the self-join, the province we filtered
+on is `province_left` and its neighbors come back as `province_right`; reading
+those apart is the whole trick to using a self-join's output.
+
+9. Not every province has that many neighbors. Count neighbors per province
+from the `touches` join (group by `province_left`, count), sort ascending, and
+print the five with the fewest. What do the provinces at the bottom have in
+common?
+
+```{python}
+(
+    prov
+    .geo.sjoin(prov, predicate="touches")
+    .group_by(c.province_left)
+    .agg(n = pl.len())
+    .sort(c.n)
+    .head(5)
+)
+```
+
+**Answer**: Trieste and Cagliari come in with a single land neighbor each,
+then Gorizia, Trapani, and Vibo Valentia with two. The bottom of this list is
+geography, not data trouble: Cagliari and Trapani are on islands (Sardinia and
+Sicily), so most of their perimeter is coastline that touches no other
+province, and Trieste and Gorizia are pinned into the far northeastern corner
+against the Slovenian border, where the neighbors that would round out their
+counts are in another country and not in this table at all. A province's
+border count reflects how much of its edge is shared Italian land versus sea
+or an international line.
+
+10. Now switch from overlap to proximity. Use `it_city.geo.sjoin_nearest(
+it_city, exclusive=True, distance_col="distance")` to find each city's nearest
+other city. Sort by `distance` descending and print the six most isolated
+cities with their distance in kilometers (`c.distance / 1000`).
+
+```{python}
+(
+    it_city
+    .geo.sjoin_nearest(it_city, exclusive=True, distance_col="distance")
+    .sort(c.distance, descending=True)
+    .select(c.city_name_left, c.city_name_right, (c.distance / 1000).round(1).alias("km"))
+    .head(6)
+)
+```
+
+**Answer**: The most isolated pairs are Olbia and Nuoro on Sardinia, about 69
+km apart, then Imperia reaching to Cuneo across the Ligurian mountains, and
+Oristano to Iglesias back on Sardinia. `exclusive=True` stops each city from
+matching itself at distance zero, and because the table is projected the
+distances land in meters, so dividing by 1000 gives real kilometers. The
+cities that top the list are exactly the ones a map would predict: island
+towns and mountain towns, where the next city over 20,000 is genuinely far.
+
+11. The distances in question 10 are only meaningful because the table was
+projected. Repeat the nearest-neighbor join on an *unprojected* copy of the
+cities and look at what happens to the ranking. Load the cities fresh, build
+points but leave them in EPSG:4326, run the same join, and print the four most
+isolated by `distance`. Does the top of the list still agree with question 10?
+
+```{python}
+it_deg = (
+    pl.read_csv(ub + "data/it_cities.csv")
+    .geo.points_from_xy("lon", "lat")
+)
+```
+
+```{python}
+(
+    it_deg
+    .geo.sjoin_nearest(it_deg, exclusive=True, distance_col="distance")
+    .sort(c.distance, descending=True)
+    .select(c.city_name_left, c.city_name_right, c.distance.round(4).alias("deg"))
+    .head(4)
+)
+```
+
+**Answer**: The ranking changes at the top. In degrees, Imperia and Cuneo come
+out as the most isolated pair, ahead of Olbia and Nuoro, which was the clear
+leader in kilometers. Nothing raised an error. The join ran fine and returned
+distances, just distances in degrees, which are not a fixed length on the
+ground. A degree of longitude is shorter than a degree of latitude at these
+latitudes, so an east-west gap like Imperia to Cuneo gets undercounted less
+than the mostly north-south Sardinian pairs, and the order shuffles. The
+projected answer from question 10 is the honest one; this is the same trap as
+computing area in unprojected degrees back in notebook32, now showing up as a
+ranking that quietly reorders itself.

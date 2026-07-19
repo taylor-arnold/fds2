@@ -1,0 +1,343 @@
+---
+title: "Notebook37"
+solutions-release-date: "2026-09-23"
+---
+
+### Setup
+
+Run all of the following before starting the notebook.
+
+```{python}
+#| tags: [noclear]
+#| eval: false
+! wget -q -nc https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/funs.py
+```
+
+```{python}
+#| tags: [noclear]
+import polars as pl
+from plotnine import ggplot, aes, element_text
+from polars import col as c
+
+import funs
+
+ub = "https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"
+```
+
+```{python}
+#| tags: [remove]
+#| include: false
+ub = ""
+```
+
+```{python}
+#| tags: [noclear]
+storm = pl.read_csv(ub + "data/storms.csv")
+storm_type = pl.read_csv(ub + "data/storm_codes.csv")
+```
+
+### Questions
+
+`storm` is NOAA's best-track history of North Atlantic tropical cyclones, one
+row per observation logged roughly every six hours since 1950 (more often
+around landfall, as you will see). `year`, `month`, `day`, and `hour` split
+the observation time into separate numeric components, the same way the
+book recommends recording dates. `name` is the storm's common name, `letter`
+its single-letter season code, and `doy` the day of the year. `lon` and `lat`
+give the storm center's position, `status` a two-letter code for its phase
+(tropical depression, tropical storm, hurricane, and so on), `category` its
+Saffir-Simpson category (-1 for anything below hurricane strength, 0 for a
+tropical storm, 1 through 5 for a hurricane), and `wind` its maximum
+sustained wind in knots. `storm_type` maps each `status` code to a readable
+name. One thing worth knowing before question 1: Atlantic storm names are
+recycled on a six-year rotation, so `name` alone does not pick out a single
+storm. Print results unless a question says otherwise.
+
+1. Filter `storm` to rows where `name` is `"Katrina"`, without filtering on
+`year` yet. Add a row number with `.with_row_index("row_number")` and plot
+`wind` against `row_number` with `geom_line()`. Then select the distinct
+`year` values in this filtered table. What do they tell you about the plot
+you just drew?
+
+```{python}
+q1 = (
+    storm
+    .filter(c.name == "Katrina")
+    .with_row_index("row_number")
+)
+
+(
+    q1
+    .pipe(ggplot, aes(c.row_number, c.wind))
+    .geom_line(color="red")
+    .labs(title="Katrina, by Row Number", x="Row Number", y="Max Wind (knots)")
+)
+```
+
+```{python}
+q1.select(c.year.unique())
+```
+
+**Answer**: Three different years come back: 1981, 1999, and 2005. This
+"Katrina" is really three unrelated storms, eighteen and then six years
+apart, stitched together end to end by the row number. The plot reads as
+one storm's continuous life cycle, building to a single dramatic peak, but
+that is an illusion the row number manufactures. Nothing about it hints
+that the first bump and the second, far larger one are separated by two
+full decades. `name` is not a key here, the same problem a join on an
+unchecked column would have run into.
+
+2. Filter to the real 2005 storm (`name == "Katrina"` and `year == 2005`) and
+save it as `kat`. Build a fractional year column, extended to account for
+`hour` the way the chapter describes, and plot it against `wind`.
+
+```{python}
+kat = storm.filter((c.name == "Katrina") & (c.year == 2005))
+
+(
+    kat
+    .with_columns(
+        year_frac = c.year
+            + (c.month - 1) / 12
+            + (c.day - 1) / (12 * 31)
+            + c.hour / (24 * 12 * 31)
+    )
+    .pipe(ggplot, aes(c.year_frac, c.wind))
+    .geom_line(color="red")
+    .labs(title="Katrina, Fractional Year", x="Fractional Year", y="Max Wind (knots)")
+)
+```
+
+3. Add a real `date` column to `kat` with `pl.date(c.year, c.month, c.day)`
+and overwrite `kat` with it. Plot `date` against `wind`.
+
+```{python}
+kat = kat.with_columns(date = pl.date(c.year, c.month, c.day))
+
+(
+    kat
+    .pipe(ggplot, aes(c.date, c.wind))
+    .geom_line(color="red")
+    .labs(title="Hurricane Katrina, 2005", x="Date", y="Max Wind (knots)")
+)
+```
+
+4. Redraw the plot from question 3 with `scale_x_date()`, breaking the axis
+every day and labeling it `"%b %d"`, angling the labels 45 degrees so they
+do not collide. Then sort `kat` by `wind`, descending, and print the date,
+wind, category, and status of the top 5 rows.
+
+```{python}
+(
+    kat
+    .pipe(ggplot, aes(c.date, c.wind))
+    .geom_line(color="red")
+    .scale_x_date(date_breaks="1 day", date_labels="%b %d")
+    .theme(axis_text_x=element_text(angle=45, hjust=1))
+    .labs(title="Hurricane Katrina, 2005", x="Date", y="Max Wind (knots)")
+)
+```
+
+```{python}
+(
+    kat
+    .sort(c.wind, descending=True)
+    .select(c.date, c.wind, c.category, c.status)
+    .head(5)
+)
+```
+
+Katrina peaked at 150 knots, a category 5, on August 28. Notice that the
+staircase shape in the plot above comes from days that hold more than one
+observation stacked at the same x position, a hint that `date` is coarser
+than the data actually is.
+
+5. Using the full `storm` table (not just `kat`), build a `date` column,
+extract the weekday with `.dt.weekday()`, and group by weekday to compute
+the average `wind` and a count. Sort by weekday.
+
+```{python}
+(
+    storm
+    .with_columns(date = pl.date(c.year, c.month, c.day))
+    .with_columns(weekday = c.date.dt.weekday())
+    .group_by(c.weekday)
+    .agg(
+        wind_avg = c.wind.mean().round(1),
+        n = pl.len()
+    )
+    .sort(c.weekday)
+)
+```
+
+The average wind barely moves across the seven days, staying between 51 and
+53 knots. That is exactly what should happen: unlike Wikipedia page views,
+which rise and fall with when people happen to be browsing, a storm's
+intensity has no reason to know what day of the week it is. A flat result
+here is confirmation the method works, not a finding on its own.
+
+6. Filter `kat` to the observations with `date` after August 26, 2005, using
+`pl.date()` to build the comparison value, and print `date`, `hour`, `wind`,
+and `category`.
+
+```{python}
+(
+    kat
+    .filter(c.date > pl.date(2005, 8, 26))
+    .select(c.date, c.hour, c.wind, c.category)
+)
+```
+
+7. Build a `moment` column on `kat` with `pl.datetime(c.year, c.month,
+c.day, c.hour)` and overwrite `kat` with it. Plot `moment` against `wind`
+with `scale_x_datetime()`, same breaks and labels as question 4. Then use
+`.filter()` with `.is_in()` to find the rows whose `hour` is not one of the
+four routine values, 0, 6, 12, or 18.
+
+```{python}
+kat = kat.with_columns(moment = pl.datetime(c.year, c.month, c.day, c.hour))
+
+(
+    kat
+    .pipe(ggplot, aes(c.moment, c.wind))
+    .geom_line(color="red")
+    .scale_x_datetime(date_breaks="1 day", date_labels="%b %d")
+    .theme(axis_text_x=element_text(angle=45, hjust=1))
+    .labs(title="Hurricane Katrina, 2005", x="Moment", y="Max Wind (knots)")
+)
+```
+
+```{python}
+(
+    kat
+    .filter(~c.hour.is_in([0, 6, 12, 18]))
+    .select(c.moment, c.hour, c.wind)
+)
+```
+
+The staircase from question 4 is gone, because `moment` carries the hour
+that `date` threw away. And the six-hour rhythm is not perfectly steady:
+one off-cycle fix shows up on August 25, and two more cluster on August 29,
+right when Katrina was making landfall. That is exactly when forecasters
+most need an observation between the routine ones.
+
+8. Sort `kat` by `wind`, descending, and print `moment`, `wind`, and
+`category` for the top 3. Then filter `kat` to `moment` strictly after the
+top row's timestamp and print how many rows remain.
+
+```{python}
+(
+    kat
+    .sort(c.wind, descending=True)
+    .select(c.moment, c.wind, c.category)
+    .head(3)
+)
+```
+
+```{python}
+(
+    kat
+    .filter(c.moment > pl.datetime(2005, 8, 28, 18))
+    .select(pl.len())
+)
+```
+
+The peak reading itself, at 2005-08-28 18:00, does not survive a strict
+`>` filter against its own timestamp. It is the same boundary the chapter's
+example ran into with New Year's Day, just with hurricanes standing in for
+Wikipedia edits.
+
+9. NOAA reports these timestamps in UTC. Attach that zone to `moment` with
+`.dt.replace_time_zone("UTC")`, then convert to `"America/Chicago"` (the
+zone Katrina's landfall coast sits in) with `.dt.convert_time_zone()`. Find
+the local Central time of the peak-wind row.
+
+```{python}
+kat = (
+    kat
+    .with_columns(utc = c.moment.dt.replace_time_zone("UTC"))
+    .with_columns(central = c.utc.dt.convert_time_zone("America/Chicago"))
+)
+
+(
+    kat
+    .sort(c.wind, descending=True)
+    .select(c.moment, c.utc, c.central, c.wind)
+    .head(1)
+)
+```
+
+10. Now make the mirror-image mistake the chapter warns about: instead of
+converting `utc` to Central time, call `.dt.replace_time_zone("America/Chicago")`
+on it directly. Compare the result to the correctly converted `central`
+column for the peak row, and explain why they disagree.
+
+```{python}
+(
+    kat
+    .with_columns(central_wrong = c.utc.dt.replace_time_zone("America/Chicago"))
+    .sort(c.wind, descending=True)
+    .select(c.moment, c.central, c.central_wrong, c.wind)
+    .head(1)
+)
+```
+
+**Answer**: `central` reads 13:00 and `central_wrong` reads 18:00, a
+five-hour gap, exactly the CDT offset. `.dt.convert_time_zone()` did
+arithmetic, shifting the clock reading to express the same instant in a new
+zone. `.dt.replace_time_zone()` just overwrote the label on an
+already-aware column, leaving the clock reading untouched, so it silently
+relabeled 18:00 UTC as if it had always been 18:00 Chicago time. The two
+methods look interchangeable and are not.
+
+11. Join `kat` to `storm_type` on `status` and group by `status_name` to
+count how many of Katrina's 34 observations fall in each phase, sorted
+descending.
+
+```{python}
+(
+    kat
+    .join(storm_type, on="status", how="left")
+    .group_by(c.status_name)
+    .agg(n = pl.len())
+    .sort(c.n, descending=True)
+)
+```
+
+Nineteen of the thirty-four observations, just over half, were logged
+while Katrina was already a hurricane, not just approaching one.
+
+12. Across the full `storm` table, count the distinct storm `name`s per
+`year`, bucket the years into decades, and compute the average storms
+tracked per decade. Plot the result with `geom_col()`.
+
+```{python}
+q12 = (
+    storm
+    .group_by(c.year)
+    .agg(n_storms = c.name.n_unique())
+    .with_columns(decade = (c.year // 10) * 10)
+    .group_by(c.decade)
+    .agg(storms_avg = c.n_storms.mean().round(1))
+    .sort(c.decade)
+)
+q12
+```
+
+```{python}
+(
+    q12
+    .pipe(ggplot, aes(c.decade, c.storms_avg))
+    .geom_col()
+    .labs(title="Average Storms Tracked per Year, by Decade", x="Decade", y="Avg Storms / Year")
+)
+```
+
+The average climbs from under 9 storms a year in the 1950s to over 15 by
+the 2010s, with 2020 alone averaging 21. Before reading this as storms
+getting more frequent, recall the same observation-window caution the
+chapter raised for Wikipedia's revision counts: satellite coverage of the
+Atlantic did not begin until the mid-1960s, and tracking methods kept
+improving for decades after that. Some of this rise is real. Some of it is
+that the 1950s could only record what a ship or a plane happened to sail
+through.

@@ -1,0 +1,498 @@
+---
+title: "Notebook40"
+solutions-release-date: "2026-10-07"
+---
+
+### Setup
+
+Run all of the following before starting the notebook.
+
+```{python}
+#| tags: [noclear]
+#| eval: false
+! wget -q -nc https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/funs.py
+```
+
+```{python}
+#| tags: [noclear]
+import polars as pl
+from plotnine import ggplot, aes
+from polars import col as c
+
+import funs
+from funs import DSText
+
+import spacy
+
+ub = "https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"
+```
+
+```{python}
+#| tags: [remove]
+#| include: false
+ub = ""
+```
+
+```{python}
+#| tags: [noclear]
+docs = (
+    pl.read_parquet(ub + "data/imdb5k_pca.parquet")
+    .select(c.id, c.label, c.text)
+    .rename({"id": "doc_id"})
+    .sort(c.doc_id)
+    .group_by(c.label, maintain_order=True)
+    .head(100)
+    .with_columns(
+        text = c.text.str.replace_all("<br />", " ")
+    )
+)
+```
+
+```{python}
+#| tags: [noclear]
+nlp = spacy.load("en_core_web_sm")
+```
+
+```{python}
+#| tags: [noclear]
+anno = DSText.process(docs.select(c.doc_id, c.text), nlp)
+```
+
+### Questions
+
+`docs` and `anno` carry the same 200 IMDb movie reviews from the last
+notebook, 100 labeled `"positive"` and 100 labeled `"negative"`, with the
+stray `<br />` HTML already replaced by a space before `anno` was built.
+This notebook picks up where that one left off: instead of single tokens and
+parts of speech, we work with multi-word phrases, named entities, and
+grammatical structure. Print results unless a question says otherwise.
+
+1. Build the bigram table the same way the chapter does: filter `anno` to
+alphabetic tokens, shift `lemma` and `is_alpha` by `-1` within each `doc_id`
+and `sid`, keep pairs where both tokens are alphabetic, and paste the two
+lemmas together into a `bigram` column. Print the 15 most frequent bigrams.
+
+```{python}
+bigrams = (
+    anno
+    .filter(c.is_alpha)
+    .with_columns(
+        next_token = c.lemma.shift(-1).over([c.doc_id, c.sid]),
+        next_is_alpha = c.is_alpha.shift(-1).over([c.doc_id, c.sid])
+    )
+    .filter(c.next_is_alpha)
+    .with_columns(
+        bigram = c.lemma + " " + c.next_token
+    )
+)
+
+(
+    bigrams
+    .group_by(c.bigram)
+    .agg(count = pl.len())
+    .sort(c.count, descending=True)
+    .head(15)
+)
+```
+
+As in the chapter, raw frequency mostly turns up function-word glue ("of
+the", "in the", "to be") plus the two words for the thing being reviewed
+("this movie", "the film"). None of it is specific to movie reviews as a
+genre; the same bigrams would top the list for almost any English corpus.
+
+2. Compute PMI for every bigram, following the chapter's chain: count each
+word, count each bigram, join the two word counts onto the bigram table, and
+combine them into `p_bigram`, `p_w1`, `p_w2`, and finally `pmi`. Filter to
+`bigram_count >= 5` and print the 15 highest-PMI bigrams.
+
+```{python}
+word_counts = (
+    anno
+    .filter(c.is_alpha)
+    .group_by(c.lemma)
+    .agg(word_count = pl.len())
+)
+
+total_words = (
+    anno
+    .filter(c.is_alpha)
+    .select(pl.len())
+    .item()
+)
+
+bigram_counts = (
+    bigrams
+    .group_by(c.bigram, c.lemma, c.next_token)
+    .agg(bigram_count = pl.len())
+)
+
+total_bigrams = bigrams.select(pl.len()).item()
+
+top_pmi = (
+    bigram_counts
+    .join(
+        word_counts.rename({"lemma": "w1", "word_count": "w1_count"}),
+        left_on=c.lemma,
+        right_on=c.w1
+    )
+    .join(
+        word_counts.rename({"lemma": "w2", "word_count": "w2_count"}),
+        left_on=c.next_token,
+        right_on=c.w2
+    )
+    .with_columns(
+        p_bigram = c.bigram_count / total_bigrams,
+        p_w1 = c.w1_count / total_words,
+        p_w2 = c.w2_count / total_words
+    )
+    .with_columns(
+        pmi = (c.p_bigram / (c.p_w1 * c.p_w2)).log(2)
+    )
+    .filter(c.bigram_count >= 5)
+    .sort(c.pmi, descending=True)
+    .select(c.bigram, c.bigram_count, c.pmi)
+    .head(15)
+)
+top_pmi
+```
+
+The chapter's own PMI list for the Wikipedia author pages was almost
+entirely proper nouns: book titles ("Biographia Literaria"), historical
+events ("Molotov-Ribbentrop Pact"), and names of people the authors wrote
+about. This list has proper nouns too ("New York", "Cathy Lee"), but it also
+surfaces genre vocabulary that no biography page would ever produce ("sci
+fi", "low budget", "special effect", "production value", "support cast")
+and first-person review phrasing ("my opinion", "my favorite", "apart
+from"). PMI measures how strongly two words predict each other, and in a
+corpus of reviews, some of the tightest predictable pairs come from the
+genre's own vocabulary and its narrator's voice rather than from names.
+
+3. Build the `entities` table the same way the chapter does: filter `anno`
+to rows with a non-empty `ent_type`, mark the start of each entity with
+`ent_iob == "B"`, take a cumulative sum of that flag within each `doc_id` to
+get an `entity_id`, and group by `doc_id`, `entity_id`, and `ent_type` to
+join the tokens back into `entity_text`. Then print the 15 most frequently
+mentioned `PERSON` entities.
+
+```{python}
+entities = (
+    anno
+    .filter(c.ent_type != "")
+    .with_columns(
+        new_entity = c.ent_iob == "B"
+    )
+    .with_columns(
+        entity_id = c.new_entity.cum_sum().over([c.doc_id])
+    )
+    .group_by([c.doc_id, c.entity_id, c.ent_type])
+    .agg(
+        entity_text = c.token.str.join(" "),
+    )
+)
+
+top_people = (
+    entities
+    .filter(c.ent_type == "PERSON")
+    .group_by(c.entity_text)
+    .agg(count = pl.len())
+    .sort(c.count, descending=True)
+    .head(15)
+)
+top_people
+```
+
+4. Pick two names from question 3's list and check what they actually refer
+to by searching `docs` for the surrounding text. Confirm each one by eye:
+is it a real person (a director, an actor) or a fictional character in the
+movie being reviewed?
+
+```{python}
+for name in ["Kornbluth", "Baird"]:
+    row = docs.filter(c.text.str.contains(name)).select(c.doc_id, c.text).row(0, named=True)
+    idx = row["text"].find(name)
+    print(row["doc_id"], "-", row["text"][max(0, idx - 80):idx + 80])
+```
+
+`Kornbluth` names Josh and Jacob Kornbluth, the real directors of `Haiku
+Tunnel`. `Baird` is John Baird, a character in `The Couch Trip`. Nothing in
+the `PERSON` label distinguishes the two; the chapter's biography pages
+never raise this problem, since every `PERSON` entity there is unambiguously
+a real historical figure. In a review corpus, "who is this?" is a question
+the entity type alone cannot answer.
+
+5. Group `entities` by `ent_type`, count, and plot the result as a bar chart
+with `geom_col()` and `coord_flip()`, matching the chapter's own entity-type
+plot.
+
+```{python}
+(
+    entities
+    .group_by(c.ent_type)
+    .agg(count = pl.len())
+    .pipe(ggplot, aes(c.ent_type, c.count))
+    .geom_col()
+    .coord_flip()
+    .labs(title="Named Entity Types in the Review Corpus", x="Entity Type", y="Count")
+)
+```
+
+`PERSON` still leads, as it did for the biography pages, but the order
+underneath it changes: `ORG` and `CARDINAL` outrank `DATE` here, while in
+the chapter's corpus `DATE` was the third most common type behind `PERSON`
+and `ORG`. Reviews count things (a rating out of ten, a number of stars, "one
+of the worst films") far more than they cite calendar dates, which biography
+pages do constantly for birth, death, and publication years.
+
+6. Reconstruct subject-verb pairs the way the chapter does: select `VERB`
+tokens as `verbs`, then join every `nsubj` token to the verb sitting at its
+`head_idx` within the same `doc_id` and `sid`. Print the 10 most frequent
+subject-verb pairs.
+
+```{python}
+verbs = (
+    anno
+    .filter(c.upos == "VERB")
+    .select(
+        c.doc_id, c.sid,
+        verb_idx = c.tid,
+        verb = c.lemma
+    )
+)
+
+(
+    anno
+    .filter(c.dep == "nsubj")
+    .select(
+        c.doc_id, c.sid,
+        subject = c.lemma,
+        verb_idx = c.head_idx
+    )
+    .join(verbs, on=[c.doc_id, c.sid, c.verb_idx])
+    .group_by([c.subject, c.verb])
+    .agg(count = pl.len())
+    .sort(c.count, descending=True)
+    .head(10)
+)
+```
+
+Every single pair in this list has `I` or `you` as the subject; the closest
+a movie-related noun gets is `movie` itself, in 9th place. Compare this to
+the chapter's own finding for the biography pages, where the most common
+subjects were the authors and their works ("author write", "work receive").
+A review corpus's dependency structure is dominated by its narrator, not by
+the thing being described, which is exactly what a first-person genre should
+look like once you have a tool that can actually show it.
+
+7. Extract adjective-noun pairs the way the chapter does (`dep == "amod"`,
+joined to the `NOUN` sitting at `head_idx`), restrict to pairs where the
+noun is `"movie"` or `"film"`, and print the count for `"good"` and `"bad"`
+by `label`.
+
+```{python}
+amod = (
+    anno
+    .filter(c.dep == "amod", c.is_alpha)
+    .select(
+        c.doc_id, c.sid,
+        adjective = c.lemma,
+        noun_idx = c.head_idx
+    )
+    .join(
+        anno.filter(c.upos == "NOUN").select(
+            c.doc_id, c.sid, noun_idx = c.tid, noun = c.lemma,
+        ),
+        on=[c.doc_id, c.sid, c.noun_idx]
+    )
+)
+
+(
+    amod
+    .filter(c.noun.is_in(["movie", "film"]))
+    .join(docs.select(c.doc_id, c.label), on=c.doc_id)
+    .filter(c.adjective.is_in(["good", "bad"]))
+    .group_by([c.label, c.adjective])
+    .agg(count = pl.len())
+    .sort([c.label, c.adjective])
+)
+```
+
+Restricting to a real grammatical attachment ("bad movie", not just "bad"
+anywhere in the review) sharpens the signal for `bad` well past what the
+last notebook found from raw whole-review counts: 16 negative uses of "bad
+movie"/"bad film" against a single positive one, versus 86-to-17 for the
+word `bad` anywhere in the review. `good`, though, barely moves: 9 negative
+against 8 positive, almost exactly as balanced as the raw count was. A
+tighter grammatical filter helps when the word being filtered for is doing
+real evaluative work, but it is not a fix for negation on its own, since
+"not good" is still `good` attached to the same head as `movie`.
+
+8. Find every negated predicate adjective: join tokens with `dep == "neg"`
+to `ADJ` tokens with `dep in ["acomp", "attr"]` that share the same
+`head_idx` within a `doc_id`/`sid` (this is the same "share a head" logic
+question 6 used for subjects and verbs). Count how many negated predicate
+adjectives exist in total, then count how many of them have the negation
+word sitting in the position immediately before the adjective, the only
+case a bigram search like question 1's `shift(-1)` could ever catch.
+
+```{python}
+neg = anno.filter(c.dep == "neg").select(c.doc_id, c.sid, neg_tid = c.tid, verb_idx = c.head_idx)
+
+predicate_adj = (
+    anno
+    .filter(c.upos == "ADJ", c.dep.is_in(["acomp", "attr"]))
+    .select(c.doc_id, c.sid, verb_idx = c.head_idx, adj_tid = c.tid, adjective = c.lemma)
+)
+
+negated_adj = neg.join(predicate_adj, on=[c.doc_id, c.sid, c.verb_idx])
+negated_adj.height
+```
+
+```{python}
+negated_adj.filter(c.adj_tid == c.neg_tid + 1).height
+```
+
+Only 30 of the 76 negated predicate adjectives have the negation word
+directly next to them; the other 46 have something in between, sometimes a
+single word ("never tired"), sometimes a whole clause. A bigram search for
+"not X" would have silently missed 61% of the true negations in this
+corpus, not because the sentences are unusual, but because negation in
+English does not have to sit next to the word it negates. Dependency
+parsing catches all 76 the same way regardless of the gap, because it is
+tracking a grammatical relationship, not a distance. This is the tool the
+last notebook's question 10 was missing: a real way to tell "good" and "not
+good" apart.
+
+9. Run `DSText.kwic()` on the lemma `"acting"` with `window=5` and
+`max_num=10`.
+
+```{python}
+DSText.kwic(anno, "acting", max_num=10, window=5)
+```
+
+The concordance shows both halves of the corpus at once, since the display
+is not filtered by `label`: "terrible", "decidedly bad", and "purely" sit
+next to "good acting" and "above average" within the same 10 lines. No
+adjective-frequency table would show this as directly, since "acting" here
+is playing the role of the noun being judged, and the judgments on either
+side of it in the printout are the actual words reviewers reached for.
+
+10. Compute the four complexity metrics from the chapter (mean sentence
+length, type-token ratio, mean word length, and content-word ratio) per
+document, join them into a single table, and print the mean of each metric
+grouped by `label`.
+
+```{python}
+sentence_length = (
+    anno
+    .group_by([c.doc_id, c.sid])
+    .agg(n_words = c.is_alpha.sum())
+    .group_by(c.doc_id)
+    .agg(mean_sentence_length = c.n_words.mean())
+)
+
+ttr = (
+    anno
+    .filter(c.is_alpha)
+    .group_by(c.doc_id)
+    .agg(n_tokens = pl.len(), n_types = c.lemma.n_unique())
+    .with_columns(ttr = c.n_types / c.n_tokens)
+    .select(c.doc_id, c.ttr)
+)
+
+word_length = (
+    anno
+    .filter(c.is_alpha)
+    .with_columns(word_length = c.token.str.len_chars())
+    .group_by(c.doc_id)
+    .agg(mean_word_length = c.word_length.mean())
+)
+
+content_pos = ["NOUN", "VERB", "ADJ", "ADV"]
+content_ratio = (
+    anno
+    .filter(c.is_alpha)
+    .with_columns(is_content = c.upos.is_in(content_pos))
+    .group_by(c.doc_id)
+    .agg(n_words = pl.len(), n_content = c.is_content.sum())
+    .with_columns(content_ratio = c.n_content / c.n_words)
+    .select(c.doc_id, c.content_ratio)
+)
+
+style_metrics = (
+    sentence_length
+    .join(ttr, on=c.doc_id)
+    .join(word_length, on=c.doc_id)
+    .join(content_ratio, on=c.doc_id)
+    .join(docs.select(c.doc_id, c.label), on=c.doc_id)
+)
+
+(
+    style_metrics
+    .group_by(c.label)
+    .agg(
+        pl.col("mean_sentence_length").mean(),
+        pl.col("ttr").mean(),
+        pl.col("mean_word_length").mean(),
+        pl.col("content_ratio").mean()
+    )
+)
+```
+
+None of the four metrics separates the two labels by much: sentence length
+differs by about half a word, word length by four hundredths of a
+character. These are measures of *style*, and the style of a positive
+review and a negative review of the same kind of movie, written by the same
+kind of person, is not obviously different. Sentiment lives in which words
+get chosen, as questions 7 and 8 showed, not in how long or how varied the
+sentences carrying those words happen to be.
+
+11. Plot `mean_sentence_length` against `mean_word_length` from
+`style_metrics`, coloring points by `label`.
+
+```{python}
+(
+    style_metrics
+    .pipe(ggplot, aes(c.mean_sentence_length, c.mean_word_length, color=c.label))
+    .geom_point()
+    .labs(title="Sentence Length vs. Word Length by Review Sentiment", x="Mean Sentence Length", y="Mean Word Length")
+)
+```
+
+The two colors sit on top of each other across the whole plot, with no
+region dominated by one label. This is the visual version of question 10's
+finding: whatever separates a positive review from a negative one, it is
+not this pair of style measures.
+
+12. Count the number of `"!"` tokens per document, join that count onto
+`docs`, and print the mean per-review count and the fraction of reviews
+containing at least one `"!"`, grouped by `label`.
+
+```{python}
+excl_counts = (
+    anno
+    .filter(c.token == "!")
+    .group_by(c.doc_id)
+    .agg(n_excl = pl.len())
+)
+
+(
+    docs
+    .select(c.doc_id, c.label)
+    .join(excl_counts, on=c.doc_id, how="left")
+    .with_columns(n_excl = c.n_excl.fill_null(0))
+    .group_by(c.label)
+    .agg(
+        mean_excl = c.n_excl.mean(),
+        pct_any_excl = (c.n_excl > 0).mean()
+    )
+)
+```
+
+Here the two labels finally split: negative reviews average 1.21
+exclamation points against 0.52 for positive ones, more than double. It is a
+small, crude signal on its own, and it says nothing about *what* is being
+exclaimed, but it is a real difference in a place none of the chapter's
+four standard metrics thought to look. Punctuation is not a linguistic
+category the chapter covers, and building this count required nothing more
+than the `.filter()` and `.group_by()` chain every earlier chapter already
+supplied.

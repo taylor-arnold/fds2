@@ -1,0 +1,274 @@
+---
+title: "Notebook39"
+solutions-release-date: "2026-10-05"
+---
+
+### Setup
+
+Run all of the following before starting the notebook.
+
+```{python}
+#| tags: [noclear]
+#| eval: false
+! wget -q -nc https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/funs.py
+```
+
+```{python}
+#| tags: [noclear]
+import polars as pl
+from plotnine import ggplot, aes
+from polars import col as c
+
+import funs
+from funs import DSText
+
+import spacy
+
+ub = "https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"
+```
+
+```{python}
+#| tags: [remove]
+#| include: false
+ub = ""
+```
+
+```{python}
+#| tags: [noclear]
+docs_raw = (
+    pl.read_parquet(ub + "data/imdb5k_pca.parquet")
+    .select(c.id, c.label, c.text)
+    .rename({"id": "doc_id"})
+    .sort(c.doc_id)
+    .group_by(c.label, maintain_order=True)
+    .head(100)
+)
+```
+
+```{python}
+#| tags: [noclear]
+nlp = spacy.load("en_core_web_sm")
+```
+
+### Questions
+
+`docs_raw` holds 200 IMDb movie reviews, 100 labeled `"positive"` and 100
+labeled `"negative"`, each with a `doc_id` and the raw `text` of the review.
+This is a different, smaller corpus than the one the chapter itself uses for
+its Wikipedia author pages, and it comes with a mess of its own: IMDb's
+reviews were originally scraped from a web page, and the literal characters
+`<br />` (an HTML line break) are still sitting inside the text of many
+reviews. The first few questions deal with that mess directly, in the same
+spirit as the chapter's warning that the wrapper functions are not magic.
+Print results unless a question says otherwise.
+
+1. Count how many reviews fall into each `label`. Then count how many of the
+200 reviews contain the literal string `"<br />"` somewhere in their `text`.
+
+```{python}
+docs_raw.group_by(c.label).agg(n = pl.len())
+```
+
+```{python}
+docs_raw.select(c.text.str.contains("<br />").sum())
+```
+
+2. Before cleaning anything, see what the raw HTML does to the pipeline.
+Run `DSText.process()` on just review `doc0001`, then filter the result to
+tokens whose `token` contains `"<br"` and print `token`, `upos`, and
+`is_alpha`.
+
+```{python}
+example = DSText.process(
+    docs_raw.filter(c.doc_id == "doc0001").select(c.doc_id, c.text),
+    nlp
+)
+
+(
+    example
+    .filter(c.token.str.contains("<br"))
+    .select(c.token, c.upos, c.is_alpha)
+)
+```
+
+Every one of these tokens has `is_alpha` equal to `False`, but three of them
+still get labeled `NOUN` by the tagger, and the same string, `"/><br"`,
+comes back tagged three different ways (`PUNCT`, `NOUN`, `NUM`) depending on
+what happens to sit next to it. None of this is the tagger's fault; it is
+being handed text that was never a real sentence to begin with. Because the
+chapter's own noun-frequency query in the next section filters only on
+`upos`, these contaminated tokens would sneak into a noun count without
+`is_alpha` ever being checked.
+
+3. Build `docs` from `docs_raw` by replacing every `"<br />"` with a single
+space. Confirm the count from question 1 is now zero.
+
+```{python}
+docs = docs_raw.with_columns(
+    text = c.text.str.replace_all("<br />", " ")
+)
+
+docs.select(c.text.str.contains("<br />").sum())
+```
+
+4. Run `DSText.process()` on the full, cleaned `docs` table to build `anno`.
+Print its shape. Then confirm that `doc_id`, `sid`, and `tid` together form a
+valid key for `anno`, the same `.group_by()`-then-`.filter()` check used for
+any other table's key.
+
+```{python}
+anno = DSText.process(docs.select(c.doc_id, c.text), nlp)
+anno.shape
+```
+
+```{python}
+(
+    anno
+    .group_by(c.doc_id, c.sid, c.tid)
+    .agg(count = pl.len())
+    .filter(c.count > 1)
+)
+```
+
+No rows come back, so the triple identifies a single token with nothing
+left over.
+
+5. Look at the first sentence of `doc0001` on its own: filter `anno` to
+`doc_id == "doc0001"` and `sid == 1`, and select `tid`, `token`, and `upos`.
+
+```{python}
+(
+    anno
+    .filter(c.doc_id == "doc0001", c.sid == 1)
+    .select(c.tid, c.token, c.upos)
+)
+```
+
+6. Reconstruct the full cleaned text of `doc0001` from `anno` by sorting on
+`sid` and `tid` and joining `token_with_ws` back together. Compare it to the
+`text` value for `doc0001` in `docs` and confirm they match exactly.
+
+```{python}
+recon = (
+    anno
+    .filter(c.doc_id == "doc0001")
+    .sort(c.sid, c.tid)
+    .select(c.token_with_ws.str.join(""))
+    .item()
+)
+
+original = docs.filter(c.doc_id == "doc0001").select(c.text).item()
+
+recon == original
+```
+
+7. Find the 10 most frequent nouns across the whole corpus: filter `anno` to
+`upos == "NOUN"`, group by `lemma`, count, and sort in descending order.
+
+```{python}
+top_nouns = (
+    anno
+    .filter(c.upos == "NOUN")
+    .group_by(c.lemma)
+    .agg(count = pl.len())
+    .sort(c.count, descending=True)
+    .head(10)
+)
+top_nouns
+```
+
+Unlike the chapter's biography pages, where the most common nouns spread
+across a handful of different themes, this list is dominated by the two
+words for the thing being reviewed. `movie` and `film` alone account for
+more mentions than the next four nouns combined, a reminder that the most
+frequent word in a collection is not always the most informative one.
+
+8. Plot the top 10 nouns from question 7 as a bar chart with `geom_col()`,
+flipping the coordinates so the noun labels are readable.
+
+```{python}
+(
+    top_nouns
+    .pipe(ggplot, aes(c.lemma, c.count))
+    .geom_col()
+    .coord_flip()
+    .labs(title="Most Frequent Nouns", x="Noun", y="Count")
+)
+```
+
+9. Find the 10 most frequent adjectives within each `label`. Join `anno` to
+the `doc_id`/`label` pairs in `docs`, filter to alphabetic adjectives, group
+by `label` and `lemma`, count, and take the top 10 rows within each `label`.
+
+```{python}
+adj_by_label = (
+    anno
+    .join(docs.select(c.doc_id, c.label), on=c.doc_id)
+    .filter(c.upos == "ADJ", c.is_alpha)
+    .group_by(c.label, c.lemma)
+    .agg(count = pl.len())
+    .sort([c.label, c.count], descending=[False, True])
+)
+
+(
+    adj_by_label
+    .group_by(c.label, maintain_order=True)
+    .head(10)
+)
+```
+
+10. Filter `adj_by_label` to just the lemmas `"good"` and `"bad"` and print
+the count for each label. Sentiment labels aside, why doesn't a simple count
+of these two words cleanly separate the positive reviews from the negative
+ones?
+
+```{python}
+(
+    adj_by_label
+    .filter(c.lemma.is_in(["good", "bad"]))
+    .sort(c.label, c.lemma)
+)
+```
+
+**Answer**: `bad` is heavily one-sided, 86 uses in negative reviews against
+only 17 in positive ones. `good`, on the other hand, shows up 80 times in
+positive reviews but still 65 times in negative ones, nearly as often. The
+sentence pulled out in question 5, "this movie is not good," is exactly why:
+a negation flips the sentiment of a sentence without removing the positive
+word that carries it. The chapter's own introduction makes the same point
+about "not bad" being a mild compliment. A raw adjective count has no way to
+see the "not" sitting three tokens away; it would need the dependency
+information from later in the chapter to catch it.
+
+11. Run `DSText.process()` on `docs_raw` (the *uncleaned* text) to build
+`anno_dirty`, covering the same 200 reviews. Compare the `NOUN` counts for
+`movie` and `film` in `anno_dirty` against the counts already sitting in
+`top_nouns` from the cleaned version.
+
+```{python}
+anno_dirty = DSText.process(docs_raw.select(c.doc_id, c.text), nlp)
+
+clean_counts = (
+    top_nouns
+    .filter(c.lemma.is_in(["movie", "film"]))
+    .rename({"count": "count_clean"})
+)
+
+dirty_counts = (
+    anno_dirty
+    .filter(c.upos == "NOUN", c.lemma.is_in(["movie", "film"]))
+    .group_by(c.lemma)
+    .agg(count_dirty = pl.len())
+)
+
+clean_counts.join(dirty_counts, on=c.lemma)
+```
+
+`movie` loses 8 mentions and `film` loses 6 when the HTML is left in, even
+though the top-10 list in question 7 would look almost identical either
+way. spaCy's tokenizer merges a word directly against the `<br` that
+follows it, the same way question 2 caught it happening to a single
+review, and each merge quietly removes one real instance of `movie` or
+`film` from the count without raising an error. A list that looks unchanged
+is not the same thing as a count that is unchanged; the fix from question 3
+was worth doing before, not after, running the pipeline on all 200 reviews.

@@ -16,7 +16,8 @@ Behavior:
 - In kept code cells, ALL lines starting with '#|' are removed
 - Markdown text is preserved as markdown cells, with each paragraph
   (text separated by blank lines) becoming a separate cell
-- Lines starting with '**Answer**:' have everything after '**Answer**:' removed
+- Lines starting with '**Answer**:' have everything after '**Answer**:' removed,
+  including any continuation lines of a multi-line answer
 - Parses Quarto YAML headers, transforming the `title` into a markdown cell
   and tracking the `solutions-release-date`.
 """
@@ -94,7 +95,9 @@ def _strip_quarto_option_lines(lines):
     return [ln for ln in lines if not ln.lstrip().startswith("#|")]
 
 def _strip_answer_content(lines):
-    """For lines starting with '**Answer**:', keep only '**Answer**:' and remove the rest."""
+    """For lines starting with '**Answer**:', keep only '**Answer**:' and remove
+    everything after it, including any continuation lines that belong to the
+    same paragraph (an answer's explanation can span multiple lines)."""
     result = []
     for ln in lines:
         stripped = ln.lstrip()
@@ -104,6 +107,7 @@ def _strip_answer_content(lines):
                 result.append(ln[:idx] + "**Answer**:\n")
             else:
                 result.append(ln[:idx] + "**Answer**:")
+            break
         else:
             result.append(ln)
     return result
