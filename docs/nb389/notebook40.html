@@ -1,0 +1,2190 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.36">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Notebook40 – Foundations of Data Science: Notebooks</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-77a666a5542a07a54dbe0a7f6e3b86cd.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+</head>
+
+<body class="nav-sidebar docked fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./notebook40.html">Notebook40</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Foundations of Data Science: Notebooks</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook30.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook30</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook31.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook31</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook32.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook32</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook33.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook33</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook34.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook34</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook35.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook35</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook36.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook36</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook37.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook37</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook38.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook38</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook39.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook39</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook40.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Notebook40</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook41.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook41</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook42.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook42</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook43.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook43</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook45.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook45</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook46.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook46</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook47.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook47</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook48.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook48</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Notebook40</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="setup" class="level3">
+<h3 class="anchored" data-anchor-id="setup">Setup</h3>
+<p>Run all of the following before starting the notebook.</p>
+<div id="582d4a63" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="1">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span> wget <span class="op">-</span>q <span class="op">-</span>nc https:<span class="op">//</span>raw.githubusercontent.com<span class="op">/</span>taylor<span class="op">-</span>arnold<span class="op">/</span>fds2<span class="op">/</span>refs<span class="op">/</span>heads<span class="op">/</span>main<span class="op">/</span>funs.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div id="2e66a329" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="2">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine <span class="im">import</span> ggplot, aes</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> polars <span class="im">import</span> col <span class="im">as</span> c</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> funs</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> funs <span class="im">import</span> DSText</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> spacy</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>ub <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div id="3f8cdf0e" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="4">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>docs <span class="op">=</span> (</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    pl.read_parquet(ub <span class="op">+</span> <span class="st">"data/imdb5k_pca.parquet"</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    .select(c.<span class="bu">id</span>, c.label, c.text)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    .rename({<span class="st">"id"</span>: <span class="st">"doc_id"</span>})</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    .sort(c.doc_id)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    .group_by(c.label, maintain_order<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">100</span>)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        text <span class="op">=</span> c.text.<span class="bu">str</span>.replace_all(<span class="st">"&lt;br /&gt;"</span>, <span class="st">" "</span>)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div id="4a02a416" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="5">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>nlp <span class="op">=</span> spacy.load(<span class="st">"en_core_web_sm"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div id="5a60fb89" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="6">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>anno <span class="op">=</span> DSText.process(docs.select(c.doc_id, c.text), nlp)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+<section id="questions" class="level3">
+<h3 class="anchored" data-anchor-id="questions">Questions</h3>
+<p><code>docs</code> and <code>anno</code> carry the same 200 IMDb movie reviews from the last notebook, 100 labeled <code>"positive"</code> and 100 labeled <code>"negative"</code>, with the stray <code>&lt;br /&gt;</code> HTML already replaced by a space before <code>anno</code> was built. This notebook picks up where that one left off: instead of single tokens and parts of speech, we work with multi-word phrases, named entities, and grammatical structure. Print results unless a question says otherwise.</p>
+<ol type="1">
+<li>Build the bigram table the same way the chapter does: filter <code>anno</code> to alphabetic tokens, shift <code>lemma</code> and <code>is_alpha</code> by <code>-1</code> within each <code>doc_id</code> and <code>sid</code>, keep pairs where both tokens are alphabetic, and paste the two lemmas together into a <code>bigram</code> column. Print the 15 most frequent bigrams.</li>
+</ol>
+<div id="4e7d5b95" class="cell" data-execution_count="7">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>bigrams <span class="op">=</span> (</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    anno</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.is_alpha)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        next_token <span class="op">=</span> c.lemma.shift(<span class="op">-</span><span class="dv">1</span>).over([c.doc_id, c.sid]),</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        next_is_alpha <span class="op">=</span> c.is_alpha.shift(<span class="op">-</span><span class="dv">1</span>).over([c.doc_id, c.sid])</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.next_is_alpha)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>        bigram <span class="op">=</span> c.lemma <span class="op">+</span> <span class="st">" "</span> <span class="op">+</span> c.next_token</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    bigrams</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    .group_by(c.bigram)</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    .agg(count <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    .sort(c.count, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">15</span>)</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="6">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (15, 2)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">bigram</th>
+<th data-quarto-table-cell-role="th">count</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>u32</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"of the"</td>
+<td>304</td>
+</tr>
+<tr class="even">
+<td>"be a"</td>
+<td>209</td>
+</tr>
+<tr class="odd">
+<td>"in the"</td>
+<td>180</td>
+</tr>
+<tr class="even">
+<td>"it be"</td>
+<td>148</td>
+</tr>
+<tr class="odd">
+<td>"this movie"</td>
+<td>129</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"I be"</td>
+<td>94</td>
+</tr>
+<tr class="even">
+<td>"the movie"</td>
+<td>93</td>
+</tr>
+<tr class="odd">
+<td>"there be"</td>
+<td>88</td>
+</tr>
+<tr class="even">
+<td>"to be"</td>
+<td>87</td>
+</tr>
+<tr class="odd">
+<td>"in a"</td>
+<td>81</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>As in the chapter, raw frequency mostly turns up function-word glue (“of the”, “in the”, “to be”) plus the two words for the thing being reviewed (“this movie”, “the film”). None of it is specific to movie reviews as a genre; the same bigrams would top the list for almost any English corpus.</p>
+<ol start="2" type="1">
+<li>Compute PMI for every bigram, following the chapter’s chain: count each word, count each bigram, join the two word counts onto the bigram table, and combine them into <code>p_bigram</code>, <code>p_w1</code>, <code>p_w2</code>, and finally <code>pmi</code>. Filter to <code>bigram_count &gt;= 5</code> and print the 15 highest-PMI bigrams.</li>
+</ol>
+<div id="41c9ec5d" class="cell" data-execution_count="8">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>word_counts <span class="op">=</span> (</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    anno</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.is_alpha)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    .group_by(c.lemma)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    .agg(word_count <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>total_words <span class="op">=</span> (</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    anno</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.is_alpha)</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    .select(pl.<span class="bu">len</span>())</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    .item()</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>bigram_counts <span class="op">=</span> (</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    bigrams</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    .group_by(c.bigram, c.lemma, c.next_token)</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    .agg(bigram_count <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>total_bigrams <span class="op">=</span> bigrams.select(pl.<span class="bu">len</span>()).item()</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>top_pmi <span class="op">=</span> (</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>    bigram_counts</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>    .join(</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>        word_counts.rename({<span class="st">"lemma"</span>: <span class="st">"w1"</span>, <span class="st">"word_count"</span>: <span class="st">"w1_count"</span>}),</span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>        left_on<span class="op">=</span>c.lemma,</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>        right_on<span class="op">=</span>c.w1</span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>    .join(</span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>        word_counts.rename({<span class="st">"lemma"</span>: <span class="st">"w2"</span>, <span class="st">"word_count"</span>: <span class="st">"w2_count"</span>}),</span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>        left_on<span class="op">=</span>c.next_token,</span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>        right_on<span class="op">=</span>c.w2</span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>        p_bigram <span class="op">=</span> c.bigram_count <span class="op">/</span> total_bigrams,</span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>        p_w1 <span class="op">=</span> c.w1_count <span class="op">/</span> total_words,</span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a>        p_w2 <span class="op">=</span> c.w2_count <span class="op">/</span> total_words</span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a>        pmi <span class="op">=</span> (c.p_bigram <span class="op">/</span> (c.p_w1 <span class="op">*</span> c.p_w2)).log(<span class="dv">2</span>)</span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.bigram_count <span class="op">&gt;=</span> <span class="dv">5</span>)</span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a>    .sort(c.pmi, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a>    .select(c.bigram, c.bigram_count, c.pmi)</span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">15</span>)</span>
+<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a>top_pmi</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="7">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (15, 3)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">bigram</th>
+<th data-quarto-table-cell-role="th">bigram_count</th>
+<th data-quarto-table-cell-role="th">pmi</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>u32</td>
+<td>f64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"sci fi"</td>
+<td>6</td>
+<td>12.70405</td>
+</tr>
+<tr class="even">
+<td>"Cathy Lee"</td>
+<td>5</td>
+<td>12.511405</td>
+</tr>
+<tr class="odd">
+<td>"New York"</td>
+<td>5</td>
+<td>12.441015</td>
+</tr>
+<tr class="even">
+<td>"production value"</td>
+<td>5</td>
+<td>11.078445</td>
+</tr>
+<tr class="odd">
+<td>"dumb dumb"</td>
+<td>5</td>
+<td>10.91447</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"year later"</td>
+<td>8</td>
+<td>8.311732</td>
+</tr>
+<tr class="even">
+<td>"my opinion"</td>
+<td>7</td>
+<td>8.282586</td>
+</tr>
+<tr class="odd">
+<td>"my favorite"</td>
+<td>5</td>
+<td>8.119087</td>
+</tr>
+<tr class="even">
+<td>"apart from"</td>
+<td>5</td>
+<td>7.972246</td>
+</tr>
+<tr class="odd">
+<td>"something else"</td>
+<td>5</td>
+<td>7.817918</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>The chapter’s own PMI list for the Wikipedia author pages was almost entirely proper nouns: book titles (“Biographia Literaria”), historical events (“Molotov-Ribbentrop Pact”), and names of people the authors wrote about. This list has proper nouns too (“New York”, “Cathy Lee”), but it also surfaces genre vocabulary that no biography page would ever produce (“sci fi”, “low budget”, “special effect”, “production value”, “support cast”) and first-person review phrasing (“my opinion”, “my favorite”, “apart from”). PMI measures how strongly two words predict each other, and in a corpus of reviews, some of the tightest predictable pairs come from the genre’s own vocabulary and its narrator’s voice rather than from names.</p>
+<ol start="3" type="1">
+<li>Build the <code>entities</code> table the same way the chapter does: filter <code>anno</code> to rows with a non-empty <code>ent_type</code>, mark the start of each entity with <code>ent_iob == "B"</code>, take a cumulative sum of that flag within each <code>doc_id</code> to get an <code>entity_id</code>, and group by <code>doc_id</code>, <code>entity_id</code>, and <code>ent_type</code> to join the tokens back into <code>entity_text</code>. Then print the 15 most frequently mentioned <code>PERSON</code> entities.</li>
+</ol>
+<div id="65533ab4" class="cell" data-execution_count="9">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>entities <span class="op">=</span> (</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    anno</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.ent_type <span class="op">!=</span> <span class="st">""</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>        new_entity <span class="op">=</span> c.ent_iob <span class="op">==</span> <span class="st">"B"</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>        entity_id <span class="op">=</span> c.new_entity.cum_sum().over([c.doc_id])</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    .group_by([c.doc_id, c.entity_id, c.ent_type])</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    .agg(</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>        entity_text <span class="op">=</span> c.token.<span class="bu">str</span>.join(<span class="st">" "</span>),</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>top_people <span class="op">=</span> (</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    entities</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.ent_type <span class="op">==</span> <span class="st">"PERSON"</span>)</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    .group_by(c.entity_text)</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    .agg(count <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    .sort(c.count, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">15</span>)</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>top_people</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="8">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (15, 2)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">entity_text</th>
+<th data-quarto-table-cell-role="th">count</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>u32</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"Kornbluth"</td>
+<td>14</td>
+</tr>
+<tr class="even">
+<td>"Baird"</td>
+<td>13</td>
+</tr>
+<tr class="odd">
+<td>"Mike"</td>
+<td>11</td>
+</tr>
+<tr class="even">
+<td>"Margaret"</td>
+<td>10</td>
+</tr>
+<tr class="odd">
+<td>"Alice"</td>
+<td>9</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"Norris"</td>
+<td>6</td>
+</tr>
+<tr class="even">
+<td>"Hudson"</td>
+<td>6</td>
+</tr>
+<tr class="odd">
+<td>"Adam"</td>
+<td>6</td>
+</tr>
+<tr class="even">
+<td>"Wolf"</td>
+<td>6</td>
+</tr>
+<tr class="odd">
+<td>"Lisa"</td>
+<td>6</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<ol start="4" type="1">
+<li>Pick two names from question 3’s list and check what they actually refer to by searching <code>docs</code> for the surrounding text. Confirm each one by eye: is it a real person (a director, an actor) or a fictional character in the movie being reviewed?</li>
+</ol>
+<div id="aa8f9f94" class="cell" data-execution_count="10">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name <span class="kw">in</span> [<span class="st">"Kornbluth"</span>, <span class="st">"Baird"</span>]:</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    row <span class="op">=</span> docs.<span class="bu">filter</span>(c.text.<span class="bu">str</span>.contains(name)).select(c.doc_id, c.text).row(<span class="dv">0</span>, named<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    idx <span class="op">=</span> row[<span class="st">"text"</span>].find(name)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(row[<span class="st">"doc_id"</span>], <span class="st">"-"</span>, row[<span class="st">"text"</span>][<span class="bu">max</span>(<span class="dv">0</span>, idx <span class="op">-</span> <span class="dv">80</span>):idx <span class="op">+</span> <span class="dv">80</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>doc0118 - test addition to the temp/humor pool, however, `Haiku Tunnel,' directed by Josh Kornbluth and Jacob Kornbluth, fails to live up to it's predecessors, and leaves
+doc0207 - ital who may or may not actually be mental. He gives the psychiatrist, Lawrence Baird (David Clennon), plenty of grief and misery, which leads us to believe he </code></pre>
+</div>
+</div>
+<p><code>Kornbluth</code> names Josh and Jacob Kornbluth, the real directors of <code>Haiku Tunnel</code>. <code>Baird</code> is John Baird, a character in <code>The Couch Trip</code>. Nothing in the <code>PERSON</code> label distinguishes the two; the chapter’s biography pages never raise this problem, since every <code>PERSON</code> entity there is unambiguously a real historical figure. In a review corpus, “who is this?” is a question the entity type alone cannot answer.</p>
+<ol start="5" type="1">
+<li>Group <code>entities</code> by <code>ent_type</code>, count, and plot the result as a bar chart with <code>geom_col()</code> and <code>coord_flip()</code>, matching the chapter’s own entity-type plot.</li>
+</ol>
+<div id="3745cd0d" class="cell" data-execution_count="11">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    entities</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    .group_by(c.ent_type)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    .agg(count <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    .pipe(ggplot, aes(c.ent_type, c.count))</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    .geom_col()</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    .coord_flip()</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    .labs(title<span class="op">=</span><span class="st">"Named Entity Types in the Review Corpus"</span>, x<span class="op">=</span><span class="st">"Entity Type"</span>, y<span class="op">=</span><span class="st">"Count"</span>)</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="10">
+<div>
+<figure class="figure">
+<p><a href="notebook40_files/figure-html/cell-12-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="notebook40_files/figure-html/cell-12-output-1.png" width="672" height="480" class="figure-img"></a></p>
+</figure>
+</div>
+</div>
+</div>
+<p><code>PERSON</code> still leads, as it did for the biography pages, but the order underneath it changes: <code>ORG</code> and <code>CARDINAL</code> outrank <code>DATE</code> here, while in the chapter’s corpus <code>DATE</code> was the third most common type behind <code>PERSON</code> and <code>ORG</code>. Reviews count things (a rating out of ten, a number of stars, “one of the worst films”) far more than they cite calendar dates, which biography pages do constantly for birth, death, and publication years.</p>
+<ol start="6" type="1">
+<li>Reconstruct subject-verb pairs the way the chapter does: select <code>VERB</code> tokens as <code>verbs</code>, then join every <code>nsubj</code> token to the verb sitting at its <code>head_idx</code> within the same <code>doc_id</code> and <code>sid</code>. Print the 10 most frequent subject-verb pairs.</li>
+</ol>
+<div id="7e3a0fcf" class="cell" data-execution_count="12">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>verbs <span class="op">=</span> (</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    anno</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.upos <span class="op">==</span> <span class="st">"VERB"</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    .select(</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>        c.doc_id, c.sid,</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>        verb_idx <span class="op">=</span> c.tid,</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>        verb <span class="op">=</span> c.lemma</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    anno</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.dep <span class="op">==</span> <span class="st">"nsubj"</span>)</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    .select(</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>        c.doc_id, c.sid,</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>        subject <span class="op">=</span> c.lemma,</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>        verb_idx <span class="op">=</span> c.head_idx</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>    .join(verbs, on<span class="op">=</span>[c.doc_id, c.sid, c.verb_idx])</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    .group_by([c.subject, c.verb])</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>    .agg(count <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>    .sort(c.count, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">10</span>)</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="11">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (10, 3)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">subject</th>
+<th data-quarto-table-cell-role="th">verb</th>
+<th data-quarto-table-cell-role="th">count</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>str</td>
+<td>u32</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"I"</td>
+<td>"think"</td>
+<td>51</td>
+</tr>
+<tr class="even">
+<td>"I"</td>
+<td>"see"</td>
+<td>48</td>
+</tr>
+<tr class="odd">
+<td>"I"</td>
+<td>"have"</td>
+<td>30</td>
+</tr>
+<tr class="even">
+<td>"I"</td>
+<td>"watch"</td>
+<td>27</td>
+</tr>
+<tr class="odd">
+<td>"I"</td>
+<td>"say"</td>
+<td>23</td>
+</tr>
+<tr class="even">
+<td>"you"</td>
+<td>"know"</td>
+<td>20</td>
+</tr>
+<tr class="odd">
+<td>"it"</td>
+<td>"have"</td>
+<td>18</td>
+</tr>
+<tr class="even">
+<td>"I"</td>
+<td>"like"</td>
+<td>18</td>
+</tr>
+<tr class="odd">
+<td>"you"</td>
+<td>"see"</td>
+<td>18</td>
+</tr>
+<tr class="even">
+<td>"I"</td>
+<td>"know"</td>
+<td>17</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Every single pair in this list has <code>I</code> or <code>you</code> as the subject; the closest a movie-related noun gets is <code>movie</code> itself, in 9th place. Compare this to the chapter’s own finding for the biography pages, where the most common subjects were the authors and their works (“author write”, “work receive”). A review corpus’s dependency structure is dominated by its narrator, not by the thing being described, which is exactly what a first-person genre should look like once you have a tool that can actually show it.</p>
+<ol start="7" type="1">
+<li>Extract adjective-noun pairs the way the chapter does (<code>dep == "amod"</code>, joined to the <code>NOUN</code> sitting at <code>head_idx</code>), restrict to pairs where the noun is <code>"movie"</code> or <code>"film"</code>, and print the count for <code>"good"</code> and <code>"bad"</code> by <code>label</code>.</li>
+</ol>
+<div id="9636ff66" class="cell" data-execution_count="13">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>amod <span class="op">=</span> (</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    anno</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.dep <span class="op">==</span> <span class="st">"amod"</span>, c.is_alpha)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    .select(</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>        c.doc_id, c.sid,</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>        adjective <span class="op">=</span> c.lemma,</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>        noun_idx <span class="op">=</span> c.head_idx</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    .join(</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>        anno.<span class="bu">filter</span>(c.upos <span class="op">==</span> <span class="st">"NOUN"</span>).select(</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>            c.doc_id, c.sid, noun_idx <span class="op">=</span> c.tid, noun <span class="op">=</span> c.lemma,</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>        on<span class="op">=</span>[c.doc_id, c.sid, c.noun_idx]</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>    amod</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.noun.is_in([<span class="st">"movie"</span>, <span class="st">"film"</span>]))</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>    .join(docs.select(c.doc_id, c.label), on<span class="op">=</span>c.doc_id)</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.adjective.is_in([<span class="st">"good"</span>, <span class="st">"bad"</span>]))</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>    .group_by([c.label, c.adjective])</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>    .agg(count <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>    .sort([c.label, c.adjective])</span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="12">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (4, 3)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">label</th>
+<th data-quarto-table-cell-role="th">adjective</th>
+<th data-quarto-table-cell-role="th">count</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>str</td>
+<td>u32</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"negative"</td>
+<td>"bad"</td>
+<td>16</td>
+</tr>
+<tr class="even">
+<td>"negative"</td>
+<td>"good"</td>
+<td>9</td>
+</tr>
+<tr class="odd">
+<td>"positive"</td>
+<td>"bad"</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td>"positive"</td>
+<td>"good"</td>
+<td>8</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Restricting to a real grammatical attachment (“bad movie”, not just “bad” anywhere in the review) sharpens the signal for <code>bad</code> well past what the last notebook found from raw whole-review counts: 16 negative uses of “bad movie”/“bad film” against a single positive one, versus 86-to-17 for the word <code>bad</code> anywhere in the review. <code>good</code>, though, barely moves: 9 negative against 8 positive, almost exactly as balanced as the raw count was. A tighter grammatical filter helps when the word being filtered for is doing real evaluative work, but it is not a fix for negation on its own, since “not good” is still <code>good</code> attached to the same head as <code>movie</code>.</p>
+<ol start="8" type="1">
+<li>Find every negated predicate adjective: join tokens with <code>dep == "neg"</code> to <code>ADJ</code> tokens with <code>dep in ["acomp", "attr"]</code> that share the same <code>head_idx</code> within a <code>doc_id</code>/<code>sid</code> (this is the same “share a head” logic question 6 used for subjects and verbs). Count how many negated predicate adjectives exist in total, then count how many of them have the negation word sitting in the position immediately before the adjective, the only case a bigram search like question 1’s <code>shift(-1)</code> could ever catch.</li>
+</ol>
+<div id="16a449ff" class="cell" data-execution_count="14">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>neg <span class="op">=</span> anno.<span class="bu">filter</span>(c.dep <span class="op">==</span> <span class="st">"neg"</span>).select(c.doc_id, c.sid, neg_tid <span class="op">=</span> c.tid, verb_idx <span class="op">=</span> c.head_idx)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>predicate_adj <span class="op">=</span> (</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    anno</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.upos <span class="op">==</span> <span class="st">"ADJ"</span>, c.dep.is_in([<span class="st">"acomp"</span>, <span class="st">"attr"</span>]))</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    .select(c.doc_id, c.sid, verb_idx <span class="op">=</span> c.head_idx, adj_tid <span class="op">=</span> c.tid, adjective <span class="op">=</span> c.lemma)</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>negated_adj <span class="op">=</span> neg.join(predicate_adj, on<span class="op">=</span>[c.doc_id, c.sid, c.verb_idx])</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>negated_adj.height</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="13">
+<pre><code>76</code></pre>
+</div>
+</div>
+<div id="274dc68d" class="cell" data-execution_count="15">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>negated_adj.<span class="bu">filter</span>(c.adj_tid <span class="op">==</span> c.neg_tid <span class="op">+</span> <span class="dv">1</span>).height</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="14">
+<pre><code>30</code></pre>
+</div>
+</div>
+<p>Only 30 of the 76 negated predicate adjectives have the negation word directly next to them; the other 46 have something in between, sometimes a single word (“never tired”), sometimes a whole clause. A bigram search for “not X” would have silently missed 61% of the true negations in this corpus, not because the sentences are unusual, but because negation in English does not have to sit next to the word it negates. Dependency parsing catches all 76 the same way regardless of the gap, because it is tracking a grammatical relationship, not a distance. This is the tool the last notebook’s question 10 was missing: a real way to tell “good” and “not good” apart.</p>
+<ol start="9" type="1">
+<li>Run <code>DSText.kwic()</code> on the lemma <code>"acting"</code> with <code>window=5</code> and <code>max_num=10</code>.</li>
+</ol>
+<div id="7b6332f6" class="cell" data-execution_count="16">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>DSText.kwic(anno, <span class="st">"acting"</span>, max_num<span class="op">=</span><span class="dv">10</span>, window<span class="op">=</span><span class="dv">5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>doc0011:2                                          The [acting] was terrible , the plot                 
+doc0013:1                     along quite well but the [acting] , direction and editing leave           
+doc0023:10                 an Army captain turned into [acting] .                                       
+doc0026:3                                  I found the [acting] purely and the most of                  
+doc0034:2                    precious little ) of good [acting] , primarily by the two                  
+doc0034:3                                Otherwise the [acting] was decidedly bad .                     
+doc0043:1                     bad is Lindsay Crouse 's [acting] .                                       
+doc0043:12                                Maybe if her [acting] had been better , I                     
+doc0048:9                                        Their [acting] was also above average .                
+doc0058:4                                          The [acting] , the dialogue , the                    </code></pre>
+</div>
+</div>
+<p>The concordance shows both halves of the corpus at once, since the display is not filtered by <code>label</code>: “terrible”, “decidedly bad”, and “purely” sit next to “good acting” and “above average” within the same 10 lines. No adjective-frequency table would show this as directly, since “acting” here is playing the role of the noun being judged, and the judgments on either side of it in the printout are the actual words reviewers reached for.</p>
+<ol start="10" type="1">
+<li>Compute the four complexity metrics from the chapter (mean sentence length, type-token ratio, mean word length, and content-word ratio) per document, join them into a single table, and print the mean of each metric grouped by <code>label</code>.</li>
+</ol>
+<div id="7b8f70de" class="cell" data-execution_count="17">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>sentence_length <span class="op">=</span> (</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    anno</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    .group_by([c.doc_id, c.sid])</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    .agg(n_words <span class="op">=</span> c.is_alpha.<span class="bu">sum</span>())</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    .group_by(c.doc_id)</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    .agg(mean_sentence_length <span class="op">=</span> c.n_words.mean())</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>ttr <span class="op">=</span> (</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>    anno</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.is_alpha)</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>    .group_by(c.doc_id)</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>    .agg(n_tokens <span class="op">=</span> pl.<span class="bu">len</span>(), n_types <span class="op">=</span> c.lemma.n_unique())</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>    .with_columns(ttr <span class="op">=</span> c.n_types <span class="op">/</span> c.n_tokens)</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>    .select(c.doc_id, c.ttr)</span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>word_length <span class="op">=</span> (</span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>    anno</span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.is_alpha)</span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>    .with_columns(word_length <span class="op">=</span> c.token.<span class="bu">str</span>.len_chars())</span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>    .group_by(c.doc_id)</span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>    .agg(mean_word_length <span class="op">=</span> c.word_length.mean())</span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a>content_pos <span class="op">=</span> [<span class="st">"NOUN"</span>, <span class="st">"VERB"</span>, <span class="st">"ADJ"</span>, <span class="st">"ADV"</span>]</span>
+<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a>content_ratio <span class="op">=</span> (</span>
+<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a>    anno</span>
+<span id="cb20-29"><a href="#cb20-29" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.is_alpha)</span>
+<span id="cb20-30"><a href="#cb20-30" aria-hidden="true" tabindex="-1"></a>    .with_columns(is_content <span class="op">=</span> c.upos.is_in(content_pos))</span>
+<span id="cb20-31"><a href="#cb20-31" aria-hidden="true" tabindex="-1"></a>    .group_by(c.doc_id)</span>
+<span id="cb20-32"><a href="#cb20-32" aria-hidden="true" tabindex="-1"></a>    .agg(n_words <span class="op">=</span> pl.<span class="bu">len</span>(), n_content <span class="op">=</span> c.is_content.<span class="bu">sum</span>())</span>
+<span id="cb20-33"><a href="#cb20-33" aria-hidden="true" tabindex="-1"></a>    .with_columns(content_ratio <span class="op">=</span> c.n_content <span class="op">/</span> c.n_words)</span>
+<span id="cb20-34"><a href="#cb20-34" aria-hidden="true" tabindex="-1"></a>    .select(c.doc_id, c.content_ratio)</span>
+<span id="cb20-35"><a href="#cb20-35" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb20-36"><a href="#cb20-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-37"><a href="#cb20-37" aria-hidden="true" tabindex="-1"></a>style_metrics <span class="op">=</span> (</span>
+<span id="cb20-38"><a href="#cb20-38" aria-hidden="true" tabindex="-1"></a>    sentence_length</span>
+<span id="cb20-39"><a href="#cb20-39" aria-hidden="true" tabindex="-1"></a>    .join(ttr, on<span class="op">=</span>c.doc_id)</span>
+<span id="cb20-40"><a href="#cb20-40" aria-hidden="true" tabindex="-1"></a>    .join(word_length, on<span class="op">=</span>c.doc_id)</span>
+<span id="cb20-41"><a href="#cb20-41" aria-hidden="true" tabindex="-1"></a>    .join(content_ratio, on<span class="op">=</span>c.doc_id)</span>
+<span id="cb20-42"><a href="#cb20-42" aria-hidden="true" tabindex="-1"></a>    .join(docs.select(c.doc_id, c.label), on<span class="op">=</span>c.doc_id)</span>
+<span id="cb20-43"><a href="#cb20-43" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb20-44"><a href="#cb20-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-45"><a href="#cb20-45" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb20-46"><a href="#cb20-46" aria-hidden="true" tabindex="-1"></a>    style_metrics</span>
+<span id="cb20-47"><a href="#cb20-47" aria-hidden="true" tabindex="-1"></a>    .group_by(c.label)</span>
+<span id="cb20-48"><a href="#cb20-48" aria-hidden="true" tabindex="-1"></a>    .agg(</span>
+<span id="cb20-49"><a href="#cb20-49" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"mean_sentence_length"</span>).mean(),</span>
+<span id="cb20-50"><a href="#cb20-50" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"ttr"</span>).mean(),</span>
+<span id="cb20-51"><a href="#cb20-51" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"mean_word_length"</span>).mean(),</span>
+<span id="cb20-52"><a href="#cb20-52" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"content_ratio"</span>).mean()</span>
+<span id="cb20-53"><a href="#cb20-53" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb20-54"><a href="#cb20-54" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="16">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (2, 5)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">label</th>
+<th data-quarto-table-cell-role="th">mean_sentence_length</th>
+<th data-quarto-table-cell-role="th">ttr</th>
+<th data-quarto-table-cell-role="th">mean_word_length</th>
+<th data-quarto-table-cell-role="th">content_ratio</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>f64</td>
+<td>f64</td>
+<td>f64</td>
+<td>f64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"positive"</td>
+<td>17.450679</td>
+<td>0.616662</td>
+<td>4.372415</td>
+<td>0.451798</td>
+</tr>
+<tr class="even">
+<td>"negative"</td>
+<td>17.970821</td>
+<td>0.62626</td>
+<td>4.329913</td>
+<td>0.465087</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>None of the four metrics separates the two labels by much: sentence length differs by about half a word, word length by four hundredths of a character. These are measures of <em>style</em>, and the style of a positive review and a negative review of the same kind of movie, written by the same kind of person, is not obviously different. Sentiment lives in which words get chosen, as questions 7 and 8 showed, not in how long or how varied the sentences carrying those words happen to be.</p>
+<ol start="11" type="1">
+<li>Plot <code>mean_sentence_length</code> against <code>mean_word_length</code> from <code>style_metrics</code>, coloring points by <code>label</code>.</li>
+</ol>
+<div id="54afe05c" class="cell" data-execution_count="18">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    style_metrics</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    .pipe(ggplot, aes(c.mean_sentence_length, c.mean_word_length, color<span class="op">=</span>c.label))</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    .geom_point()</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    .labs(title<span class="op">=</span><span class="st">"Sentence Length vs. Word Length by Review Sentiment"</span>, x<span class="op">=</span><span class="st">"Mean Sentence Length"</span>, y<span class="op">=</span><span class="st">"Mean Word Length"</span>)</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="17">
+<div>
+<figure class="figure">
+<p><a href="notebook40_files/figure-html/cell-19-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img src="notebook40_files/figure-html/cell-19-output-1.png" width="672" height="480" class="figure-img"></a></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The two colors sit on top of each other across the whole plot, with no region dominated by one label. This is the visual version of question 10’s finding: whatever separates a positive review from a negative one, it is not this pair of style measures.</p>
+<ol start="12" type="1">
+<li>Count the number of <code>"!"</code> tokens per document, join that count onto <code>docs</code>, and print the mean per-review count and the fraction of reviews containing at least one <code>"!"</code>, grouped by <code>label</code>.</li>
+</ol>
+<div id="b1e208a8" class="cell" data-execution_count="19">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>excl_counts <span class="op">=</span> (</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    anno</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.token <span class="op">==</span> <span class="st">"!"</span>)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    .group_by(c.doc_id)</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    .agg(n_excl <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    docs</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>    .select(c.doc_id, c.label)</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>    .join(excl_counts, on<span class="op">=</span>c.doc_id, how<span class="op">=</span><span class="st">"left"</span>)</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>    .with_columns(n_excl <span class="op">=</span> c.n_excl.fill_null(<span class="dv">0</span>))</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>    .group_by(c.label)</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>    .agg(</span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>        mean_excl <span class="op">=</span> c.n_excl.mean(),</span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>        pct_any_excl <span class="op">=</span> (c.n_excl <span class="op">&gt;</span> <span class="dv">0</span>).mean()</span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="18">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (2, 3)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">label</th>
+<th data-quarto-table-cell-role="th">mean_excl</th>
+<th data-quarto-table-cell-role="th">pct_any_excl</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>f64</td>
+<td>f64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"negative"</td>
+<td>1.21</td>
+<td>0.36</td>
+</tr>
+<tr class="even">
+<td>"positive"</td>
+<td>0.52</td>
+<td>0.31</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Here the two labels finally split: negative reviews average 1.21 exclamation points against 0.52 for positive ones, more than double. It is a small, crude signal on its own, and it says nothing about <em>what</em> is being exclaimed, but it is a real difference in a place none of the chapter’s four standard metrics thought to look. Punctuation is not a linguistic category the chapter covers, and building this count required nothing more than the <code>.filter()</code> and <code>.group_by()</code> chain every earlier chapter already supplied.</p>
+
+
+<!-- -->
+
+</section>
+
+</main> <!-- /main -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details .sourceCode");
+      for (let i = 0; i < detailsSrc.length; i++) {
+        const details = detailsSrc[i].closest('details');
+        if (details) {
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+      }
+      return false;
+    };
+  }
+  // Replace buttons to strip the broken listeners Quarto attached, then re-add fixed ones
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    const fresh = hideAllCode.cloneNode(true);
+    hideAllCode.parentNode.replaceChild(fresh, hideAllCode);
+    fresh.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    const fresh = showAllCode.cloneNode(true);
+    showAllCode.parentNode.replaceChild(fresh, showAllCode);
+    fresh.addEventListener("click", toggleCodeHandler(true));
+  }
+});
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Notebook40"</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="an">solutions-release-date:</span><span class="co"> "2026-10-07"</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a><span class="fu">### Setup</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>Run all of the following before starting the notebook.</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [noclear]</span></span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a><span class="op">!</span> wget <span class="op">-</span>q <span class="op">-</span>nc https:<span class="op">//</span>raw.githubusercontent.com<span class="op">/</span>taylor<span class="op">-</span>arnold<span class="op">/</span>fds2<span class="op">/</span>refs<span class="op">/</span>heads<span class="op">/</span>main<span class="op">/</span>funs.py</span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [noclear]</span></span>
+<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb23-23"><a href="#cb23-23" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine <span class="im">import</span> ggplot, aes</span>
+<span id="cb23-24"><a href="#cb23-24" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> polars <span class="im">import</span> col <span class="im">as</span> c</span>
+<span id="cb23-25"><a href="#cb23-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-26"><a href="#cb23-26" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> funs</span>
+<span id="cb23-27"><a href="#cb23-27" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> funs <span class="im">import</span> DSText</span>
+<span id="cb23-28"><a href="#cb23-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-29"><a href="#cb23-29" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> spacy</span>
+<span id="cb23-30"><a href="#cb23-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-31"><a href="#cb23-31" aria-hidden="true" tabindex="-1"></a>ub <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"</span></span>
+<span id="cb23-32"><a href="#cb23-32" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-33"><a href="#cb23-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-36"><a href="#cb23-36" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb23-37"><a href="#cb23-37" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [remove]</span></span>
+<span id="cb23-38"><a href="#cb23-38" aria-hidden="true" tabindex="-1"></a><span class="co">#| include: false</span></span>
+<span id="cb23-39"><a href="#cb23-39" aria-hidden="true" tabindex="-1"></a>ub <span class="op">=</span> <span class="st">""</span></span>
+<span id="cb23-40"><a href="#cb23-40" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-41"><a href="#cb23-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-44"><a href="#cb23-44" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb23-45"><a href="#cb23-45" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [noclear]</span></span>
+<span id="cb23-46"><a href="#cb23-46" aria-hidden="true" tabindex="-1"></a>docs <span class="op">=</span> (</span>
+<span id="cb23-47"><a href="#cb23-47" aria-hidden="true" tabindex="-1"></a>    pl.read_parquet(ub <span class="op">+</span> <span class="st">"data/imdb5k_pca.parquet"</span>)</span>
+<span id="cb23-48"><a href="#cb23-48" aria-hidden="true" tabindex="-1"></a>    .select(c.<span class="bu">id</span>, c.label, c.text)</span>
+<span id="cb23-49"><a href="#cb23-49" aria-hidden="true" tabindex="-1"></a>    .rename({<span class="st">"id"</span>: <span class="st">"doc_id"</span>})</span>
+<span id="cb23-50"><a href="#cb23-50" aria-hidden="true" tabindex="-1"></a>    .sort(c.doc_id)</span>
+<span id="cb23-51"><a href="#cb23-51" aria-hidden="true" tabindex="-1"></a>    .group_by(c.label, maintain_order<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb23-52"><a href="#cb23-52" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">100</span>)</span>
+<span id="cb23-53"><a href="#cb23-53" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb23-54"><a href="#cb23-54" aria-hidden="true" tabindex="-1"></a>        text <span class="op">=</span> c.text.<span class="bu">str</span>.replace_all(<span class="st">"&lt;br /&gt;"</span>, <span class="st">" "</span>)</span>
+<span id="cb23-55"><a href="#cb23-55" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb23-56"><a href="#cb23-56" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-57"><a href="#cb23-57" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-58"><a href="#cb23-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-61"><a href="#cb23-61" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb23-62"><a href="#cb23-62" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [noclear]</span></span>
+<span id="cb23-63"><a href="#cb23-63" aria-hidden="true" tabindex="-1"></a>nlp <span class="op">=</span> spacy.load(<span class="st">"en_core_web_sm"</span>)</span>
+<span id="cb23-64"><a href="#cb23-64" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-65"><a href="#cb23-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-68"><a href="#cb23-68" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb23-69"><a href="#cb23-69" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [noclear]</span></span>
+<span id="cb23-70"><a href="#cb23-70" aria-hidden="true" tabindex="-1"></a>anno <span class="op">=</span> DSText.process(docs.select(c.doc_id, c.text), nlp)</span>
+<span id="cb23-71"><a href="#cb23-71" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-72"><a href="#cb23-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-73"><a href="#cb23-73" aria-hidden="true" tabindex="-1"></a><span class="fu">### Questions</span></span>
+<span id="cb23-74"><a href="#cb23-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-75"><a href="#cb23-75" aria-hidden="true" tabindex="-1"></a><span class="in">`docs`</span> and <span class="in">`anno`</span> carry the same 200 IMDb movie reviews from the last</span>
+<span id="cb23-76"><a href="#cb23-76" aria-hidden="true" tabindex="-1"></a>notebook, 100 labeled <span class="in">`"positive"`</span> and 100 labeled <span class="in">`"negative"`</span>, with the</span>
+<span id="cb23-77"><a href="#cb23-77" aria-hidden="true" tabindex="-1"></a>stray <span class="in">`&lt;br /&gt;`</span> HTML already replaced by a space before <span class="in">`anno`</span> was built.</span>
+<span id="cb23-78"><a href="#cb23-78" aria-hidden="true" tabindex="-1"></a>This notebook picks up where that one left off: instead of single tokens and</span>
+<span id="cb23-79"><a href="#cb23-79" aria-hidden="true" tabindex="-1"></a>parts of speech, we work with multi-word phrases, named entities, and</span>
+<span id="cb23-80"><a href="#cb23-80" aria-hidden="true" tabindex="-1"></a>grammatical structure. Print results unless a question says otherwise.</span>
+<span id="cb23-81"><a href="#cb23-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-82"><a href="#cb23-82" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Build the bigram table the same way the chapter does: filter <span class="in">`anno`</span> to</span>
+<span id="cb23-83"><a href="#cb23-83" aria-hidden="true" tabindex="-1"></a>alphabetic tokens, shift <span class="in">`lemma`</span> and <span class="in">`is_alpha`</span> by <span class="in">`-1`</span> within each <span class="in">`doc_id`</span></span>
+<span id="cb23-84"><a href="#cb23-84" aria-hidden="true" tabindex="-1"></a>and <span class="in">`sid`</span>, keep pairs where both tokens are alphabetic, and paste the two</span>
+<span id="cb23-85"><a href="#cb23-85" aria-hidden="true" tabindex="-1"></a>lemmas together into a <span class="in">`bigram`</span> column. Print the 15 most frequent bigrams.</span>
+<span id="cb23-86"><a href="#cb23-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-89"><a href="#cb23-89" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb23-90"><a href="#cb23-90" aria-hidden="true" tabindex="-1"></a>bigrams <span class="op">=</span> (</span>
+<span id="cb23-91"><a href="#cb23-91" aria-hidden="true" tabindex="-1"></a>    anno</span>
+<span id="cb23-92"><a href="#cb23-92" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.is_alpha)</span>
+<span id="cb23-93"><a href="#cb23-93" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb23-94"><a href="#cb23-94" aria-hidden="true" tabindex="-1"></a>        next_token <span class="op">=</span> c.lemma.shift(<span class="op">-</span><span class="dv">1</span>).over([c.doc_id, c.sid]),</span>
+<span id="cb23-95"><a href="#cb23-95" aria-hidden="true" tabindex="-1"></a>        next_is_alpha <span class="op">=</span> c.is_alpha.shift(<span class="op">-</span><span class="dv">1</span>).over([c.doc_id, c.sid])</span>
+<span id="cb23-96"><a href="#cb23-96" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb23-97"><a href="#cb23-97" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.next_is_alpha)</span>
+<span id="cb23-98"><a href="#cb23-98" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb23-99"><a href="#cb23-99" aria-hidden="true" tabindex="-1"></a>        bigram <span class="op">=</span> c.lemma <span class="op">+</span> <span class="st">" "</span> <span class="op">+</span> c.next_token</span>
+<span id="cb23-100"><a href="#cb23-100" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb23-101"><a href="#cb23-101" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-102"><a href="#cb23-102" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-103"><a href="#cb23-103" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb23-104"><a href="#cb23-104" aria-hidden="true" tabindex="-1"></a>    bigrams</span>
+<span id="cb23-105"><a href="#cb23-105" aria-hidden="true" tabindex="-1"></a>    .group_by(c.bigram)</span>
+<span id="cb23-106"><a href="#cb23-106" aria-hidden="true" tabindex="-1"></a>    .agg(count <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb23-107"><a href="#cb23-107" aria-hidden="true" tabindex="-1"></a>    .sort(c.count, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb23-108"><a href="#cb23-108" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">15</span>)</span>
+<span id="cb23-109"><a href="#cb23-109" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-110"><a href="#cb23-110" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-111"><a href="#cb23-111" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-112"><a href="#cb23-112" aria-hidden="true" tabindex="-1"></a>As in the chapter, raw frequency mostly turns up function-word glue ("of</span>
+<span id="cb23-113"><a href="#cb23-113" aria-hidden="true" tabindex="-1"></a>the", "in the", "to be") plus the two words for the thing being reviewed</span>
+<span id="cb23-114"><a href="#cb23-114" aria-hidden="true" tabindex="-1"></a>("this movie", "the film"). None of it is specific to movie reviews as a</span>
+<span id="cb23-115"><a href="#cb23-115" aria-hidden="true" tabindex="-1"></a>genre; the same bigrams would top the list for almost any English corpus.</span>
+<span id="cb23-116"><a href="#cb23-116" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-117"><a href="#cb23-117" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Compute PMI for every bigram, following the chapter's chain: count each</span>
+<span id="cb23-118"><a href="#cb23-118" aria-hidden="true" tabindex="-1"></a>word, count each bigram, join the two word counts onto the bigram table, and</span>
+<span id="cb23-119"><a href="#cb23-119" aria-hidden="true" tabindex="-1"></a>combine them into <span class="in">`p_bigram`</span>, <span class="in">`p_w1`</span>, <span class="in">`p_w2`</span>, and finally <span class="in">`pmi`</span>. Filter to</span>
+<span id="cb23-120"><a href="#cb23-120" aria-hidden="true" tabindex="-1"></a><span class="in">`bigram_count &gt;= 5`</span> and print the 15 highest-PMI bigrams.</span>
+<span id="cb23-121"><a href="#cb23-121" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-124"><a href="#cb23-124" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb23-125"><a href="#cb23-125" aria-hidden="true" tabindex="-1"></a>word_counts <span class="op">=</span> (</span>
+<span id="cb23-126"><a href="#cb23-126" aria-hidden="true" tabindex="-1"></a>    anno</span>
+<span id="cb23-127"><a href="#cb23-127" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.is_alpha)</span>
+<span id="cb23-128"><a href="#cb23-128" aria-hidden="true" tabindex="-1"></a>    .group_by(c.lemma)</span>
+<span id="cb23-129"><a href="#cb23-129" aria-hidden="true" tabindex="-1"></a>    .agg(word_count <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb23-130"><a href="#cb23-130" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-131"><a href="#cb23-131" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-132"><a href="#cb23-132" aria-hidden="true" tabindex="-1"></a>total_words <span class="op">=</span> (</span>
+<span id="cb23-133"><a href="#cb23-133" aria-hidden="true" tabindex="-1"></a>    anno</span>
+<span id="cb23-134"><a href="#cb23-134" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.is_alpha)</span>
+<span id="cb23-135"><a href="#cb23-135" aria-hidden="true" tabindex="-1"></a>    .select(pl.<span class="bu">len</span>())</span>
+<span id="cb23-136"><a href="#cb23-136" aria-hidden="true" tabindex="-1"></a>    .item()</span>
+<span id="cb23-137"><a href="#cb23-137" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-138"><a href="#cb23-138" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-139"><a href="#cb23-139" aria-hidden="true" tabindex="-1"></a>bigram_counts <span class="op">=</span> (</span>
+<span id="cb23-140"><a href="#cb23-140" aria-hidden="true" tabindex="-1"></a>    bigrams</span>
+<span id="cb23-141"><a href="#cb23-141" aria-hidden="true" tabindex="-1"></a>    .group_by(c.bigram, c.lemma, c.next_token)</span>
+<span id="cb23-142"><a href="#cb23-142" aria-hidden="true" tabindex="-1"></a>    .agg(bigram_count <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb23-143"><a href="#cb23-143" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-144"><a href="#cb23-144" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-145"><a href="#cb23-145" aria-hidden="true" tabindex="-1"></a>total_bigrams <span class="op">=</span> bigrams.select(pl.<span class="bu">len</span>()).item()</span>
+<span id="cb23-146"><a href="#cb23-146" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-147"><a href="#cb23-147" aria-hidden="true" tabindex="-1"></a>top_pmi <span class="op">=</span> (</span>
+<span id="cb23-148"><a href="#cb23-148" aria-hidden="true" tabindex="-1"></a>    bigram_counts</span>
+<span id="cb23-149"><a href="#cb23-149" aria-hidden="true" tabindex="-1"></a>    .join(</span>
+<span id="cb23-150"><a href="#cb23-150" aria-hidden="true" tabindex="-1"></a>        word_counts.rename({<span class="st">"lemma"</span>: <span class="st">"w1"</span>, <span class="st">"word_count"</span>: <span class="st">"w1_count"</span>}),</span>
+<span id="cb23-151"><a href="#cb23-151" aria-hidden="true" tabindex="-1"></a>        left_on<span class="op">=</span>c.lemma,</span>
+<span id="cb23-152"><a href="#cb23-152" aria-hidden="true" tabindex="-1"></a>        right_on<span class="op">=</span>c.w1</span>
+<span id="cb23-153"><a href="#cb23-153" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb23-154"><a href="#cb23-154" aria-hidden="true" tabindex="-1"></a>    .join(</span>
+<span id="cb23-155"><a href="#cb23-155" aria-hidden="true" tabindex="-1"></a>        word_counts.rename({<span class="st">"lemma"</span>: <span class="st">"w2"</span>, <span class="st">"word_count"</span>: <span class="st">"w2_count"</span>}),</span>
+<span id="cb23-156"><a href="#cb23-156" aria-hidden="true" tabindex="-1"></a>        left_on<span class="op">=</span>c.next_token,</span>
+<span id="cb23-157"><a href="#cb23-157" aria-hidden="true" tabindex="-1"></a>        right_on<span class="op">=</span>c.w2</span>
+<span id="cb23-158"><a href="#cb23-158" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb23-159"><a href="#cb23-159" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb23-160"><a href="#cb23-160" aria-hidden="true" tabindex="-1"></a>        p_bigram <span class="op">=</span> c.bigram_count <span class="op">/</span> total_bigrams,</span>
+<span id="cb23-161"><a href="#cb23-161" aria-hidden="true" tabindex="-1"></a>        p_w1 <span class="op">=</span> c.w1_count <span class="op">/</span> total_words,</span>
+<span id="cb23-162"><a href="#cb23-162" aria-hidden="true" tabindex="-1"></a>        p_w2 <span class="op">=</span> c.w2_count <span class="op">/</span> total_words</span>
+<span id="cb23-163"><a href="#cb23-163" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb23-164"><a href="#cb23-164" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb23-165"><a href="#cb23-165" aria-hidden="true" tabindex="-1"></a>        pmi <span class="op">=</span> (c.p_bigram <span class="op">/</span> (c.p_w1 <span class="op">*</span> c.p_w2)).log(<span class="dv">2</span>)</span>
+<span id="cb23-166"><a href="#cb23-166" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb23-167"><a href="#cb23-167" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.bigram_count <span class="op">&gt;=</span> <span class="dv">5</span>)</span>
+<span id="cb23-168"><a href="#cb23-168" aria-hidden="true" tabindex="-1"></a>    .sort(c.pmi, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb23-169"><a href="#cb23-169" aria-hidden="true" tabindex="-1"></a>    .select(c.bigram, c.bigram_count, c.pmi)</span>
+<span id="cb23-170"><a href="#cb23-170" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">15</span>)</span>
+<span id="cb23-171"><a href="#cb23-171" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-172"><a href="#cb23-172" aria-hidden="true" tabindex="-1"></a>top_pmi</span>
+<span id="cb23-173"><a href="#cb23-173" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-174"><a href="#cb23-174" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-175"><a href="#cb23-175" aria-hidden="true" tabindex="-1"></a>The chapter's own PMI list for the Wikipedia author pages was almost</span>
+<span id="cb23-176"><a href="#cb23-176" aria-hidden="true" tabindex="-1"></a>entirely proper nouns: book titles ("Biographia Literaria"), historical</span>
+<span id="cb23-177"><a href="#cb23-177" aria-hidden="true" tabindex="-1"></a>events ("Molotov-Ribbentrop Pact"), and names of people the authors wrote</span>
+<span id="cb23-178"><a href="#cb23-178" aria-hidden="true" tabindex="-1"></a>about. This list has proper nouns too ("New York", "Cathy Lee"), but it also</span>
+<span id="cb23-179"><a href="#cb23-179" aria-hidden="true" tabindex="-1"></a>surfaces genre vocabulary that no biography page would ever produce ("sci</span>
+<span id="cb23-180"><a href="#cb23-180" aria-hidden="true" tabindex="-1"></a>fi", "low budget", "special effect", "production value", "support cast")</span>
+<span id="cb23-181"><a href="#cb23-181" aria-hidden="true" tabindex="-1"></a>and first-person review phrasing ("my opinion", "my favorite", "apart</span>
+<span id="cb23-182"><a href="#cb23-182" aria-hidden="true" tabindex="-1"></a>from"). PMI measures how strongly two words predict each other, and in a</span>
+<span id="cb23-183"><a href="#cb23-183" aria-hidden="true" tabindex="-1"></a>corpus of reviews, some of the tightest predictable pairs come from the</span>
+<span id="cb23-184"><a href="#cb23-184" aria-hidden="true" tabindex="-1"></a>genre's own vocabulary and its narrator's voice rather than from names.</span>
+<span id="cb23-185"><a href="#cb23-185" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-186"><a href="#cb23-186" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Build the <span class="in">`entities`</span> table the same way the chapter does: filter <span class="in">`anno`</span></span>
+<span id="cb23-187"><a href="#cb23-187" aria-hidden="true" tabindex="-1"></a>to rows with a non-empty <span class="in">`ent_type`</span>, mark the start of each entity with</span>
+<span id="cb23-188"><a href="#cb23-188" aria-hidden="true" tabindex="-1"></a><span class="in">`ent_iob == "B"`</span>, take a cumulative sum of that flag within each <span class="in">`doc_id`</span> to</span>
+<span id="cb23-189"><a href="#cb23-189" aria-hidden="true" tabindex="-1"></a>get an <span class="in">`entity_id`</span>, and group by <span class="in">`doc_id`</span>, <span class="in">`entity_id`</span>, and <span class="in">`ent_type`</span> to</span>
+<span id="cb23-190"><a href="#cb23-190" aria-hidden="true" tabindex="-1"></a>join the tokens back into <span class="in">`entity_text`</span>. Then print the 15 most frequently</span>
+<span id="cb23-191"><a href="#cb23-191" aria-hidden="true" tabindex="-1"></a>mentioned <span class="in">`PERSON`</span> entities.</span>
+<span id="cb23-192"><a href="#cb23-192" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-195"><a href="#cb23-195" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb23-196"><a href="#cb23-196" aria-hidden="true" tabindex="-1"></a>entities <span class="op">=</span> (</span>
+<span id="cb23-197"><a href="#cb23-197" aria-hidden="true" tabindex="-1"></a>    anno</span>
+<span id="cb23-198"><a href="#cb23-198" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.ent_type <span class="op">!=</span> <span class="st">""</span>)</span>
+<span id="cb23-199"><a href="#cb23-199" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb23-200"><a href="#cb23-200" aria-hidden="true" tabindex="-1"></a>        new_entity <span class="op">=</span> c.ent_iob <span class="op">==</span> <span class="st">"B"</span></span>
+<span id="cb23-201"><a href="#cb23-201" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb23-202"><a href="#cb23-202" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb23-203"><a href="#cb23-203" aria-hidden="true" tabindex="-1"></a>        entity_id <span class="op">=</span> c.new_entity.cum_sum().over([c.doc_id])</span>
+<span id="cb23-204"><a href="#cb23-204" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb23-205"><a href="#cb23-205" aria-hidden="true" tabindex="-1"></a>    .group_by([c.doc_id, c.entity_id, c.ent_type])</span>
+<span id="cb23-206"><a href="#cb23-206" aria-hidden="true" tabindex="-1"></a>    .agg(</span>
+<span id="cb23-207"><a href="#cb23-207" aria-hidden="true" tabindex="-1"></a>        entity_text <span class="op">=</span> c.token.<span class="bu">str</span>.join(<span class="st">" "</span>),</span>
+<span id="cb23-208"><a href="#cb23-208" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb23-209"><a href="#cb23-209" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-210"><a href="#cb23-210" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-211"><a href="#cb23-211" aria-hidden="true" tabindex="-1"></a>top_people <span class="op">=</span> (</span>
+<span id="cb23-212"><a href="#cb23-212" aria-hidden="true" tabindex="-1"></a>    entities</span>
+<span id="cb23-213"><a href="#cb23-213" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.ent_type <span class="op">==</span> <span class="st">"PERSON"</span>)</span>
+<span id="cb23-214"><a href="#cb23-214" aria-hidden="true" tabindex="-1"></a>    .group_by(c.entity_text)</span>
+<span id="cb23-215"><a href="#cb23-215" aria-hidden="true" tabindex="-1"></a>    .agg(count <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb23-216"><a href="#cb23-216" aria-hidden="true" tabindex="-1"></a>    .sort(c.count, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb23-217"><a href="#cb23-217" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">15</span>)</span>
+<span id="cb23-218"><a href="#cb23-218" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-219"><a href="#cb23-219" aria-hidden="true" tabindex="-1"></a>top_people</span>
+<span id="cb23-220"><a href="#cb23-220" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-221"><a href="#cb23-221" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-222"><a href="#cb23-222" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>Pick two names from question 3's list and check what they actually refer</span>
+<span id="cb23-223"><a href="#cb23-223" aria-hidden="true" tabindex="-1"></a>to by searching <span class="in">`docs`</span> for the surrounding text. Confirm each one by eye:</span>
+<span id="cb23-224"><a href="#cb23-224" aria-hidden="true" tabindex="-1"></a>is it a real person (a director, an actor) or a fictional character in the</span>
+<span id="cb23-225"><a href="#cb23-225" aria-hidden="true" tabindex="-1"></a>movie being reviewed?</span>
+<span id="cb23-226"><a href="#cb23-226" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-229"><a href="#cb23-229" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb23-230"><a href="#cb23-230" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name <span class="kw">in</span> [<span class="st">"Kornbluth"</span>, <span class="st">"Baird"</span>]:</span>
+<span id="cb23-231"><a href="#cb23-231" aria-hidden="true" tabindex="-1"></a>    row <span class="op">=</span> docs.<span class="bu">filter</span>(c.text.<span class="bu">str</span>.contains(name)).select(c.doc_id, c.text).row(<span class="dv">0</span>, named<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb23-232"><a href="#cb23-232" aria-hidden="true" tabindex="-1"></a>    idx <span class="op">=</span> row[<span class="st">"text"</span>].find(name)</span>
+<span id="cb23-233"><a href="#cb23-233" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(row[<span class="st">"doc_id"</span>], <span class="st">"-"</span>, row[<span class="st">"text"</span>][<span class="bu">max</span>(<span class="dv">0</span>, idx <span class="op">-</span> <span class="dv">80</span>):idx <span class="op">+</span> <span class="dv">80</span>])</span>
+<span id="cb23-234"><a href="#cb23-234" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-235"><a href="#cb23-235" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-236"><a href="#cb23-236" aria-hidden="true" tabindex="-1"></a><span class="in">`Kornbluth`</span> names Josh and Jacob Kornbluth, the real directors of `Haiku</span>
+<span id="cb23-237"><a href="#cb23-237" aria-hidden="true" tabindex="-1"></a>Tunnel<span class="in">`. `</span>Baird<span class="in">` is John Baird, a character in `</span>The Couch Trip`. Nothing in</span>
+<span id="cb23-238"><a href="#cb23-238" aria-hidden="true" tabindex="-1"></a>the <span class="in">`PERSON`</span> label distinguishes the two; the chapter's biography pages</span>
+<span id="cb23-239"><a href="#cb23-239" aria-hidden="true" tabindex="-1"></a>never raise this problem, since every <span class="in">`PERSON`</span> entity there is unambiguously</span>
+<span id="cb23-240"><a href="#cb23-240" aria-hidden="true" tabindex="-1"></a>a real historical figure. In a review corpus, "who is this?" is a question</span>
+<span id="cb23-241"><a href="#cb23-241" aria-hidden="true" tabindex="-1"></a>the entity type alone cannot answer.</span>
+<span id="cb23-242"><a href="#cb23-242" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-243"><a href="#cb23-243" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>Group <span class="in">`entities`</span> by <span class="in">`ent_type`</span>, count, and plot the result as a bar chart</span>
+<span id="cb23-244"><a href="#cb23-244" aria-hidden="true" tabindex="-1"></a>with <span class="in">`geom_col()`</span> and <span class="in">`coord_flip()`</span>, matching the chapter's own entity-type</span>
+<span id="cb23-245"><a href="#cb23-245" aria-hidden="true" tabindex="-1"></a>plot.</span>
+<span id="cb23-246"><a href="#cb23-246" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-249"><a href="#cb23-249" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb23-250"><a href="#cb23-250" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb23-251"><a href="#cb23-251" aria-hidden="true" tabindex="-1"></a>    entities</span>
+<span id="cb23-252"><a href="#cb23-252" aria-hidden="true" tabindex="-1"></a>    .group_by(c.ent_type)</span>
+<span id="cb23-253"><a href="#cb23-253" aria-hidden="true" tabindex="-1"></a>    .agg(count <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb23-254"><a href="#cb23-254" aria-hidden="true" tabindex="-1"></a>    .pipe(ggplot, aes(c.ent_type, c.count))</span>
+<span id="cb23-255"><a href="#cb23-255" aria-hidden="true" tabindex="-1"></a>    .geom_col()</span>
+<span id="cb23-256"><a href="#cb23-256" aria-hidden="true" tabindex="-1"></a>    .coord_flip()</span>
+<span id="cb23-257"><a href="#cb23-257" aria-hidden="true" tabindex="-1"></a>    .labs(title<span class="op">=</span><span class="st">"Named Entity Types in the Review Corpus"</span>, x<span class="op">=</span><span class="st">"Entity Type"</span>, y<span class="op">=</span><span class="st">"Count"</span>)</span>
+<span id="cb23-258"><a href="#cb23-258" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-259"><a href="#cb23-259" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-260"><a href="#cb23-260" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-261"><a href="#cb23-261" aria-hidden="true" tabindex="-1"></a><span class="in">`PERSON`</span> still leads, as it did for the biography pages, but the order</span>
+<span id="cb23-262"><a href="#cb23-262" aria-hidden="true" tabindex="-1"></a>underneath it changes: <span class="in">`ORG`</span> and <span class="in">`CARDINAL`</span> outrank <span class="in">`DATE`</span> here, while in</span>
+<span id="cb23-263"><a href="#cb23-263" aria-hidden="true" tabindex="-1"></a>the chapter's corpus <span class="in">`DATE`</span> was the third most common type behind <span class="in">`PERSON`</span></span>
+<span id="cb23-264"><a href="#cb23-264" aria-hidden="true" tabindex="-1"></a>and <span class="in">`ORG`</span>. Reviews count things (a rating out of ten, a number of stars, "one</span>
+<span id="cb23-265"><a href="#cb23-265" aria-hidden="true" tabindex="-1"></a>of the worst films") far more than they cite calendar dates, which biography</span>
+<span id="cb23-266"><a href="#cb23-266" aria-hidden="true" tabindex="-1"></a>pages do constantly for birth, death, and publication years.</span>
+<span id="cb23-267"><a href="#cb23-267" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-268"><a href="#cb23-268" aria-hidden="true" tabindex="-1"></a><span class="ss">6. </span>Reconstruct subject-verb pairs the way the chapter does: select <span class="in">`VERB`</span></span>
+<span id="cb23-269"><a href="#cb23-269" aria-hidden="true" tabindex="-1"></a>tokens as <span class="in">`verbs`</span>, then join every <span class="in">`nsubj`</span> token to the verb sitting at its</span>
+<span id="cb23-270"><a href="#cb23-270" aria-hidden="true" tabindex="-1"></a><span class="in">`head_idx`</span> within the same <span class="in">`doc_id`</span> and <span class="in">`sid`</span>. Print the 10 most frequent</span>
+<span id="cb23-271"><a href="#cb23-271" aria-hidden="true" tabindex="-1"></a>subject-verb pairs.</span>
+<span id="cb23-272"><a href="#cb23-272" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-275"><a href="#cb23-275" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb23-276"><a href="#cb23-276" aria-hidden="true" tabindex="-1"></a>verbs <span class="op">=</span> (</span>
+<span id="cb23-277"><a href="#cb23-277" aria-hidden="true" tabindex="-1"></a>    anno</span>
+<span id="cb23-278"><a href="#cb23-278" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.upos <span class="op">==</span> <span class="st">"VERB"</span>)</span>
+<span id="cb23-279"><a href="#cb23-279" aria-hidden="true" tabindex="-1"></a>    .select(</span>
+<span id="cb23-280"><a href="#cb23-280" aria-hidden="true" tabindex="-1"></a>        c.doc_id, c.sid,</span>
+<span id="cb23-281"><a href="#cb23-281" aria-hidden="true" tabindex="-1"></a>        verb_idx <span class="op">=</span> c.tid,</span>
+<span id="cb23-282"><a href="#cb23-282" aria-hidden="true" tabindex="-1"></a>        verb <span class="op">=</span> c.lemma</span>
+<span id="cb23-283"><a href="#cb23-283" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb23-284"><a href="#cb23-284" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-285"><a href="#cb23-285" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-286"><a href="#cb23-286" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb23-287"><a href="#cb23-287" aria-hidden="true" tabindex="-1"></a>    anno</span>
+<span id="cb23-288"><a href="#cb23-288" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.dep <span class="op">==</span> <span class="st">"nsubj"</span>)</span>
+<span id="cb23-289"><a href="#cb23-289" aria-hidden="true" tabindex="-1"></a>    .select(</span>
+<span id="cb23-290"><a href="#cb23-290" aria-hidden="true" tabindex="-1"></a>        c.doc_id, c.sid,</span>
+<span id="cb23-291"><a href="#cb23-291" aria-hidden="true" tabindex="-1"></a>        subject <span class="op">=</span> c.lemma,</span>
+<span id="cb23-292"><a href="#cb23-292" aria-hidden="true" tabindex="-1"></a>        verb_idx <span class="op">=</span> c.head_idx</span>
+<span id="cb23-293"><a href="#cb23-293" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb23-294"><a href="#cb23-294" aria-hidden="true" tabindex="-1"></a>    .join(verbs, on<span class="op">=</span>[c.doc_id, c.sid, c.verb_idx])</span>
+<span id="cb23-295"><a href="#cb23-295" aria-hidden="true" tabindex="-1"></a>    .group_by([c.subject, c.verb])</span>
+<span id="cb23-296"><a href="#cb23-296" aria-hidden="true" tabindex="-1"></a>    .agg(count <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb23-297"><a href="#cb23-297" aria-hidden="true" tabindex="-1"></a>    .sort(c.count, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb23-298"><a href="#cb23-298" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">10</span>)</span>
+<span id="cb23-299"><a href="#cb23-299" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-300"><a href="#cb23-300" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-301"><a href="#cb23-301" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-302"><a href="#cb23-302" aria-hidden="true" tabindex="-1"></a>Every single pair in this list has <span class="in">`I`</span> or <span class="in">`you`</span> as the subject; the closest</span>
+<span id="cb23-303"><a href="#cb23-303" aria-hidden="true" tabindex="-1"></a>a movie-related noun gets is <span class="in">`movie`</span> itself, in 9th place. Compare this to</span>
+<span id="cb23-304"><a href="#cb23-304" aria-hidden="true" tabindex="-1"></a>the chapter's own finding for the biography pages, where the most common</span>
+<span id="cb23-305"><a href="#cb23-305" aria-hidden="true" tabindex="-1"></a>subjects were the authors and their works ("author write", "work receive").</span>
+<span id="cb23-306"><a href="#cb23-306" aria-hidden="true" tabindex="-1"></a>A review corpus's dependency structure is dominated by its narrator, not by</span>
+<span id="cb23-307"><a href="#cb23-307" aria-hidden="true" tabindex="-1"></a>the thing being described, which is exactly what a first-person genre should</span>
+<span id="cb23-308"><a href="#cb23-308" aria-hidden="true" tabindex="-1"></a>look like once you have a tool that can actually show it.</span>
+<span id="cb23-309"><a href="#cb23-309" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-310"><a href="#cb23-310" aria-hidden="true" tabindex="-1"></a><span class="ss">7. </span>Extract adjective-noun pairs the way the chapter does (<span class="in">`dep == "amod"`</span>,</span>
+<span id="cb23-311"><a href="#cb23-311" aria-hidden="true" tabindex="-1"></a>joined to the <span class="in">`NOUN`</span> sitting at <span class="in">`head_idx`</span>), restrict to pairs where the</span>
+<span id="cb23-312"><a href="#cb23-312" aria-hidden="true" tabindex="-1"></a>noun is <span class="in">`"movie"`</span> or <span class="in">`"film"`</span>, and print the count for <span class="in">`"good"`</span> and <span class="in">`"bad"`</span></span>
+<span id="cb23-313"><a href="#cb23-313" aria-hidden="true" tabindex="-1"></a>by <span class="in">`label`</span>.</span>
+<span id="cb23-314"><a href="#cb23-314" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-317"><a href="#cb23-317" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb23-318"><a href="#cb23-318" aria-hidden="true" tabindex="-1"></a>amod <span class="op">=</span> (</span>
+<span id="cb23-319"><a href="#cb23-319" aria-hidden="true" tabindex="-1"></a>    anno</span>
+<span id="cb23-320"><a href="#cb23-320" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.dep <span class="op">==</span> <span class="st">"amod"</span>, c.is_alpha)</span>
+<span id="cb23-321"><a href="#cb23-321" aria-hidden="true" tabindex="-1"></a>    .select(</span>
+<span id="cb23-322"><a href="#cb23-322" aria-hidden="true" tabindex="-1"></a>        c.doc_id, c.sid,</span>
+<span id="cb23-323"><a href="#cb23-323" aria-hidden="true" tabindex="-1"></a>        adjective <span class="op">=</span> c.lemma,</span>
+<span id="cb23-324"><a href="#cb23-324" aria-hidden="true" tabindex="-1"></a>        noun_idx <span class="op">=</span> c.head_idx</span>
+<span id="cb23-325"><a href="#cb23-325" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb23-326"><a href="#cb23-326" aria-hidden="true" tabindex="-1"></a>    .join(</span>
+<span id="cb23-327"><a href="#cb23-327" aria-hidden="true" tabindex="-1"></a>        anno.<span class="bu">filter</span>(c.upos <span class="op">==</span> <span class="st">"NOUN"</span>).select(</span>
+<span id="cb23-328"><a href="#cb23-328" aria-hidden="true" tabindex="-1"></a>            c.doc_id, c.sid, noun_idx <span class="op">=</span> c.tid, noun <span class="op">=</span> c.lemma,</span>
+<span id="cb23-329"><a href="#cb23-329" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb23-330"><a href="#cb23-330" aria-hidden="true" tabindex="-1"></a>        on<span class="op">=</span>[c.doc_id, c.sid, c.noun_idx]</span>
+<span id="cb23-331"><a href="#cb23-331" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb23-332"><a href="#cb23-332" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-333"><a href="#cb23-333" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-334"><a href="#cb23-334" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb23-335"><a href="#cb23-335" aria-hidden="true" tabindex="-1"></a>    amod</span>
+<span id="cb23-336"><a href="#cb23-336" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.noun.is_in([<span class="st">"movie"</span>, <span class="st">"film"</span>]))</span>
+<span id="cb23-337"><a href="#cb23-337" aria-hidden="true" tabindex="-1"></a>    .join(docs.select(c.doc_id, c.label), on<span class="op">=</span>c.doc_id)</span>
+<span id="cb23-338"><a href="#cb23-338" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.adjective.is_in([<span class="st">"good"</span>, <span class="st">"bad"</span>]))</span>
+<span id="cb23-339"><a href="#cb23-339" aria-hidden="true" tabindex="-1"></a>    .group_by([c.label, c.adjective])</span>
+<span id="cb23-340"><a href="#cb23-340" aria-hidden="true" tabindex="-1"></a>    .agg(count <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb23-341"><a href="#cb23-341" aria-hidden="true" tabindex="-1"></a>    .sort([c.label, c.adjective])</span>
+<span id="cb23-342"><a href="#cb23-342" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-343"><a href="#cb23-343" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-344"><a href="#cb23-344" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-345"><a href="#cb23-345" aria-hidden="true" tabindex="-1"></a>Restricting to a real grammatical attachment ("bad movie", not just "bad"</span>
+<span id="cb23-346"><a href="#cb23-346" aria-hidden="true" tabindex="-1"></a>anywhere in the review) sharpens the signal for <span class="in">`bad`</span> well past what the</span>
+<span id="cb23-347"><a href="#cb23-347" aria-hidden="true" tabindex="-1"></a>last notebook found from raw whole-review counts: 16 negative uses of "bad</span>
+<span id="cb23-348"><a href="#cb23-348" aria-hidden="true" tabindex="-1"></a>movie"/"bad film" against a single positive one, versus 86-to-17 for the</span>
+<span id="cb23-349"><a href="#cb23-349" aria-hidden="true" tabindex="-1"></a>word <span class="in">`bad`</span> anywhere in the review. <span class="in">`good`</span>, though, barely moves: 9 negative</span>
+<span id="cb23-350"><a href="#cb23-350" aria-hidden="true" tabindex="-1"></a>against 8 positive, almost exactly as balanced as the raw count was. A</span>
+<span id="cb23-351"><a href="#cb23-351" aria-hidden="true" tabindex="-1"></a>tighter grammatical filter helps when the word being filtered for is doing</span>
+<span id="cb23-352"><a href="#cb23-352" aria-hidden="true" tabindex="-1"></a>real evaluative work, but it is not a fix for negation on its own, since</span>
+<span id="cb23-353"><a href="#cb23-353" aria-hidden="true" tabindex="-1"></a>"not good" is still <span class="in">`good`</span> attached to the same head as <span class="in">`movie`</span>.</span>
+<span id="cb23-354"><a href="#cb23-354" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-355"><a href="#cb23-355" aria-hidden="true" tabindex="-1"></a><span class="ss">8. </span>Find every negated predicate adjective: join tokens with <span class="in">`dep == "neg"`</span></span>
+<span id="cb23-356"><a href="#cb23-356" aria-hidden="true" tabindex="-1"></a>to <span class="in">`ADJ`</span> tokens with <span class="in">`dep in ["acomp", "attr"]`</span> that share the same</span>
+<span id="cb23-357"><a href="#cb23-357" aria-hidden="true" tabindex="-1"></a><span class="in">`head_idx`</span> within a <span class="in">`doc_id`</span>/<span class="in">`sid`</span> (this is the same "share a head" logic</span>
+<span id="cb23-358"><a href="#cb23-358" aria-hidden="true" tabindex="-1"></a>question 6 used for subjects and verbs). Count how many negated predicate</span>
+<span id="cb23-359"><a href="#cb23-359" aria-hidden="true" tabindex="-1"></a>adjectives exist in total, then count how many of them have the negation</span>
+<span id="cb23-360"><a href="#cb23-360" aria-hidden="true" tabindex="-1"></a>word sitting in the position immediately before the adjective, the only</span>
+<span id="cb23-361"><a href="#cb23-361" aria-hidden="true" tabindex="-1"></a>case a bigram search like question 1's <span class="in">`shift(-1)`</span> could ever catch.</span>
+<span id="cb23-362"><a href="#cb23-362" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-365"><a href="#cb23-365" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb23-366"><a href="#cb23-366" aria-hidden="true" tabindex="-1"></a>neg <span class="op">=</span> anno.<span class="bu">filter</span>(c.dep <span class="op">==</span> <span class="st">"neg"</span>).select(c.doc_id, c.sid, neg_tid <span class="op">=</span> c.tid, verb_idx <span class="op">=</span> c.head_idx)</span>
+<span id="cb23-367"><a href="#cb23-367" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-368"><a href="#cb23-368" aria-hidden="true" tabindex="-1"></a>predicate_adj <span class="op">=</span> (</span>
+<span id="cb23-369"><a href="#cb23-369" aria-hidden="true" tabindex="-1"></a>    anno</span>
+<span id="cb23-370"><a href="#cb23-370" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.upos <span class="op">==</span> <span class="st">"ADJ"</span>, c.dep.is_in([<span class="st">"acomp"</span>, <span class="st">"attr"</span>]))</span>
+<span id="cb23-371"><a href="#cb23-371" aria-hidden="true" tabindex="-1"></a>    .select(c.doc_id, c.sid, verb_idx <span class="op">=</span> c.head_idx, adj_tid <span class="op">=</span> c.tid, adjective <span class="op">=</span> c.lemma)</span>
+<span id="cb23-372"><a href="#cb23-372" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-373"><a href="#cb23-373" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-374"><a href="#cb23-374" aria-hidden="true" tabindex="-1"></a>negated_adj <span class="op">=</span> neg.join(predicate_adj, on<span class="op">=</span>[c.doc_id, c.sid, c.verb_idx])</span>
+<span id="cb23-375"><a href="#cb23-375" aria-hidden="true" tabindex="-1"></a>negated_adj.height</span>
+<span id="cb23-376"><a href="#cb23-376" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-377"><a href="#cb23-377" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-380"><a href="#cb23-380" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb23-381"><a href="#cb23-381" aria-hidden="true" tabindex="-1"></a>negated_adj.<span class="bu">filter</span>(c.adj_tid <span class="op">==</span> c.neg_tid <span class="op">+</span> <span class="dv">1</span>).height</span>
+<span id="cb23-382"><a href="#cb23-382" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-383"><a href="#cb23-383" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-384"><a href="#cb23-384" aria-hidden="true" tabindex="-1"></a>Only 30 of the 76 negated predicate adjectives have the negation word</span>
+<span id="cb23-385"><a href="#cb23-385" aria-hidden="true" tabindex="-1"></a>directly next to them; the other 46 have something in between, sometimes a</span>
+<span id="cb23-386"><a href="#cb23-386" aria-hidden="true" tabindex="-1"></a>single word ("never tired"), sometimes a whole clause. A bigram search for</span>
+<span id="cb23-387"><a href="#cb23-387" aria-hidden="true" tabindex="-1"></a>"not X" would have silently missed 61% of the true negations in this</span>
+<span id="cb23-388"><a href="#cb23-388" aria-hidden="true" tabindex="-1"></a>corpus, not because the sentences are unusual, but because negation in</span>
+<span id="cb23-389"><a href="#cb23-389" aria-hidden="true" tabindex="-1"></a>English does not have to sit next to the word it negates. Dependency</span>
+<span id="cb23-390"><a href="#cb23-390" aria-hidden="true" tabindex="-1"></a>parsing catches all 76 the same way regardless of the gap, because it is</span>
+<span id="cb23-391"><a href="#cb23-391" aria-hidden="true" tabindex="-1"></a>tracking a grammatical relationship, not a distance. This is the tool the</span>
+<span id="cb23-392"><a href="#cb23-392" aria-hidden="true" tabindex="-1"></a>last notebook's question 10 was missing: a real way to tell "good" and "not</span>
+<span id="cb23-393"><a href="#cb23-393" aria-hidden="true" tabindex="-1"></a>good" apart.</span>
+<span id="cb23-394"><a href="#cb23-394" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-395"><a href="#cb23-395" aria-hidden="true" tabindex="-1"></a><span class="ss">9. </span>Run <span class="in">`DSText.kwic()`</span> on the lemma <span class="in">`"acting"`</span> with <span class="in">`window=5`</span> and</span>
+<span id="cb23-396"><a href="#cb23-396" aria-hidden="true" tabindex="-1"></a><span class="in">`max_num=10`</span>.</span>
+<span id="cb23-397"><a href="#cb23-397" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-400"><a href="#cb23-400" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb23-401"><a href="#cb23-401" aria-hidden="true" tabindex="-1"></a>DSText.kwic(anno, <span class="st">"acting"</span>, max_num<span class="op">=</span><span class="dv">10</span>, window<span class="op">=</span><span class="dv">5</span>)</span>
+<span id="cb23-402"><a href="#cb23-402" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-403"><a href="#cb23-403" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-404"><a href="#cb23-404" aria-hidden="true" tabindex="-1"></a>The concordance shows both halves of the corpus at once, since the display</span>
+<span id="cb23-405"><a href="#cb23-405" aria-hidden="true" tabindex="-1"></a>is not filtered by <span class="in">`label`</span>: "terrible", "decidedly bad", and "purely" sit</span>
+<span id="cb23-406"><a href="#cb23-406" aria-hidden="true" tabindex="-1"></a>next to "good acting" and "above average" within the same 10 lines. No</span>
+<span id="cb23-407"><a href="#cb23-407" aria-hidden="true" tabindex="-1"></a>adjective-frequency table would show this as directly, since "acting" here</span>
+<span id="cb23-408"><a href="#cb23-408" aria-hidden="true" tabindex="-1"></a>is playing the role of the noun being judged, and the judgments on either</span>
+<span id="cb23-409"><a href="#cb23-409" aria-hidden="true" tabindex="-1"></a>side of it in the printout are the actual words reviewers reached for.</span>
+<span id="cb23-410"><a href="#cb23-410" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-411"><a href="#cb23-411" aria-hidden="true" tabindex="-1"></a><span class="ss">10. </span>Compute the four complexity metrics from the chapter (mean sentence</span>
+<span id="cb23-412"><a href="#cb23-412" aria-hidden="true" tabindex="-1"></a>length, type-token ratio, mean word length, and content-word ratio) per</span>
+<span id="cb23-413"><a href="#cb23-413" aria-hidden="true" tabindex="-1"></a>document, join them into a single table, and print the mean of each metric</span>
+<span id="cb23-414"><a href="#cb23-414" aria-hidden="true" tabindex="-1"></a>grouped by <span class="in">`label`</span>.</span>
+<span id="cb23-415"><a href="#cb23-415" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-418"><a href="#cb23-418" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb23-419"><a href="#cb23-419" aria-hidden="true" tabindex="-1"></a>sentence_length <span class="op">=</span> (</span>
+<span id="cb23-420"><a href="#cb23-420" aria-hidden="true" tabindex="-1"></a>    anno</span>
+<span id="cb23-421"><a href="#cb23-421" aria-hidden="true" tabindex="-1"></a>    .group_by([c.doc_id, c.sid])</span>
+<span id="cb23-422"><a href="#cb23-422" aria-hidden="true" tabindex="-1"></a>    .agg(n_words <span class="op">=</span> c.is_alpha.<span class="bu">sum</span>())</span>
+<span id="cb23-423"><a href="#cb23-423" aria-hidden="true" tabindex="-1"></a>    .group_by(c.doc_id)</span>
+<span id="cb23-424"><a href="#cb23-424" aria-hidden="true" tabindex="-1"></a>    .agg(mean_sentence_length <span class="op">=</span> c.n_words.mean())</span>
+<span id="cb23-425"><a href="#cb23-425" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-426"><a href="#cb23-426" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-427"><a href="#cb23-427" aria-hidden="true" tabindex="-1"></a>ttr <span class="op">=</span> (</span>
+<span id="cb23-428"><a href="#cb23-428" aria-hidden="true" tabindex="-1"></a>    anno</span>
+<span id="cb23-429"><a href="#cb23-429" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.is_alpha)</span>
+<span id="cb23-430"><a href="#cb23-430" aria-hidden="true" tabindex="-1"></a>    .group_by(c.doc_id)</span>
+<span id="cb23-431"><a href="#cb23-431" aria-hidden="true" tabindex="-1"></a>    .agg(n_tokens <span class="op">=</span> pl.<span class="bu">len</span>(), n_types <span class="op">=</span> c.lemma.n_unique())</span>
+<span id="cb23-432"><a href="#cb23-432" aria-hidden="true" tabindex="-1"></a>    .with_columns(ttr <span class="op">=</span> c.n_types <span class="op">/</span> c.n_tokens)</span>
+<span id="cb23-433"><a href="#cb23-433" aria-hidden="true" tabindex="-1"></a>    .select(c.doc_id, c.ttr)</span>
+<span id="cb23-434"><a href="#cb23-434" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-435"><a href="#cb23-435" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-436"><a href="#cb23-436" aria-hidden="true" tabindex="-1"></a>word_length <span class="op">=</span> (</span>
+<span id="cb23-437"><a href="#cb23-437" aria-hidden="true" tabindex="-1"></a>    anno</span>
+<span id="cb23-438"><a href="#cb23-438" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.is_alpha)</span>
+<span id="cb23-439"><a href="#cb23-439" aria-hidden="true" tabindex="-1"></a>    .with_columns(word_length <span class="op">=</span> c.token.<span class="bu">str</span>.len_chars())</span>
+<span id="cb23-440"><a href="#cb23-440" aria-hidden="true" tabindex="-1"></a>    .group_by(c.doc_id)</span>
+<span id="cb23-441"><a href="#cb23-441" aria-hidden="true" tabindex="-1"></a>    .agg(mean_word_length <span class="op">=</span> c.word_length.mean())</span>
+<span id="cb23-442"><a href="#cb23-442" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-443"><a href="#cb23-443" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-444"><a href="#cb23-444" aria-hidden="true" tabindex="-1"></a>content_pos <span class="op">=</span> [<span class="st">"NOUN"</span>, <span class="st">"VERB"</span>, <span class="st">"ADJ"</span>, <span class="st">"ADV"</span>]</span>
+<span id="cb23-445"><a href="#cb23-445" aria-hidden="true" tabindex="-1"></a>content_ratio <span class="op">=</span> (</span>
+<span id="cb23-446"><a href="#cb23-446" aria-hidden="true" tabindex="-1"></a>    anno</span>
+<span id="cb23-447"><a href="#cb23-447" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.is_alpha)</span>
+<span id="cb23-448"><a href="#cb23-448" aria-hidden="true" tabindex="-1"></a>    .with_columns(is_content <span class="op">=</span> c.upos.is_in(content_pos))</span>
+<span id="cb23-449"><a href="#cb23-449" aria-hidden="true" tabindex="-1"></a>    .group_by(c.doc_id)</span>
+<span id="cb23-450"><a href="#cb23-450" aria-hidden="true" tabindex="-1"></a>    .agg(n_words <span class="op">=</span> pl.<span class="bu">len</span>(), n_content <span class="op">=</span> c.is_content.<span class="bu">sum</span>())</span>
+<span id="cb23-451"><a href="#cb23-451" aria-hidden="true" tabindex="-1"></a>    .with_columns(content_ratio <span class="op">=</span> c.n_content <span class="op">/</span> c.n_words)</span>
+<span id="cb23-452"><a href="#cb23-452" aria-hidden="true" tabindex="-1"></a>    .select(c.doc_id, c.content_ratio)</span>
+<span id="cb23-453"><a href="#cb23-453" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-454"><a href="#cb23-454" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-455"><a href="#cb23-455" aria-hidden="true" tabindex="-1"></a>style_metrics <span class="op">=</span> (</span>
+<span id="cb23-456"><a href="#cb23-456" aria-hidden="true" tabindex="-1"></a>    sentence_length</span>
+<span id="cb23-457"><a href="#cb23-457" aria-hidden="true" tabindex="-1"></a>    .join(ttr, on<span class="op">=</span>c.doc_id)</span>
+<span id="cb23-458"><a href="#cb23-458" aria-hidden="true" tabindex="-1"></a>    .join(word_length, on<span class="op">=</span>c.doc_id)</span>
+<span id="cb23-459"><a href="#cb23-459" aria-hidden="true" tabindex="-1"></a>    .join(content_ratio, on<span class="op">=</span>c.doc_id)</span>
+<span id="cb23-460"><a href="#cb23-460" aria-hidden="true" tabindex="-1"></a>    .join(docs.select(c.doc_id, c.label), on<span class="op">=</span>c.doc_id)</span>
+<span id="cb23-461"><a href="#cb23-461" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-462"><a href="#cb23-462" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-463"><a href="#cb23-463" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb23-464"><a href="#cb23-464" aria-hidden="true" tabindex="-1"></a>    style_metrics</span>
+<span id="cb23-465"><a href="#cb23-465" aria-hidden="true" tabindex="-1"></a>    .group_by(c.label)</span>
+<span id="cb23-466"><a href="#cb23-466" aria-hidden="true" tabindex="-1"></a>    .agg(</span>
+<span id="cb23-467"><a href="#cb23-467" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"mean_sentence_length"</span>).mean(),</span>
+<span id="cb23-468"><a href="#cb23-468" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"ttr"</span>).mean(),</span>
+<span id="cb23-469"><a href="#cb23-469" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"mean_word_length"</span>).mean(),</span>
+<span id="cb23-470"><a href="#cb23-470" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"content_ratio"</span>).mean()</span>
+<span id="cb23-471"><a href="#cb23-471" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb23-472"><a href="#cb23-472" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-473"><a href="#cb23-473" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-474"><a href="#cb23-474" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-475"><a href="#cb23-475" aria-hidden="true" tabindex="-1"></a>None of the four metrics separates the two labels by much: sentence length</span>
+<span id="cb23-476"><a href="#cb23-476" aria-hidden="true" tabindex="-1"></a>differs by about half a word, word length by four hundredths of a</span>
+<span id="cb23-477"><a href="#cb23-477" aria-hidden="true" tabindex="-1"></a>character. These are measures of *style*, and the style of a positive</span>
+<span id="cb23-478"><a href="#cb23-478" aria-hidden="true" tabindex="-1"></a>review and a negative review of the same kind of movie, written by the same</span>
+<span id="cb23-479"><a href="#cb23-479" aria-hidden="true" tabindex="-1"></a>kind of person, is not obviously different. Sentiment lives in which words</span>
+<span id="cb23-480"><a href="#cb23-480" aria-hidden="true" tabindex="-1"></a>get chosen, as questions 7 and 8 showed, not in how long or how varied the</span>
+<span id="cb23-481"><a href="#cb23-481" aria-hidden="true" tabindex="-1"></a>sentences carrying those words happen to be.</span>
+<span id="cb23-482"><a href="#cb23-482" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-483"><a href="#cb23-483" aria-hidden="true" tabindex="-1"></a><span class="ss">11. </span>Plot <span class="in">`mean_sentence_length`</span> against <span class="in">`mean_word_length`</span> from</span>
+<span id="cb23-484"><a href="#cb23-484" aria-hidden="true" tabindex="-1"></a><span class="in">`style_metrics`</span>, coloring points by <span class="in">`label`</span>.</span>
+<span id="cb23-485"><a href="#cb23-485" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-488"><a href="#cb23-488" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb23-489"><a href="#cb23-489" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb23-490"><a href="#cb23-490" aria-hidden="true" tabindex="-1"></a>    style_metrics</span>
+<span id="cb23-491"><a href="#cb23-491" aria-hidden="true" tabindex="-1"></a>    .pipe(ggplot, aes(c.mean_sentence_length, c.mean_word_length, color<span class="op">=</span>c.label))</span>
+<span id="cb23-492"><a href="#cb23-492" aria-hidden="true" tabindex="-1"></a>    .geom_point()</span>
+<span id="cb23-493"><a href="#cb23-493" aria-hidden="true" tabindex="-1"></a>    .labs(title<span class="op">=</span><span class="st">"Sentence Length vs. Word Length by Review Sentiment"</span>, x<span class="op">=</span><span class="st">"Mean Sentence Length"</span>, y<span class="op">=</span><span class="st">"Mean Word Length"</span>)</span>
+<span id="cb23-494"><a href="#cb23-494" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-495"><a href="#cb23-495" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-496"><a href="#cb23-496" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-497"><a href="#cb23-497" aria-hidden="true" tabindex="-1"></a>The two colors sit on top of each other across the whole plot, with no</span>
+<span id="cb23-498"><a href="#cb23-498" aria-hidden="true" tabindex="-1"></a>region dominated by one label. This is the visual version of question 10's</span>
+<span id="cb23-499"><a href="#cb23-499" aria-hidden="true" tabindex="-1"></a>finding: whatever separates a positive review from a negative one, it is</span>
+<span id="cb23-500"><a href="#cb23-500" aria-hidden="true" tabindex="-1"></a>not this pair of style measures.</span>
+<span id="cb23-501"><a href="#cb23-501" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-502"><a href="#cb23-502" aria-hidden="true" tabindex="-1"></a><span class="ss">12. </span>Count the number of <span class="in">`"!"`</span> tokens per document, join that count onto</span>
+<span id="cb23-503"><a href="#cb23-503" aria-hidden="true" tabindex="-1"></a><span class="in">`docs`</span>, and print the mean per-review count and the fraction of reviews</span>
+<span id="cb23-504"><a href="#cb23-504" aria-hidden="true" tabindex="-1"></a>containing at least one <span class="in">`"!"`</span>, grouped by <span class="in">`label`</span>.</span>
+<span id="cb23-505"><a href="#cb23-505" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-508"><a href="#cb23-508" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb23-509"><a href="#cb23-509" aria-hidden="true" tabindex="-1"></a>excl_counts <span class="op">=</span> (</span>
+<span id="cb23-510"><a href="#cb23-510" aria-hidden="true" tabindex="-1"></a>    anno</span>
+<span id="cb23-511"><a href="#cb23-511" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.token <span class="op">==</span> <span class="st">"!"</span>)</span>
+<span id="cb23-512"><a href="#cb23-512" aria-hidden="true" tabindex="-1"></a>    .group_by(c.doc_id)</span>
+<span id="cb23-513"><a href="#cb23-513" aria-hidden="true" tabindex="-1"></a>    .agg(n_excl <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb23-514"><a href="#cb23-514" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-515"><a href="#cb23-515" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-516"><a href="#cb23-516" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb23-517"><a href="#cb23-517" aria-hidden="true" tabindex="-1"></a>    docs</span>
+<span id="cb23-518"><a href="#cb23-518" aria-hidden="true" tabindex="-1"></a>    .select(c.doc_id, c.label)</span>
+<span id="cb23-519"><a href="#cb23-519" aria-hidden="true" tabindex="-1"></a>    .join(excl_counts, on<span class="op">=</span>c.doc_id, how<span class="op">=</span><span class="st">"left"</span>)</span>
+<span id="cb23-520"><a href="#cb23-520" aria-hidden="true" tabindex="-1"></a>    .with_columns(n_excl <span class="op">=</span> c.n_excl.fill_null(<span class="dv">0</span>))</span>
+<span id="cb23-521"><a href="#cb23-521" aria-hidden="true" tabindex="-1"></a>    .group_by(c.label)</span>
+<span id="cb23-522"><a href="#cb23-522" aria-hidden="true" tabindex="-1"></a>    .agg(</span>
+<span id="cb23-523"><a href="#cb23-523" aria-hidden="true" tabindex="-1"></a>        mean_excl <span class="op">=</span> c.n_excl.mean(),</span>
+<span id="cb23-524"><a href="#cb23-524" aria-hidden="true" tabindex="-1"></a>        pct_any_excl <span class="op">=</span> (c.n_excl <span class="op">&gt;</span> <span class="dv">0</span>).mean()</span>
+<span id="cb23-525"><a href="#cb23-525" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb23-526"><a href="#cb23-526" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-527"><a href="#cb23-527" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-528"><a href="#cb23-528" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-529"><a href="#cb23-529" aria-hidden="true" tabindex="-1"></a>Here the two labels finally split: negative reviews average 1.21</span>
+<span id="cb23-530"><a href="#cb23-530" aria-hidden="true" tabindex="-1"></a>exclamation points against 0.52 for positive ones, more than double. It is a</span>
+<span id="cb23-531"><a href="#cb23-531" aria-hidden="true" tabindex="-1"></a>small, crude signal on its own, and it says nothing about *what* is being</span>
+<span id="cb23-532"><a href="#cb23-532" aria-hidden="true" tabindex="-1"></a>exclaimed, but it is a real difference in a place none of the chapter's</span>
+<span id="cb23-533"><a href="#cb23-533" aria-hidden="true" tabindex="-1"></a>four standard metrics thought to look. Punctuation is not a linguistic</span>
+<span id="cb23-534"><a href="#cb23-534" aria-hidden="true" tabindex="-1"></a>category the chapter covers, and building this count required nothing more</span>
+<span id="cb23-535"><a href="#cb23-535" aria-hidden="true" tabindex="-1"></a>than the <span class="in">`.filter()`</span> and <span class="in">`.group_by()`</span> chain every earlier chapter already</span>
+<span id="cb23-536"><a href="#cb23-536" aria-hidden="true" tabindex="-1"></a>supplied.</span>
+</code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
+
+
+
+
+</body></html>
