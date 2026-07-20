@@ -3,7 +3,7 @@
 ```{python}
 #| include: false
 import warnings
-warnings.filterwarnings('ignore')
+warnings.filterwarnings("ignore")
 ```
 
 ## Setup
@@ -23,7 +23,7 @@ country = pl.read_csv("data/countries.csv")
 
 ## Introduction
 
-Every time we have printed a DataFrame, the display has shown a short label under each column name: `str` under the country names, `i64` under the population counts, `f64` under the latitudes. These labels are *data types*. Every column in a DataFrame has exactly one type, and that type determines what the column can do: whether its values can be added together, whether they sort numerically or alphabetically, and how missing entries behave. So far we have been able to ignore them, because the `country` dataset arrives in good shape. That luck does not hold.
+Every time we have printed a DataFrame, the display has shown a short label under each column name: `str` under the country names, `i64` under the GDP figures, `f64` under the latitudes. These labels are *data types*. Every column in a DataFrame has exactly one type, and that type determines what the column can do: whether its values can be added together, whether they sort numerically or alphabetically, and how missing entries behave. So far we have been able to ignore them, because the `country` dataset arrives in good shape. That luck does not hold.
 
 This chapter has two goals. The first is to explain the type system: what the common types are, how to check them, how to convert a column from one type to another, and what happens when a value is missing or invalid. The second goal is to go back and give a proper account of something we have been using all along. In the last chapter we wrote fragments such as `c.pop` and `c.hdi > 0.9` and handed them to `.sort()`, `.select()`, `.filter()`, and `.with_columns()`, and we said only that they were recipes rather than data. That was true but vague. These fragments are objects called *expressions*, and understanding what they are explains why the same `c.` syntax keeps turning up inside method after method for the rest of the book.
 
@@ -76,7 +76,7 @@ The answer is `"n/a"`. Strings compare alphabetically, character by character, a
 
 Converting a column from one type to another is called *casting*, done with the `.cast()` method on a column. The target type is written with a `pl.` prefix and a capitalized name: `pl.Int64`, `pl.Float64`, `pl.String`, and `pl.Boolean` correspond to the four header labels we have seen. These longer names are how Polars refers to types inside code, while the headers use short forms to save space.
 
-Casting between the numeric types works as you might expect, with one caution. Converting an integer column to `pl.Float64` is always safe. Going the other way, from floating point to `pl.Int64`, drops the decimal part entirely rather than rounding. The example below casts latitude to an integer; a latitude of 41.9 becomes 41, and -34.6 becomes -34.
+Casting between the numeric types works as you might expect, with one caution. Converting an integer column to `pl.Float64` is always safe. Going the other way, from floating point to `pl.Int64`, drops the decimal part entirely rather than rounding. The example below casts latitude to an integer; a latitude of 18.8 becomes 18, and -9.4 becomes -9.
 
 ```{python}
 (
@@ -91,8 +91,8 @@ Now back to the broken `pop` column in `cities`. Casting it to a numeric type sh
 (
     cities
     .select(
-      c.city,
-      pop = c.pop.cast(pl.Int64, strict=False)
+        c.city,
+        pop = c.pop.cast(pl.Int64, strict=False)
     )
 )
 ```
@@ -120,8 +120,8 @@ The filling methods take the replacement value as their argument. Below, we fill
 (
     cities
     .select(
-      c.city,
-      pop = c.pop.cast(pl.Int64, strict=False).fill_null(0)
+        c.city,
+        pop = c.pop.cast(pl.Int64, strict=False).fill_null(0)
     )
 )
 ```

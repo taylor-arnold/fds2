@@ -15,6 +15,12 @@ Run all of the following before starting the notebook.
 
 ```{python}
 #| tags: [noclear]
+#| eval: false
+! python -m spacy download en_core_web_sm
+```
+
+```{python}
+#| tags: [noclear]
 import polars as pl
 from plotnine import ggplot, aes
 from polars import col as c
@@ -146,10 +152,14 @@ ten top terms (`he`, `his`, `that`) are exactly the kind of function word
 question 2 found polluting the raw frequency count, and TF-IDF has not
 fully removed them here.
 
-5. Investigate the backslash artifact. Count how many of the 200 raw
-articles contain a literal `\` character, grouped by `label`. Then filter
-`anno` to tokens containing a `\` and confirm that every single one is
-tagged `is_alpha == False`.
+5. Investigate the backslash artifact. In the first block, flag each of the
+200 raw articles for whether its `text` contains a literal `\` character,
+group by `label`, and report the count `n` and the proportion `pct_backslash`
+per label, sorted by proportion descending. In the second block, filter
+`anno` to tokens containing a `\`, print how many such tokens there are out
+of the total, and confirm with `is_alpha.any()` that every single one is
+tagged `is_alpha == False`. In the third block, print the `doc_id` and
+`text` of the first article whose text contains a `\`.
 
 ```{python}
 (

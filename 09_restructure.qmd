@@ -3,7 +3,7 @@
 ```{python}
 #| include: false
 import warnings
-warnings.filterwarnings('ignore')
+warnings.filterwarnings("ignore")
 ```
 
 ## Setup
@@ -84,15 +84,15 @@ Now, what if we want to go the other way? That is, suppose we stored the data or
 
 ```{python}
 (
-  cell_wide
-  .unpivot(index=c.year)
+    cell_wide
+    .unpivot(index=c.year)
 )
 ```
 
-::: {.callout-warning collapse="true"}
+::: {.callout-note collapse="true"}
 ## Pivot and unpivot syntax
 
-The current version of Polars on Google Colab does not allow using the `c.` notation when specifying columns as we do with other Polars methods. Instead, you must specify the column as a string, similar to how we do it in plotnine graphics. This has already been changed in the development version of Polars for `pivot` and will likely change for `unpivot` in the near future. Check this callout against the version of Polars pinned for the course before each printing of the text; it is describing a moving target and may already be out of date by the time you read it. For now, remember that both `pivot` and `unpivot` require a different way of specifying columns compared to other Polars methods.
+Polars does not itself accept the `c.` notation when specifying columns in `pivot` and `unpivot`; these two methods expect plain strings. The `funs.py` module loaded at the top of every script patches both methods so that the `c.` notation works the same way it does everywhere else, which is the form used throughout this book. If you ever call `pivot` or `unpivot` without having imported `funs`, specify the columns as strings instead: `.pivot(index="year", on="iso", values="cell")`.
 :::
 
 The `.pivot()` and `.unpivot()` methods are powerful tools for data manipulation and constitute the final major methods we need for manipulating tabular datasets. Although they may at first glance seem straightforward (and should be, at least in theory), care is needed when using them to reshape data, because they can easily introduce subtle errors. The best practice is to decide on the unit of observation up front and structure your data accordingly. Use these reshaping functions when necessary, but avoid unnecessary back-and-forth transformations that can introduce mistakes.
@@ -101,12 +101,12 @@ The `.pivot()` and `.unpivot()` methods are powerful tools for data manipulation
 
 The tidy data framework was built with a particular use case in mind: it makes plotting predictable. plotnine expects long data, and once you know why, several things about earlier chapters start to make more sense.
 
-Try mapping a plotnine aesthetic to country using `cell_wide`. There is no `iso` column to map, only a separate column for each country, so there is no sensible way to write `color=c.iso`. Nothing in `cell_wide` tells plotnine that `usa` and `can` and every other column name are all values of the same underlying variable.
+Try mapping a plotnine aesthetic to country using `cell_wide`. There is no `iso` column to map, only a separate column for each country, so there is no sensible way to write `color=c.iso`. Nothing in `cell_wide` tells plotnine that `USA` and `CAN` and every other column name are all values of the same underlying variable.
 
 ```{python}
 #| eval: false
 (
-    ggplot(cell_wide, aes(x=c.year, y=c.usa))
+    ggplot(cell_wide, aes(x=c.year, y=c.USA))
     .geom_line()
 )
 ```
@@ -121,12 +121,13 @@ cell_long = (
 
 (
     cell_long
+    .filter(c.iso.is_in(["USA", "GBR", "IRL", "CAN"]))
     .pipe(ggplot, aes(x=c.year, y=c.cell, color=c.iso))
     .geom_line()
 )
 ```
 
-With `iso` as a column, `color="iso"` is enough to tell plotnine to draw one line per country. This is also the answer to a question you may have had back when we first plotted `cellphone` by country: that plot worked on the first try, with no reshaping, because `cellphone` was already stored long, with one row per *year × country* combination. The general rule is this: before reaching for `ggplot()`, check whether the variable you want to map to an aesthetic (color, shape, facet, and so on) has its own column. If it does not, unpivot first.
+With `iso` as a column, `color=c.iso` is enough to tell plotnine to draw one line per country; here we also filter to the same four countries as in @sec-graphics, since a line per each of the 174 countries would be unreadable. This is also the answer to a question you may have had back when we first plotted `cellphone` by country: that plot worked on the first try, with no reshaping, because `cellphone` was already stored long, with one row per *year × country* combination. The general rule is this: before reaching for `ggplot()`, check whether the variable you want to map to an aesthetic (color, shape, facet, and so on) has its own column. If it does not, unpivot first.
 
 ## Expand List Columns
 
@@ -142,7 +143,7 @@ A final type of transformation arises when multiple elements occupy a single cel
 )
 ```
 
-It is hard to work directly with the embedding list structure. Often the easiest way to simplify a data frame that contains list elements is to unravel the lists, duplicating the other columns. Use the `.explode()` method, passing the column(s) you want to unravel.
+It is hard to work directly with the embedded list structure. Often the easiest way to simplify a data frame that contains list elements is to unravel the lists, duplicating the other columns. Use the `.explode()` method, passing the column(s) you want to unravel.
 
 ```{python}
 (
@@ -159,6 +160,6 @@ The term "explode" warns us that the resulting dataset can become very large, pa
 
 ## Round Trips Versus Aggregation
 
-It is worth being precise about what pivoting and unpivoting do and do not do. They are round trips: pivot a long table to wide, unpivot it back, and (aside from row and column ordering) you have the original table. No values are created or destroyed, only rearranged. Aggregation is not like this. Grouping a *plant × day* table down to a *plant* table by taking the maximum height, for instance, throws away every day's measurement except the one that set the maximum, and there is no operation that gets those measurements back. Pivoting and unpivoting change a table's shape; aggregation changes its unit of observation, and it does so in one direction only. Keep the distinction in mind, since it is exactly what motivates the "prefer longer" advice for storing data in the first place: a long table can always be pivoted into whatever wide shape an analysis needs, but a table that has already been aggregated cannot be un-aggregated back into it.
+It is worth being precise about what pivoting and unpivoting do and do not do. They are round trips: pivot a long table to wide, unpivot it back, and (aside from row and column ordering) you have the original table. No values are created or destroyed, only rearranged. Aggregation is not like this. Grouping a *plant × day* table down to a *plant* table by taking the maximum height, for instance, throws away every day's measurement except the one that set the maximum, and there is no operation that gets those measurements back. Pivoting and unpivoting change a table's shape; aggregation changes its unit of observation, and it does so in one direction only. Keep the distinction in mind, since it is exactly what motivates the advice to prefer longer formats for storing data that we will develop in @sec-collect: a long table can always be pivoted into whatever wide shape an analysis needs, but a table that has already been aggregated cannot be un-aggregated back into it.
 
 ## References {-}

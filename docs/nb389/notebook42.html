@@ -317,52 +317,59 @@ window.Quarto = {
 <section id="setup" class="level3">
 <h3 class="anchored" data-anchor-id="setup">Setup</h3>
 <p>Run all of the following before starting the notebook.</p>
-<div id="d52219ce" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="1">
+<div id="fc63bd5d" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="1">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span> wget <span class="op">-</span>q <span class="op">-</span>nc https:<span class="op">//</span>raw.githubusercontent.com<span class="op">/</span>taylor<span class="op">-</span>arnold<span class="op">/</span>fds2<span class="op">/</span>refs<span class="op">/</span>heads<span class="op">/</span>main<span class="op">/</span>funs.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<div id="b1d0c1e0" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="2">
+<div id="965650ca" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="2">
 <details class="code-fold">
 <summary>View code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine <span class="im">import</span> ggplot, aes</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> polars <span class="im">import</span> col <span class="im">as</span> c</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> funs</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> funs <span class="im">import</span> DSText, umap_text</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> spacy</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>ub <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span> pip install umap<span class="op">-</span>learn <span class="op">--</span>quiet</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="op">!</span> python <span class="op">-</span>m spacy download en_core_web_sm</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<div id="fb57ae16" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="4">
+<div id="87c0177e" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="3">
 <details class="code-fold">
 <summary>View code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>docs <span class="op">=</span> (</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    pl.read_parquet(ub <span class="op">+</span> <span class="st">"data/agnews_pca.parquet"</span>)</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.index <span class="op">==</span> <span class="st">"test"</span>)</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    .select(c.<span class="bu">id</span>, c.label, c.text)</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    .rename({<span class="st">"id"</span>: <span class="st">"doc_id"</span>})</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    .sort(c.doc_id)</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    .group_by(c.label, maintain_order<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">50</span>)</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine <span class="im">import</span> ggplot, aes</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> polars <span class="im">import</span> col <span class="im">as</span> c</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> funs</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> funs <span class="im">import</span> DSText, umap_text</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> spacy</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>ub <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<div id="44c49c9f" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="5">
+<div id="3bf0e017" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="5">
 <details class="code-fold">
 <summary>View code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>nlp <span class="op">=</span> spacy.load(<span class="st">"en_core_web_sm"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>docs <span class="op">=</span> (</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    pl.read_parquet(ub <span class="op">+</span> <span class="st">"data/agnews_pca.parquet"</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.index <span class="op">==</span> <span class="st">"test"</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    .select(c.<span class="bu">id</span>, c.label, c.text)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    .rename({<span class="st">"id"</span>: <span class="st">"doc_id"</span>})</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    .sort(c.doc_id)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    .group_by(c.label, maintain_order<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">50</span>)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<div id="eedb1313" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="6">
+<div id="dfadaf3d" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="6">
 <details class="code-fold">
 <summary>View code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>anno <span class="op">=</span> DSText.process(docs.select(c.doc_id, c.text), nlp)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>nlp <span class="op">=</span> spacy.load(<span class="st">"en_core_web_sm"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div id="2ced750f" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="7">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>anno <span class="op">=</span> DSText.process(docs.select(c.doc_id, c.text), nlp)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 </section>
@@ -372,12 +379,12 @@ window.Quarto = {
 <ol type="1">
 <li>Compute the TF-IDF table with <code>DSText.compute_tfidf(anno, min_df=0.01, max_df=1.0)</code>, the same call from the last notebook. Print its shape and the number of distinct lemmas it covers.</li>
 </ol>
-<div id="87b4d98d" class="cell" data-execution_count="7">
+<div id="72fe1654" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>View code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>tfidf <span class="op">=</span> DSText.compute_tfidf(anno, min_df<span class="op">=</span><span class="fl">0.01</span>, max_df<span class="op">=</span><span class="fl">1.0</span>)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(tfidf.shape)</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>tfidf.select(c.lemma.n_unique())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>tfidf <span class="op">=</span> DSText.compute_tfidf(anno, min_df<span class="op">=</span><span class="fl">0.01</span>, max_df<span class="op">=</span><span class="fl">1.0</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(tfidf.shape)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>tfidf.select(c.lemma.n_unique())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>(4765, 7)</code></pre>
@@ -410,37 +417,37 @@ window.Quarto = {
 </div>
 </div>
 <ol start="2" type="1">
-<li>Pick two lemmas, <code>"olympic"</code> and <code>"profit"</code>, and pivot their TF-IDF scores into two columns, filling missing combinations with zero. Join <code>label</code> on and plot every document as its <code>doc_id</code>, positioned by these two scores and colored by <code>label</code>. How many documents have a nonzero score for both terms? Compare this to the book’s <code>poem</code>/<code>novel</code> example, where authors who write in both forms show up in the upper-right corner of the plot.</li>
+<li>In the first block, pick two lemmas, <code>"olympic"</code> and <code>"profit"</code>, pivot their TF-IDF scores into two columns, filling missing combinations with zero, join <code>label</code> on, and plot every document as its <code>doc_id</code>, positioned by these two scores and colored by <code>label</code>. In the second block, filter to the documents with a nonzero score for both terms. How many are there? Compare this to the book’s <code>poem</code>/<code>novel</code> example, where authors who write in both forms show up in the upper-right corner of the plot.</li>
 </ol>
-<div id="92f5bc80" class="cell" data-execution_count="8">
+<div id="46abffb8" class="cell" data-execution_count="9">
 <details class="code-fold">
 <summary>View code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>scatter_df <span class="op">=</span> (</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    tfidf</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.lemma.is_in([<span class="st">"olympic"</span>, <span class="st">"profit"</span>]))</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    .pivot(on<span class="op">=</span><span class="st">"lemma"</span>, index<span class="op">=</span><span class="st">"doc_id"</span>, values<span class="op">=</span><span class="st">"tfidf"</span>)</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    .fill_null(<span class="dv">0</span>)</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    .join(docs.select(c.doc_id, c.label), on<span class="op">=</span><span class="st">"doc_id"</span>)</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    scatter_df</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    .pipe(ggplot, aes(c.olympic, c.profit))</span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    .geom_text(aes(label<span class="op">=</span>c.doc_id, color<span class="op">=</span>c.label), size<span class="op">=</span><span class="dv">6</span>)</span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>scatter_df <span class="op">=</span> (</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    tfidf</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.lemma.is_in([<span class="st">"olympic"</span>, <span class="st">"profit"</span>]))</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    .pivot(on<span class="op">=</span><span class="st">"lemma"</span>, index<span class="op">=</span><span class="st">"doc_id"</span>, values<span class="op">=</span><span class="st">"tfidf"</span>)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    .fill_null(<span class="dv">0</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    .join(docs.select(c.doc_id, c.label), on<span class="op">=</span><span class="st">"doc_id"</span>)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    scatter_df</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    .pipe(ggplot, aes(c.olympic, c.profit))</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    .geom_text(aes(label<span class="op">=</span>c.doc_id, color<span class="op">=</span>c.label), size<span class="op">=</span><span class="dv">6</span>)</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="7">
 <div>
 <figure class="figure">
-<p><a href="notebook42_files/figure-html/cell-9-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="notebook42_files/figure-html/cell-9-output-1.png" width="672" height="480" class="figure-img"></a></p>
+<p><a href="notebook42_files/figure-html/cell-10-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="notebook42_files/figure-html/cell-10-output-1.png" width="672" height="480" class="figure-img"></a></p>
 </figure>
 </div>
 </div>
 </div>
-<div id="28dbdc6f" class="cell" data-execution_count="9">
+<div id="00a8a50c" class="cell" data-execution_count="10">
 <details class="code-fold">
 <summary>View code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>scatter_df.<span class="bu">filter</span>((c.olympic <span class="op">&gt;</span> <span class="dv">0</span>) <span class="op">&amp;</span> (c.profit <span class="op">&gt;</span> <span class="dv">0</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>scatter_df.<span class="bu">filter</span>((c.olympic <span class="op">&gt;</span> <span class="dv">0</span>) <span class="op">&amp;</span> (c.profit <span class="op">&gt;</span> <span class="dv">0</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="8">
 <div><style>
@@ -455,8 +462,8 @@ window.Quarto = {
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th">doc_id</th>
-<th data-quarto-table-cell-role="th">olympic</th>
 <th data-quarto-table-cell-role="th">profit</th>
+<th data-quarto-table-cell-role="th">olympic</th>
 <th data-quarto-table-cell-role="th">label</th>
 </tr>
 <tr class="even">
@@ -476,22 +483,22 @@ window.Quarto = {
 <ol start="3" type="1">
 <li>The TF-IDF matrix from question 1 has a row for every document and a column for every lemma. Pivot it into that wide shape, and report what percentage of the entries are exactly zero, along with the average number of nonzero terms per document out of the total vocabulary size.</li>
 </ol>
-<div id="7c80c6a6" class="cell" data-execution_count="10">
+<div id="75bcedc0" class="cell" data-execution_count="11">
 <details class="code-fold">
 <summary>View code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>mat <span class="op">=</span> (</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    tfidf</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    .pivot(on<span class="op">=</span><span class="st">"lemma"</span>, index<span class="op">=</span><span class="st">"doc_id"</span>, values<span class="op">=</span><span class="st">"tfidf"</span>)</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    .fill_null(<span class="dv">0</span>)</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> mat.drop(<span class="st">"doc_id"</span>).to_numpy()</span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>pct_zero <span class="op">=</span> <span class="dv">100</span> <span class="op">*</span> (X <span class="op">==</span> <span class="dv">0</span>).<span class="bu">sum</span>() <span class="op">/</span> X.size</span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>avg_nonzero <span class="op">=</span> (X <span class="op">!=</span> <span class="dv">0</span>).<span class="bu">sum</span>(axis<span class="op">=</span><span class="dv">1</span>).mean()</span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(X.shape, <span class="st">"matrix"</span>)</span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">round</span>(pct_zero, <span class="dv">1</span>), <span class="st">"% zero"</span>)</span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">round</span>(avg_nonzero, <span class="dv">1</span>), <span class="st">"nonzero terms per document, on average"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>mat <span class="op">=</span> (</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    tfidf</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    .pivot(on<span class="op">=</span><span class="st">"lemma"</span>, index<span class="op">=</span><span class="st">"doc_id"</span>, values<span class="op">=</span><span class="st">"tfidf"</span>)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    .fill_null(<span class="dv">0</span>)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> mat.drop(<span class="st">"doc_id"</span>).to_numpy()</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>pct_zero <span class="op">=</span> <span class="dv">100</span> <span class="op">*</span> (X <span class="op">==</span> <span class="dv">0</span>).<span class="bu">sum</span>() <span class="op">/</span> X.size</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>avg_nonzero <span class="op">=</span> (X <span class="op">!=</span> <span class="dv">0</span>).<span class="bu">sum</span>(axis<span class="op">=</span><span class="dv">1</span>).mean()</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(X.shape, <span class="st">"matrix"</span>)</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">round</span>(pct_zero, <span class="dv">1</span>), <span class="st">"% zero"</span>)</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">round</span>(avg_nonzero, <span class="dv">1</span>), <span class="st">"nonzero terms per document, on average"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>(200, 917) matrix
@@ -501,31 +508,31 @@ window.Quarto = {
 </div>
 <p>97.4% of the matrix is zero. Every one of these 200 short wire articles uses, on average, only about 24 of the corpus’s 917 lemmas, a concrete number behind the chapter’s description of a TF-IDF matrix as a <em>sparse embedding</em>.</p>
 <ol start="4" type="1">
-<li>Build a 2D UMAP projection of the corpus with <code>umap_text</code>, using <code>min_df=0.01</code> and <code>max_df=0.5</code> as the chapter does, and plot each document’s <code>label</code> at its projected position, colored by <code>label</code>. Does the plot show four clean, separated clusters the way the book’s biography pages did?</li>
+<li>In the first block, build a 2D UMAP projection of the corpus with <code>umap_text</code>, using <code>min_df=0.01</code> and <code>max_df=0.5</code> as the chapter does, and plot each document’s <code>label</code> at its projected position, colored by <code>label</code>. In the second block, find each point’s nearest neighbor in the projection and print the share whose neighbor carries the same <code>label</code>, both overall and broken down by <code>label</code>. Does the plot show four clean, separated clusters the way the book’s biography pages did?</li>
 </ol>
-<div id="180fa32c" class="cell" data-execution_count="11">
+<div id="4cf6a25d" class="cell" data-execution_count="12">
 <details class="code-fold">
 <summary>View code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>umap_full <span class="op">=</span> (</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    anno</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    .pipe(</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>        umap_text,</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>        doc_id<span class="op">=</span>c.doc_id,</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>        term_id<span class="op">=</span>c.lemma,</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>        n_components<span class="op">=</span><span class="dv">2</span>,</span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>        min_df<span class="op">=</span><span class="fl">0.01</span>,</span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>        max_df<span class="op">=</span><span class="fl">0.5</span>,</span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>        random_state<span class="op">=</span><span class="dv">42</span></span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    .predict(full<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    .join(docs.select(c.doc_id, c.label), on<span class="op">=</span><span class="st">"doc_id"</span>)</span>
-<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>    umap_full</span>
-<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    .pipe(ggplot, aes(c.dr0, c.dr1))</span>
-<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>    .geom_text(aes(label<span class="op">=</span>c.label, color<span class="op">=</span>c.label), size<span class="op">=</span><span class="dv">6</span>)</span>
-<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>umap_full <span class="op">=</span> (</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    anno</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    .pipe(</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>        umap_text,</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>        doc_id<span class="op">=</span>c.doc_id,</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>        term_id<span class="op">=</span>c.lemma,</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>        n_components<span class="op">=</span><span class="dv">2</span>,</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>        min_df<span class="op">=</span><span class="fl">0.01</span>,</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>        max_df<span class="op">=</span><span class="fl">0.5</span>,</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>        random_state<span class="op">=</span><span class="dv">42</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    .predict(full<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    .join(docs.select(c.doc_id, c.label), on<span class="op">=</span><span class="st">"doc_id"</span>)</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>    umap_full</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>    .pipe(ggplot, aes(c.dr0, c.dr1))</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    .geom_text(aes(label<span class="op">=</span>c.label, color<span class="op">=</span>c.label), size<span class="op">=</span><span class="dv">6</span>)</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stderr">
 <pre><code>/Users/admin/gh/fds2/.venv/lib/python3.13/site-packages/tqdm/auto.py:21: TqdmWarning: IProgress not found. Please update jupyter and ipywidgets. See https://ipywidgets.readthedocs.io/en/stable/user_install.html
@@ -534,26 +541,26 @@ window.Quarto = {
 <div class="cell-output cell-output-display" data-execution_count="10">
 <div>
 <figure class="figure">
-<p><a href="notebook42_files/figure-html/cell-12-output-2.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img src="notebook42_files/figure-html/cell-12-output-2.png" width="672" height="480" class="figure-img"></a></p>
+<p><a href="notebook42_files/figure-html/cell-13-output-2.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img src="notebook42_files/figure-html/cell-13-output-2.png" width="672" height="480" class="figure-img"></a></p>
 </figure>
 </div>
 </div>
 </div>
-<div id="a792f107" class="cell" data-execution_count="12">
+<div id="57aac05e" class="cell" data-execution_count="13">
 <details class="code-fold">
 <summary>View code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>coords <span class="op">=</span> umap_full.select(c.dr0, c.dr1).to_numpy()</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>labels_arr <span class="op">=</span> umap_full.select(c.label).to_numpy().ravel()</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>dist_sq <span class="op">=</span> ((coords[:, <span class="va">None</span>, :] <span class="op">-</span> coords[<span class="va">None</span>, :, :]) <span class="op">**</span> <span class="dv">2</span>).<span class="bu">sum</span>(axis<span class="op">=</span><span class="dv">2</span>)</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>np.fill_diagonal(dist_sq, np.inf)</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>nn_idx <span class="op">=</span> dist_sq.argmin(axis<span class="op">=</span><span class="dv">1</span>)</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>same_label <span class="op">=</span> labels_arr <span class="op">==</span> labels_arr[nn_idx]</span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">round</span>(same_label.mean(), <span class="dv">2</span>), <span class="st">"overall same-label nearest-neighbor rate"</span>)</span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> lbl <span class="kw">in</span> <span class="bu">sorted</span>(<span class="bu">set</span>(labels_arr)):</span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    mask <span class="op">=</span> labels_arr <span class="op">==</span> lbl</span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(lbl, <span class="bu">round</span>(same_label[mask].mean(), <span class="dv">2</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>coords <span class="op">=</span> umap_full.select(c.dr0, c.dr1).to_numpy()</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>labels_arr <span class="op">=</span> umap_full.select(c.label).to_numpy().ravel()</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>dist_sq <span class="op">=</span> ((coords[:, <span class="va">None</span>, :] <span class="op">-</span> coords[<span class="va">None</span>, :, :]) <span class="op">**</span> <span class="dv">2</span>).<span class="bu">sum</span>(axis<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>np.fill_diagonal(dist_sq, np.inf)</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>nn_idx <span class="op">=</span> dist_sq.argmin(axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>same_label <span class="op">=</span> labels_arr <span class="op">==</span> labels_arr[nn_idx]</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">round</span>(same_label.mean(), <span class="dv">2</span>), <span class="st">"overall same-label nearest-neighbor rate"</span>)</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> lbl <span class="kw">in</span> <span class="bu">sorted</span>(<span class="bu">set</span>(labels_arr)):</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    mask <span class="op">=</span> labels_arr <span class="op">==</span> lbl</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(lbl, <span class="bu">round</span>(same_label[mask].mean(), <span class="dv">2</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>0.5 overall same-label nearest-neighbor rate
@@ -567,12 +574,12 @@ World 0.5</code></pre>
 <ol start="5" type="1">
 <li>Compute the pairwise angle distance between every pair of documents with <code>DSText.compute_distances(anno, min_df=0.01, max_df=0.5)</code>. Print its shape, and confirm the row count matches <span class="math inline">\(\binom{200}{2}\)</span>, the number of ways to pick an unordered pair from 200 documents.</li>
 </ol>
-<div id="820502e4" class="cell" data-execution_count="13">
+<div id="a307f138" class="cell" data-execution_count="14">
 <details class="code-fold">
 <summary>View code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>text_dist <span class="op">=</span> DSText.compute_distances(anno, min_df<span class="op">=</span><span class="fl">0.01</span>, max_df<span class="op">=</span><span class="fl">0.5</span>)</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(text_dist.shape)</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="dv">200</span> <span class="op">*</span> <span class="dv">199</span> <span class="op">//</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>text_dist <span class="op">=</span> DSText.compute_distances(anno, min_df<span class="op">=</span><span class="fl">0.01</span>, max_df<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(text_dist.shape)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="dv">200</span> <span class="op">*</span> <span class="dv">199</span> <span class="op">//</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>(19900, 3)
@@ -582,14 +589,14 @@ World 0.5</code></pre>
 <ol start="6" type="1">
 <li>Each pair in <code>text_dist</code> is stored once, in <code>doc_id &lt; doc_id2</code> order. Stack the table with a copy of itself with the two ID columns swapped, so that every document appears in the <code>doc_id</code> column with a row for every other document.</li>
 </ol>
-<div id="abbcd76a" class="cell" data-execution_count="14">
+<div id="5c448d16" class="cell" data-execution_count="15">
 <details class="code-fold">
 <summary>View code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>text_dist_both <span class="op">=</span> pl.concat([</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    text_dist,</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    text_dist.select(doc_id<span class="op">=</span>c.doc_id2, doc_id2<span class="op">=</span>c.doc_id, distance<span class="op">=</span>c.distance)</span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>])</span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>text_dist_both.shape</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>text_dist_both <span class="op">=</span> pl.concat([</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    text_dist,</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    text_dist.select(doc_id<span class="op">=</span>c.doc_id2, doc_id2<span class="op">=</span>c.doc_id, distance<span class="op">=</span>c.distance)</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>text_dist_both.shape</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="13">
 <pre><code>(39800, 3)</code></pre>
@@ -598,15 +605,15 @@ World 0.5</code></pre>
 <ol start="7" type="1">
 <li>The last notebook’s <code>doc120027</code> was Michael Phelps’s “Giddy Phelps Touches Gold” article. Find its five closest matches in <code>text_dist_both</code>.</li>
 </ol>
-<div id="40e92951" class="cell" data-execution_count="15">
+<div id="cc6fabb2" class="cell" data-execution_count="16">
 <details class="code-fold">
 <summary>View code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    text_dist_both</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.doc_id <span class="op">==</span> <span class="st">"doc120027"</span>)</span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    .sort(c.distance)</span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">5</span>)</span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    text_dist_both</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.doc_id <span class="op">==</span> <span class="st">"doc120027"</span>)</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    .sort(c.distance)</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">5</span>)</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="14">
 <div><style>
@@ -665,32 +672,32 @@ World 0.5</code></pre>
 <ol start="8" type="1">
 <li>Find the single nearest neighbor of every document at once, and report what proportion of documents have a nearest neighbor sharing their own <code>label</code>, both overall and broken down by <code>label</code>.</li>
 </ol>
-<div id="6b88a0c4" class="cell" data-execution_count="16">
+<div id="f054a39f" class="cell" data-execution_count="17">
 <details class="code-fold">
 <summary>View code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>nn <span class="op">=</span> (</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    text_dist_both</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    .sort(c.doc_id, c.distance)</span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    .group_by(c.doc_id, maintain_order<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">1</span>)</span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>nn_labeled <span class="op">=</span> (</span>
-<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    nn</span>
-<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>    .join(docs.select(c.doc_id, c.label), on<span class="op">=</span>c.doc_id)</span>
-<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>    .join(</span>
-<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>        docs.select(pl.col(<span class="st">"doc_id"</span>).alias(<span class="st">"doc_id2"</span>), pl.col(<span class="st">"label"</span>).alias(<span class="st">"label2"</span>)),</span>
-<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>        on<span class="op">=</span>c.doc_id2</span>
-<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(nn_labeled.select((c.label <span class="op">==</span> c.label2).mean()))</span>
-<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>    nn_labeled</span>
-<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>    .group_by(c.label)</span>
-<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a>    .agg(n<span class="op">=</span>pl.<span class="bu">len</span>(), n_same<span class="op">=</span>(c.label <span class="op">==</span> c.label2).<span class="bu">sum</span>())</span>
-<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>nn <span class="op">=</span> (</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    text_dist_both</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    .sort(c.doc_id, c.distance)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    .group_by(c.doc_id, maintain_order<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">1</span>)</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>nn_labeled <span class="op">=</span> (</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    nn</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>    .join(docs.select(c.doc_id, c.label), on<span class="op">=</span>c.doc_id)</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>    .join(</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>        docs.select(pl.col(<span class="st">"doc_id"</span>).alias(<span class="st">"doc_id2"</span>), pl.col(<span class="st">"label"</span>).alias(<span class="st">"label2"</span>)),</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>        on<span class="op">=</span>c.doc_id2</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(nn_labeled.select((c.label <span class="op">==</span> c.label2).mean()))</span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a>    nn_labeled</span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>    .group_by(c.label)</span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a>    .agg(n<span class="op">=</span>pl.<span class="bu">len</span>(), n_same<span class="op">=</span>(c.label <span class="op">==</span> c.label2).<span class="bu">sum</span>())</span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>shape: (1, 1)
@@ -731,19 +738,19 @@ World 0.5</code></pre>
 <td>34</td>
 </tr>
 <tr class="even">
+<td>"World"</td>
+<td>50</td>
+<td>38</td>
+</tr>
+<tr class="odd">
 <td>"Sci/Tech"</td>
 <td>50</td>
 <td>28</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>"Sports"</td>
 <td>50</td>
 <td>40</td>
-</tr>
-<tr class="even">
-<td>"World"</td>
-<td>50</td>
-<td>38</td>
 </tr>
 </tbody>
 </table>
@@ -752,31 +759,31 @@ World 0.5</code></pre>
 </div>
 <p>70% of documents (140 of 200) have a same-topic nearest neighbor under the full-dimensional angle distance, well above the 50% question 4 found in the 2D UMAP projection, since collapsing hundreds of dimensions down to two necessarily throws away some of the structure that separates the topics. The ranking across labels matches question 4’s ranking exactly, though: <code>Sports</code> is easiest to match correctly (80%, 40 of 50) and <code>Sci/Tech</code> is hardest (56%, 28 of 50) in both the full-dimensional distances and the 2D projection built from them.</p>
 <ol start="9" type="1">
-<li>The chapter argues that plain Euclidean distance is a poor choice for document vectors because document length distorts it. Test this directly: build the raw (non-length-normalized) TF-IDF matrix with the same <code>min_df</code>/<code>max_df</code> used above, compute the Euclidean distance between every pair of rows, and find each document’s Euclidean nearest neighbor. Which document (or documents) get picked as the nearest neighbor unreasonably often?</li>
+<li>The chapter argues that plain Euclidean distance is a poor choice for document vectors because document length distorts it. Test this directly. In the first block, build the raw (non-length-normalized) TF-IDF matrix with the same <code>min_df</code>/<code>max_df</code> used above, compute the Euclidean distance between every pair of rows, find each document’s Euclidean nearest neighbor, and count how often each document gets chosen as one. In the second block, print <code>doc120070</code>’s Euclidean nearest neighbor and its angle-distance nearest neighbor. Which document (or documents) get picked as the nearest neighbor unreasonably often?</li>
 </ol>
-<div id="986e5aae" class="cell" data-execution_count="17">
+<div id="5a609ec4" class="cell" data-execution_count="18">
 <details class="code-fold">
 <summary>View code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>mat2 <span class="op">=</span> (</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    DSText.compute_tfidf(anno, min_df<span class="op">=</span><span class="fl">0.01</span>, max_df<span class="op">=</span><span class="fl">0.5</span>)</span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    .pivot(on<span class="op">=</span><span class="st">"lemma"</span>, index<span class="op">=</span><span class="st">"doc_id"</span>, values<span class="op">=</span><span class="st">"tfidf"</span>)</span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    .fill_null(<span class="dv">0</span>)</span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    .sort(c.doc_id)</span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>doc_ids2 <span class="op">=</span> mat2.select(c.doc_id).to_series().to_list()</span>
-<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>X2 <span class="op">=</span> mat2.drop(<span class="st">"doc_id"</span>).to_numpy()</span>
-<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>sq_norms <span class="op">=</span> (X2 <span class="op">**</span> <span class="dv">2</span>).<span class="bu">sum</span>(axis<span class="op">=</span><span class="dv">1</span>)</span>
-<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>euclid <span class="op">=</span> np.sqrt(np.clip(sq_norms[:, <span class="va">None</span>] <span class="op">+</span> sq_norms[<span class="va">None</span>, :] <span class="op">-</span> <span class="dv">2</span> <span class="op">*</span> X2 <span class="op">@</span> X2.T, <span class="dv">0</span>, <span class="va">None</span>))</span>
-<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>np.fill_diagonal(euclid, np.inf)</span>
-<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>euclid_nn <span class="op">=</span> pl.DataFrame({</span>
-<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">"doc_id"</span>: doc_ids2,</span>
-<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">"euclid_nn"</span>: [doc_ids2[i] <span class="cf">for</span> i <span class="kw">in</span> euclid.argmin(axis<span class="op">=</span><span class="dv">1</span>)]</span>
-<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a>})</span>
-<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a>euclid_nn.group_by(c.euclid_nn).agg(n<span class="op">=</span>pl.<span class="bu">len</span>()).sort(c.n, descending<span class="op">=</span><span class="va">True</span>).head(<span class="dv">5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>mat2 <span class="op">=</span> (</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    DSText.compute_tfidf(anno, min_df<span class="op">=</span><span class="fl">0.01</span>, max_df<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    .pivot(on<span class="op">=</span><span class="st">"lemma"</span>, index<span class="op">=</span><span class="st">"doc_id"</span>, values<span class="op">=</span><span class="st">"tfidf"</span>)</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    .fill_null(<span class="dv">0</span>)</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    .sort(c.doc_id)</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>doc_ids2 <span class="op">=</span> mat2.select(c.doc_id).to_series().to_list()</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>X2 <span class="op">=</span> mat2.drop(<span class="st">"doc_id"</span>).to_numpy()</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>sq_norms <span class="op">=</span> (X2 <span class="op">**</span> <span class="dv">2</span>).<span class="bu">sum</span>(axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>euclid <span class="op">=</span> np.sqrt(np.clip(sq_norms[:, <span class="va">None</span>] <span class="op">+</span> sq_norms[<span class="va">None</span>, :] <span class="op">-</span> <span class="dv">2</span> <span class="op">*</span> X2 <span class="op">@</span> X2.T, <span class="dv">0</span>, <span class="va">None</span>))</span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>np.fill_diagonal(euclid, np.inf)</span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>euclid_nn <span class="op">=</span> pl.DataFrame({</span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">"doc_id"</span>: doc_ids2,</span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">"euclid_nn"</span>: [doc_ids2[i] <span class="cf">for</span> i <span class="kw">in</span> euclid.argmin(axis<span class="op">=</span><span class="dv">1</span>)]</span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a>euclid_nn.group_by(c.euclid_nn).agg(n<span class="op">=</span>pl.<span class="bu">len</span>()).sort(c.n, descending<span class="op">=</span><span class="va">True</span>).head(<span class="dv">5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="16">
 <div><style>
@@ -812,11 +819,11 @@ World 0.5</code></pre>
 <td>3</td>
 </tr>
 <tr class="even">
-<td>"doc120157"</td>
+<td>"doc120138"</td>
 <td>2</td>
 </tr>
 <tr class="odd">
-<td>"doc120112"</td>
+<td>"doc120157"</td>
 <td>2</td>
 </tr>
 </tbody>
@@ -825,11 +832,11 @@ World 0.5</code></pre>
 </div>
 </div>
 <p>Two documents, <code>doc120007</code> and <code>doc120006</code>, are picked as the Euclidean nearest neighbor for 70 and 66 of the 200 documents respectively. That means 136 documents (68% of the corpus) get one of just two articles as their “closest” match. Both are long: 95 and 137 alphabetic tokens, against a corpus average of 39. Their raw (non-normalized) TF-IDF vectors simply carry more total mass than a typical short wire article’s, which pulls them closer to almost everything in Euclidean terms regardless of topic. For example, <code>doc120070</code> (<code>World</code>, about a police case) gets <code>doc120007</code> (a <code>Sci/Tech</code> article about a computer virus, and incidentally the same article with the backslash line-wrap artifact from the last notebook’s question 5) as its Euclidean nearest neighbor, while the angle distance used in the rest of this notebook correctly matches it to <code>doc120033</code>, another <code>World</code> article about a different Vancouver police case:</p>
-<div id="147c9915" class="cell" data-execution_count="18">
+<div id="674a8d69" class="cell" data-execution_count="19">
 <details class="code-fold">
 <summary>View code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(euclid_nn.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> <span class="st">"doc120070"</span>))</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(nn.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> <span class="st">"doc120070"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(euclid_nn.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> <span class="st">"doc120070"</span>))</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(nn.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> <span class="st">"doc120070"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>shape: (1, 2)
@@ -851,13 +858,13 @@ shape: (1, 3)
 </div>
 </div>
 <ol start="10" type="1">
-<li>Find the single closest pair of documents in the whole corpus under the angle distance, and print both articles’ full text to confirm by eye what makes them so close.</li>
+<li>In the first block, find the single closest pair of documents in the whole corpus under the angle distance. In the second block, print both articles’ full text to confirm by eye what makes them so close.</li>
 </ol>
-<div id="0ee28d6a" class="cell" data-execution_count="19">
+<div id="4a9ed2df" class="cell" data-execution_count="20">
 <details class="code-fold">
 <summary>View code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>closest_pair <span class="op">=</span> text_dist.sort(c.distance).head(<span class="dv">1</span>)</span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>closest_pair</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>closest_pair <span class="op">=</span> text_dist.sort(c.distance).head(<span class="dv">1</span>)</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>closest_pair</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="18">
 <div><style>
@@ -892,12 +899,12 @@ shape: (1, 3)
 </div>
 </div>
 </div>
-<div id="9222955e" class="cell" data-execution_count="20">
+<div id="5c4c57a0" class="cell" data-execution_count="21">
 <details class="code-fold">
 <summary>View code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> doc <span class="kw">in</span> [closest_pair.item(<span class="dv">0</span>, <span class="st">"doc_id"</span>), closest_pair.item(<span class="dv">0</span>, <span class="st">"doc_id2"</span>)]:</span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(docs.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> doc).item(<span class="dv">0</span>, <span class="st">"text"</span>))</span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> doc <span class="kw">in</span> [closest_pair.item(<span class="dv">0</span>, <span class="st">"doc_id"</span>), closest_pair.item(<span class="dv">0</span>, <span class="st">"doc_id2"</span>)]:</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(docs.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> doc).item(<span class="dv">0</span>, <span class="st">"text"</span>))</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Medtronic Quarterly Earnings Rise  CHICAGO (Reuters) - Medtronic Inc. &amp;lt;A HREF="http://www.investor.reuters.com/FullQuote.aspx?ticker=MDT.N target=/stocks/quickinfo/fullquote"&amp;gt;MDT.N&amp;lt;/A&amp;gt; on Wednesday  said its quarterly earnings rose amid brisk demand for devices  that manage irregular heart beats and products used to treat  the spine.
@@ -908,19 +915,19 @@ Medtronic Quarterly Net Up  CHICAGO (Reuters) - Medtronic Inc. &amp;lt;A HREF="h
 </div>
 <p>At a distance of 0.37 (by far the smallest in the corpus, well under the 0.85 next-closest pair), <code>doc120195</code> and <code>doc120199</code> turn out to be two independent wire versions of the exact same story, filed by Reuters minutes apart: Medtronic’s quarterly earnings. The angle distance has found a real near-duplicate, not a coincidence of vocabulary.</p>
 <ol start="11" type="1">
-<li><code>text_dist_both</code> also contains pairs at the maximum possible distance, <span class="math inline">\(\pi/2\)</span>, meaning the two documents share no filtered vocabulary at all. Find the document involved in the most such pairs, and look at its top TF-IDF terms to explain why.</li>
+<li><code>text_dist_both</code> also contains pairs at the maximum possible distance, <span class="math inline">\(\pi/2\)</span>, meaning the two documents share no filtered vocabulary at all. In the first block, find the document involved in the most such pairs. In the second block, print that document’s text and look at its top TF-IDF terms to explain why.</li>
 </ol>
-<div id="9515cef6" class="cell" data-execution_count="21">
+<div id="0c097aa6" class="cell" data-execution_count="22">
 <details class="code-fold">
 <summary>View code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>lonely <span class="op">=</span> (</span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>    text_dist_both</span>
-<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>((c.distance <span class="op">-</span> np.pi <span class="op">/</span> <span class="dv">2</span>).<span class="bu">abs</span>() <span class="op">&lt;</span> <span class="fl">1e-9</span>)</span>
-<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>    .group_by(c.doc_id)</span>
-<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>    .agg(n<span class="op">=</span>pl.<span class="bu">len</span>())</span>
-<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>    .sort(c.n, descending<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>lonely.head(<span class="dv">5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>lonely <span class="op">=</span> (</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>    text_dist_both</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>((c.distance <span class="op">-</span> np.pi <span class="op">/</span> <span class="dv">2</span>).<span class="bu">abs</span>() <span class="op">&lt;</span> <span class="fl">1e-9</span>)</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>    .group_by(c.doc_id)</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>    .agg(n<span class="op">=</span>pl.<span class="bu">len</span>())</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>    .sort(c.n, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>lonely.head(<span class="dv">5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="20">
 <div><style>
@@ -960,7 +967,7 @@ Medtronic Quarterly Net Up  CHICAGO (Reuters) - Medtronic Inc. &amp;lt;A HREF="h
 <td>133</td>
 </tr>
 <tr class="odd">
-<td>"doc120183"</td>
+<td>"doc120081"</td>
 <td>131</td>
 </tr>
 </tbody>
@@ -968,18 +975,18 @@ Medtronic Quarterly Net Up  CHICAGO (Reuters) - Medtronic Inc. &amp;lt;A HREF="h
 </div>
 </div>
 </div>
-<div id="5a114962" class="cell" data-execution_count="22">
+<div id="1ba2f6e1" class="cell" data-execution_count="23">
 <details class="code-fold">
 <summary>View code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>loneliest <span class="op">=</span> lonely.item(<span class="dv">0</span>, <span class="st">"doc_id"</span>)</span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(docs.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> loneliest).item(<span class="dv">0</span>, <span class="st">"text"</span>))</span>
-<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>    DSText.compute_tfidf(anno, min_df<span class="op">=</span><span class="fl">0.01</span>, max_df<span class="op">=</span><span class="fl">0.5</span>)</span>
-<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.doc_id <span class="op">==</span> loneliest)</span>
-<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>    .sort(c.tfidf, descending<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">5</span>)</span>
-<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>loneliest <span class="op">=</span> lonely.item(<span class="dv">0</span>, <span class="st">"doc_id"</span>)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(docs.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> loneliest).item(<span class="dv">0</span>, <span class="st">"text"</span>))</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>    DSText.compute_tfidf(anno, min_df<span class="op">=</span><span class="fl">0.01</span>, max_df<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.doc_id <span class="op">==</span> loneliest)</span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>    .sort(c.tfidf, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">5</span>)</span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Olympics: Emotional Zijlaard-van Moorsel defends time trial title ATHENS : Dutch cycling great Leontien Zijlaard-van Moorsel emotionally defended her Olympic time trial gold medal here. </code></pre>
@@ -1026,7 +1033,7 @@ Medtronic Quarterly Net Up  CHICAGO (Reuters) - Medtronic Inc. &amp;lt;A HREF="h
 </tr>
 <tr class="even">
 <td>"doc120178"</td>
-<td>"van"</td>
+<td>"Zijlaard"</td>
 <td>2</td>
 <td>0.076923</td>
 <td>2</td>
@@ -1044,7 +1051,7 @@ Medtronic Quarterly Net Up  CHICAGO (Reuters) - Medtronic Inc. &amp;lt;A HREF="h
 </tr>
 <tr class="even">
 <td>"doc120178"</td>
-<td>"Zijlaard"</td>
+<td>"van"</td>
 <td>2</td>
 <td>0.076923</td>
 <td>2</td>
@@ -1557,390 +1564,404 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
   </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Notebook42"</span></span>
-<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="an">solutions-release-date:</span><span class="co"> "2026-10-19"</span></span>
-<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a><span class="fu">### Setup</span></span>
-<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>Run all of the following before starting the notebook.</span>
-<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [noclear]</span></span>
-<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
-<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a><span class="op">!</span> wget <span class="op">-</span>q <span class="op">-</span>nc https:<span class="op">//</span>raw.githubusercontent.com<span class="op">/</span>taylor<span class="op">-</span>arnold<span class="op">/</span>fds2<span class="op">/</span>refs<span class="op">/</span>heads<span class="op">/</span>main<span class="op">/</span>funs.py</span>
-<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-20"><a href="#cb32-20" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb32-21"><a href="#cb32-21" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [noclear]</span></span>
-<span id="cb32-22"><a href="#cb32-22" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
-<span id="cb32-23"><a href="#cb32-23" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine <span class="im">import</span> ggplot, aes</span>
-<span id="cb32-24"><a href="#cb32-24" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> polars <span class="im">import</span> col <span class="im">as</span> c</span>
-<span id="cb32-25"><a href="#cb32-25" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb32-26"><a href="#cb32-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-27"><a href="#cb32-27" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> funs</span>
-<span id="cb32-28"><a href="#cb32-28" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> funs <span class="im">import</span> DSText, umap_text</span>
-<span id="cb32-29"><a href="#cb32-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-30"><a href="#cb32-30" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> spacy</span>
-<span id="cb32-31"><a href="#cb32-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-32"><a href="#cb32-32" aria-hidden="true" tabindex="-1"></a>ub <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"</span></span>
-<span id="cb32-33"><a href="#cb32-33" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb32-34"><a href="#cb32-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-37"><a href="#cb32-37" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb32-38"><a href="#cb32-38" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [remove]</span></span>
-<span id="cb32-39"><a href="#cb32-39" aria-hidden="true" tabindex="-1"></a><span class="co">#| include: false</span></span>
-<span id="cb32-40"><a href="#cb32-40" aria-hidden="true" tabindex="-1"></a>ub <span class="op">=</span> <span class="st">""</span></span>
-<span id="cb32-41"><a href="#cb32-41" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb32-42"><a href="#cb32-42" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-45"><a href="#cb32-45" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb32-46"><a href="#cb32-46" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [noclear]</span></span>
-<span id="cb32-47"><a href="#cb32-47" aria-hidden="true" tabindex="-1"></a>docs <span class="op">=</span> (</span>
-<span id="cb32-48"><a href="#cb32-48" aria-hidden="true" tabindex="-1"></a>    pl.read_parquet(ub <span class="op">+</span> <span class="st">"data/agnews_pca.parquet"</span>)</span>
-<span id="cb32-49"><a href="#cb32-49" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.index <span class="op">==</span> <span class="st">"test"</span>)</span>
-<span id="cb32-50"><a href="#cb32-50" aria-hidden="true" tabindex="-1"></a>    .select(c.<span class="bu">id</span>, c.label, c.text)</span>
-<span id="cb32-51"><a href="#cb32-51" aria-hidden="true" tabindex="-1"></a>    .rename({<span class="st">"id"</span>: <span class="st">"doc_id"</span>})</span>
-<span id="cb32-52"><a href="#cb32-52" aria-hidden="true" tabindex="-1"></a>    .sort(c.doc_id)</span>
-<span id="cb32-53"><a href="#cb32-53" aria-hidden="true" tabindex="-1"></a>    .group_by(c.label, maintain_order<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb32-54"><a href="#cb32-54" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">50</span>)</span>
-<span id="cb32-55"><a href="#cb32-55" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb32-56"><a href="#cb32-56" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb32-57"><a href="#cb32-57" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-60"><a href="#cb32-60" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb32-61"><a href="#cb32-61" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [noclear]</span></span>
-<span id="cb32-62"><a href="#cb32-62" aria-hidden="true" tabindex="-1"></a>nlp <span class="op">=</span> spacy.load(<span class="st">"en_core_web_sm"</span>)</span>
-<span id="cb32-63"><a href="#cb32-63" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb32-64"><a href="#cb32-64" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-67"><a href="#cb32-67" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb32-68"><a href="#cb32-68" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [noclear]</span></span>
-<span id="cb32-69"><a href="#cb32-69" aria-hidden="true" tabindex="-1"></a>anno <span class="op">=</span> DSText.process(docs.select(c.doc_id, c.text), nlp)</span>
-<span id="cb32-70"><a href="#cb32-70" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb32-71"><a href="#cb32-71" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-72"><a href="#cb32-72" aria-hidden="true" tabindex="-1"></a><span class="fu">### Questions</span></span>
-<span id="cb32-73"><a href="#cb32-73" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-74"><a href="#cb32-74" aria-hidden="true" tabindex="-1"></a><span class="in">`docs`</span> and <span class="in">`anno`</span> are the same 200 AG News articles from the last notebook,</span>
-<span id="cb32-75"><a href="#cb32-75" aria-hidden="true" tabindex="-1"></a>50 each labeled <span class="in">`"Business"`</span>, <span class="in">`"Sci/Tech"`</span>, <span class="in">`"Sports"`</span>, or <span class="in">`"World"`</span>. That</span>
-<span id="cb32-76"><a href="#cb32-76" aria-hidden="true" tabindex="-1"></a>notebook counted words within each article one at a time; this one turns</span>
-<span id="cb32-77"><a href="#cb32-77" aria-hidden="true" tabindex="-1"></a>each article into a single point and asks how those points relate to one</span>
-<span id="cb32-78"><a href="#cb32-78" aria-hidden="true" tabindex="-1"></a>another. Print results unless a question says otherwise.</span>
-<span id="cb32-79"><a href="#cb32-79" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-80"><a href="#cb32-80" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Compute the TF-IDF table with `DSText.compute_tfidf(anno, min_df=0.01,</span>
-<span id="cb32-81"><a href="#cb32-81" aria-hidden="true" tabindex="-1"></a>max_df=1.0)`, the same call from the last notebook. Print its shape and the</span>
-<span id="cb32-82"><a href="#cb32-82" aria-hidden="true" tabindex="-1"></a>number of distinct lemmas it covers.</span>
-<span id="cb32-83"><a href="#cb32-83" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-86"><a href="#cb32-86" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb32-87"><a href="#cb32-87" aria-hidden="true" tabindex="-1"></a>tfidf <span class="op">=</span> DSText.compute_tfidf(anno, min_df<span class="op">=</span><span class="fl">0.01</span>, max_df<span class="op">=</span><span class="fl">1.0</span>)</span>
-<span id="cb32-88"><a href="#cb32-88" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(tfidf.shape)</span>
-<span id="cb32-89"><a href="#cb32-89" aria-hidden="true" tabindex="-1"></a>tfidf.select(c.lemma.n_unique())</span>
-<span id="cb32-90"><a href="#cb32-90" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb32-91"><a href="#cb32-91" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-92"><a href="#cb32-92" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Pick two lemmas, <span class="in">`"olympic"`</span> and <span class="in">`"profit"`</span>, and pivot their TF-IDF scores</span>
-<span id="cb32-93"><a href="#cb32-93" aria-hidden="true" tabindex="-1"></a>into two columns, filling missing combinations with zero. Join <span class="in">`label`</span> on</span>
-<span id="cb32-94"><a href="#cb32-94" aria-hidden="true" tabindex="-1"></a>and plot every document as its <span class="in">`doc_id`</span>, positioned by these two scores and</span>
-<span id="cb32-95"><a href="#cb32-95" aria-hidden="true" tabindex="-1"></a>colored by <span class="in">`label`</span>. How many documents have a nonzero score for both terms?</span>
-<span id="cb32-96"><a href="#cb32-96" aria-hidden="true" tabindex="-1"></a>Compare this to the book's <span class="in">`poem`</span>/<span class="in">`novel`</span> example, where authors who write</span>
-<span id="cb32-97"><a href="#cb32-97" aria-hidden="true" tabindex="-1"></a>in both forms show up in the upper-right corner of the plot.</span>
-<span id="cb32-98"><a href="#cb32-98" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-101"><a href="#cb32-101" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb32-102"><a href="#cb32-102" aria-hidden="true" tabindex="-1"></a>scatter_df <span class="op">=</span> (</span>
-<span id="cb32-103"><a href="#cb32-103" aria-hidden="true" tabindex="-1"></a>    tfidf</span>
-<span id="cb32-104"><a href="#cb32-104" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.lemma.is_in([<span class="st">"olympic"</span>, <span class="st">"profit"</span>]))</span>
-<span id="cb32-105"><a href="#cb32-105" aria-hidden="true" tabindex="-1"></a>    .pivot(on<span class="op">=</span><span class="st">"lemma"</span>, index<span class="op">=</span><span class="st">"doc_id"</span>, values<span class="op">=</span><span class="st">"tfidf"</span>)</span>
-<span id="cb32-106"><a href="#cb32-106" aria-hidden="true" tabindex="-1"></a>    .fill_null(<span class="dv">0</span>)</span>
-<span id="cb32-107"><a href="#cb32-107" aria-hidden="true" tabindex="-1"></a>    .join(docs.select(c.doc_id, c.label), on<span class="op">=</span><span class="st">"doc_id"</span>)</span>
-<span id="cb32-108"><a href="#cb32-108" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb32-109"><a href="#cb32-109" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-110"><a href="#cb32-110" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb32-111"><a href="#cb32-111" aria-hidden="true" tabindex="-1"></a>    scatter_df</span>
-<span id="cb32-112"><a href="#cb32-112" aria-hidden="true" tabindex="-1"></a>    .pipe(ggplot, aes(c.olympic, c.profit))</span>
-<span id="cb32-113"><a href="#cb32-113" aria-hidden="true" tabindex="-1"></a>    .geom_text(aes(label<span class="op">=</span>c.doc_id, color<span class="op">=</span>c.label), size<span class="op">=</span><span class="dv">6</span>)</span>
-<span id="cb32-114"><a href="#cb32-114" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb32-115"><a href="#cb32-115" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb32-116"><a href="#cb32-116" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-119"><a href="#cb32-119" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb32-120"><a href="#cb32-120" aria-hidden="true" tabindex="-1"></a>scatter_df.<span class="bu">filter</span>((c.olympic <span class="op">&gt;</span> <span class="dv">0</span>) <span class="op">&amp;</span> (c.profit <span class="op">&gt;</span> <span class="dv">0</span>))</span>
-<span id="cb32-121"><a href="#cb32-121" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb32-122"><a href="#cb32-122" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-123"><a href="#cb32-123" aria-hidden="true" tabindex="-1"></a>Zero. Eleven documents (all <span class="in">`Sports`</span>) sit along the <span class="in">`olympic`</span> axis with a</span>
-<span id="cb32-124"><a href="#cb32-124" aria-hidden="true" tabindex="-1"></a><span class="in">`profit`</span> score of exactly 0, and eleven more (all <span class="in">`Business`</span>) sit along the</span>
-<span id="cb32-125"><a href="#cb32-125" aria-hidden="true" tabindex="-1"></a><span class="in">`profit`</span> axis with an <span class="in">`olympic`</span> score of exactly 0; the other 178 sit at the</span>
-<span id="cb32-126"><a href="#cb32-126" aria-hidden="true" tabindex="-1"></a>origin, using neither word. There is no upper-right corner here at all. The</span>
-<span id="cb32-127"><a href="#cb32-127" aria-hidden="true" tabindex="-1"></a>book's authors write in mixed proportions of poetry and prose, so some of</span>
-<span id="cb32-128"><a href="#cb32-128" aria-hidden="true" tabindex="-1"></a>them genuinely earn a spot away from both axes. <span class="in">`olympic`</span> and <span class="in">`profit`</span></span>
-<span id="cb32-129"><a href="#cb32-129" aria-hidden="true" tabindex="-1"></a>belong to two unrelated news beats instead of two overlapping literary</span>
-<span id="cb32-130"><a href="#cb32-130" aria-hidden="true" tabindex="-1"></a>forms, so no article in this corpus has a reason to use both, and the</span>
-<span id="cb32-131"><a href="#cb32-131" aria-hidden="true" tabindex="-1"></a>quadrant plot ends up as clean as it possibly could be.</span>
-<span id="cb32-132"><a href="#cb32-132" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-133"><a href="#cb32-133" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>The TF-IDF matrix from question 1 has a row for every document and a</span>
-<span id="cb32-134"><a href="#cb32-134" aria-hidden="true" tabindex="-1"></a>column for every lemma. Pivot it into that wide shape, and report what</span>
-<span id="cb32-135"><a href="#cb32-135" aria-hidden="true" tabindex="-1"></a>percentage of the entries are exactly zero, along with the average number of</span>
-<span id="cb32-136"><a href="#cb32-136" aria-hidden="true" tabindex="-1"></a>nonzero terms per document out of the total vocabulary size.</span>
-<span id="cb32-137"><a href="#cb32-137" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-140"><a href="#cb32-140" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb32-141"><a href="#cb32-141" aria-hidden="true" tabindex="-1"></a>mat <span class="op">=</span> (</span>
-<span id="cb32-142"><a href="#cb32-142" aria-hidden="true" tabindex="-1"></a>    tfidf</span>
-<span id="cb32-143"><a href="#cb32-143" aria-hidden="true" tabindex="-1"></a>    .pivot(on<span class="op">=</span><span class="st">"lemma"</span>, index<span class="op">=</span><span class="st">"doc_id"</span>, values<span class="op">=</span><span class="st">"tfidf"</span>)</span>
-<span id="cb32-144"><a href="#cb32-144" aria-hidden="true" tabindex="-1"></a>    .fill_null(<span class="dv">0</span>)</span>
-<span id="cb32-145"><a href="#cb32-145" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb32-146"><a href="#cb32-146" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-147"><a href="#cb32-147" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> mat.drop(<span class="st">"doc_id"</span>).to_numpy()</span>
-<span id="cb32-148"><a href="#cb32-148" aria-hidden="true" tabindex="-1"></a>pct_zero <span class="op">=</span> <span class="dv">100</span> <span class="op">*</span> (X <span class="op">==</span> <span class="dv">0</span>).<span class="bu">sum</span>() <span class="op">/</span> X.size</span>
-<span id="cb32-149"><a href="#cb32-149" aria-hidden="true" tabindex="-1"></a>avg_nonzero <span class="op">=</span> (X <span class="op">!=</span> <span class="dv">0</span>).<span class="bu">sum</span>(axis<span class="op">=</span><span class="dv">1</span>).mean()</span>
-<span id="cb32-150"><a href="#cb32-150" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-151"><a href="#cb32-151" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(X.shape, <span class="st">"matrix"</span>)</span>
-<span id="cb32-152"><a href="#cb32-152" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">round</span>(pct_zero, <span class="dv">1</span>), <span class="st">"% zero"</span>)</span>
-<span id="cb32-153"><a href="#cb32-153" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">round</span>(avg_nonzero, <span class="dv">1</span>), <span class="st">"nonzero terms per document, on average"</span>)</span>
-<span id="cb32-154"><a href="#cb32-154" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb32-155"><a href="#cb32-155" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-156"><a href="#cb32-156" aria-hidden="true" tabindex="-1"></a>97.4% of the matrix is zero. Every one of these 200 short wire articles uses,</span>
-<span id="cb32-157"><a href="#cb32-157" aria-hidden="true" tabindex="-1"></a>on average, only about 24 of the corpus's 917 lemmas, a concrete number</span>
-<span id="cb32-158"><a href="#cb32-158" aria-hidden="true" tabindex="-1"></a>behind the chapter's description of a TF-IDF matrix as a *sparse embedding*.</span>
-<span id="cb32-159"><a href="#cb32-159" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-160"><a href="#cb32-160" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>Build a 2D UMAP projection of the corpus with <span class="in">`umap_text`</span>, using</span>
-<span id="cb32-161"><a href="#cb32-161" aria-hidden="true" tabindex="-1"></a><span class="in">`min_df=0.01`</span> and <span class="in">`max_df=0.5`</span> as the chapter does, and plot each document's</span>
-<span id="cb32-162"><a href="#cb32-162" aria-hidden="true" tabindex="-1"></a><span class="in">`label`</span> at its projected position, colored by <span class="in">`label`</span>. Does the plot show</span>
-<span id="cb32-163"><a href="#cb32-163" aria-hidden="true" tabindex="-1"></a>four clean, separated clusters the way the book's biography pages did?</span>
-<span id="cb32-164"><a href="#cb32-164" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-167"><a href="#cb32-167" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb32-168"><a href="#cb32-168" aria-hidden="true" tabindex="-1"></a>umap_full <span class="op">=</span> (</span>
-<span id="cb32-169"><a href="#cb32-169" aria-hidden="true" tabindex="-1"></a>    anno</span>
-<span id="cb32-170"><a href="#cb32-170" aria-hidden="true" tabindex="-1"></a>    .pipe(</span>
-<span id="cb32-171"><a href="#cb32-171" aria-hidden="true" tabindex="-1"></a>        umap_text,</span>
-<span id="cb32-172"><a href="#cb32-172" aria-hidden="true" tabindex="-1"></a>        doc_id<span class="op">=</span>c.doc_id,</span>
-<span id="cb32-173"><a href="#cb32-173" aria-hidden="true" tabindex="-1"></a>        term_id<span class="op">=</span>c.lemma,</span>
-<span id="cb32-174"><a href="#cb32-174" aria-hidden="true" tabindex="-1"></a>        n_components<span class="op">=</span><span class="dv">2</span>,</span>
-<span id="cb32-175"><a href="#cb32-175" aria-hidden="true" tabindex="-1"></a>        min_df<span class="op">=</span><span class="fl">0.01</span>,</span>
-<span id="cb32-176"><a href="#cb32-176" aria-hidden="true" tabindex="-1"></a>        max_df<span class="op">=</span><span class="fl">0.5</span>,</span>
-<span id="cb32-177"><a href="#cb32-177" aria-hidden="true" tabindex="-1"></a>        random_state<span class="op">=</span><span class="dv">42</span></span>
-<span id="cb32-178"><a href="#cb32-178" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb32-179"><a href="#cb32-179" aria-hidden="true" tabindex="-1"></a>    .predict(full<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb32-180"><a href="#cb32-180" aria-hidden="true" tabindex="-1"></a>    .join(docs.select(c.doc_id, c.label), on<span class="op">=</span><span class="st">"doc_id"</span>)</span>
-<span id="cb32-181"><a href="#cb32-181" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb32-182"><a href="#cb32-182" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-183"><a href="#cb32-183" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb32-184"><a href="#cb32-184" aria-hidden="true" tabindex="-1"></a>    umap_full</span>
-<span id="cb32-185"><a href="#cb32-185" aria-hidden="true" tabindex="-1"></a>    .pipe(ggplot, aes(c.dr0, c.dr1))</span>
-<span id="cb32-186"><a href="#cb32-186" aria-hidden="true" tabindex="-1"></a>    .geom_text(aes(label<span class="op">=</span>c.label, color<span class="op">=</span>c.label), size<span class="op">=</span><span class="dv">6</span>)</span>
-<span id="cb32-187"><a href="#cb32-187" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb32-188"><a href="#cb32-188" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb32-189"><a href="#cb32-189" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-192"><a href="#cb32-192" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb32-193"><a href="#cb32-193" aria-hidden="true" tabindex="-1"></a>coords <span class="op">=</span> umap_full.select(c.dr0, c.dr1).to_numpy()</span>
-<span id="cb32-194"><a href="#cb32-194" aria-hidden="true" tabindex="-1"></a>labels_arr <span class="op">=</span> umap_full.select(c.label).to_numpy().ravel()</span>
-<span id="cb32-195"><a href="#cb32-195" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-196"><a href="#cb32-196" aria-hidden="true" tabindex="-1"></a>dist_sq <span class="op">=</span> ((coords[:, <span class="va">None</span>, :] <span class="op">-</span> coords[<span class="va">None</span>, :, :]) <span class="op">**</span> <span class="dv">2</span>).<span class="bu">sum</span>(axis<span class="op">=</span><span class="dv">2</span>)</span>
-<span id="cb32-197"><a href="#cb32-197" aria-hidden="true" tabindex="-1"></a>np.fill_diagonal(dist_sq, np.inf)</span>
-<span id="cb32-198"><a href="#cb32-198" aria-hidden="true" tabindex="-1"></a>nn_idx <span class="op">=</span> dist_sq.argmin(axis<span class="op">=</span><span class="dv">1</span>)</span>
-<span id="cb32-199"><a href="#cb32-199" aria-hidden="true" tabindex="-1"></a>same_label <span class="op">=</span> labels_arr <span class="op">==</span> labels_arr[nn_idx]</span>
-<span id="cb32-200"><a href="#cb32-200" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-201"><a href="#cb32-201" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">round</span>(same_label.mean(), <span class="dv">2</span>), <span class="st">"overall same-label nearest-neighbor rate"</span>)</span>
-<span id="cb32-202"><a href="#cb32-202" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> lbl <span class="kw">in</span> <span class="bu">sorted</span>(<span class="bu">set</span>(labels_arr)):</span>
-<span id="cb32-203"><a href="#cb32-203" aria-hidden="true" tabindex="-1"></a>    mask <span class="op">=</span> labels_arr <span class="op">==</span> lbl</span>
-<span id="cb32-204"><a href="#cb32-204" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(lbl, <span class="bu">round</span>(same_label[mask].mean(), <span class="dv">2</span>))</span>
-<span id="cb32-205"><a href="#cb32-205" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb32-206"><a href="#cb32-206" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-207"><a href="#cb32-207" aria-hidden="true" tabindex="-1"></a>No. The four labels form loose, overlapping neighborhoods rather than four</span>
-<span id="cb32-208"><a href="#cb32-208" aria-hidden="true" tabindex="-1"></a>separated blobs; a <span class="in">`Sports`</span> patch in the upper left sits right next to a</span>
-<span id="cb32-209"><a href="#cb32-209" aria-hidden="true" tabindex="-1"></a><span class="in">`World`</span> patch, and <span class="in">`Business`</span> and <span class="in">`Sci/Tech`</span> interleave through the middle of</span>
-<span id="cb32-210"><a href="#cb32-210" aria-hidden="true" tabindex="-1"></a>the plot. Measuring it directly confirms the impression: the nearest</span>
-<span id="cb32-211"><a href="#cb32-211" aria-hidden="true" tabindex="-1"></a>neighbor of a point shares its label 50% of the time overall (100 of 200),</span>
-<span id="cb32-212"><a href="#cb32-212" aria-hidden="true" tabindex="-1"></a>twice the 25% we would expect from random guessing among four labels, but</span>
-<span id="cb32-213"><a href="#cb32-213" aria-hidden="true" tabindex="-1"></a>nowhere near the clean separation the chapter's biography pages achieved.</span>
-<span id="cb32-214"><a href="#cb32-214" aria-hidden="true" tabindex="-1"></a><span class="in">`Sports`</span> is the easiest to keep together (60%) and <span class="in">`Sci/Tech`</span> the hardest</span>
-<span id="cb32-215"><a href="#cb32-215" aria-hidden="true" tabindex="-1"></a>(42%), a gap that resurfaces below when the same question is asked with the</span>
-<span id="cb32-216"><a href="#cb32-216" aria-hidden="true" tabindex="-1"></a>full-dimensional distances instead of a 2D projection.</span>
-<span id="cb32-217"><a href="#cb32-217" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-218"><a href="#cb32-218" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>Compute the pairwise angle distance between every pair of documents with</span>
-<span id="cb32-219"><a href="#cb32-219" aria-hidden="true" tabindex="-1"></a><span class="in">`DSText.compute_distances(anno, min_df=0.01, max_df=0.5)`</span>. Print its shape,</span>
-<span id="cb32-220"><a href="#cb32-220" aria-hidden="true" tabindex="-1"></a>and confirm the row count matches $\binom{200}{2}$, the number of ways to</span>
-<span id="cb32-221"><a href="#cb32-221" aria-hidden="true" tabindex="-1"></a>pick an unordered pair from 200 documents.</span>
-<span id="cb32-222"><a href="#cb32-222" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-225"><a href="#cb32-225" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb32-226"><a href="#cb32-226" aria-hidden="true" tabindex="-1"></a>text_dist <span class="op">=</span> DSText.compute_distances(anno, min_df<span class="op">=</span><span class="fl">0.01</span>, max_df<span class="op">=</span><span class="fl">0.5</span>)</span>
-<span id="cb32-227"><a href="#cb32-227" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(text_dist.shape)</span>
-<span id="cb32-228"><a href="#cb32-228" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="dv">200</span> <span class="op">*</span> <span class="dv">199</span> <span class="op">//</span> <span class="dv">2</span>)</span>
-<span id="cb32-229"><a href="#cb32-229" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb32-230"><a href="#cb32-230" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-231"><a href="#cb32-231" aria-hidden="true" tabindex="-1"></a><span class="ss">6. </span>Each pair in <span class="in">`text_dist`</span> is stored once, in <span class="in">`doc_id &lt; doc_id2`</span> order.</span>
-<span id="cb32-232"><a href="#cb32-232" aria-hidden="true" tabindex="-1"></a>Stack the table with a copy of itself with the two ID columns swapped, so</span>
-<span id="cb32-233"><a href="#cb32-233" aria-hidden="true" tabindex="-1"></a>that every document appears in the <span class="in">`doc_id`</span> column with a row for every</span>
-<span id="cb32-234"><a href="#cb32-234" aria-hidden="true" tabindex="-1"></a>other document.</span>
-<span id="cb32-235"><a href="#cb32-235" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-238"><a href="#cb32-238" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb32-239"><a href="#cb32-239" aria-hidden="true" tabindex="-1"></a>text_dist_both <span class="op">=</span> pl.concat([</span>
-<span id="cb32-240"><a href="#cb32-240" aria-hidden="true" tabindex="-1"></a>    text_dist,</span>
-<span id="cb32-241"><a href="#cb32-241" aria-hidden="true" tabindex="-1"></a>    text_dist.select(doc_id<span class="op">=</span>c.doc_id2, doc_id2<span class="op">=</span>c.doc_id, distance<span class="op">=</span>c.distance)</span>
-<span id="cb32-242"><a href="#cb32-242" aria-hidden="true" tabindex="-1"></a>])</span>
-<span id="cb32-243"><a href="#cb32-243" aria-hidden="true" tabindex="-1"></a>text_dist_both.shape</span>
-<span id="cb32-244"><a href="#cb32-244" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb32-245"><a href="#cb32-245" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-246"><a href="#cb32-246" aria-hidden="true" tabindex="-1"></a><span class="ss">7. </span>The last notebook's <span class="in">`doc120027`</span> was Michael Phelps's "Giddy Phelps</span>
-<span id="cb32-247"><a href="#cb32-247" aria-hidden="true" tabindex="-1"></a>Touches Gold" article. Find its five closest matches in <span class="in">`text_dist_both`</span>.</span>
-<span id="cb32-248"><a href="#cb32-248" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-251"><a href="#cb32-251" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb32-252"><a href="#cb32-252" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb32-253"><a href="#cb32-253" aria-hidden="true" tabindex="-1"></a>    text_dist_both</span>
-<span id="cb32-254"><a href="#cb32-254" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.doc_id <span class="op">==</span> <span class="st">"doc120027"</span>)</span>
-<span id="cb32-255"><a href="#cb32-255" aria-hidden="true" tabindex="-1"></a>    .sort(c.distance)</span>
-<span id="cb32-256"><a href="#cb32-256" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">5</span>)</span>
-<span id="cb32-257"><a href="#cb32-257" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb32-258"><a href="#cb32-258" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb32-259"><a href="#cb32-259" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-260"><a href="#cb32-260" aria-hidden="true" tabindex="-1"></a>The closest match, <span class="in">`doc120159`</span> at distance 1.04, is itself titled "Phelps</span>
-<span id="cb32-261"><a href="#cb32-261" aria-hidden="true" tabindex="-1"></a>Eyes Fourth Gold," a second wire article about the same swimmer during the</span>
-<span id="cb32-262"><a href="#cb32-262" aria-hidden="true" tabindex="-1"></a>same Olympics. It sits noticeably closer than the next four matches (all</span>
-<span id="cb32-263"><a href="#cb32-263" aria-hidden="true" tabindex="-1"></a>above 1.30), which are Olympic articles about other athletes and events.</span>
-<span id="cb32-264"><a href="#cb32-264" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-265"><a href="#cb32-265" aria-hidden="true" tabindex="-1"></a><span class="ss">8. </span>Find the single nearest neighbor of every document at once, and report</span>
-<span id="cb32-266"><a href="#cb32-266" aria-hidden="true" tabindex="-1"></a>what proportion of documents have a nearest neighbor sharing their own</span>
-<span id="cb32-267"><a href="#cb32-267" aria-hidden="true" tabindex="-1"></a><span class="in">`label`</span>, both overall and broken down by <span class="in">`label`</span>.</span>
-<span id="cb32-268"><a href="#cb32-268" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-271"><a href="#cb32-271" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb32-272"><a href="#cb32-272" aria-hidden="true" tabindex="-1"></a>nn <span class="op">=</span> (</span>
-<span id="cb32-273"><a href="#cb32-273" aria-hidden="true" tabindex="-1"></a>    text_dist_both</span>
-<span id="cb32-274"><a href="#cb32-274" aria-hidden="true" tabindex="-1"></a>    .sort(c.doc_id, c.distance)</span>
-<span id="cb32-275"><a href="#cb32-275" aria-hidden="true" tabindex="-1"></a>    .group_by(c.doc_id, maintain_order<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb32-276"><a href="#cb32-276" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">1</span>)</span>
-<span id="cb32-277"><a href="#cb32-277" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb32-278"><a href="#cb32-278" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-279"><a href="#cb32-279" aria-hidden="true" tabindex="-1"></a>nn_labeled <span class="op">=</span> (</span>
-<span id="cb32-280"><a href="#cb32-280" aria-hidden="true" tabindex="-1"></a>    nn</span>
-<span id="cb32-281"><a href="#cb32-281" aria-hidden="true" tabindex="-1"></a>    .join(docs.select(c.doc_id, c.label), on<span class="op">=</span>c.doc_id)</span>
-<span id="cb32-282"><a href="#cb32-282" aria-hidden="true" tabindex="-1"></a>    .join(</span>
-<span id="cb32-283"><a href="#cb32-283" aria-hidden="true" tabindex="-1"></a>        docs.select(pl.col(<span class="st">"doc_id"</span>).alias(<span class="st">"doc_id2"</span>), pl.col(<span class="st">"label"</span>).alias(<span class="st">"label2"</span>)),</span>
-<span id="cb32-284"><a href="#cb32-284" aria-hidden="true" tabindex="-1"></a>        on<span class="op">=</span>c.doc_id2</span>
-<span id="cb32-285"><a href="#cb32-285" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb32-286"><a href="#cb32-286" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb32-287"><a href="#cb32-287" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-288"><a href="#cb32-288" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(nn_labeled.select((c.label <span class="op">==</span> c.label2).mean()))</span>
-<span id="cb32-289"><a href="#cb32-289" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-290"><a href="#cb32-290" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb32-291"><a href="#cb32-291" aria-hidden="true" tabindex="-1"></a>    nn_labeled</span>
-<span id="cb32-292"><a href="#cb32-292" aria-hidden="true" tabindex="-1"></a>    .group_by(c.label)</span>
-<span id="cb32-293"><a href="#cb32-293" aria-hidden="true" tabindex="-1"></a>    .agg(n<span class="op">=</span>pl.<span class="bu">len</span>(), n_same<span class="op">=</span>(c.label <span class="op">==</span> c.label2).<span class="bu">sum</span>())</span>
-<span id="cb32-294"><a href="#cb32-294" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb32-295"><a href="#cb32-295" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb32-296"><a href="#cb32-296" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-297"><a href="#cb32-297" aria-hidden="true" tabindex="-1"></a>70% of documents (140 of 200) have a same-topic nearest neighbor under the</span>
-<span id="cb32-298"><a href="#cb32-298" aria-hidden="true" tabindex="-1"></a>full-dimensional angle distance, well above the 50% question 4 found in the</span>
-<span id="cb32-299"><a href="#cb32-299" aria-hidden="true" tabindex="-1"></a>2D UMAP projection, since collapsing hundreds of dimensions down to two</span>
-<span id="cb32-300"><a href="#cb32-300" aria-hidden="true" tabindex="-1"></a>necessarily throws away some of the structure that separates the topics.</span>
-<span id="cb32-301"><a href="#cb32-301" aria-hidden="true" tabindex="-1"></a>The ranking across labels matches question 4's ranking exactly, though:</span>
-<span id="cb32-302"><a href="#cb32-302" aria-hidden="true" tabindex="-1"></a><span class="in">`Sports`</span> is easiest to match correctly (80%, 40 of 50) and <span class="in">`Sci/Tech`</span> is</span>
-<span id="cb32-303"><a href="#cb32-303" aria-hidden="true" tabindex="-1"></a>hardest (56%, 28 of 50) in both the full-dimensional distances and the 2D</span>
-<span id="cb32-304"><a href="#cb32-304" aria-hidden="true" tabindex="-1"></a>projection built from them.</span>
-<span id="cb32-305"><a href="#cb32-305" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-306"><a href="#cb32-306" aria-hidden="true" tabindex="-1"></a><span class="ss">9. </span>The chapter argues that plain Euclidean distance is a poor choice for</span>
-<span id="cb32-307"><a href="#cb32-307" aria-hidden="true" tabindex="-1"></a>document vectors because document length distorts it. Test this directly:</span>
-<span id="cb32-308"><a href="#cb32-308" aria-hidden="true" tabindex="-1"></a>build the raw (non-length-normalized) TF-IDF matrix with the same</span>
-<span id="cb32-309"><a href="#cb32-309" aria-hidden="true" tabindex="-1"></a><span class="in">`min_df`</span>/<span class="in">`max_df`</span> used above, compute the Euclidean distance between every</span>
-<span id="cb32-310"><a href="#cb32-310" aria-hidden="true" tabindex="-1"></a>pair of rows, and find each document's Euclidean nearest neighbor. Which</span>
-<span id="cb32-311"><a href="#cb32-311" aria-hidden="true" tabindex="-1"></a>document (or documents) get picked as the nearest neighbor unreasonably</span>
-<span id="cb32-312"><a href="#cb32-312" aria-hidden="true" tabindex="-1"></a>often?</span>
-<span id="cb32-313"><a href="#cb32-313" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-316"><a href="#cb32-316" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb32-317"><a href="#cb32-317" aria-hidden="true" tabindex="-1"></a>mat2 <span class="op">=</span> (</span>
-<span id="cb32-318"><a href="#cb32-318" aria-hidden="true" tabindex="-1"></a>    DSText.compute_tfidf(anno, min_df<span class="op">=</span><span class="fl">0.01</span>, max_df<span class="op">=</span><span class="fl">0.5</span>)</span>
-<span id="cb32-319"><a href="#cb32-319" aria-hidden="true" tabindex="-1"></a>    .pivot(on<span class="op">=</span><span class="st">"lemma"</span>, index<span class="op">=</span><span class="st">"doc_id"</span>, values<span class="op">=</span><span class="st">"tfidf"</span>)</span>
-<span id="cb32-320"><a href="#cb32-320" aria-hidden="true" tabindex="-1"></a>    .fill_null(<span class="dv">0</span>)</span>
-<span id="cb32-321"><a href="#cb32-321" aria-hidden="true" tabindex="-1"></a>    .sort(c.doc_id)</span>
-<span id="cb32-322"><a href="#cb32-322" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb32-323"><a href="#cb32-323" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-324"><a href="#cb32-324" aria-hidden="true" tabindex="-1"></a>doc_ids2 <span class="op">=</span> mat2.select(c.doc_id).to_series().to_list()</span>
-<span id="cb32-325"><a href="#cb32-325" aria-hidden="true" tabindex="-1"></a>X2 <span class="op">=</span> mat2.drop(<span class="st">"doc_id"</span>).to_numpy()</span>
-<span id="cb32-326"><a href="#cb32-326" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-327"><a href="#cb32-327" aria-hidden="true" tabindex="-1"></a>sq_norms <span class="op">=</span> (X2 <span class="op">**</span> <span class="dv">2</span>).<span class="bu">sum</span>(axis<span class="op">=</span><span class="dv">1</span>)</span>
-<span id="cb32-328"><a href="#cb32-328" aria-hidden="true" tabindex="-1"></a>euclid <span class="op">=</span> np.sqrt(np.clip(sq_norms[:, <span class="va">None</span>] <span class="op">+</span> sq_norms[<span class="va">None</span>, :] <span class="op">-</span> <span class="dv">2</span> <span class="op">*</span> X2 <span class="op">@</span> X2.T, <span class="dv">0</span>, <span class="va">None</span>))</span>
-<span id="cb32-329"><a href="#cb32-329" aria-hidden="true" tabindex="-1"></a>np.fill_diagonal(euclid, np.inf)</span>
-<span id="cb32-330"><a href="#cb32-330" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-331"><a href="#cb32-331" aria-hidden="true" tabindex="-1"></a>euclid_nn <span class="op">=</span> pl.DataFrame({</span>
-<span id="cb32-332"><a href="#cb32-332" aria-hidden="true" tabindex="-1"></a>    <span class="st">"doc_id"</span>: doc_ids2,</span>
-<span id="cb32-333"><a href="#cb32-333" aria-hidden="true" tabindex="-1"></a>    <span class="st">"euclid_nn"</span>: [doc_ids2[i] <span class="cf">for</span> i <span class="kw">in</span> euclid.argmin(axis<span class="op">=</span><span class="dv">1</span>)]</span>
-<span id="cb32-334"><a href="#cb32-334" aria-hidden="true" tabindex="-1"></a>})</span>
-<span id="cb32-335"><a href="#cb32-335" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-336"><a href="#cb32-336" aria-hidden="true" tabindex="-1"></a>euclid_nn.group_by(c.euclid_nn).agg(n<span class="op">=</span>pl.<span class="bu">len</span>()).sort(c.n, descending<span class="op">=</span><span class="va">True</span>).head(<span class="dv">5</span>)</span>
-<span id="cb32-337"><a href="#cb32-337" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb32-338"><a href="#cb32-338" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-339"><a href="#cb32-339" aria-hidden="true" tabindex="-1"></a>Two documents, <span class="in">`doc120007`</span> and <span class="in">`doc120006`</span>, are picked as the Euclidean</span>
-<span id="cb32-340"><a href="#cb32-340" aria-hidden="true" tabindex="-1"></a>nearest neighbor for 70 and 66 of the 200 documents respectively. That means</span>
-<span id="cb32-341"><a href="#cb32-341" aria-hidden="true" tabindex="-1"></a>136 documents (68% of the corpus) get one of just two articles as their</span>
-<span id="cb32-342"><a href="#cb32-342" aria-hidden="true" tabindex="-1"></a>"closest" match. Both are long: 95 and 137 alphabetic tokens, against a</span>
-<span id="cb32-343"><a href="#cb32-343" aria-hidden="true" tabindex="-1"></a>corpus average of 39. Their raw (non-normalized) TF-IDF vectors simply carry</span>
-<span id="cb32-344"><a href="#cb32-344" aria-hidden="true" tabindex="-1"></a>more total mass than a typical short wire article's, which pulls them</span>
-<span id="cb32-345"><a href="#cb32-345" aria-hidden="true" tabindex="-1"></a>closer to almost everything in Euclidean terms regardless of topic. For</span>
-<span id="cb32-346"><a href="#cb32-346" aria-hidden="true" tabindex="-1"></a>example, <span class="in">`doc120070`</span> (<span class="in">`World`</span>, about a police case) gets <span class="in">`doc120007`</span> (a</span>
-<span id="cb32-347"><a href="#cb32-347" aria-hidden="true" tabindex="-1"></a><span class="in">`Sci/Tech`</span> article about a computer virus, and incidentally the same article</span>
-<span id="cb32-348"><a href="#cb32-348" aria-hidden="true" tabindex="-1"></a>with the backslash line-wrap artifact from the last notebook's question 5)</span>
-<span id="cb32-349"><a href="#cb32-349" aria-hidden="true" tabindex="-1"></a>as its Euclidean nearest neighbor, while the angle distance used in the rest</span>
-<span id="cb32-350"><a href="#cb32-350" aria-hidden="true" tabindex="-1"></a>of this notebook correctly matches it to <span class="in">`doc120033`</span>, another <span class="in">`World`</span></span>
-<span id="cb32-351"><a href="#cb32-351" aria-hidden="true" tabindex="-1"></a>article about a different Vancouver police case:</span>
-<span id="cb32-352"><a href="#cb32-352" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-355"><a href="#cb32-355" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb32-356"><a href="#cb32-356" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(euclid_nn.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> <span class="st">"doc120070"</span>))</span>
-<span id="cb32-357"><a href="#cb32-357" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(nn.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> <span class="st">"doc120070"</span>))</span>
-<span id="cb32-358"><a href="#cb32-358" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb32-359"><a href="#cb32-359" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-360"><a href="#cb32-360" aria-hidden="true" tabindex="-1"></a><span class="ss">10. </span>Find the single closest pair of documents in the whole corpus under the</span>
-<span id="cb32-361"><a href="#cb32-361" aria-hidden="true" tabindex="-1"></a>angle distance, and print both articles' full text to confirm by eye what</span>
-<span id="cb32-362"><a href="#cb32-362" aria-hidden="true" tabindex="-1"></a>makes them so close.</span>
-<span id="cb32-363"><a href="#cb32-363" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-366"><a href="#cb32-366" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb32-367"><a href="#cb32-367" aria-hidden="true" tabindex="-1"></a>closest_pair <span class="op">=</span> text_dist.sort(c.distance).head(<span class="dv">1</span>)</span>
-<span id="cb32-368"><a href="#cb32-368" aria-hidden="true" tabindex="-1"></a>closest_pair</span>
-<span id="cb32-369"><a href="#cb32-369" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb32-370"><a href="#cb32-370" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-373"><a href="#cb32-373" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb32-374"><a href="#cb32-374" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> doc <span class="kw">in</span> [closest_pair.item(<span class="dv">0</span>, <span class="st">"doc_id"</span>), closest_pair.item(<span class="dv">0</span>, <span class="st">"doc_id2"</span>)]:</span>
-<span id="cb32-375"><a href="#cb32-375" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(docs.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> doc).item(<span class="dv">0</span>, <span class="st">"text"</span>))</span>
-<span id="cb32-376"><a href="#cb32-376" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>()</span>
-<span id="cb32-377"><a href="#cb32-377" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb32-378"><a href="#cb32-378" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-379"><a href="#cb32-379" aria-hidden="true" tabindex="-1"></a>At a distance of 0.37 (by far the smallest in the corpus, well under the</span>
-<span id="cb32-380"><a href="#cb32-380" aria-hidden="true" tabindex="-1"></a>0.85 next-closest pair), <span class="in">`doc120195`</span> and <span class="in">`doc120199`</span> turn out to be two</span>
-<span id="cb32-381"><a href="#cb32-381" aria-hidden="true" tabindex="-1"></a>independent wire versions of the exact same story, filed by Reuters minutes</span>
-<span id="cb32-382"><a href="#cb32-382" aria-hidden="true" tabindex="-1"></a>apart: Medtronic's quarterly earnings. The angle distance has found a real</span>
-<span id="cb32-383"><a href="#cb32-383" aria-hidden="true" tabindex="-1"></a>near-duplicate, not a coincidence of vocabulary.</span>
-<span id="cb32-384"><a href="#cb32-384" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-385"><a href="#cb32-385" aria-hidden="true" tabindex="-1"></a><span class="ss">11. </span><span class="in">`text_dist_both`</span> also contains pairs at the maximum possible distance,</span>
-<span id="cb32-386"><a href="#cb32-386" aria-hidden="true" tabindex="-1"></a>$\pi/2$, meaning the two documents share no filtered vocabulary at all. Find</span>
-<span id="cb32-387"><a href="#cb32-387" aria-hidden="true" tabindex="-1"></a>the document involved in the most such pairs, and look at its top TF-IDF</span>
-<span id="cb32-388"><a href="#cb32-388" aria-hidden="true" tabindex="-1"></a>terms to explain why.</span>
-<span id="cb32-389"><a href="#cb32-389" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-392"><a href="#cb32-392" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb32-393"><a href="#cb32-393" aria-hidden="true" tabindex="-1"></a>lonely <span class="op">=</span> (</span>
-<span id="cb32-394"><a href="#cb32-394" aria-hidden="true" tabindex="-1"></a>    text_dist_both</span>
-<span id="cb32-395"><a href="#cb32-395" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>((c.distance <span class="op">-</span> np.pi <span class="op">/</span> <span class="dv">2</span>).<span class="bu">abs</span>() <span class="op">&lt;</span> <span class="fl">1e-9</span>)</span>
-<span id="cb32-396"><a href="#cb32-396" aria-hidden="true" tabindex="-1"></a>    .group_by(c.doc_id)</span>
-<span id="cb32-397"><a href="#cb32-397" aria-hidden="true" tabindex="-1"></a>    .agg(n<span class="op">=</span>pl.<span class="bu">len</span>())</span>
-<span id="cb32-398"><a href="#cb32-398" aria-hidden="true" tabindex="-1"></a>    .sort(c.n, descending<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb32-399"><a href="#cb32-399" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb32-400"><a href="#cb32-400" aria-hidden="true" tabindex="-1"></a>lonely.head(<span class="dv">5</span>)</span>
-<span id="cb32-401"><a href="#cb32-401" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb32-402"><a href="#cb32-402" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-405"><a href="#cb32-405" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb32-406"><a href="#cb32-406" aria-hidden="true" tabindex="-1"></a>loneliest <span class="op">=</span> lonely.item(<span class="dv">0</span>, <span class="st">"doc_id"</span>)</span>
-<span id="cb32-407"><a href="#cb32-407" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(docs.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> loneliest).item(<span class="dv">0</span>, <span class="st">"text"</span>))</span>
-<span id="cb32-408"><a href="#cb32-408" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-409"><a href="#cb32-409" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb32-410"><a href="#cb32-410" aria-hidden="true" tabindex="-1"></a>    DSText.compute_tfidf(anno, min_df<span class="op">=</span><span class="fl">0.01</span>, max_df<span class="op">=</span><span class="fl">0.5</span>)</span>
-<span id="cb32-411"><a href="#cb32-411" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.doc_id <span class="op">==</span> loneliest)</span>
-<span id="cb32-412"><a href="#cb32-412" aria-hidden="true" tabindex="-1"></a>    .sort(c.tfidf, descending<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb32-413"><a href="#cb32-413" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">5</span>)</span>
-<span id="cb32-414"><a href="#cb32-414" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb32-415"><a href="#cb32-415" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb32-416"><a href="#cb32-416" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-417"><a href="#cb32-417" aria-hidden="true" tabindex="-1"></a><span class="in">`doc120178`</span> shares no filtered vocabulary at all with 162 of the other 199</span>
-<span id="cb32-418"><a href="#cb32-418" aria-hidden="true" tabindex="-1"></a>documents, over 80% of the corpus. It is not a broken row: it is a short</span>
-<span id="cb32-419"><a href="#cb32-419" aria-hidden="true" tabindex="-1"></a>article (16 surviving terms) about the cyclist Leontien Zijlaard-van</span>
-<span id="cb32-420"><a href="#cb32-420" aria-hidden="true" tabindex="-1"></a>Moorsel, and spaCy's tokenizer splits her name into three separate tokens</span>
-<span id="cb32-421"><a href="#cb32-421" aria-hidden="true" tabindex="-1"></a>(<span class="in">`Zijlaard`</span>, <span class="in">`van`</span>, <span class="in">`Moorsel`</span>), each appearing in only one other document in</span>
-<span id="cb32-422"><a href="#cb32-422" aria-hidden="true" tabindex="-1"></a>the whole corpus. Those three rare tokens get the highest possible IDF</span>
-<span id="cb32-423"><a href="#cb32-423" aria-hidden="true" tabindex="-1"></a>weight and dominate the document's normalized direction, so unless another</span>
-<span id="cb32-424"><a href="#cb32-424" aria-hidden="true" tabindex="-1"></a>article happens to mention this specific cyclist by name, the angle between</span>
-<span id="cb32-425"><a href="#cb32-425" aria-hidden="true" tabindex="-1"></a>the two vectors lands at the maximum. A short document built around one</span>
-<span id="cb32-426"><a href="#cb32-426" aria-hidden="true" tabindex="-1"></a>uncommon proper name is, geometrically, an outlier almost by construction.</span>
-<span id="cb32-427"><a href="#cb32-427" aria-hidden="true" tabindex="-1"></a>That is worth remembering before reading too much into any single</span>
-<span id="cb32-428"><a href="#cb32-428" aria-hidden="true" tabindex="-1"></a>document's distance to the rest of a corpus.</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Notebook42"</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="an">solutions-release-date:</span><span class="co"> "2026-10-19"</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a><span class="fu">### Setup</span></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>Run all of the following before starting the notebook.</span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [noclear]</span></span>
+<span id="cb33-14"><a href="#cb33-14" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
+<span id="cb33-15"><a href="#cb33-15" aria-hidden="true" tabindex="-1"></a><span class="op">!</span> wget <span class="op">-</span>q <span class="op">-</span>nc https:<span class="op">//</span>raw.githubusercontent.com<span class="op">/</span>taylor<span class="op">-</span>arnold<span class="op">/</span>fds2<span class="op">/</span>refs<span class="op">/</span>heads<span class="op">/</span>main<span class="op">/</span>funs.py</span>
+<span id="cb33-16"><a href="#cb33-16" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb33-17"><a href="#cb33-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-20"><a href="#cb33-20" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb33-21"><a href="#cb33-21" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [noclear]</span></span>
+<span id="cb33-22"><a href="#cb33-22" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
+<span id="cb33-23"><a href="#cb33-23" aria-hidden="true" tabindex="-1"></a><span class="op">!</span> pip install umap<span class="op">-</span>learn <span class="op">--</span>quiet</span>
+<span id="cb33-24"><a href="#cb33-24" aria-hidden="true" tabindex="-1"></a><span class="op">!</span> python <span class="op">-</span>m spacy download en_core_web_sm</span>
+<span id="cb33-25"><a href="#cb33-25" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb33-26"><a href="#cb33-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-29"><a href="#cb33-29" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb33-30"><a href="#cb33-30" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [noclear]</span></span>
+<span id="cb33-31"><a href="#cb33-31" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb33-32"><a href="#cb33-32" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine <span class="im">import</span> ggplot, aes</span>
+<span id="cb33-33"><a href="#cb33-33" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> polars <span class="im">import</span> col <span class="im">as</span> c</span>
+<span id="cb33-34"><a href="#cb33-34" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb33-35"><a href="#cb33-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-36"><a href="#cb33-36" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> funs</span>
+<span id="cb33-37"><a href="#cb33-37" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> funs <span class="im">import</span> DSText, umap_text</span>
+<span id="cb33-38"><a href="#cb33-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-39"><a href="#cb33-39" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> spacy</span>
+<span id="cb33-40"><a href="#cb33-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-41"><a href="#cb33-41" aria-hidden="true" tabindex="-1"></a>ub <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"</span></span>
+<span id="cb33-42"><a href="#cb33-42" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb33-43"><a href="#cb33-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-46"><a href="#cb33-46" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb33-47"><a href="#cb33-47" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [remove]</span></span>
+<span id="cb33-48"><a href="#cb33-48" aria-hidden="true" tabindex="-1"></a><span class="co">#| include: false</span></span>
+<span id="cb33-49"><a href="#cb33-49" aria-hidden="true" tabindex="-1"></a>ub <span class="op">=</span> <span class="st">""</span></span>
+<span id="cb33-50"><a href="#cb33-50" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb33-51"><a href="#cb33-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-54"><a href="#cb33-54" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb33-55"><a href="#cb33-55" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [noclear]</span></span>
+<span id="cb33-56"><a href="#cb33-56" aria-hidden="true" tabindex="-1"></a>docs <span class="op">=</span> (</span>
+<span id="cb33-57"><a href="#cb33-57" aria-hidden="true" tabindex="-1"></a>    pl.read_parquet(ub <span class="op">+</span> <span class="st">"data/agnews_pca.parquet"</span>)</span>
+<span id="cb33-58"><a href="#cb33-58" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.index <span class="op">==</span> <span class="st">"test"</span>)</span>
+<span id="cb33-59"><a href="#cb33-59" aria-hidden="true" tabindex="-1"></a>    .select(c.<span class="bu">id</span>, c.label, c.text)</span>
+<span id="cb33-60"><a href="#cb33-60" aria-hidden="true" tabindex="-1"></a>    .rename({<span class="st">"id"</span>: <span class="st">"doc_id"</span>})</span>
+<span id="cb33-61"><a href="#cb33-61" aria-hidden="true" tabindex="-1"></a>    .sort(c.doc_id)</span>
+<span id="cb33-62"><a href="#cb33-62" aria-hidden="true" tabindex="-1"></a>    .group_by(c.label, maintain_order<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb33-63"><a href="#cb33-63" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">50</span>)</span>
+<span id="cb33-64"><a href="#cb33-64" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb33-65"><a href="#cb33-65" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb33-66"><a href="#cb33-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-69"><a href="#cb33-69" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb33-70"><a href="#cb33-70" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [noclear]</span></span>
+<span id="cb33-71"><a href="#cb33-71" aria-hidden="true" tabindex="-1"></a>nlp <span class="op">=</span> spacy.load(<span class="st">"en_core_web_sm"</span>)</span>
+<span id="cb33-72"><a href="#cb33-72" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb33-73"><a href="#cb33-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-76"><a href="#cb33-76" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb33-77"><a href="#cb33-77" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [noclear]</span></span>
+<span id="cb33-78"><a href="#cb33-78" aria-hidden="true" tabindex="-1"></a>anno <span class="op">=</span> DSText.process(docs.select(c.doc_id, c.text), nlp)</span>
+<span id="cb33-79"><a href="#cb33-79" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb33-80"><a href="#cb33-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-81"><a href="#cb33-81" aria-hidden="true" tabindex="-1"></a><span class="fu">### Questions</span></span>
+<span id="cb33-82"><a href="#cb33-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-83"><a href="#cb33-83" aria-hidden="true" tabindex="-1"></a><span class="in">`docs`</span> and <span class="in">`anno`</span> are the same 200 AG News articles from the last notebook,</span>
+<span id="cb33-84"><a href="#cb33-84" aria-hidden="true" tabindex="-1"></a>50 each labeled <span class="in">`"Business"`</span>, <span class="in">`"Sci/Tech"`</span>, <span class="in">`"Sports"`</span>, or <span class="in">`"World"`</span>. That</span>
+<span id="cb33-85"><a href="#cb33-85" aria-hidden="true" tabindex="-1"></a>notebook counted words within each article one at a time; this one turns</span>
+<span id="cb33-86"><a href="#cb33-86" aria-hidden="true" tabindex="-1"></a>each article into a single point and asks how those points relate to one</span>
+<span id="cb33-87"><a href="#cb33-87" aria-hidden="true" tabindex="-1"></a>another. Print results unless a question says otherwise.</span>
+<span id="cb33-88"><a href="#cb33-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-89"><a href="#cb33-89" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Compute the TF-IDF table with `DSText.compute_tfidf(anno, min_df=0.01,</span>
+<span id="cb33-90"><a href="#cb33-90" aria-hidden="true" tabindex="-1"></a>max_df=1.0)`, the same call from the last notebook. Print its shape and the</span>
+<span id="cb33-91"><a href="#cb33-91" aria-hidden="true" tabindex="-1"></a>number of distinct lemmas it covers.</span>
+<span id="cb33-92"><a href="#cb33-92" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-95"><a href="#cb33-95" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb33-96"><a href="#cb33-96" aria-hidden="true" tabindex="-1"></a>tfidf <span class="op">=</span> DSText.compute_tfidf(anno, min_df<span class="op">=</span><span class="fl">0.01</span>, max_df<span class="op">=</span><span class="fl">1.0</span>)</span>
+<span id="cb33-97"><a href="#cb33-97" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(tfidf.shape)</span>
+<span id="cb33-98"><a href="#cb33-98" aria-hidden="true" tabindex="-1"></a>tfidf.select(c.lemma.n_unique())</span>
+<span id="cb33-99"><a href="#cb33-99" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb33-100"><a href="#cb33-100" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-101"><a href="#cb33-101" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>In the first block, pick two lemmas, <span class="in">`"olympic"`</span> and <span class="in">`"profit"`</span>, pivot</span>
+<span id="cb33-102"><a href="#cb33-102" aria-hidden="true" tabindex="-1"></a>their TF-IDF scores into two columns, filling missing combinations with zero,</span>
+<span id="cb33-103"><a href="#cb33-103" aria-hidden="true" tabindex="-1"></a>join <span class="in">`label`</span> on, and plot every document as its <span class="in">`doc_id`</span>, positioned by these</span>
+<span id="cb33-104"><a href="#cb33-104" aria-hidden="true" tabindex="-1"></a>two scores and colored by <span class="in">`label`</span>. In the second block, filter to the</span>
+<span id="cb33-105"><a href="#cb33-105" aria-hidden="true" tabindex="-1"></a>documents with a nonzero score for both terms. How many are there? Compare</span>
+<span id="cb33-106"><a href="#cb33-106" aria-hidden="true" tabindex="-1"></a>this to the book's <span class="in">`poem`</span>/<span class="in">`novel`</span> example, where authors who write in both</span>
+<span id="cb33-107"><a href="#cb33-107" aria-hidden="true" tabindex="-1"></a>forms show up in the upper-right corner of the plot.</span>
+<span id="cb33-108"><a href="#cb33-108" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-111"><a href="#cb33-111" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb33-112"><a href="#cb33-112" aria-hidden="true" tabindex="-1"></a>scatter_df <span class="op">=</span> (</span>
+<span id="cb33-113"><a href="#cb33-113" aria-hidden="true" tabindex="-1"></a>    tfidf</span>
+<span id="cb33-114"><a href="#cb33-114" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.lemma.is_in([<span class="st">"olympic"</span>, <span class="st">"profit"</span>]))</span>
+<span id="cb33-115"><a href="#cb33-115" aria-hidden="true" tabindex="-1"></a>    .pivot(on<span class="op">=</span><span class="st">"lemma"</span>, index<span class="op">=</span><span class="st">"doc_id"</span>, values<span class="op">=</span><span class="st">"tfidf"</span>)</span>
+<span id="cb33-116"><a href="#cb33-116" aria-hidden="true" tabindex="-1"></a>    .fill_null(<span class="dv">0</span>)</span>
+<span id="cb33-117"><a href="#cb33-117" aria-hidden="true" tabindex="-1"></a>    .join(docs.select(c.doc_id, c.label), on<span class="op">=</span><span class="st">"doc_id"</span>)</span>
+<span id="cb33-118"><a href="#cb33-118" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb33-119"><a href="#cb33-119" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-120"><a href="#cb33-120" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb33-121"><a href="#cb33-121" aria-hidden="true" tabindex="-1"></a>    scatter_df</span>
+<span id="cb33-122"><a href="#cb33-122" aria-hidden="true" tabindex="-1"></a>    .pipe(ggplot, aes(c.olympic, c.profit))</span>
+<span id="cb33-123"><a href="#cb33-123" aria-hidden="true" tabindex="-1"></a>    .geom_text(aes(label<span class="op">=</span>c.doc_id, color<span class="op">=</span>c.label), size<span class="op">=</span><span class="dv">6</span>)</span>
+<span id="cb33-124"><a href="#cb33-124" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb33-125"><a href="#cb33-125" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb33-126"><a href="#cb33-126" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-129"><a href="#cb33-129" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb33-130"><a href="#cb33-130" aria-hidden="true" tabindex="-1"></a>scatter_df.<span class="bu">filter</span>((c.olympic <span class="op">&gt;</span> <span class="dv">0</span>) <span class="op">&amp;</span> (c.profit <span class="op">&gt;</span> <span class="dv">0</span>))</span>
+<span id="cb33-131"><a href="#cb33-131" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb33-132"><a href="#cb33-132" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-133"><a href="#cb33-133" aria-hidden="true" tabindex="-1"></a>Zero. Eleven documents (all <span class="in">`Sports`</span>) sit along the <span class="in">`olympic`</span> axis with a</span>
+<span id="cb33-134"><a href="#cb33-134" aria-hidden="true" tabindex="-1"></a><span class="in">`profit`</span> score of exactly 0, and eleven more (all <span class="in">`Business`</span>) sit along the</span>
+<span id="cb33-135"><a href="#cb33-135" aria-hidden="true" tabindex="-1"></a><span class="in">`profit`</span> axis with an <span class="in">`olympic`</span> score of exactly 0; the other 178 sit at the</span>
+<span id="cb33-136"><a href="#cb33-136" aria-hidden="true" tabindex="-1"></a>origin, using neither word. There is no upper-right corner here at all. The</span>
+<span id="cb33-137"><a href="#cb33-137" aria-hidden="true" tabindex="-1"></a>book's authors write in mixed proportions of poetry and prose, so some of</span>
+<span id="cb33-138"><a href="#cb33-138" aria-hidden="true" tabindex="-1"></a>them genuinely earn a spot away from both axes. <span class="in">`olympic`</span> and <span class="in">`profit`</span></span>
+<span id="cb33-139"><a href="#cb33-139" aria-hidden="true" tabindex="-1"></a>belong to two unrelated news beats instead of two overlapping literary</span>
+<span id="cb33-140"><a href="#cb33-140" aria-hidden="true" tabindex="-1"></a>forms, so no article in this corpus has a reason to use both, and the</span>
+<span id="cb33-141"><a href="#cb33-141" aria-hidden="true" tabindex="-1"></a>quadrant plot ends up as clean as it possibly could be.</span>
+<span id="cb33-142"><a href="#cb33-142" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-143"><a href="#cb33-143" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>The TF-IDF matrix from question 1 has a row for every document and a</span>
+<span id="cb33-144"><a href="#cb33-144" aria-hidden="true" tabindex="-1"></a>column for every lemma. Pivot it into that wide shape, and report what</span>
+<span id="cb33-145"><a href="#cb33-145" aria-hidden="true" tabindex="-1"></a>percentage of the entries are exactly zero, along with the average number of</span>
+<span id="cb33-146"><a href="#cb33-146" aria-hidden="true" tabindex="-1"></a>nonzero terms per document out of the total vocabulary size.</span>
+<span id="cb33-147"><a href="#cb33-147" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-150"><a href="#cb33-150" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb33-151"><a href="#cb33-151" aria-hidden="true" tabindex="-1"></a>mat <span class="op">=</span> (</span>
+<span id="cb33-152"><a href="#cb33-152" aria-hidden="true" tabindex="-1"></a>    tfidf</span>
+<span id="cb33-153"><a href="#cb33-153" aria-hidden="true" tabindex="-1"></a>    .pivot(on<span class="op">=</span><span class="st">"lemma"</span>, index<span class="op">=</span><span class="st">"doc_id"</span>, values<span class="op">=</span><span class="st">"tfidf"</span>)</span>
+<span id="cb33-154"><a href="#cb33-154" aria-hidden="true" tabindex="-1"></a>    .fill_null(<span class="dv">0</span>)</span>
+<span id="cb33-155"><a href="#cb33-155" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb33-156"><a href="#cb33-156" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-157"><a href="#cb33-157" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> mat.drop(<span class="st">"doc_id"</span>).to_numpy()</span>
+<span id="cb33-158"><a href="#cb33-158" aria-hidden="true" tabindex="-1"></a>pct_zero <span class="op">=</span> <span class="dv">100</span> <span class="op">*</span> (X <span class="op">==</span> <span class="dv">0</span>).<span class="bu">sum</span>() <span class="op">/</span> X.size</span>
+<span id="cb33-159"><a href="#cb33-159" aria-hidden="true" tabindex="-1"></a>avg_nonzero <span class="op">=</span> (X <span class="op">!=</span> <span class="dv">0</span>).<span class="bu">sum</span>(axis<span class="op">=</span><span class="dv">1</span>).mean()</span>
+<span id="cb33-160"><a href="#cb33-160" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-161"><a href="#cb33-161" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(X.shape, <span class="st">"matrix"</span>)</span>
+<span id="cb33-162"><a href="#cb33-162" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">round</span>(pct_zero, <span class="dv">1</span>), <span class="st">"% zero"</span>)</span>
+<span id="cb33-163"><a href="#cb33-163" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">round</span>(avg_nonzero, <span class="dv">1</span>), <span class="st">"nonzero terms per document, on average"</span>)</span>
+<span id="cb33-164"><a href="#cb33-164" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb33-165"><a href="#cb33-165" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-166"><a href="#cb33-166" aria-hidden="true" tabindex="-1"></a>97.4% of the matrix is zero. Every one of these 200 short wire articles uses,</span>
+<span id="cb33-167"><a href="#cb33-167" aria-hidden="true" tabindex="-1"></a>on average, only about 24 of the corpus's 917 lemmas, a concrete number</span>
+<span id="cb33-168"><a href="#cb33-168" aria-hidden="true" tabindex="-1"></a>behind the chapter's description of a TF-IDF matrix as a *sparse embedding*.</span>
+<span id="cb33-169"><a href="#cb33-169" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-170"><a href="#cb33-170" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>In the first block, build a 2D UMAP projection of the corpus with</span>
+<span id="cb33-171"><a href="#cb33-171" aria-hidden="true" tabindex="-1"></a><span class="in">`umap_text`</span>, using <span class="in">`min_df=0.01`</span> and <span class="in">`max_df=0.5`</span> as the chapter does, and</span>
+<span id="cb33-172"><a href="#cb33-172" aria-hidden="true" tabindex="-1"></a>plot each document's <span class="in">`label`</span> at its projected position, colored by <span class="in">`label`</span>.</span>
+<span id="cb33-173"><a href="#cb33-173" aria-hidden="true" tabindex="-1"></a>In the second block, find each point's nearest neighbor in the projection and</span>
+<span id="cb33-174"><a href="#cb33-174" aria-hidden="true" tabindex="-1"></a>print the share whose neighbor carries the same <span class="in">`label`</span>, both overall and</span>
+<span id="cb33-175"><a href="#cb33-175" aria-hidden="true" tabindex="-1"></a>broken down by <span class="in">`label`</span>. Does the plot show four clean, separated clusters the</span>
+<span id="cb33-176"><a href="#cb33-176" aria-hidden="true" tabindex="-1"></a>way the book's biography pages did?</span>
+<span id="cb33-177"><a href="#cb33-177" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-180"><a href="#cb33-180" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb33-181"><a href="#cb33-181" aria-hidden="true" tabindex="-1"></a>umap_full <span class="op">=</span> (</span>
+<span id="cb33-182"><a href="#cb33-182" aria-hidden="true" tabindex="-1"></a>    anno</span>
+<span id="cb33-183"><a href="#cb33-183" aria-hidden="true" tabindex="-1"></a>    .pipe(</span>
+<span id="cb33-184"><a href="#cb33-184" aria-hidden="true" tabindex="-1"></a>        umap_text,</span>
+<span id="cb33-185"><a href="#cb33-185" aria-hidden="true" tabindex="-1"></a>        doc_id<span class="op">=</span>c.doc_id,</span>
+<span id="cb33-186"><a href="#cb33-186" aria-hidden="true" tabindex="-1"></a>        term_id<span class="op">=</span>c.lemma,</span>
+<span id="cb33-187"><a href="#cb33-187" aria-hidden="true" tabindex="-1"></a>        n_components<span class="op">=</span><span class="dv">2</span>,</span>
+<span id="cb33-188"><a href="#cb33-188" aria-hidden="true" tabindex="-1"></a>        min_df<span class="op">=</span><span class="fl">0.01</span>,</span>
+<span id="cb33-189"><a href="#cb33-189" aria-hidden="true" tabindex="-1"></a>        max_df<span class="op">=</span><span class="fl">0.5</span>,</span>
+<span id="cb33-190"><a href="#cb33-190" aria-hidden="true" tabindex="-1"></a>        random_state<span class="op">=</span><span class="dv">42</span></span>
+<span id="cb33-191"><a href="#cb33-191" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb33-192"><a href="#cb33-192" aria-hidden="true" tabindex="-1"></a>    .predict(full<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb33-193"><a href="#cb33-193" aria-hidden="true" tabindex="-1"></a>    .join(docs.select(c.doc_id, c.label), on<span class="op">=</span><span class="st">"doc_id"</span>)</span>
+<span id="cb33-194"><a href="#cb33-194" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb33-195"><a href="#cb33-195" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-196"><a href="#cb33-196" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb33-197"><a href="#cb33-197" aria-hidden="true" tabindex="-1"></a>    umap_full</span>
+<span id="cb33-198"><a href="#cb33-198" aria-hidden="true" tabindex="-1"></a>    .pipe(ggplot, aes(c.dr0, c.dr1))</span>
+<span id="cb33-199"><a href="#cb33-199" aria-hidden="true" tabindex="-1"></a>    .geom_text(aes(label<span class="op">=</span>c.label, color<span class="op">=</span>c.label), size<span class="op">=</span><span class="dv">6</span>)</span>
+<span id="cb33-200"><a href="#cb33-200" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb33-201"><a href="#cb33-201" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb33-202"><a href="#cb33-202" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-205"><a href="#cb33-205" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb33-206"><a href="#cb33-206" aria-hidden="true" tabindex="-1"></a>coords <span class="op">=</span> umap_full.select(c.dr0, c.dr1).to_numpy()</span>
+<span id="cb33-207"><a href="#cb33-207" aria-hidden="true" tabindex="-1"></a>labels_arr <span class="op">=</span> umap_full.select(c.label).to_numpy().ravel()</span>
+<span id="cb33-208"><a href="#cb33-208" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-209"><a href="#cb33-209" aria-hidden="true" tabindex="-1"></a>dist_sq <span class="op">=</span> ((coords[:, <span class="va">None</span>, :] <span class="op">-</span> coords[<span class="va">None</span>, :, :]) <span class="op">**</span> <span class="dv">2</span>).<span class="bu">sum</span>(axis<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb33-210"><a href="#cb33-210" aria-hidden="true" tabindex="-1"></a>np.fill_diagonal(dist_sq, np.inf)</span>
+<span id="cb33-211"><a href="#cb33-211" aria-hidden="true" tabindex="-1"></a>nn_idx <span class="op">=</span> dist_sq.argmin(axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb33-212"><a href="#cb33-212" aria-hidden="true" tabindex="-1"></a>same_label <span class="op">=</span> labels_arr <span class="op">==</span> labels_arr[nn_idx]</span>
+<span id="cb33-213"><a href="#cb33-213" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-214"><a href="#cb33-214" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">round</span>(same_label.mean(), <span class="dv">2</span>), <span class="st">"overall same-label nearest-neighbor rate"</span>)</span>
+<span id="cb33-215"><a href="#cb33-215" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> lbl <span class="kw">in</span> <span class="bu">sorted</span>(<span class="bu">set</span>(labels_arr)):</span>
+<span id="cb33-216"><a href="#cb33-216" aria-hidden="true" tabindex="-1"></a>    mask <span class="op">=</span> labels_arr <span class="op">==</span> lbl</span>
+<span id="cb33-217"><a href="#cb33-217" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(lbl, <span class="bu">round</span>(same_label[mask].mean(), <span class="dv">2</span>))</span>
+<span id="cb33-218"><a href="#cb33-218" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb33-219"><a href="#cb33-219" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-220"><a href="#cb33-220" aria-hidden="true" tabindex="-1"></a>No. The four labels form loose, overlapping neighborhoods rather than four</span>
+<span id="cb33-221"><a href="#cb33-221" aria-hidden="true" tabindex="-1"></a>separated blobs; a <span class="in">`Sports`</span> patch in the upper left sits right next to a</span>
+<span id="cb33-222"><a href="#cb33-222" aria-hidden="true" tabindex="-1"></a><span class="in">`World`</span> patch, and <span class="in">`Business`</span> and <span class="in">`Sci/Tech`</span> interleave through the middle of</span>
+<span id="cb33-223"><a href="#cb33-223" aria-hidden="true" tabindex="-1"></a>the plot. Measuring it directly confirms the impression: the nearest</span>
+<span id="cb33-224"><a href="#cb33-224" aria-hidden="true" tabindex="-1"></a>neighbor of a point shares its label 50% of the time overall (100 of 200),</span>
+<span id="cb33-225"><a href="#cb33-225" aria-hidden="true" tabindex="-1"></a>twice the 25% we would expect from random guessing among four labels, but</span>
+<span id="cb33-226"><a href="#cb33-226" aria-hidden="true" tabindex="-1"></a>nowhere near the clean separation the chapter's biography pages achieved.</span>
+<span id="cb33-227"><a href="#cb33-227" aria-hidden="true" tabindex="-1"></a><span class="in">`Sports`</span> is the easiest to keep together (60%) and <span class="in">`Sci/Tech`</span> the hardest</span>
+<span id="cb33-228"><a href="#cb33-228" aria-hidden="true" tabindex="-1"></a>(42%), a gap that resurfaces below when the same question is asked with the</span>
+<span id="cb33-229"><a href="#cb33-229" aria-hidden="true" tabindex="-1"></a>full-dimensional distances instead of a 2D projection.</span>
+<span id="cb33-230"><a href="#cb33-230" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-231"><a href="#cb33-231" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>Compute the pairwise angle distance between every pair of documents with</span>
+<span id="cb33-232"><a href="#cb33-232" aria-hidden="true" tabindex="-1"></a><span class="in">`DSText.compute_distances(anno, min_df=0.01, max_df=0.5)`</span>. Print its shape,</span>
+<span id="cb33-233"><a href="#cb33-233" aria-hidden="true" tabindex="-1"></a>and confirm the row count matches $\binom{200}{2}$, the number of ways to</span>
+<span id="cb33-234"><a href="#cb33-234" aria-hidden="true" tabindex="-1"></a>pick an unordered pair from 200 documents.</span>
+<span id="cb33-235"><a href="#cb33-235" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-238"><a href="#cb33-238" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb33-239"><a href="#cb33-239" aria-hidden="true" tabindex="-1"></a>text_dist <span class="op">=</span> DSText.compute_distances(anno, min_df<span class="op">=</span><span class="fl">0.01</span>, max_df<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb33-240"><a href="#cb33-240" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(text_dist.shape)</span>
+<span id="cb33-241"><a href="#cb33-241" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="dv">200</span> <span class="op">*</span> <span class="dv">199</span> <span class="op">//</span> <span class="dv">2</span>)</span>
+<span id="cb33-242"><a href="#cb33-242" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb33-243"><a href="#cb33-243" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-244"><a href="#cb33-244" aria-hidden="true" tabindex="-1"></a><span class="ss">6. </span>Each pair in <span class="in">`text_dist`</span> is stored once, in <span class="in">`doc_id &lt; doc_id2`</span> order.</span>
+<span id="cb33-245"><a href="#cb33-245" aria-hidden="true" tabindex="-1"></a>Stack the table with a copy of itself with the two ID columns swapped, so</span>
+<span id="cb33-246"><a href="#cb33-246" aria-hidden="true" tabindex="-1"></a>that every document appears in the <span class="in">`doc_id`</span> column with a row for every</span>
+<span id="cb33-247"><a href="#cb33-247" aria-hidden="true" tabindex="-1"></a>other document.</span>
+<span id="cb33-248"><a href="#cb33-248" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-251"><a href="#cb33-251" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb33-252"><a href="#cb33-252" aria-hidden="true" tabindex="-1"></a>text_dist_both <span class="op">=</span> pl.concat([</span>
+<span id="cb33-253"><a href="#cb33-253" aria-hidden="true" tabindex="-1"></a>    text_dist,</span>
+<span id="cb33-254"><a href="#cb33-254" aria-hidden="true" tabindex="-1"></a>    text_dist.select(doc_id<span class="op">=</span>c.doc_id2, doc_id2<span class="op">=</span>c.doc_id, distance<span class="op">=</span>c.distance)</span>
+<span id="cb33-255"><a href="#cb33-255" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb33-256"><a href="#cb33-256" aria-hidden="true" tabindex="-1"></a>text_dist_both.shape</span>
+<span id="cb33-257"><a href="#cb33-257" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb33-258"><a href="#cb33-258" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-259"><a href="#cb33-259" aria-hidden="true" tabindex="-1"></a><span class="ss">7. </span>The last notebook's <span class="in">`doc120027`</span> was Michael Phelps's "Giddy Phelps</span>
+<span id="cb33-260"><a href="#cb33-260" aria-hidden="true" tabindex="-1"></a>Touches Gold" article. Find its five closest matches in <span class="in">`text_dist_both`</span>.</span>
+<span id="cb33-261"><a href="#cb33-261" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-264"><a href="#cb33-264" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb33-265"><a href="#cb33-265" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb33-266"><a href="#cb33-266" aria-hidden="true" tabindex="-1"></a>    text_dist_both</span>
+<span id="cb33-267"><a href="#cb33-267" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.doc_id <span class="op">==</span> <span class="st">"doc120027"</span>)</span>
+<span id="cb33-268"><a href="#cb33-268" aria-hidden="true" tabindex="-1"></a>    .sort(c.distance)</span>
+<span id="cb33-269"><a href="#cb33-269" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">5</span>)</span>
+<span id="cb33-270"><a href="#cb33-270" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb33-271"><a href="#cb33-271" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb33-272"><a href="#cb33-272" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-273"><a href="#cb33-273" aria-hidden="true" tabindex="-1"></a>The closest match, <span class="in">`doc120159`</span> at distance 1.04, is itself titled "Phelps</span>
+<span id="cb33-274"><a href="#cb33-274" aria-hidden="true" tabindex="-1"></a>Eyes Fourth Gold," a second wire article about the same swimmer during the</span>
+<span id="cb33-275"><a href="#cb33-275" aria-hidden="true" tabindex="-1"></a>same Olympics. It sits noticeably closer than the next four matches (all</span>
+<span id="cb33-276"><a href="#cb33-276" aria-hidden="true" tabindex="-1"></a>above 1.30), which are Olympic articles about other athletes and events.</span>
+<span id="cb33-277"><a href="#cb33-277" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-278"><a href="#cb33-278" aria-hidden="true" tabindex="-1"></a><span class="ss">8. </span>Find the single nearest neighbor of every document at once, and report</span>
+<span id="cb33-279"><a href="#cb33-279" aria-hidden="true" tabindex="-1"></a>what proportion of documents have a nearest neighbor sharing their own</span>
+<span id="cb33-280"><a href="#cb33-280" aria-hidden="true" tabindex="-1"></a><span class="in">`label`</span>, both overall and broken down by <span class="in">`label`</span>.</span>
+<span id="cb33-281"><a href="#cb33-281" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-284"><a href="#cb33-284" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb33-285"><a href="#cb33-285" aria-hidden="true" tabindex="-1"></a>nn <span class="op">=</span> (</span>
+<span id="cb33-286"><a href="#cb33-286" aria-hidden="true" tabindex="-1"></a>    text_dist_both</span>
+<span id="cb33-287"><a href="#cb33-287" aria-hidden="true" tabindex="-1"></a>    .sort(c.doc_id, c.distance)</span>
+<span id="cb33-288"><a href="#cb33-288" aria-hidden="true" tabindex="-1"></a>    .group_by(c.doc_id, maintain_order<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb33-289"><a href="#cb33-289" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">1</span>)</span>
+<span id="cb33-290"><a href="#cb33-290" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb33-291"><a href="#cb33-291" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-292"><a href="#cb33-292" aria-hidden="true" tabindex="-1"></a>nn_labeled <span class="op">=</span> (</span>
+<span id="cb33-293"><a href="#cb33-293" aria-hidden="true" tabindex="-1"></a>    nn</span>
+<span id="cb33-294"><a href="#cb33-294" aria-hidden="true" tabindex="-1"></a>    .join(docs.select(c.doc_id, c.label), on<span class="op">=</span>c.doc_id)</span>
+<span id="cb33-295"><a href="#cb33-295" aria-hidden="true" tabindex="-1"></a>    .join(</span>
+<span id="cb33-296"><a href="#cb33-296" aria-hidden="true" tabindex="-1"></a>        docs.select(pl.col(<span class="st">"doc_id"</span>).alias(<span class="st">"doc_id2"</span>), pl.col(<span class="st">"label"</span>).alias(<span class="st">"label2"</span>)),</span>
+<span id="cb33-297"><a href="#cb33-297" aria-hidden="true" tabindex="-1"></a>        on<span class="op">=</span>c.doc_id2</span>
+<span id="cb33-298"><a href="#cb33-298" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb33-299"><a href="#cb33-299" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb33-300"><a href="#cb33-300" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-301"><a href="#cb33-301" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(nn_labeled.select((c.label <span class="op">==</span> c.label2).mean()))</span>
+<span id="cb33-302"><a href="#cb33-302" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-303"><a href="#cb33-303" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb33-304"><a href="#cb33-304" aria-hidden="true" tabindex="-1"></a>    nn_labeled</span>
+<span id="cb33-305"><a href="#cb33-305" aria-hidden="true" tabindex="-1"></a>    .group_by(c.label)</span>
+<span id="cb33-306"><a href="#cb33-306" aria-hidden="true" tabindex="-1"></a>    .agg(n<span class="op">=</span>pl.<span class="bu">len</span>(), n_same<span class="op">=</span>(c.label <span class="op">==</span> c.label2).<span class="bu">sum</span>())</span>
+<span id="cb33-307"><a href="#cb33-307" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb33-308"><a href="#cb33-308" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb33-309"><a href="#cb33-309" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-310"><a href="#cb33-310" aria-hidden="true" tabindex="-1"></a>70% of documents (140 of 200) have a same-topic nearest neighbor under the</span>
+<span id="cb33-311"><a href="#cb33-311" aria-hidden="true" tabindex="-1"></a>full-dimensional angle distance, well above the 50% question 4 found in the</span>
+<span id="cb33-312"><a href="#cb33-312" aria-hidden="true" tabindex="-1"></a>2D UMAP projection, since collapsing hundreds of dimensions down to two</span>
+<span id="cb33-313"><a href="#cb33-313" aria-hidden="true" tabindex="-1"></a>necessarily throws away some of the structure that separates the topics.</span>
+<span id="cb33-314"><a href="#cb33-314" aria-hidden="true" tabindex="-1"></a>The ranking across labels matches question 4's ranking exactly, though:</span>
+<span id="cb33-315"><a href="#cb33-315" aria-hidden="true" tabindex="-1"></a><span class="in">`Sports`</span> is easiest to match correctly (80%, 40 of 50) and <span class="in">`Sci/Tech`</span> is</span>
+<span id="cb33-316"><a href="#cb33-316" aria-hidden="true" tabindex="-1"></a>hardest (56%, 28 of 50) in both the full-dimensional distances and the 2D</span>
+<span id="cb33-317"><a href="#cb33-317" aria-hidden="true" tabindex="-1"></a>projection built from them.</span>
+<span id="cb33-318"><a href="#cb33-318" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-319"><a href="#cb33-319" aria-hidden="true" tabindex="-1"></a><span class="ss">9. </span>The chapter argues that plain Euclidean distance is a poor choice for</span>
+<span id="cb33-320"><a href="#cb33-320" aria-hidden="true" tabindex="-1"></a>document vectors because document length distorts it. Test this directly. In</span>
+<span id="cb33-321"><a href="#cb33-321" aria-hidden="true" tabindex="-1"></a>the first block, build the raw (non-length-normalized) TF-IDF matrix with the</span>
+<span id="cb33-322"><a href="#cb33-322" aria-hidden="true" tabindex="-1"></a>same <span class="in">`min_df`</span>/<span class="in">`max_df`</span> used above, compute the Euclidean distance between</span>
+<span id="cb33-323"><a href="#cb33-323" aria-hidden="true" tabindex="-1"></a>every pair of rows, find each document's Euclidean nearest neighbor, and count</span>
+<span id="cb33-324"><a href="#cb33-324" aria-hidden="true" tabindex="-1"></a>how often each document gets chosen as one. In the second block, print</span>
+<span id="cb33-325"><a href="#cb33-325" aria-hidden="true" tabindex="-1"></a><span class="in">`doc120070`</span>'s Euclidean nearest neighbor and its angle-distance nearest</span>
+<span id="cb33-326"><a href="#cb33-326" aria-hidden="true" tabindex="-1"></a>neighbor. Which document (or documents) get picked as the nearest neighbor</span>
+<span id="cb33-327"><a href="#cb33-327" aria-hidden="true" tabindex="-1"></a>unreasonably often?</span>
+<span id="cb33-328"><a href="#cb33-328" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-331"><a href="#cb33-331" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb33-332"><a href="#cb33-332" aria-hidden="true" tabindex="-1"></a>mat2 <span class="op">=</span> (</span>
+<span id="cb33-333"><a href="#cb33-333" aria-hidden="true" tabindex="-1"></a>    DSText.compute_tfidf(anno, min_df<span class="op">=</span><span class="fl">0.01</span>, max_df<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb33-334"><a href="#cb33-334" aria-hidden="true" tabindex="-1"></a>    .pivot(on<span class="op">=</span><span class="st">"lemma"</span>, index<span class="op">=</span><span class="st">"doc_id"</span>, values<span class="op">=</span><span class="st">"tfidf"</span>)</span>
+<span id="cb33-335"><a href="#cb33-335" aria-hidden="true" tabindex="-1"></a>    .fill_null(<span class="dv">0</span>)</span>
+<span id="cb33-336"><a href="#cb33-336" aria-hidden="true" tabindex="-1"></a>    .sort(c.doc_id)</span>
+<span id="cb33-337"><a href="#cb33-337" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb33-338"><a href="#cb33-338" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-339"><a href="#cb33-339" aria-hidden="true" tabindex="-1"></a>doc_ids2 <span class="op">=</span> mat2.select(c.doc_id).to_series().to_list()</span>
+<span id="cb33-340"><a href="#cb33-340" aria-hidden="true" tabindex="-1"></a>X2 <span class="op">=</span> mat2.drop(<span class="st">"doc_id"</span>).to_numpy()</span>
+<span id="cb33-341"><a href="#cb33-341" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-342"><a href="#cb33-342" aria-hidden="true" tabindex="-1"></a>sq_norms <span class="op">=</span> (X2 <span class="op">**</span> <span class="dv">2</span>).<span class="bu">sum</span>(axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb33-343"><a href="#cb33-343" aria-hidden="true" tabindex="-1"></a>euclid <span class="op">=</span> np.sqrt(np.clip(sq_norms[:, <span class="va">None</span>] <span class="op">+</span> sq_norms[<span class="va">None</span>, :] <span class="op">-</span> <span class="dv">2</span> <span class="op">*</span> X2 <span class="op">@</span> X2.T, <span class="dv">0</span>, <span class="va">None</span>))</span>
+<span id="cb33-344"><a href="#cb33-344" aria-hidden="true" tabindex="-1"></a>np.fill_diagonal(euclid, np.inf)</span>
+<span id="cb33-345"><a href="#cb33-345" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-346"><a href="#cb33-346" aria-hidden="true" tabindex="-1"></a>euclid_nn <span class="op">=</span> pl.DataFrame({</span>
+<span id="cb33-347"><a href="#cb33-347" aria-hidden="true" tabindex="-1"></a>    <span class="st">"doc_id"</span>: doc_ids2,</span>
+<span id="cb33-348"><a href="#cb33-348" aria-hidden="true" tabindex="-1"></a>    <span class="st">"euclid_nn"</span>: [doc_ids2[i] <span class="cf">for</span> i <span class="kw">in</span> euclid.argmin(axis<span class="op">=</span><span class="dv">1</span>)]</span>
+<span id="cb33-349"><a href="#cb33-349" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb33-350"><a href="#cb33-350" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-351"><a href="#cb33-351" aria-hidden="true" tabindex="-1"></a>euclid_nn.group_by(c.euclid_nn).agg(n<span class="op">=</span>pl.<span class="bu">len</span>()).sort(c.n, descending<span class="op">=</span><span class="va">True</span>).head(<span class="dv">5</span>)</span>
+<span id="cb33-352"><a href="#cb33-352" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb33-353"><a href="#cb33-353" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-354"><a href="#cb33-354" aria-hidden="true" tabindex="-1"></a>Two documents, <span class="in">`doc120007`</span> and <span class="in">`doc120006`</span>, are picked as the Euclidean</span>
+<span id="cb33-355"><a href="#cb33-355" aria-hidden="true" tabindex="-1"></a>nearest neighbor for 70 and 66 of the 200 documents respectively. That means</span>
+<span id="cb33-356"><a href="#cb33-356" aria-hidden="true" tabindex="-1"></a>136 documents (68% of the corpus) get one of just two articles as their</span>
+<span id="cb33-357"><a href="#cb33-357" aria-hidden="true" tabindex="-1"></a>"closest" match. Both are long: 95 and 137 alphabetic tokens, against a</span>
+<span id="cb33-358"><a href="#cb33-358" aria-hidden="true" tabindex="-1"></a>corpus average of 39. Their raw (non-normalized) TF-IDF vectors simply carry</span>
+<span id="cb33-359"><a href="#cb33-359" aria-hidden="true" tabindex="-1"></a>more total mass than a typical short wire article's, which pulls them</span>
+<span id="cb33-360"><a href="#cb33-360" aria-hidden="true" tabindex="-1"></a>closer to almost everything in Euclidean terms regardless of topic. For</span>
+<span id="cb33-361"><a href="#cb33-361" aria-hidden="true" tabindex="-1"></a>example, <span class="in">`doc120070`</span> (<span class="in">`World`</span>, about a police case) gets <span class="in">`doc120007`</span> (a</span>
+<span id="cb33-362"><a href="#cb33-362" aria-hidden="true" tabindex="-1"></a><span class="in">`Sci/Tech`</span> article about a computer virus, and incidentally the same article</span>
+<span id="cb33-363"><a href="#cb33-363" aria-hidden="true" tabindex="-1"></a>with the backslash line-wrap artifact from the last notebook's question 5)</span>
+<span id="cb33-364"><a href="#cb33-364" aria-hidden="true" tabindex="-1"></a>as its Euclidean nearest neighbor, while the angle distance used in the rest</span>
+<span id="cb33-365"><a href="#cb33-365" aria-hidden="true" tabindex="-1"></a>of this notebook correctly matches it to <span class="in">`doc120033`</span>, another <span class="in">`World`</span></span>
+<span id="cb33-366"><a href="#cb33-366" aria-hidden="true" tabindex="-1"></a>article about a different Vancouver police case:</span>
+<span id="cb33-367"><a href="#cb33-367" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-370"><a href="#cb33-370" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb33-371"><a href="#cb33-371" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(euclid_nn.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> <span class="st">"doc120070"</span>))</span>
+<span id="cb33-372"><a href="#cb33-372" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(nn.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> <span class="st">"doc120070"</span>))</span>
+<span id="cb33-373"><a href="#cb33-373" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb33-374"><a href="#cb33-374" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-375"><a href="#cb33-375" aria-hidden="true" tabindex="-1"></a><span class="ss">10. </span>In the first block, find the single closest pair of documents in the</span>
+<span id="cb33-376"><a href="#cb33-376" aria-hidden="true" tabindex="-1"></a>whole corpus under the angle distance. In the second block, print both</span>
+<span id="cb33-377"><a href="#cb33-377" aria-hidden="true" tabindex="-1"></a>articles' full text to confirm by eye what makes them so close.</span>
+<span id="cb33-378"><a href="#cb33-378" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-381"><a href="#cb33-381" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb33-382"><a href="#cb33-382" aria-hidden="true" tabindex="-1"></a>closest_pair <span class="op">=</span> text_dist.sort(c.distance).head(<span class="dv">1</span>)</span>
+<span id="cb33-383"><a href="#cb33-383" aria-hidden="true" tabindex="-1"></a>closest_pair</span>
+<span id="cb33-384"><a href="#cb33-384" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb33-385"><a href="#cb33-385" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-388"><a href="#cb33-388" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb33-389"><a href="#cb33-389" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> doc <span class="kw">in</span> [closest_pair.item(<span class="dv">0</span>, <span class="st">"doc_id"</span>), closest_pair.item(<span class="dv">0</span>, <span class="st">"doc_id2"</span>)]:</span>
+<span id="cb33-390"><a href="#cb33-390" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(docs.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> doc).item(<span class="dv">0</span>, <span class="st">"text"</span>))</span>
+<span id="cb33-391"><a href="#cb33-391" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>()</span>
+<span id="cb33-392"><a href="#cb33-392" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb33-393"><a href="#cb33-393" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-394"><a href="#cb33-394" aria-hidden="true" tabindex="-1"></a>At a distance of 0.37 (by far the smallest in the corpus, well under the</span>
+<span id="cb33-395"><a href="#cb33-395" aria-hidden="true" tabindex="-1"></a>0.85 next-closest pair), <span class="in">`doc120195`</span> and <span class="in">`doc120199`</span> turn out to be two</span>
+<span id="cb33-396"><a href="#cb33-396" aria-hidden="true" tabindex="-1"></a>independent wire versions of the exact same story, filed by Reuters minutes</span>
+<span id="cb33-397"><a href="#cb33-397" aria-hidden="true" tabindex="-1"></a>apart: Medtronic's quarterly earnings. The angle distance has found a real</span>
+<span id="cb33-398"><a href="#cb33-398" aria-hidden="true" tabindex="-1"></a>near-duplicate, not a coincidence of vocabulary.</span>
+<span id="cb33-399"><a href="#cb33-399" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-400"><a href="#cb33-400" aria-hidden="true" tabindex="-1"></a><span class="ss">11. </span><span class="in">`text_dist_both`</span> also contains pairs at the maximum possible distance,</span>
+<span id="cb33-401"><a href="#cb33-401" aria-hidden="true" tabindex="-1"></a>$\pi/2$, meaning the two documents share no filtered vocabulary at all. In</span>
+<span id="cb33-402"><a href="#cb33-402" aria-hidden="true" tabindex="-1"></a>the first block, find the document involved in the most such pairs. In the</span>
+<span id="cb33-403"><a href="#cb33-403" aria-hidden="true" tabindex="-1"></a>second block, print that document's text and look at its top TF-IDF terms to</span>
+<span id="cb33-404"><a href="#cb33-404" aria-hidden="true" tabindex="-1"></a>explain why.</span>
+<span id="cb33-405"><a href="#cb33-405" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-408"><a href="#cb33-408" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb33-409"><a href="#cb33-409" aria-hidden="true" tabindex="-1"></a>lonely <span class="op">=</span> (</span>
+<span id="cb33-410"><a href="#cb33-410" aria-hidden="true" tabindex="-1"></a>    text_dist_both</span>
+<span id="cb33-411"><a href="#cb33-411" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>((c.distance <span class="op">-</span> np.pi <span class="op">/</span> <span class="dv">2</span>).<span class="bu">abs</span>() <span class="op">&lt;</span> <span class="fl">1e-9</span>)</span>
+<span id="cb33-412"><a href="#cb33-412" aria-hidden="true" tabindex="-1"></a>    .group_by(c.doc_id)</span>
+<span id="cb33-413"><a href="#cb33-413" aria-hidden="true" tabindex="-1"></a>    .agg(n<span class="op">=</span>pl.<span class="bu">len</span>())</span>
+<span id="cb33-414"><a href="#cb33-414" aria-hidden="true" tabindex="-1"></a>    .sort(c.n, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb33-415"><a href="#cb33-415" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb33-416"><a href="#cb33-416" aria-hidden="true" tabindex="-1"></a>lonely.head(<span class="dv">5</span>)</span>
+<span id="cb33-417"><a href="#cb33-417" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb33-418"><a href="#cb33-418" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-421"><a href="#cb33-421" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb33-422"><a href="#cb33-422" aria-hidden="true" tabindex="-1"></a>loneliest <span class="op">=</span> lonely.item(<span class="dv">0</span>, <span class="st">"doc_id"</span>)</span>
+<span id="cb33-423"><a href="#cb33-423" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(docs.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> loneliest).item(<span class="dv">0</span>, <span class="st">"text"</span>))</span>
+<span id="cb33-424"><a href="#cb33-424" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-425"><a href="#cb33-425" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb33-426"><a href="#cb33-426" aria-hidden="true" tabindex="-1"></a>    DSText.compute_tfidf(anno, min_df<span class="op">=</span><span class="fl">0.01</span>, max_df<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb33-427"><a href="#cb33-427" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.doc_id <span class="op">==</span> loneliest)</span>
+<span id="cb33-428"><a href="#cb33-428" aria-hidden="true" tabindex="-1"></a>    .sort(c.tfidf, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb33-429"><a href="#cb33-429" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">5</span>)</span>
+<span id="cb33-430"><a href="#cb33-430" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb33-431"><a href="#cb33-431" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb33-432"><a href="#cb33-432" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-433"><a href="#cb33-433" aria-hidden="true" tabindex="-1"></a><span class="in">`doc120178`</span> shares no filtered vocabulary at all with 162 of the other 199</span>
+<span id="cb33-434"><a href="#cb33-434" aria-hidden="true" tabindex="-1"></a>documents, over 80% of the corpus. It is not a broken row: it is a short</span>
+<span id="cb33-435"><a href="#cb33-435" aria-hidden="true" tabindex="-1"></a>article (16 surviving terms) about the cyclist Leontien Zijlaard-van</span>
+<span id="cb33-436"><a href="#cb33-436" aria-hidden="true" tabindex="-1"></a>Moorsel, and spaCy's tokenizer splits her name into three separate tokens</span>
+<span id="cb33-437"><a href="#cb33-437" aria-hidden="true" tabindex="-1"></a>(<span class="in">`Zijlaard`</span>, <span class="in">`van`</span>, <span class="in">`Moorsel`</span>), each appearing in only one other document in</span>
+<span id="cb33-438"><a href="#cb33-438" aria-hidden="true" tabindex="-1"></a>the whole corpus. Those three rare tokens get the highest possible IDF</span>
+<span id="cb33-439"><a href="#cb33-439" aria-hidden="true" tabindex="-1"></a>weight and dominate the document's normalized direction, so unless another</span>
+<span id="cb33-440"><a href="#cb33-440" aria-hidden="true" tabindex="-1"></a>article happens to mention this specific cyclist by name, the angle between</span>
+<span id="cb33-441"><a href="#cb33-441" aria-hidden="true" tabindex="-1"></a>the two vectors lands at the maximum. A short document built around one</span>
+<span id="cb33-442"><a href="#cb33-442" aria-hidden="true" tabindex="-1"></a>uncommon proper name is, geometrically, an outlier almost by construction.</span>
+<span id="cb33-443"><a href="#cb33-443" aria-hidden="true" tabindex="-1"></a>That is worth remembering before reading too much into any single</span>
+<span id="cb33-444"><a href="#cb33-444" aria-hidden="true" tabindex="-1"></a>document's distance to the rest of a corpus.</span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->

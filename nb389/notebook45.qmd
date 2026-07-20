@@ -15,6 +15,12 @@ Run all of the following before starting the notebook.
 
 ```{python}
 #| tags: [noclear]
+#| eval: false
+! pip install igraph --quiet
+```
+
+```{python}
+#| tags: [noclear]
 import polars as pl
 from plotnine import ggplot, aes
 from polars import col as c
@@ -127,11 +133,11 @@ edges = (
 edges.select(pl.len())
 ```
 
-4. Build an undirected network from this edge list with
-`DSNetwork.process(directed=False)`, and join the case metadata onto the node
-table so the nodes are readable later. Print the node table. Then compare the
-number of nodes to the 80 cases you selected, and use an anti-join to find the
-ones that are missing.
+4. In the first block, build an undirected network from this edge list with
+`DSNetwork.process(directed=False)`, join the case metadata onto the node
+table so the nodes are readable later, and print the node table. In the second
+block, compare the number of nodes to the 80 cases you selected, using an
+anti-join to find the ones that are missing.
 
 ```{python}
 node, edge, G = DSNetwork.process(edges, directed=False)
@@ -191,9 +197,9 @@ too long, to label every point, which is already a hint that tables will do
 more of the work than the picture from here on.
 
 6. The first centrality measure is degree, the number of edges a node has,
-which the `node` table already carries in the `degree` column. Sort the nodes
-by degree and print the top 10 names. Then redraw the network coloring the
-points by degree.
+which the `node` table already carries in the `degree` column. In the first
+block, sort the nodes by degree and print the top 10 names. In the second
+block, redraw the network coloring the points by degree.
 
 ```{python}
 (
@@ -231,8 +237,9 @@ center of the network is not the same as the leader of the raw count.
 
 7. Eigenvalue centrality scores a node by the scores of its neighbors, so that
 being cited by central cases counts for more than being cited by peripheral
-ones. It is in the `eigen` column, scaled so the largest score is 1. Print the
-top 10 by `eigen`, and color the network by it.
+ones. It is in the `eigen` column, scaled so the largest score is 1. In the
+first block, print the top 10 by `eigen`. In the second block, color the
+network by it.
 
 ```{python}
 (
@@ -267,8 +274,9 @@ cases only becomes visible if the scores are transformed first.
 
 8. Closeness centrality, in the `close` column, measures how few hops it takes
 to reach the rest of the network from a given node. It is only defined within a
-single connected component, so filter to `component == 1` before plotting, then
-color the network by `close`. Print the top 5 as well.
+single connected component, so filter to `component == 1` in both blocks. In
+the first block, sort by `close` and print the top 5. In the second block,
+color the network by `close`.
 
 ```{python}
 (
@@ -304,9 +312,10 @@ networks later in the chapter do break into pieces, and closeness computed
 across a broken network mixes together numbers from separate components.
 
 9. Betweenness centrality, in the `between` column, counts how many of the
-shortest paths between other cases run through a given node. Print the top 10,
-this time showing `between` next to `degree` and `eigen` so the three can be
-compared. Then color the network by `between`.
+shortest paths between other cases run through a given node. In the first
+block, print the top 10, this time showing `between` next to `degree` and
+`eigen` so the three can be compared. In the second block, color the network by
+`between`.
 
 ```{python}
 (
@@ -344,8 +353,9 @@ betweenness from the other centrality measures; this network, which spans
 several distinct areas of law, shows the difference plainly.
 
 10. The `cluster` column holds a community label assigned when the network was
-built. Color the network by `cluster`, and print each cluster's members by
-grouping on `cluster` and concatenating the case names.
+built. In the first block, color the network by `cluster`. In the second block,
+print each cluster's members by grouping on `cluster` and concatenating the
+case names.
 
 ```{python}
 (

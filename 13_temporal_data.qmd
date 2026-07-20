@@ -3,7 +3,7 @@
 ```{python}
 #| include: false
 import warnings
-warnings.filterwarnings('ignore')
+warnings.filterwarnings("ignore")
 ```
 
 ## Setup
@@ -27,7 +27,7 @@ page_revisions = pl.read_parquet("data/wiki/uk/revisions.parquet")
 
 This chapter is about data with a temporal component: any dataset with one or more variables recording dates or times, and more broadly any dataset whose rows have a meaningful order. We begin with data that carries explicit dates and times, since that is where the special data types and functions live. The later sections widen the scope to ordered data generally, which is why the tools there apply well beyond time series.
 
-The data comes from the corpus of 75 British and Irish authors that we assembled at the end of @sec-apis. Two of its tables are temporal. One records how many people viewed each author's Wikipedia page on each day of 2025. The other records the most recent 500 edits made to each author's page, with a timestamp, an editor, the size of the article after the edit, and the editor's summary comment. A third table gives each author's birth and death years, which we will need at the end of the chapter.
+The data comes from the corpus of 75 British and Irish authors that we assembled at the end of @sec-apis. Two of its tables are temporal. One records how many people viewed each author's Wikipedia page on nearly every day of 2025. The other records the most recent edits made to each author's page, up to 500 of them, with a timestamp, an editor, the size of the article after the edit, and the editor's summary comment. A third table gives each author's birth and death years, which we will need at the end of the chapter.
 
 A word about what is new here and what is not. Two of this chapter's central tools are ones you have already met. Window functions were the subject of @sec-window, where `.shift()` and `.over()` were introduced on the cellphone data, and conditional joins appeared in @sec-combine, where `.join_asof()` and `.join_where()` matched countries on inequalities rather than exact keys. Both come back in this chapter, and both sections say so plainly when they do. This is deliberate rather than accidental. Those tools were introduced on data that had an order but no clock, and time is where they do their real work, so it is worth walking through them a second time on data that actually has dates in it. Where a section is retracing ground, it opens by naming the chapter that covered it and summarizing what you should already know, then moves on to the part that is genuinely new. If a reprise feels too fast, the original treatment is the place to go back to.
 
@@ -35,7 +35,7 @@ The material that is new to this chapter is the temporal type system itself: dat
 
 ## Temporal Data and Ordering
 
-Let's start with the page view data. For each of the 75 authors we have a record of how many people looked at their Wikipedia page on each day of 2025, so the data is organized with one row for each combination of author and day.
+Let's start with the page view data. For each of the 75 authors we have a record of how many people looked at their Wikipedia page on each day of 2025, so the data is organized with one row for each author and each day on which the page was viewed, which for most pages is every day of the year.
 
 ```{python}
 page_views
@@ -60,7 +60,7 @@ How could we show the change in page views over time for a single author? One ap
 )
 ```
 
-This is not a bad place to begin. The x-axis is the day number, and in many applications that is exactly what we need. Chaucer's page holds a fairly stable level of around fourteen hundred views a day, with a good deal of short-term noise and a few pronounced spikes. But notice how hard it is to say anything about *when* those spikes happened. The tallest one sits somewhere around day forty-five, which is not a fact anybody can use. There is also a hidden assumption in the plot: the row number only tracks the date because the data happens to be sampled uniformly, one row per day, with nothing missing. Sort the data differently, or lose a few days, and the axis quietly starts lying.
+This is not a bad place to begin. The x-axis is the day number, and in many applications that is exactly what we need. Chaucer's page holds a fairly stable level of around fourteen hundred views a day, with a good deal of short-term noise and a few pronounced spikes. But notice how hard it is to say anything about *when* those spikes happened. The tallest one sits somewhere around day forty-five, which is not a fact anybody can use. There is also a hidden assumption in the plot: the row number only tracks the date because the data happens to be sampled uniformly, one row per day, with nothing missing. Sort the data differently, or lose a few days, and the axis quietly starts lying. Losing days is not hypothetical here: the source omits days on which a page recorded no views, so some of the quieter pages in this table are missing a handful of days already.
 
 Another way to work with dates is to convert them to a fractional year. Here the months and days are folded into the year as a fraction:
 
@@ -87,7 +87,7 @@ We subtract one from the month and day so that, for example, 1 July 2020 (halfwa
 
 This improves on the first plot in a few ways. We can roughly read off what date each point corresponds to, and the code works whether or not the data is sorted, evenly spaced, or complete. The cost is an axis that needs explaining to anyone who reads the figure. The same approach extends to times. If we also knew the hour of each observation, the formula would become:
 
-$$ year_{frac} = year + \frac{month - 1}{12} + \frac{day - 1}{12 \cdot 31} + \frac{hour - 1}{24 \cdot 12 \cdot 31}$$
+$$ year_{frac} = year + \frac{month - 1}{12} + \frac{day - 1}{12 \cdot 31} + \frac{hour}{24 \cdot 12 \cdot 31}$$
 
 And if we only cared about time elapsed since some event, such as the start of an experiment, we could take the difference from a fixed fractional year.
 
@@ -202,7 +202,7 @@ page_revisions = (
 page_revisions
 ```
 
-The `timestamp` column now has the type `Datetime`, giving the second at which each edit was saved. Because the string was written in the ISO-8601 format, `.str.to_datetime()` parses it without being told the layout. A format string can be passed if the data uses some other convention, and often must be, since a date like `03/04/2025` is ambiguous in a way that `2025-04-03` is not. That ambiguity is the whole argument for the ISO format.
+The `timestamp` column now has the type `Datetime`, giving the second at which each edit was saved. Because the string was written in the ISO-8601 date format, with a space in place of the standard's `T` separator, `.str.to_datetime()` parses it without being told the layout. A format string can be passed if the data uses some other convention, and often must be, since a date like `03/04/2025` is ambiguous in a way that `2025-04-03` is not. That ambiguity is the whole argument for the ISO format.
 
 Each row also carries the editor's username (anyone can edit a Wikipedia page), the size in bytes of the article after the edit, and a short comment describing the change. Plotting size against time shows the article growing, and shows the moments when large sections were added or removed.
 
@@ -224,7 +224,7 @@ selected_authors = ["Geoffrey Chaucer", "Emily Brontë"]
 )
 ```
 
-The two lines cover very different stretches of time, and the reason is worth pausing on. We collected the 500 most recent edits for every page, not every edit ever made, so the window we observe is not a fixed span of years but a fixed number of events. Emily Brontë's page is edited often, so her last 500 edits reach back only to late 2024. Chaucer's page moves more slowly, so the same 500 edits carry us back to 2021. The observation window is different for every author, and any comparison that forgets this will end up comparing a busy year and a quiet half-decade as though they were the same thing.
+The two lines cover very different stretches of time, and the reason is worth pausing on. We collected up to 500 of the most recent edits for every page, not every edit ever made, so the window we observe is not a fixed span of years but a capped number of events. Emily Brontë's page is edited often, so her last 500 edits reach back only to late 2024. Chaucer's page moves more slowly, so the same 500 edits carry us back to 2021. The observation window is different for every author, and any comparison that forgets this will end up comparing a busy year and a quiet half-decade as though they were the same thing.
 
 We can label the axis with `scale_x_datetime()`, which works like `scale_x_date()` but understands times as well as dates.
 
@@ -495,7 +495,7 @@ Emily Brontë's page turns over roughly once a day. At the other end, Charlotte 
 
 Choose that unit with some care, because these methods truncate toward zero rather than rounding. Had we asked for `.dt.total_days()` here, every gap shorter than twenty-four hours would have become exactly zero, and the busiest pages, the ones whose gaps are measured in hours, would have had their averages dragged toward nothing. The unit needs to be finer than the intervals being measured.
 
-Remember too the caveat from earlier. Because we hold the 500 most recent edits rather than the full history, the authors at the top of this table are the ones whose observation window is shortest. The ranking describes editing intensity in the recent past, not across the whole life of the encyclopedia.
+Remember too the caveat from earlier. Because we hold up to the 500 most recent edits rather than the full history, the authors at the top of this table are the ones whose observation window is shortest. The ranking describes editing intensity in the recent past, not across the whole life of the encyclopedia.
 
 ## Rolling Windows in Time
 
@@ -559,8 +559,8 @@ edits_with_views = (
     edits_2025
     .join_asof(
         views_daily,
-        left_on="timestamp",
-        right_on="moment",
+        left_on=c.timestamp,
+        right_on=c.moment,
         by="doc_id",
         strategy="backward"
     )

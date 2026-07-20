@@ -285,13 +285,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="setup" class="level3">
 <h3 class="anchored" data-anchor-id="setup">Setup</h3>
 <p>Run all of the following before starting the notebook.</p>
-<div id="efd0481d" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="1">
+<div id="00bb8275" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="1">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span> wget <span class="op">-</span>q <span class="op">-</span>nc https:<span class="op">//</span>raw.githubusercontent.com<span class="op">/</span>taylor<span class="op">-</span>arnold<span class="op">/</span>fds2<span class="op">/</span>refs<span class="op">/</span>heads<span class="op">/</span>main<span class="op">/</span>funs.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<div id="7d84a5a3" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="2">
+<div id="92d75791" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="2">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
@@ -303,14 +303,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>ub <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<div id="3cbe8a5c" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="3">
+<div id="ee57bcf1" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="3">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> warnings</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>warnings.filterwarnings(<span class="st">"ignore"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<div id="04415a8e" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="5">
+<div id="eeb90d93" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="5">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>it_city <span class="op">=</span> pl.read_csv(ub <span class="op">+</span> <span class="st">"data/it_cities.csv"</span>)</span>
@@ -323,16 +323,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>This notebook brings back both Italy tables from the last two notebooks and puts them together. <code>it_city</code> is the table of 388 cities, with <code>city_name</code>, <code>lon</code>, <code>lat</code>, and <code>pop</code>; <code>prov</code> is the GeoJSON of Italy’s 107 provinces, with a <code>province</code> name and a polygon <code>geometry</code>. A row of <code>it_city</code> is one city; a row of <code>prov</code> is one whole province boundary. The two are not linked by any shared key column this time: there is no province name on the city table. What links them is geography: each city sits inside exactly one province, and the point of a spatial join is to recover that relationship from the geometries alone.</p>
 <p>Spatial operations only work when both tables are in the same coordinate system, so the first question projects both into EPSG:7791 and saves them back. After that, the join and geometry-building steps get reassigned; the plain lookups and counts should just be printed.</p>
 <ol type="1">
-<li>Build a point <code>geometry</code> for <code>it_city</code> with <code>it_city.geo.points_from_xy( "lon", "lat")</code>, then project it into EPSG:7791 and save it back. Project <code>prov</code> into EPSG:7791 as well and save that too. Print both <code>_crs</code> columns to confirm they now agree.</li>
+<li>In the first block, build a point <code>geometry</code> for <code>it_city</code> with <code>it_city.geo.points_from_xy("lon", "lat")</code>, project it into EPSG:7791 and save it back, and project <code>prov</code> into EPSG:7791 as well and save that too. In the second block print <code>it_city</code>’s <code>_crs</code> column; in the third, print <code>prov</code>’s, to confirm they now agree.</li>
 </ol>
-<div id="196a4548" class="cell" data-execution_count="6">
+<div id="50bbcd92" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>it_city <span class="op">=</span> it_city.geo.points_from_xy(<span class="st">"lon"</span>, <span class="st">"lat"</span>).geo.to_crs(<span class="dv">7791</span>)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>prov <span class="op">=</span> prov.geo.to_crs(<span class="dv">7791</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<div id="f8f5cf4a" class="cell" data-execution_count="7">
+<div id="9378de9b" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>it_city.select(c._crs.first())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -364,7 +364,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<div id="a552778e" class="cell" data-execution_count="8">
+<div id="bb581165" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>prov.select(c._crs.first())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -400,7 +400,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="2" type="1">
 <li>Join the cities into the provinces with <code>it_city.geo.sjoin(prov)</code> and print the result. Each city point gets matched to the province polygon that contains it. Look at the columns: what does a row mean now, and what are <code>index_right</code> and the <code>geometry</code> column showing?</li>
 </ol>
-<div id="dfa2380b" class="cell" data-execution_count="9">
+<div id="51be805a" class="cell" data-execution_count="9">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>it_city.geo.sjoin(prov)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -555,9 +555,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p><strong>Answer</strong>: Each row is now a city paired with the province it falls inside, carrying the city’s four original columns plus the <code>province</code> name it landed in. <code>index_right</code> records which row of the <code>prov</code> table matched, a bookkeeping column GeoPandas adds. The <code>geometry</code> column holds the city <em>point</em>, not the province polygon, because the left table’s geometry is the one that survives a spatial join. So this is still one row per city, now labeled with its province.</p>
 <ol start="3" type="1">
-<li>A spatial join is an inner join by default, so a city that fell outside every province polygon would be dropped with no error. Guard against that: compare the row count of the join to the row count of <code>it_city</code>. Did every city match?</li>
+<li>A spatial join is an inner join by default, so a city that fell outside every province polygon would be dropped with no error. Guard against that: compare the row count of the join to the row count of <code>it_city</code>. In the first block, print the row count of the join; in the second, print the row count of <code>it_city</code>. Did every city match?</li>
 </ol>
-<div id="590b81e4" class="cell" data-execution_count="10">
+<div id="9da54384" class="cell" data-execution_count="10">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>it_city.geo.sjoin(prov).select(pl.<span class="bu">len</span>())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -589,7 +589,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<div id="1f33bffd" class="cell" data-execution_count="11">
+<div id="f0e48152" class="cell" data-execution_count="11">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>it_city.select(pl.<span class="bu">len</span>())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -625,7 +625,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="4" type="1">
 <li>Reverse the join with <code>prov.geo.sjoin(it_city)</code>, so the province polygons are kept instead. This gives one row per city again, but now the province geometry is repeated for each city inside it. Group by <code>province</code> and count the cities per province, then print the five provinces with the most.</li>
 </ol>
-<div id="72aacb05" class="cell" data-execution_count="12">
+<div id="94f2833c" class="cell" data-execution_count="12">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -687,7 +687,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="5" type="1">
 <li>Use the join to answer a question neither table can answer alone: how much of each province’s population lives in these cities? Join the cities into the provinces, group by <code>province</code>, sum <code>pop</code>, and print the six provinces with the largest urban population.</li>
 </ol>
-<div id="c15c0963" class="cell" data-execution_count="13">
+<div id="8a99ea46" class="cell" data-execution_count="13">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -753,7 +753,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="6" type="1">
 <li>The city table has repeated names. Filter the join to the rows where <code>city_name</code> is <code>"Massa"</code> and print <code>city_name</code>, <code>pop</code>, and <code>province</code>. Two things are worth noticing: which provinces the three Massas land in, and what their <code>pop</code> values are.</li>
 </ol>
-<div id="b67c0007" class="cell" data-execution_count="14">
+<div id="58917ae9" class="cell" data-execution_count="14">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -810,7 +810,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="7" type="1">
 <li>Provinces can be joined to <em>themselves</em>. Use <code>prov.geo.sjoin(prov, predicate="touches")</code> to find every pair of provinces that share a border, and print how many rows come back.</li>
 </ol>
-<div id="db167de5" class="cell" data-execution_count="15">
+<div id="21455109" class="cell" data-execution_count="15">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>prov.geo.sjoin(prov, predicate<span class="op">=</span><span class="st">"touches"</span>).select(pl.<span class="bu">len</span>())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -846,7 +846,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="8" type="1">
 <li>Pull out one province’s neighbors. Filter the <code>touches</code> self-join to the rows where <code>province_left</code> is <code>"Milano"</code> and print the <code>province_right</code> values. Do these match what you would expect from a map of Lombardy?</li>
 </ol>
-<div id="033c5af3" class="cell" data-execution_count="16">
+<div id="18198f74" class="cell" data-execution_count="16">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -906,7 +906,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="9" type="1">
 <li>Not every province has that many neighbors. Count neighbors per province from the <code>touches</code> join (group by <code>province_left</code>, count), sort ascending, and print the five with the fewest. What do the provinces at the bottom have in common?</li>
 </ol>
-<div id="b00cbbae" class="cell" data-execution_count="17">
+<div id="6d57b922" class="cell" data-execution_count="17">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -948,15 +948,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>1</td>
 </tr>
 <tr class="odd">
-<td>"Livorno"</td>
+<td>"Lecce"</td>
 <td>2</td>
 </tr>
 <tr class="even">
-<td>"Reggio di Calabria"</td>
+<td>"Sassari"</td>
 <td>2</td>
 </tr>
 <tr class="odd">
-<td>"Lecce"</td>
+<td>"Vibo Valentia"</td>
 <td>2</td>
 </tr>
 </tbody>
@@ -968,7 +968,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="10" type="1">
 <li>Now switch from overlap to proximity. Use <code>it_city.geo.sjoin_nearest( it_city, exclusive=True, distance_col="distance")</code> to find each city’s nearest other city. Sort by <code>distance</code> descending and print the six most isolated cities with their distance in kilometers (<code>c.distance / 1000</code>).</li>
 </ol>
-<div id="0c8ea054" class="cell" data-execution_count="18">
+<div id="8bc56849" class="cell" data-execution_count="18">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -1039,9 +1039,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p><strong>Answer</strong>: The most isolated pairs are Olbia and Nuoro on Sardinia, about 69 km apart, then Imperia reaching to Cuneo across the Ligurian mountains, and Oristano to Iglesias back on Sardinia. <code>exclusive=True</code> stops each city from matching itself at distance zero, and because the table is projected the distances land in meters, so dividing by 1000 gives real kilometers. The cities that top the list are exactly the ones a map would predict: island towns and mountain towns, where the next city over 20,000 is genuinely far.</p>
 <ol start="11" type="1">
-<li>The distances in question 10 are only meaningful because the table was projected. Repeat the nearest-neighbor join on an <em>unprojected</em> copy of the cities and look at what happens to the ranking. Load the cities fresh, build points but leave them in EPSG:4326, run the same join, and print the four most isolated by <code>distance</code>. Does the top of the list still agree with question 10?</li>
+<li>The distances in question 10 are only meaningful because the table was projected. Repeat the nearest-neighbor join on an <em>unprojected</em> copy of the cities and look at what happens to the ranking. In the first block, load the cities fresh and build points but leave them in EPSG:4326. In the second block, run the same join and print the four most isolated by <code>distance</code>. Does the top of the list still agree with question 10?</li>
 </ol>
-<div id="f379ad24" class="cell" data-execution_count="19">
+<div id="335b2716" class="cell" data-execution_count="19">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>it_deg <span class="op">=</span> (</span>
@@ -1050,7 +1050,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<div id="e8d0286a" class="cell" data-execution_count="20">
+<div id="d33498d2" class="cell" data-execution_count="20">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -1662,265 +1662,268 @@ document.addEventListener('DOMContentLoaded', function() {
 <span id="cb20-69"><a href="#cb20-69" aria-hidden="true" tabindex="-1"></a>back. After that, the join and geometry-building steps get reassigned; the</span>
 <span id="cb20-70"><a href="#cb20-70" aria-hidden="true" tabindex="-1"></a>plain lookups and counts should just be printed.</span>
 <span id="cb20-71"><a href="#cb20-71" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-72"><a href="#cb20-72" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Build a point <span class="in">`geometry`</span> for <span class="in">`it_city`</span> with `it_city.geo.points_from_xy(</span>
-<span id="cb20-73"><a href="#cb20-73" aria-hidden="true" tabindex="-1"></a>"lon", "lat")`, then project it into EPSG:7791 and save it back. Project</span>
-<span id="cb20-74"><a href="#cb20-74" aria-hidden="true" tabindex="-1"></a><span class="in">`prov`</span> into EPSG:7791 as well and save that too. Print both <span class="in">`_crs`</span> columns to</span>
-<span id="cb20-75"><a href="#cb20-75" aria-hidden="true" tabindex="-1"></a>confirm they now agree.</span>
-<span id="cb20-76"><a href="#cb20-76" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-79"><a href="#cb20-79" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb20-80"><a href="#cb20-80" aria-hidden="true" tabindex="-1"></a>it_city <span class="op">=</span> it_city.geo.points_from_xy(<span class="st">"lon"</span>, <span class="st">"lat"</span>).geo.to_crs(<span class="dv">7791</span>)</span>
-<span id="cb20-81"><a href="#cb20-81" aria-hidden="true" tabindex="-1"></a>prov <span class="op">=</span> prov.geo.to_crs(<span class="dv">7791</span>)</span>
-<span id="cb20-82"><a href="#cb20-82" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb20-83"><a href="#cb20-83" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-86"><a href="#cb20-86" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb20-87"><a href="#cb20-87" aria-hidden="true" tabindex="-1"></a>it_city.select(c._crs.first())</span>
-<span id="cb20-88"><a href="#cb20-88" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb20-89"><a href="#cb20-89" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-92"><a href="#cb20-92" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb20-93"><a href="#cb20-93" aria-hidden="true" tabindex="-1"></a>prov.select(c._crs.first())</span>
-<span id="cb20-94"><a href="#cb20-94" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb20-95"><a href="#cb20-95" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-96"><a href="#cb20-96" aria-hidden="true" tabindex="-1"></a>**Answer**: Both tables now report EPSG:7791. That agreement is the</span>
-<span id="cb20-97"><a href="#cb20-97" aria-hidden="true" tabindex="-1"></a>precondition for everything below: a spatial join reads coordinates from both</span>
-<span id="cb20-98"><a href="#cb20-98" aria-hidden="true" tabindex="-1"></a>tables and compares them directly, so if one were still in degrees and the</span>
-<span id="cb20-99"><a href="#cb20-99" aria-hidden="true" tabindex="-1"></a>other in meters the numbers would not line up and the match would be garbage.</span>
-<span id="cb20-100"><a href="#cb20-100" aria-hidden="true" tabindex="-1"></a>Projecting both to the same CRS first is the spatial version of making sure</span>
-<span id="cb20-101"><a href="#cb20-101" aria-hidden="true" tabindex="-1"></a>two key columns hold the same kind of value before a regular join.</span>
-<span id="cb20-102"><a href="#cb20-102" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-103"><a href="#cb20-103" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Join the cities into the provinces with <span class="in">`it_city.geo.sjoin(prov)`</span> and print</span>
-<span id="cb20-104"><a href="#cb20-104" aria-hidden="true" tabindex="-1"></a>the result. Each city point gets matched to the province polygon that contains</span>
-<span id="cb20-105"><a href="#cb20-105" aria-hidden="true" tabindex="-1"></a>it. Look at the columns: what does a row mean now, and what are <span class="in">`index_right`</span></span>
-<span id="cb20-106"><a href="#cb20-106" aria-hidden="true" tabindex="-1"></a>and the <span class="in">`geometry`</span> column showing?</span>
-<span id="cb20-107"><a href="#cb20-107" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-110"><a href="#cb20-110" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb20-111"><a href="#cb20-111" aria-hidden="true" tabindex="-1"></a>it_city.geo.sjoin(prov)</span>
-<span id="cb20-112"><a href="#cb20-112" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb20-113"><a href="#cb20-113" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-114"><a href="#cb20-114" aria-hidden="true" tabindex="-1"></a>**Answer**: Each row is now a city paired with the province it falls inside,</span>
-<span id="cb20-115"><a href="#cb20-115" aria-hidden="true" tabindex="-1"></a>carrying the city's four original columns plus the <span class="in">`province`</span> name it landed</span>
-<span id="cb20-116"><a href="#cb20-116" aria-hidden="true" tabindex="-1"></a>in. <span class="in">`index_right`</span> records which row of the <span class="in">`prov`</span> table matched, a bookkeeping</span>
-<span id="cb20-117"><a href="#cb20-117" aria-hidden="true" tabindex="-1"></a>column GeoPandas adds. The <span class="in">`geometry`</span> column holds the city *point*, not the</span>
-<span id="cb20-118"><a href="#cb20-118" aria-hidden="true" tabindex="-1"></a>province polygon, because the left table's geometry is the one that survives a</span>
-<span id="cb20-119"><a href="#cb20-119" aria-hidden="true" tabindex="-1"></a>spatial join. So this is still one row per city, now labeled with its</span>
-<span id="cb20-120"><a href="#cb20-120" aria-hidden="true" tabindex="-1"></a>province.</span>
-<span id="cb20-121"><a href="#cb20-121" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-122"><a href="#cb20-122" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>A spatial join is an inner join by default, so a city that fell outside</span>
-<span id="cb20-123"><a href="#cb20-123" aria-hidden="true" tabindex="-1"></a>every province polygon would be dropped with no error. Guard against that:</span>
-<span id="cb20-124"><a href="#cb20-124" aria-hidden="true" tabindex="-1"></a>compare the row count of the join to the row count of <span class="in">`it_city`</span>. Did every</span>
-<span id="cb20-125"><a href="#cb20-125" aria-hidden="true" tabindex="-1"></a>city match?</span>
-<span id="cb20-126"><a href="#cb20-126" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-129"><a href="#cb20-129" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb20-130"><a href="#cb20-130" aria-hidden="true" tabindex="-1"></a>it_city.geo.sjoin(prov).select(pl.<span class="bu">len</span>())</span>
-<span id="cb20-131"><a href="#cb20-131" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb20-132"><a href="#cb20-132" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-135"><a href="#cb20-135" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb20-136"><a href="#cb20-136" aria-hidden="true" tabindex="-1"></a>it_city.select(pl.<span class="bu">len</span>())</span>
-<span id="cb20-137"><a href="#cb20-137" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb20-138"><a href="#cb20-138" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-139"><a href="#cb20-139" aria-hidden="true" tabindex="-1"></a>**Answer**: Both come back 388, so no city was dropped: every one of the 388</span>
-<span id="cb20-140"><a href="#cb20-140" aria-hidden="true" tabindex="-1"></a>cities fell inside some province. That is the check worth building a habit</span>
-<span id="cb20-141"><a href="#cb20-141" aria-hidden="true" tabindex="-1"></a>around. A regular join tells you nothing went wrong by matching on a key you</span>
-<span id="cb20-142"><a href="#cb20-142" aria-hidden="true" tabindex="-1"></a>can see; a spatial join matches on geometry you can't eyeball, and a point</span>
-<span id="cb20-143"><a href="#cb20-143" aria-hidden="true" tabindex="-1"></a>sitting just off the coast or in a gap between polygons would simply vanish</span>
-<span id="cb20-144"><a href="#cb20-144" aria-hidden="true" tabindex="-1"></a>from the result without complaint. Counting rows before and after is the</span>
-<span id="cb20-145"><a href="#cb20-145" aria-hidden="true" tabindex="-1"></a>geometry version of the <span class="in">`n_unique() == len()`</span> key check from the last</span>
-<span id="cb20-146"><a href="#cb20-146" aria-hidden="true" tabindex="-1"></a>notebook.</span>
-<span id="cb20-147"><a href="#cb20-147" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-148"><a href="#cb20-148" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>Reverse the join with <span class="in">`prov.geo.sjoin(it_city)`</span>, so the province polygons</span>
-<span id="cb20-149"><a href="#cb20-149" aria-hidden="true" tabindex="-1"></a>are kept instead. This gives one row per city again, but now the province</span>
-<span id="cb20-150"><a href="#cb20-150" aria-hidden="true" tabindex="-1"></a>geometry is repeated for each city inside it. Group by <span class="in">`province`</span> and count</span>
-<span id="cb20-151"><a href="#cb20-151" aria-hidden="true" tabindex="-1"></a>the cities per province, then print the five provinces with the most.</span>
-<span id="cb20-152"><a href="#cb20-152" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-155"><a href="#cb20-155" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb20-156"><a href="#cb20-156" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb20-157"><a href="#cb20-157" aria-hidden="true" tabindex="-1"></a>    prov</span>
-<span id="cb20-158"><a href="#cb20-158" aria-hidden="true" tabindex="-1"></a>    .geo.sjoin(it_city)</span>
-<span id="cb20-159"><a href="#cb20-159" aria-hidden="true" tabindex="-1"></a>    .group_by(c.province)</span>
-<span id="cb20-160"><a href="#cb20-160" aria-hidden="true" tabindex="-1"></a>    .agg(n <span class="op">=</span> pl.<span class="bu">len</span>())</span>
-<span id="cb20-161"><a href="#cb20-161" aria-hidden="true" tabindex="-1"></a>    .sort(c.n, descending<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb20-162"><a href="#cb20-162" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">5</span>)</span>
-<span id="cb20-163"><a href="#cb20-163" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb20-164"><a href="#cb20-164" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb20-165"><a href="#cb20-165" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-166"><a href="#cb20-166" aria-hidden="true" tabindex="-1"></a>**Answer**: Naples leads with 36 cities over 20,000 people, then Milan (23),</span>
-<span id="cb20-167"><a href="#cb20-167" aria-hidden="true" tabindex="-1"></a>Bari (18), Rome (15), and Turin (14). Putting the polygon table first flips</span>
-<span id="cb20-168"><a href="#cb20-168" aria-hidden="true" tabindex="-1"></a>which geometry is kept. Now each row carries a province boundary, duplicated</span>
-<span id="cb20-169"><a href="#cb20-169" aria-hidden="true" tabindex="-1"></a>once per city it contains, the same one-to-many shape a regular left join</span>
-<span id="cb20-170"><a href="#cb20-170" aria-hidden="true" tabindex="-1"></a>produces when the right table has several matches per key. Napoli topping the</span>
-<span id="cb20-171"><a href="#cb20-171" aria-hidden="true" tabindex="-1"></a>list fits the map: the area around Naples is one of the most densely</span>
-<span id="cb20-172"><a href="#cb20-172" aria-hidden="true" tabindex="-1"></a>town-packed corners of the country.</span>
-<span id="cb20-173"><a href="#cb20-173" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-174"><a href="#cb20-174" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>Use the join to answer a question neither table can answer alone: how much</span>
-<span id="cb20-175"><a href="#cb20-175" aria-hidden="true" tabindex="-1"></a>of each province's population lives in these cities? Join the cities into the</span>
-<span id="cb20-176"><a href="#cb20-176" aria-hidden="true" tabindex="-1"></a>provinces, group by <span class="in">`province`</span>, sum <span class="in">`pop`</span>, and print the six provinces with</span>
-<span id="cb20-177"><a href="#cb20-177" aria-hidden="true" tabindex="-1"></a>the largest urban population.</span>
-<span id="cb20-178"><a href="#cb20-178" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-181"><a href="#cb20-181" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb20-182"><a href="#cb20-182" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb20-183"><a href="#cb20-183" aria-hidden="true" tabindex="-1"></a>    it_city</span>
-<span id="cb20-184"><a href="#cb20-184" aria-hidden="true" tabindex="-1"></a>    .geo.sjoin(prov)</span>
-<span id="cb20-185"><a href="#cb20-185" aria-hidden="true" tabindex="-1"></a>    .group_by(c.province)</span>
-<span id="cb20-186"><a href="#cb20-186" aria-hidden="true" tabindex="-1"></a>    .agg(urban_pop <span class="op">=</span> c.pop.<span class="bu">sum</span>())</span>
-<span id="cb20-187"><a href="#cb20-187" aria-hidden="true" tabindex="-1"></a>    .sort(c.urban_pop, descending<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb20-188"><a href="#cb20-188" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">6</span>)</span>
-<span id="cb20-189"><a href="#cb20-189" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb20-190"><a href="#cb20-190" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb20-191"><a href="#cb20-191" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-192"><a href="#cb20-192" aria-hidden="true" tabindex="-1"></a>**Answer**: Rome's province tops the list at about 2.96 million, then Naples</span>
-<span id="cb20-193"><a href="#cb20-193" aria-hidden="true" tabindex="-1"></a>(2.35M), Milan (2.05M), Turin (1.32M), Bari (0.87M), and Palermo (0.81M). This</span>
-<span id="cb20-194"><a href="#cb20-194" aria-hidden="true" tabindex="-1"></a>number could not be read off either table by itself: the population lives on</span>
-<span id="cb20-195"><a href="#cb20-195" aria-hidden="true" tabindex="-1"></a>the city table, the province boundary lives on the polygon table, and only the</span>
-<span id="cb20-196"><a href="#cb20-196" aria-hidden="true" tabindex="-1"></a>spatial join tells us which cities belong to which province. Note the count is</span>
-<span id="cb20-197"><a href="#cb20-197" aria-hidden="true" tabindex="-1"></a>population in *towns over 20,000*, not the full province population, since the</span>
-<span id="cb20-198"><a href="#cb20-198" aria-hidden="true" tabindex="-1"></a>city table left out everything smaller, the same 20,000 floor from</span>
-<span id="cb20-199"><a href="#cb20-199" aria-hidden="true" tabindex="-1"></a>notebook31 that a raw sum quietly inherits.</span>
-<span id="cb20-200"><a href="#cb20-200" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-201"><a href="#cb20-201" aria-hidden="true" tabindex="-1"></a><span class="ss">6. </span>The city table has repeated names. Filter the join to the rows where</span>
-<span id="cb20-202"><a href="#cb20-202" aria-hidden="true" tabindex="-1"></a><span class="in">`city_name`</span> is <span class="in">`"Massa"`</span> and print <span class="in">`city_name`</span>, <span class="in">`pop`</span>, and <span class="in">`province`</span>. Two</span>
-<span id="cb20-203"><a href="#cb20-203" aria-hidden="true" tabindex="-1"></a>things are worth noticing: which provinces the three Massas land in, and what</span>
-<span id="cb20-204"><a href="#cb20-204" aria-hidden="true" tabindex="-1"></a>their <span class="in">`pop`</span> values are.</span>
-<span id="cb20-205"><a href="#cb20-205" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-208"><a href="#cb20-208" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb20-209"><a href="#cb20-209" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb20-210"><a href="#cb20-210" aria-hidden="true" tabindex="-1"></a>    it_city</span>
-<span id="cb20-211"><a href="#cb20-211" aria-hidden="true" tabindex="-1"></a>    .geo.sjoin(prov)</span>
-<span id="cb20-212"><a href="#cb20-212" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.city_name <span class="op">==</span> <span class="st">"Massa"</span>)</span>
-<span id="cb20-213"><a href="#cb20-213" aria-hidden="true" tabindex="-1"></a>    .select(c.city_name, c.pop, c.province)</span>
-<span id="cb20-214"><a href="#cb20-214" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb20-215"><a href="#cb20-215" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb20-216"><a href="#cb20-216" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-217"><a href="#cb20-217" aria-hidden="true" tabindex="-1"></a>**Answer**: Three separate points named Massa land in three different</span>
-<span id="cb20-218"><a href="#cb20-218" aria-hidden="true" tabindex="-1"></a>provinces (Massa-Carrara, Pistoia, and Macerata), and the spatial join sends</span>
-<span id="cb20-219"><a href="#cb20-219" aria-hidden="true" tabindex="-1"></a>each to the right one from its coordinates, which a join on the name alone</span>
-<span id="cb20-220"><a href="#cb20-220" aria-hidden="true" tabindex="-1"></a>could never do. But all three carry the identical population 64,783, which is</span>
-<span id="cb20-221"><a href="#cb20-221" aria-hidden="true" tabindex="-1"></a>the figure for the real Massa in Massa-Carrara. That repetition is a data</span>
-<span id="cb20-222"><a href="#cb20-222" aria-hidden="true" tabindex="-1"></a>error: the population was copied onto every place sharing the name rather than</span>
-<span id="cb20-223"><a href="#cb20-223" aria-hidden="true" tabindex="-1"></a>measured for each. The join is what exposes it, because the same number sitting</span>
-<span id="cb20-224"><a href="#cb20-224" aria-hidden="true" tabindex="-1"></a>next to three different provinces is only obvious once each point is in its</span>
-<span id="cb20-225"><a href="#cb20-225" aria-hidden="true" tabindex="-1"></a>geographic context. It is also a reason to treat the per-province sums from</span>
-<span id="cb20-226"><a href="#cb20-226" aria-hidden="true" tabindex="-1"></a>question 5 as a little high: a few of those towns are carrying a population</span>
-<span id="cb20-227"><a href="#cb20-227" aria-hidden="true" tabindex="-1"></a>that is not really theirs.</span>
-<span id="cb20-228"><a href="#cb20-228" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-229"><a href="#cb20-229" aria-hidden="true" tabindex="-1"></a><span class="ss">7. </span>Provinces can be joined to *themselves*. Use `prov.geo.sjoin(prov,</span>
-<span id="cb20-230"><a href="#cb20-230" aria-hidden="true" tabindex="-1"></a>predicate="touches")` to find every pair of provinces that share a border, and</span>
-<span id="cb20-231"><a href="#cb20-231" aria-hidden="true" tabindex="-1"></a>print how many rows come back.</span>
-<span id="cb20-232"><a href="#cb20-232" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-235"><a href="#cb20-235" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb20-236"><a href="#cb20-236" aria-hidden="true" tabindex="-1"></a>prov.geo.sjoin(prov, predicate<span class="op">=</span><span class="st">"touches"</span>).select(pl.<span class="bu">len</span>())</span>
-<span id="cb20-237"><a href="#cb20-237" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb20-238"><a href="#cb20-238" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-239"><a href="#cb20-239" aria-hidden="true" tabindex="-1"></a>**Answer**: 476 rows. The <span class="in">`touches`</span> predicate matches two polygons whenever</span>
-<span id="cb20-240"><a href="#cb20-240" aria-hidden="true" tabindex="-1"></a>they share at least one point of their boundaries, so this pairs each province</span>
-<span id="cb20-241"><a href="#cb20-241" aria-hidden="true" tabindex="-1"></a>with every neighbor it shares a line with. The count is even because every</span>
-<span id="cb20-242"><a href="#cb20-242" aria-hidden="true" tabindex="-1"></a>border shows up twice: if Milan touches Pavia then Pavia touches Milan, and</span>
-<span id="cb20-243"><a href="#cb20-243" aria-hidden="true" tabindex="-1"></a>both directed pairs are in the table. There are 238 actual borders here; the</span>
-<span id="cb20-244"><a href="#cb20-244" aria-hidden="true" tabindex="-1"></a>join reports each one from both sides, which is something to remember before</span>
-<span id="cb20-245"><a href="#cb20-245" aria-hidden="true" tabindex="-1"></a>counting anything off a self-join like this.</span>
-<span id="cb20-246"><a href="#cb20-246" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-247"><a href="#cb20-247" aria-hidden="true" tabindex="-1"></a><span class="ss">8. </span>Pull out one province's neighbors. Filter the <span class="in">`touches`</span> self-join to the</span>
-<span id="cb20-248"><a href="#cb20-248" aria-hidden="true" tabindex="-1"></a>rows where <span class="in">`province_left`</span> is <span class="in">`"Milano"`</span> and print the <span class="in">`province_right`</span></span>
-<span id="cb20-249"><a href="#cb20-249" aria-hidden="true" tabindex="-1"></a>values. Do these match what you would expect from a map of Lombardy?</span>
-<span id="cb20-250"><a href="#cb20-250" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-253"><a href="#cb20-253" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb20-254"><a href="#cb20-254" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb20-255"><a href="#cb20-255" aria-hidden="true" tabindex="-1"></a>    prov</span>
-<span id="cb20-256"><a href="#cb20-256" aria-hidden="true" tabindex="-1"></a>    .geo.sjoin(prov, predicate<span class="op">=</span><span class="st">"touches"</span>)</span>
-<span id="cb20-257"><a href="#cb20-257" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.province_left <span class="op">==</span> <span class="st">"Milano"</span>)</span>
-<span id="cb20-258"><a href="#cb20-258" aria-hidden="true" tabindex="-1"></a>    .select(c.province_right)</span>
-<span id="cb20-259"><a href="#cb20-259" aria-hidden="true" tabindex="-1"></a>    .sort(c.province_right)</span>
-<span id="cb20-260"><a href="#cb20-260" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb20-261"><a href="#cb20-261" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb20-262"><a href="#cb20-262" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-263"><a href="#cb20-263" aria-hidden="true" tabindex="-1"></a>**Answer**: Milan borders seven provinces: Bergamo, Cremona, Lodi, Monza e</span>
-<span id="cb20-264"><a href="#cb20-264" aria-hidden="true" tabindex="-1"></a>della Brianza, Novara, Pavia, and Varese. Every one is a real neighbor: Monza</span>
-<span id="cb20-265"><a href="#cb20-265" aria-hidden="true" tabindex="-1"></a>and Lodi were carved out of Milan's own hinterland, Pavia and Cremona sit to</span>
-<span id="cb20-266"><a href="#cb20-266" aria-hidden="true" tabindex="-1"></a>the south, and Novara is just across the boundary into Piedmont. Because the</span>
-<span id="cb20-267"><a href="#cb20-267" aria-hidden="true" tabindex="-1"></a>suffix landed on both name columns in the self-join, the province we filtered</span>
-<span id="cb20-268"><a href="#cb20-268" aria-hidden="true" tabindex="-1"></a>on is <span class="in">`province_left`</span> and its neighbors come back as <span class="in">`province_right`</span>; reading</span>
-<span id="cb20-269"><a href="#cb20-269" aria-hidden="true" tabindex="-1"></a>those apart is the whole trick to using a self-join's output.</span>
-<span id="cb20-270"><a href="#cb20-270" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-271"><a href="#cb20-271" aria-hidden="true" tabindex="-1"></a><span class="ss">9. </span>Not every province has that many neighbors. Count neighbors per province</span>
-<span id="cb20-272"><a href="#cb20-272" aria-hidden="true" tabindex="-1"></a>from the <span class="in">`touches`</span> join (group by <span class="in">`province_left`</span>, count), sort ascending, and</span>
-<span id="cb20-273"><a href="#cb20-273" aria-hidden="true" tabindex="-1"></a>print the five with the fewest. What do the provinces at the bottom have in</span>
-<span id="cb20-274"><a href="#cb20-274" aria-hidden="true" tabindex="-1"></a>common?</span>
-<span id="cb20-275"><a href="#cb20-275" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-278"><a href="#cb20-278" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb20-279"><a href="#cb20-279" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb20-280"><a href="#cb20-280" aria-hidden="true" tabindex="-1"></a>    prov</span>
-<span id="cb20-281"><a href="#cb20-281" aria-hidden="true" tabindex="-1"></a>    .geo.sjoin(prov, predicate<span class="op">=</span><span class="st">"touches"</span>)</span>
-<span id="cb20-282"><a href="#cb20-282" aria-hidden="true" tabindex="-1"></a>    .group_by(c.province_left)</span>
-<span id="cb20-283"><a href="#cb20-283" aria-hidden="true" tabindex="-1"></a>    .agg(n <span class="op">=</span> pl.<span class="bu">len</span>())</span>
-<span id="cb20-284"><a href="#cb20-284" aria-hidden="true" tabindex="-1"></a>    .sort(c.n)</span>
-<span id="cb20-285"><a href="#cb20-285" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">5</span>)</span>
-<span id="cb20-286"><a href="#cb20-286" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb20-287"><a href="#cb20-287" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb20-288"><a href="#cb20-288" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-289"><a href="#cb20-289" aria-hidden="true" tabindex="-1"></a>**Answer**: Trieste and Cagliari come in with a single land neighbor each,</span>
-<span id="cb20-290"><a href="#cb20-290" aria-hidden="true" tabindex="-1"></a>then Gorizia, Trapani, and Vibo Valentia with two. The bottom of this list is</span>
-<span id="cb20-291"><a href="#cb20-291" aria-hidden="true" tabindex="-1"></a>geography, not data trouble: Cagliari and Trapani are on islands (Sardinia and</span>
-<span id="cb20-292"><a href="#cb20-292" aria-hidden="true" tabindex="-1"></a>Sicily), so most of their perimeter is coastline that touches no other</span>
-<span id="cb20-293"><a href="#cb20-293" aria-hidden="true" tabindex="-1"></a>province, and Trieste and Gorizia are pinned into the far northeastern corner</span>
-<span id="cb20-294"><a href="#cb20-294" aria-hidden="true" tabindex="-1"></a>against the Slovenian border, where the neighbors that would round out their</span>
-<span id="cb20-295"><a href="#cb20-295" aria-hidden="true" tabindex="-1"></a>counts are in another country and not in this table at all. A province's</span>
-<span id="cb20-296"><a href="#cb20-296" aria-hidden="true" tabindex="-1"></a>border count reflects how much of its edge is shared Italian land versus sea</span>
-<span id="cb20-297"><a href="#cb20-297" aria-hidden="true" tabindex="-1"></a>or an international line.</span>
-<span id="cb20-298"><a href="#cb20-298" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-299"><a href="#cb20-299" aria-hidden="true" tabindex="-1"></a><span class="ss">10. </span>Now switch from overlap to proximity. Use `it_city.geo.sjoin_nearest(</span>
-<span id="cb20-300"><a href="#cb20-300" aria-hidden="true" tabindex="-1"></a>it_city, exclusive=True, distance_col="distance")` to find each city's nearest</span>
-<span id="cb20-301"><a href="#cb20-301" aria-hidden="true" tabindex="-1"></a>other city. Sort by <span class="in">`distance`</span> descending and print the six most isolated</span>
-<span id="cb20-302"><a href="#cb20-302" aria-hidden="true" tabindex="-1"></a>cities with their distance in kilometers (<span class="in">`c.distance / 1000`</span>).</span>
-<span id="cb20-303"><a href="#cb20-303" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-306"><a href="#cb20-306" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb20-307"><a href="#cb20-307" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb20-308"><a href="#cb20-308" aria-hidden="true" tabindex="-1"></a>    it_city</span>
-<span id="cb20-309"><a href="#cb20-309" aria-hidden="true" tabindex="-1"></a>    .geo.sjoin_nearest(it_city, exclusive<span class="op">=</span><span class="va">True</span>, distance_col<span class="op">=</span><span class="st">"distance"</span>)</span>
-<span id="cb20-310"><a href="#cb20-310" aria-hidden="true" tabindex="-1"></a>    .sort(c.distance, descending<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb20-311"><a href="#cb20-311" aria-hidden="true" tabindex="-1"></a>    .select(c.city_name_left, c.city_name_right, (c.distance <span class="op">/</span> <span class="dv">1000</span>).<span class="bu">round</span>(<span class="dv">1</span>).alias(<span class="st">"km"</span>))</span>
-<span id="cb20-312"><a href="#cb20-312" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">6</span>)</span>
-<span id="cb20-313"><a href="#cb20-313" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb20-314"><a href="#cb20-314" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb20-315"><a href="#cb20-315" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-316"><a href="#cb20-316" aria-hidden="true" tabindex="-1"></a>**Answer**: The most isolated pairs are Olbia and Nuoro on Sardinia, about 69</span>
-<span id="cb20-317"><a href="#cb20-317" aria-hidden="true" tabindex="-1"></a>km apart, then Imperia reaching to Cuneo across the Ligurian mountains, and</span>
-<span id="cb20-318"><a href="#cb20-318" aria-hidden="true" tabindex="-1"></a>Oristano to Iglesias back on Sardinia. <span class="in">`exclusive=True`</span> stops each city from</span>
-<span id="cb20-319"><a href="#cb20-319" aria-hidden="true" tabindex="-1"></a>matching itself at distance zero, and because the table is projected the</span>
-<span id="cb20-320"><a href="#cb20-320" aria-hidden="true" tabindex="-1"></a>distances land in meters, so dividing by 1000 gives real kilometers. The</span>
-<span id="cb20-321"><a href="#cb20-321" aria-hidden="true" tabindex="-1"></a>cities that top the list are exactly the ones a map would predict: island</span>
-<span id="cb20-322"><a href="#cb20-322" aria-hidden="true" tabindex="-1"></a>towns and mountain towns, where the next city over 20,000 is genuinely far.</span>
-<span id="cb20-323"><a href="#cb20-323" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-324"><a href="#cb20-324" aria-hidden="true" tabindex="-1"></a><span class="ss">11. </span>The distances in question 10 are only meaningful because the table was</span>
-<span id="cb20-325"><a href="#cb20-325" aria-hidden="true" tabindex="-1"></a>projected. Repeat the nearest-neighbor join on an *unprojected* copy of the</span>
-<span id="cb20-326"><a href="#cb20-326" aria-hidden="true" tabindex="-1"></a>cities and look at what happens to the ranking. Load the cities fresh, build</span>
-<span id="cb20-327"><a href="#cb20-327" aria-hidden="true" tabindex="-1"></a>points but leave them in EPSG:4326, run the same join, and print the four most</span>
-<span id="cb20-328"><a href="#cb20-328" aria-hidden="true" tabindex="-1"></a>isolated by <span class="in">`distance`</span>. Does the top of the list still agree with question 10?</span>
-<span id="cb20-329"><a href="#cb20-329" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-332"><a href="#cb20-332" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb20-333"><a href="#cb20-333" aria-hidden="true" tabindex="-1"></a>it_deg <span class="op">=</span> (</span>
-<span id="cb20-334"><a href="#cb20-334" aria-hidden="true" tabindex="-1"></a>    pl.read_csv(ub <span class="op">+</span> <span class="st">"data/it_cities.csv"</span>)</span>
-<span id="cb20-335"><a href="#cb20-335" aria-hidden="true" tabindex="-1"></a>    .geo.points_from_xy(<span class="st">"lon"</span>, <span class="st">"lat"</span>)</span>
-<span id="cb20-336"><a href="#cb20-336" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb20-337"><a href="#cb20-337" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb20-338"><a href="#cb20-338" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-341"><a href="#cb20-341" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb20-342"><a href="#cb20-342" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb20-343"><a href="#cb20-343" aria-hidden="true" tabindex="-1"></a>    it_deg</span>
-<span id="cb20-344"><a href="#cb20-344" aria-hidden="true" tabindex="-1"></a>    .geo.sjoin_nearest(it_deg, exclusive<span class="op">=</span><span class="va">True</span>, distance_col<span class="op">=</span><span class="st">"distance"</span>)</span>
-<span id="cb20-345"><a href="#cb20-345" aria-hidden="true" tabindex="-1"></a>    .sort(c.distance, descending<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb20-346"><a href="#cb20-346" aria-hidden="true" tabindex="-1"></a>    .select(c.city_name_left, c.city_name_right, c.distance.<span class="bu">round</span>(<span class="dv">4</span>).alias(<span class="st">"deg"</span>))</span>
-<span id="cb20-347"><a href="#cb20-347" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">4</span>)</span>
-<span id="cb20-348"><a href="#cb20-348" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb20-349"><a href="#cb20-349" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb20-350"><a href="#cb20-350" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-351"><a href="#cb20-351" aria-hidden="true" tabindex="-1"></a>**Answer**: The ranking changes at the top. In degrees, Imperia and Cuneo come</span>
-<span id="cb20-352"><a href="#cb20-352" aria-hidden="true" tabindex="-1"></a>out as the most isolated pair, ahead of Olbia and Nuoro, which was the clear</span>
-<span id="cb20-353"><a href="#cb20-353" aria-hidden="true" tabindex="-1"></a>leader in kilometers. Nothing raised an error. The join ran fine and returned</span>
-<span id="cb20-354"><a href="#cb20-354" aria-hidden="true" tabindex="-1"></a>distances, just distances in degrees, which are not a fixed length on the</span>
-<span id="cb20-355"><a href="#cb20-355" aria-hidden="true" tabindex="-1"></a>ground. A degree of longitude is shorter than a degree of latitude at these</span>
-<span id="cb20-356"><a href="#cb20-356" aria-hidden="true" tabindex="-1"></a>latitudes, so an east-west gap like Imperia to Cuneo gets undercounted less</span>
-<span id="cb20-357"><a href="#cb20-357" aria-hidden="true" tabindex="-1"></a>than the mostly north-south Sardinian pairs, and the order shuffles. The</span>
-<span id="cb20-358"><a href="#cb20-358" aria-hidden="true" tabindex="-1"></a>projected answer from question 10 is the honest one; this is the same trap as</span>
-<span id="cb20-359"><a href="#cb20-359" aria-hidden="true" tabindex="-1"></a>computing area in unprojected degrees back in notebook32, now showing up as a</span>
-<span id="cb20-360"><a href="#cb20-360" aria-hidden="true" tabindex="-1"></a>ranking that quietly reorders itself.</span>
+<span id="cb20-72"><a href="#cb20-72" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>In the first block, build a point <span class="in">`geometry`</span> for <span class="in">`it_city`</span> with</span>
+<span id="cb20-73"><a href="#cb20-73" aria-hidden="true" tabindex="-1"></a><span class="in">`it_city.geo.points_from_xy("lon", "lat")`</span>, project it into EPSG:7791 and save</span>
+<span id="cb20-74"><a href="#cb20-74" aria-hidden="true" tabindex="-1"></a>it back, and project <span class="in">`prov`</span> into EPSG:7791 as well and save that too. In the</span>
+<span id="cb20-75"><a href="#cb20-75" aria-hidden="true" tabindex="-1"></a>second block print <span class="in">`it_city`</span>'s <span class="in">`_crs`</span> column; in the third, print <span class="in">`prov`</span>'s, to</span>
+<span id="cb20-76"><a href="#cb20-76" aria-hidden="true" tabindex="-1"></a>confirm they now agree.</span>
+<span id="cb20-77"><a href="#cb20-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-80"><a href="#cb20-80" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb20-81"><a href="#cb20-81" aria-hidden="true" tabindex="-1"></a>it_city <span class="op">=</span> it_city.geo.points_from_xy(<span class="st">"lon"</span>, <span class="st">"lat"</span>).geo.to_crs(<span class="dv">7791</span>)</span>
+<span id="cb20-82"><a href="#cb20-82" aria-hidden="true" tabindex="-1"></a>prov <span class="op">=</span> prov.geo.to_crs(<span class="dv">7791</span>)</span>
+<span id="cb20-83"><a href="#cb20-83" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb20-84"><a href="#cb20-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-87"><a href="#cb20-87" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb20-88"><a href="#cb20-88" aria-hidden="true" tabindex="-1"></a>it_city.select(c._crs.first())</span>
+<span id="cb20-89"><a href="#cb20-89" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb20-90"><a href="#cb20-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-93"><a href="#cb20-93" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb20-94"><a href="#cb20-94" aria-hidden="true" tabindex="-1"></a>prov.select(c._crs.first())</span>
+<span id="cb20-95"><a href="#cb20-95" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb20-96"><a href="#cb20-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-97"><a href="#cb20-97" aria-hidden="true" tabindex="-1"></a>**Answer**: Both tables now report EPSG:7791. That agreement is the</span>
+<span id="cb20-98"><a href="#cb20-98" aria-hidden="true" tabindex="-1"></a>precondition for everything below: a spatial join reads coordinates from both</span>
+<span id="cb20-99"><a href="#cb20-99" aria-hidden="true" tabindex="-1"></a>tables and compares them directly, so if one were still in degrees and the</span>
+<span id="cb20-100"><a href="#cb20-100" aria-hidden="true" tabindex="-1"></a>other in meters the numbers would not line up and the match would be garbage.</span>
+<span id="cb20-101"><a href="#cb20-101" aria-hidden="true" tabindex="-1"></a>Projecting both to the same CRS first is the spatial version of making sure</span>
+<span id="cb20-102"><a href="#cb20-102" aria-hidden="true" tabindex="-1"></a>two key columns hold the same kind of value before a regular join.</span>
+<span id="cb20-103"><a href="#cb20-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-104"><a href="#cb20-104" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Join the cities into the provinces with <span class="in">`it_city.geo.sjoin(prov)`</span> and print</span>
+<span id="cb20-105"><a href="#cb20-105" aria-hidden="true" tabindex="-1"></a>the result. Each city point gets matched to the province polygon that contains</span>
+<span id="cb20-106"><a href="#cb20-106" aria-hidden="true" tabindex="-1"></a>it. Look at the columns: what does a row mean now, and what are <span class="in">`index_right`</span></span>
+<span id="cb20-107"><a href="#cb20-107" aria-hidden="true" tabindex="-1"></a>and the <span class="in">`geometry`</span> column showing?</span>
+<span id="cb20-108"><a href="#cb20-108" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-111"><a href="#cb20-111" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb20-112"><a href="#cb20-112" aria-hidden="true" tabindex="-1"></a>it_city.geo.sjoin(prov)</span>
+<span id="cb20-113"><a href="#cb20-113" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb20-114"><a href="#cb20-114" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-115"><a href="#cb20-115" aria-hidden="true" tabindex="-1"></a>**Answer**: Each row is now a city paired with the province it falls inside,</span>
+<span id="cb20-116"><a href="#cb20-116" aria-hidden="true" tabindex="-1"></a>carrying the city's four original columns plus the <span class="in">`province`</span> name it landed</span>
+<span id="cb20-117"><a href="#cb20-117" aria-hidden="true" tabindex="-1"></a>in. <span class="in">`index_right`</span> records which row of the <span class="in">`prov`</span> table matched, a bookkeeping</span>
+<span id="cb20-118"><a href="#cb20-118" aria-hidden="true" tabindex="-1"></a>column GeoPandas adds. The <span class="in">`geometry`</span> column holds the city *point*, not the</span>
+<span id="cb20-119"><a href="#cb20-119" aria-hidden="true" tabindex="-1"></a>province polygon, because the left table's geometry is the one that survives a</span>
+<span id="cb20-120"><a href="#cb20-120" aria-hidden="true" tabindex="-1"></a>spatial join. So this is still one row per city, now labeled with its</span>
+<span id="cb20-121"><a href="#cb20-121" aria-hidden="true" tabindex="-1"></a>province.</span>
+<span id="cb20-122"><a href="#cb20-122" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-123"><a href="#cb20-123" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>A spatial join is an inner join by default, so a city that fell outside</span>
+<span id="cb20-124"><a href="#cb20-124" aria-hidden="true" tabindex="-1"></a>every province polygon would be dropped with no error. Guard against that:</span>
+<span id="cb20-125"><a href="#cb20-125" aria-hidden="true" tabindex="-1"></a>compare the row count of the join to the row count of <span class="in">`it_city`</span>. In the first</span>
+<span id="cb20-126"><a href="#cb20-126" aria-hidden="true" tabindex="-1"></a>block, print the row count of the join; in the second, print the row count of</span>
+<span id="cb20-127"><a href="#cb20-127" aria-hidden="true" tabindex="-1"></a><span class="in">`it_city`</span>. Did every city match?</span>
+<span id="cb20-128"><a href="#cb20-128" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-131"><a href="#cb20-131" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb20-132"><a href="#cb20-132" aria-hidden="true" tabindex="-1"></a>it_city.geo.sjoin(prov).select(pl.<span class="bu">len</span>())</span>
+<span id="cb20-133"><a href="#cb20-133" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb20-134"><a href="#cb20-134" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-137"><a href="#cb20-137" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb20-138"><a href="#cb20-138" aria-hidden="true" tabindex="-1"></a>it_city.select(pl.<span class="bu">len</span>())</span>
+<span id="cb20-139"><a href="#cb20-139" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb20-140"><a href="#cb20-140" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-141"><a href="#cb20-141" aria-hidden="true" tabindex="-1"></a>**Answer**: Both come back 388, so no city was dropped: every one of the 388</span>
+<span id="cb20-142"><a href="#cb20-142" aria-hidden="true" tabindex="-1"></a>cities fell inside some province. That is the check worth building a habit</span>
+<span id="cb20-143"><a href="#cb20-143" aria-hidden="true" tabindex="-1"></a>around. A regular join tells you nothing went wrong by matching on a key you</span>
+<span id="cb20-144"><a href="#cb20-144" aria-hidden="true" tabindex="-1"></a>can see; a spatial join matches on geometry you can't eyeball, and a point</span>
+<span id="cb20-145"><a href="#cb20-145" aria-hidden="true" tabindex="-1"></a>sitting just off the coast or in a gap between polygons would simply vanish</span>
+<span id="cb20-146"><a href="#cb20-146" aria-hidden="true" tabindex="-1"></a>from the result without complaint. Counting rows before and after is the</span>
+<span id="cb20-147"><a href="#cb20-147" aria-hidden="true" tabindex="-1"></a>geometry version of the <span class="in">`n_unique() == len()`</span> key check from the last</span>
+<span id="cb20-148"><a href="#cb20-148" aria-hidden="true" tabindex="-1"></a>notebook.</span>
+<span id="cb20-149"><a href="#cb20-149" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-150"><a href="#cb20-150" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>Reverse the join with <span class="in">`prov.geo.sjoin(it_city)`</span>, so the province polygons</span>
+<span id="cb20-151"><a href="#cb20-151" aria-hidden="true" tabindex="-1"></a>are kept instead. This gives one row per city again, but now the province</span>
+<span id="cb20-152"><a href="#cb20-152" aria-hidden="true" tabindex="-1"></a>geometry is repeated for each city inside it. Group by <span class="in">`province`</span> and count</span>
+<span id="cb20-153"><a href="#cb20-153" aria-hidden="true" tabindex="-1"></a>the cities per province, then print the five provinces with the most.</span>
+<span id="cb20-154"><a href="#cb20-154" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-157"><a href="#cb20-157" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb20-158"><a href="#cb20-158" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb20-159"><a href="#cb20-159" aria-hidden="true" tabindex="-1"></a>    prov</span>
+<span id="cb20-160"><a href="#cb20-160" aria-hidden="true" tabindex="-1"></a>    .geo.sjoin(it_city)</span>
+<span id="cb20-161"><a href="#cb20-161" aria-hidden="true" tabindex="-1"></a>    .group_by(c.province)</span>
+<span id="cb20-162"><a href="#cb20-162" aria-hidden="true" tabindex="-1"></a>    .agg(n <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb20-163"><a href="#cb20-163" aria-hidden="true" tabindex="-1"></a>    .sort(c.n, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb20-164"><a href="#cb20-164" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">5</span>)</span>
+<span id="cb20-165"><a href="#cb20-165" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb20-166"><a href="#cb20-166" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb20-167"><a href="#cb20-167" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-168"><a href="#cb20-168" aria-hidden="true" tabindex="-1"></a>**Answer**: Naples leads with 36 cities over 20,000 people, then Milan (23),</span>
+<span id="cb20-169"><a href="#cb20-169" aria-hidden="true" tabindex="-1"></a>Bari (18), Rome (15), and Turin (14). Putting the polygon table first flips</span>
+<span id="cb20-170"><a href="#cb20-170" aria-hidden="true" tabindex="-1"></a>which geometry is kept. Now each row carries a province boundary, duplicated</span>
+<span id="cb20-171"><a href="#cb20-171" aria-hidden="true" tabindex="-1"></a>once per city it contains, the same one-to-many shape a regular left join</span>
+<span id="cb20-172"><a href="#cb20-172" aria-hidden="true" tabindex="-1"></a>produces when the right table has several matches per key. Napoli topping the</span>
+<span id="cb20-173"><a href="#cb20-173" aria-hidden="true" tabindex="-1"></a>list fits the map: the area around Naples is one of the most densely</span>
+<span id="cb20-174"><a href="#cb20-174" aria-hidden="true" tabindex="-1"></a>town-packed corners of the country.</span>
+<span id="cb20-175"><a href="#cb20-175" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-176"><a href="#cb20-176" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>Use the join to answer a question neither table can answer alone: how much</span>
+<span id="cb20-177"><a href="#cb20-177" aria-hidden="true" tabindex="-1"></a>of each province's population lives in these cities? Join the cities into the</span>
+<span id="cb20-178"><a href="#cb20-178" aria-hidden="true" tabindex="-1"></a>provinces, group by <span class="in">`province`</span>, sum <span class="in">`pop`</span>, and print the six provinces with</span>
+<span id="cb20-179"><a href="#cb20-179" aria-hidden="true" tabindex="-1"></a>the largest urban population.</span>
+<span id="cb20-180"><a href="#cb20-180" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-183"><a href="#cb20-183" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb20-184"><a href="#cb20-184" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb20-185"><a href="#cb20-185" aria-hidden="true" tabindex="-1"></a>    it_city</span>
+<span id="cb20-186"><a href="#cb20-186" aria-hidden="true" tabindex="-1"></a>    .geo.sjoin(prov)</span>
+<span id="cb20-187"><a href="#cb20-187" aria-hidden="true" tabindex="-1"></a>    .group_by(c.province)</span>
+<span id="cb20-188"><a href="#cb20-188" aria-hidden="true" tabindex="-1"></a>    .agg(urban_pop <span class="op">=</span> c.pop.<span class="bu">sum</span>())</span>
+<span id="cb20-189"><a href="#cb20-189" aria-hidden="true" tabindex="-1"></a>    .sort(c.urban_pop, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb20-190"><a href="#cb20-190" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">6</span>)</span>
+<span id="cb20-191"><a href="#cb20-191" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb20-192"><a href="#cb20-192" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb20-193"><a href="#cb20-193" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-194"><a href="#cb20-194" aria-hidden="true" tabindex="-1"></a>**Answer**: Rome's province tops the list at about 2.96 million, then Naples</span>
+<span id="cb20-195"><a href="#cb20-195" aria-hidden="true" tabindex="-1"></a>(2.35M), Milan (2.05M), Turin (1.32M), Bari (0.87M), and Palermo (0.81M). This</span>
+<span id="cb20-196"><a href="#cb20-196" aria-hidden="true" tabindex="-1"></a>number could not be read off either table by itself: the population lives on</span>
+<span id="cb20-197"><a href="#cb20-197" aria-hidden="true" tabindex="-1"></a>the city table, the province boundary lives on the polygon table, and only the</span>
+<span id="cb20-198"><a href="#cb20-198" aria-hidden="true" tabindex="-1"></a>spatial join tells us which cities belong to which province. Note the count is</span>
+<span id="cb20-199"><a href="#cb20-199" aria-hidden="true" tabindex="-1"></a>population in *towns over 20,000*, not the full province population, since the</span>
+<span id="cb20-200"><a href="#cb20-200" aria-hidden="true" tabindex="-1"></a>city table left out everything smaller, the same 20,000 floor from</span>
+<span id="cb20-201"><a href="#cb20-201" aria-hidden="true" tabindex="-1"></a>notebook31 that a raw sum quietly inherits.</span>
+<span id="cb20-202"><a href="#cb20-202" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-203"><a href="#cb20-203" aria-hidden="true" tabindex="-1"></a><span class="ss">6. </span>The city table has repeated names. Filter the join to the rows where</span>
+<span id="cb20-204"><a href="#cb20-204" aria-hidden="true" tabindex="-1"></a><span class="in">`city_name`</span> is <span class="in">`"Massa"`</span> and print <span class="in">`city_name`</span>, <span class="in">`pop`</span>, and <span class="in">`province`</span>. Two</span>
+<span id="cb20-205"><a href="#cb20-205" aria-hidden="true" tabindex="-1"></a>things are worth noticing: which provinces the three Massas land in, and what</span>
+<span id="cb20-206"><a href="#cb20-206" aria-hidden="true" tabindex="-1"></a>their <span class="in">`pop`</span> values are.</span>
+<span id="cb20-207"><a href="#cb20-207" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-210"><a href="#cb20-210" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb20-211"><a href="#cb20-211" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb20-212"><a href="#cb20-212" aria-hidden="true" tabindex="-1"></a>    it_city</span>
+<span id="cb20-213"><a href="#cb20-213" aria-hidden="true" tabindex="-1"></a>    .geo.sjoin(prov)</span>
+<span id="cb20-214"><a href="#cb20-214" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.city_name <span class="op">==</span> <span class="st">"Massa"</span>)</span>
+<span id="cb20-215"><a href="#cb20-215" aria-hidden="true" tabindex="-1"></a>    .select(c.city_name, c.pop, c.province)</span>
+<span id="cb20-216"><a href="#cb20-216" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb20-217"><a href="#cb20-217" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb20-218"><a href="#cb20-218" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-219"><a href="#cb20-219" aria-hidden="true" tabindex="-1"></a>**Answer**: Three separate points named Massa land in three different</span>
+<span id="cb20-220"><a href="#cb20-220" aria-hidden="true" tabindex="-1"></a>provinces (Massa-Carrara, Pistoia, and Macerata), and the spatial join sends</span>
+<span id="cb20-221"><a href="#cb20-221" aria-hidden="true" tabindex="-1"></a>each to the right one from its coordinates, which a join on the name alone</span>
+<span id="cb20-222"><a href="#cb20-222" aria-hidden="true" tabindex="-1"></a>could never do. But all three carry the identical population 64,783, which is</span>
+<span id="cb20-223"><a href="#cb20-223" aria-hidden="true" tabindex="-1"></a>the figure for the real Massa in Massa-Carrara. That repetition is a data</span>
+<span id="cb20-224"><a href="#cb20-224" aria-hidden="true" tabindex="-1"></a>error: the population was copied onto every place sharing the name rather than</span>
+<span id="cb20-225"><a href="#cb20-225" aria-hidden="true" tabindex="-1"></a>measured for each. The join is what exposes it, because the same number sitting</span>
+<span id="cb20-226"><a href="#cb20-226" aria-hidden="true" tabindex="-1"></a>next to three different provinces is only obvious once each point is in its</span>
+<span id="cb20-227"><a href="#cb20-227" aria-hidden="true" tabindex="-1"></a>geographic context. It is also a reason to treat the per-province sums from</span>
+<span id="cb20-228"><a href="#cb20-228" aria-hidden="true" tabindex="-1"></a>question 5 as a little high: a few of those towns are carrying a population</span>
+<span id="cb20-229"><a href="#cb20-229" aria-hidden="true" tabindex="-1"></a>that is not really theirs.</span>
+<span id="cb20-230"><a href="#cb20-230" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-231"><a href="#cb20-231" aria-hidden="true" tabindex="-1"></a><span class="ss">7. </span>Provinces can be joined to *themselves*. Use `prov.geo.sjoin(prov,</span>
+<span id="cb20-232"><a href="#cb20-232" aria-hidden="true" tabindex="-1"></a>predicate="touches")` to find every pair of provinces that share a border, and</span>
+<span id="cb20-233"><a href="#cb20-233" aria-hidden="true" tabindex="-1"></a>print how many rows come back.</span>
+<span id="cb20-234"><a href="#cb20-234" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-237"><a href="#cb20-237" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb20-238"><a href="#cb20-238" aria-hidden="true" tabindex="-1"></a>prov.geo.sjoin(prov, predicate<span class="op">=</span><span class="st">"touches"</span>).select(pl.<span class="bu">len</span>())</span>
+<span id="cb20-239"><a href="#cb20-239" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb20-240"><a href="#cb20-240" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-241"><a href="#cb20-241" aria-hidden="true" tabindex="-1"></a>**Answer**: 476 rows. The <span class="in">`touches`</span> predicate matches two polygons whenever</span>
+<span id="cb20-242"><a href="#cb20-242" aria-hidden="true" tabindex="-1"></a>they share at least one point of their boundaries, so this pairs each province</span>
+<span id="cb20-243"><a href="#cb20-243" aria-hidden="true" tabindex="-1"></a>with every neighbor it shares a line with. The count is even because every</span>
+<span id="cb20-244"><a href="#cb20-244" aria-hidden="true" tabindex="-1"></a>border shows up twice: if Milan touches Pavia then Pavia touches Milan, and</span>
+<span id="cb20-245"><a href="#cb20-245" aria-hidden="true" tabindex="-1"></a>both directed pairs are in the table. There are 238 actual borders here; the</span>
+<span id="cb20-246"><a href="#cb20-246" aria-hidden="true" tabindex="-1"></a>join reports each one from both sides, which is something to remember before</span>
+<span id="cb20-247"><a href="#cb20-247" aria-hidden="true" tabindex="-1"></a>counting anything off a self-join like this.</span>
+<span id="cb20-248"><a href="#cb20-248" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-249"><a href="#cb20-249" aria-hidden="true" tabindex="-1"></a><span class="ss">8. </span>Pull out one province's neighbors. Filter the <span class="in">`touches`</span> self-join to the</span>
+<span id="cb20-250"><a href="#cb20-250" aria-hidden="true" tabindex="-1"></a>rows where <span class="in">`province_left`</span> is <span class="in">`"Milano"`</span> and print the <span class="in">`province_right`</span></span>
+<span id="cb20-251"><a href="#cb20-251" aria-hidden="true" tabindex="-1"></a>values. Do these match what you would expect from a map of Lombardy?</span>
+<span id="cb20-252"><a href="#cb20-252" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-255"><a href="#cb20-255" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb20-256"><a href="#cb20-256" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb20-257"><a href="#cb20-257" aria-hidden="true" tabindex="-1"></a>    prov</span>
+<span id="cb20-258"><a href="#cb20-258" aria-hidden="true" tabindex="-1"></a>    .geo.sjoin(prov, predicate<span class="op">=</span><span class="st">"touches"</span>)</span>
+<span id="cb20-259"><a href="#cb20-259" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.province_left <span class="op">==</span> <span class="st">"Milano"</span>)</span>
+<span id="cb20-260"><a href="#cb20-260" aria-hidden="true" tabindex="-1"></a>    .select(c.province_right)</span>
+<span id="cb20-261"><a href="#cb20-261" aria-hidden="true" tabindex="-1"></a>    .sort(c.province_right)</span>
+<span id="cb20-262"><a href="#cb20-262" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb20-263"><a href="#cb20-263" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb20-264"><a href="#cb20-264" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-265"><a href="#cb20-265" aria-hidden="true" tabindex="-1"></a>**Answer**: Milan borders seven provinces: Bergamo, Cremona, Lodi, Monza e</span>
+<span id="cb20-266"><a href="#cb20-266" aria-hidden="true" tabindex="-1"></a>della Brianza, Novara, Pavia, and Varese. Every one is a real neighbor: Monza</span>
+<span id="cb20-267"><a href="#cb20-267" aria-hidden="true" tabindex="-1"></a>and Lodi were carved out of Milan's own hinterland, Pavia and Cremona sit to</span>
+<span id="cb20-268"><a href="#cb20-268" aria-hidden="true" tabindex="-1"></a>the south, and Novara is just across the boundary into Piedmont. Because the</span>
+<span id="cb20-269"><a href="#cb20-269" aria-hidden="true" tabindex="-1"></a>suffix landed on both name columns in the self-join, the province we filtered</span>
+<span id="cb20-270"><a href="#cb20-270" aria-hidden="true" tabindex="-1"></a>on is <span class="in">`province_left`</span> and its neighbors come back as <span class="in">`province_right`</span>; reading</span>
+<span id="cb20-271"><a href="#cb20-271" aria-hidden="true" tabindex="-1"></a>those apart is the whole trick to using a self-join's output.</span>
+<span id="cb20-272"><a href="#cb20-272" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-273"><a href="#cb20-273" aria-hidden="true" tabindex="-1"></a><span class="ss">9. </span>Not every province has that many neighbors. Count neighbors per province</span>
+<span id="cb20-274"><a href="#cb20-274" aria-hidden="true" tabindex="-1"></a>from the <span class="in">`touches`</span> join (group by <span class="in">`province_left`</span>, count), sort ascending, and</span>
+<span id="cb20-275"><a href="#cb20-275" aria-hidden="true" tabindex="-1"></a>print the five with the fewest. What do the provinces at the bottom have in</span>
+<span id="cb20-276"><a href="#cb20-276" aria-hidden="true" tabindex="-1"></a>common?</span>
+<span id="cb20-277"><a href="#cb20-277" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-280"><a href="#cb20-280" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb20-281"><a href="#cb20-281" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb20-282"><a href="#cb20-282" aria-hidden="true" tabindex="-1"></a>    prov</span>
+<span id="cb20-283"><a href="#cb20-283" aria-hidden="true" tabindex="-1"></a>    .geo.sjoin(prov, predicate<span class="op">=</span><span class="st">"touches"</span>)</span>
+<span id="cb20-284"><a href="#cb20-284" aria-hidden="true" tabindex="-1"></a>    .group_by(c.province_left)</span>
+<span id="cb20-285"><a href="#cb20-285" aria-hidden="true" tabindex="-1"></a>    .agg(n <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb20-286"><a href="#cb20-286" aria-hidden="true" tabindex="-1"></a>    .sort(c.n)</span>
+<span id="cb20-287"><a href="#cb20-287" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">5</span>)</span>
+<span id="cb20-288"><a href="#cb20-288" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb20-289"><a href="#cb20-289" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb20-290"><a href="#cb20-290" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-291"><a href="#cb20-291" aria-hidden="true" tabindex="-1"></a>**Answer**: Trieste and Cagliari come in with a single land neighbor each,</span>
+<span id="cb20-292"><a href="#cb20-292" aria-hidden="true" tabindex="-1"></a>then Gorizia, Trapani, and Vibo Valentia with two. The bottom of this list is</span>
+<span id="cb20-293"><a href="#cb20-293" aria-hidden="true" tabindex="-1"></a>geography, not data trouble: Cagliari and Trapani are on islands (Sardinia and</span>
+<span id="cb20-294"><a href="#cb20-294" aria-hidden="true" tabindex="-1"></a>Sicily), so most of their perimeter is coastline that touches no other</span>
+<span id="cb20-295"><a href="#cb20-295" aria-hidden="true" tabindex="-1"></a>province, and Trieste and Gorizia are pinned into the far northeastern corner</span>
+<span id="cb20-296"><a href="#cb20-296" aria-hidden="true" tabindex="-1"></a>against the Slovenian border, where the neighbors that would round out their</span>
+<span id="cb20-297"><a href="#cb20-297" aria-hidden="true" tabindex="-1"></a>counts are in another country and not in this table at all. A province's</span>
+<span id="cb20-298"><a href="#cb20-298" aria-hidden="true" tabindex="-1"></a>border count reflects how much of its edge is shared Italian land versus sea</span>
+<span id="cb20-299"><a href="#cb20-299" aria-hidden="true" tabindex="-1"></a>or an international line.</span>
+<span id="cb20-300"><a href="#cb20-300" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-301"><a href="#cb20-301" aria-hidden="true" tabindex="-1"></a><span class="ss">10. </span>Now switch from overlap to proximity. Use `it_city.geo.sjoin_nearest(</span>
+<span id="cb20-302"><a href="#cb20-302" aria-hidden="true" tabindex="-1"></a>it_city, exclusive=True, distance_col="distance")` to find each city's nearest</span>
+<span id="cb20-303"><a href="#cb20-303" aria-hidden="true" tabindex="-1"></a>other city. Sort by <span class="in">`distance`</span> descending and print the six most isolated</span>
+<span id="cb20-304"><a href="#cb20-304" aria-hidden="true" tabindex="-1"></a>cities with their distance in kilometers (<span class="in">`c.distance / 1000`</span>).</span>
+<span id="cb20-305"><a href="#cb20-305" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-308"><a href="#cb20-308" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb20-309"><a href="#cb20-309" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb20-310"><a href="#cb20-310" aria-hidden="true" tabindex="-1"></a>    it_city</span>
+<span id="cb20-311"><a href="#cb20-311" aria-hidden="true" tabindex="-1"></a>    .geo.sjoin_nearest(it_city, exclusive<span class="op">=</span><span class="va">True</span>, distance_col<span class="op">=</span><span class="st">"distance"</span>)</span>
+<span id="cb20-312"><a href="#cb20-312" aria-hidden="true" tabindex="-1"></a>    .sort(c.distance, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb20-313"><a href="#cb20-313" aria-hidden="true" tabindex="-1"></a>    .select(c.city_name_left, c.city_name_right, (c.distance <span class="op">/</span> <span class="dv">1000</span>).<span class="bu">round</span>(<span class="dv">1</span>).alias(<span class="st">"km"</span>))</span>
+<span id="cb20-314"><a href="#cb20-314" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">6</span>)</span>
+<span id="cb20-315"><a href="#cb20-315" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb20-316"><a href="#cb20-316" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb20-317"><a href="#cb20-317" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-318"><a href="#cb20-318" aria-hidden="true" tabindex="-1"></a>**Answer**: The most isolated pairs are Olbia and Nuoro on Sardinia, about 69</span>
+<span id="cb20-319"><a href="#cb20-319" aria-hidden="true" tabindex="-1"></a>km apart, then Imperia reaching to Cuneo across the Ligurian mountains, and</span>
+<span id="cb20-320"><a href="#cb20-320" aria-hidden="true" tabindex="-1"></a>Oristano to Iglesias back on Sardinia. <span class="in">`exclusive=True`</span> stops each city from</span>
+<span id="cb20-321"><a href="#cb20-321" aria-hidden="true" tabindex="-1"></a>matching itself at distance zero, and because the table is projected the</span>
+<span id="cb20-322"><a href="#cb20-322" aria-hidden="true" tabindex="-1"></a>distances land in meters, so dividing by 1000 gives real kilometers. The</span>
+<span id="cb20-323"><a href="#cb20-323" aria-hidden="true" tabindex="-1"></a>cities that top the list are exactly the ones a map would predict: island</span>
+<span id="cb20-324"><a href="#cb20-324" aria-hidden="true" tabindex="-1"></a>towns and mountain towns, where the next city over 20,000 is genuinely far.</span>
+<span id="cb20-325"><a href="#cb20-325" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-326"><a href="#cb20-326" aria-hidden="true" tabindex="-1"></a><span class="ss">11. </span>The distances in question 10 are only meaningful because the table was</span>
+<span id="cb20-327"><a href="#cb20-327" aria-hidden="true" tabindex="-1"></a>projected. Repeat the nearest-neighbor join on an *unprojected* copy of the</span>
+<span id="cb20-328"><a href="#cb20-328" aria-hidden="true" tabindex="-1"></a>cities and look at what happens to the ranking. In the first block, load the cities fresh and build points but</span>
+<span id="cb20-329"><a href="#cb20-329" aria-hidden="true" tabindex="-1"></a>leave them in EPSG:4326. In the second block, run the same join and print the</span>
+<span id="cb20-330"><a href="#cb20-330" aria-hidden="true" tabindex="-1"></a>four most isolated by <span class="in">`distance`</span>. Does the top of the list still agree with</span>
+<span id="cb20-331"><a href="#cb20-331" aria-hidden="true" tabindex="-1"></a>question 10?</span>
+<span id="cb20-332"><a href="#cb20-332" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-335"><a href="#cb20-335" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb20-336"><a href="#cb20-336" aria-hidden="true" tabindex="-1"></a>it_deg <span class="op">=</span> (</span>
+<span id="cb20-337"><a href="#cb20-337" aria-hidden="true" tabindex="-1"></a>    pl.read_csv(ub <span class="op">+</span> <span class="st">"data/it_cities.csv"</span>)</span>
+<span id="cb20-338"><a href="#cb20-338" aria-hidden="true" tabindex="-1"></a>    .geo.points_from_xy(<span class="st">"lon"</span>, <span class="st">"lat"</span>)</span>
+<span id="cb20-339"><a href="#cb20-339" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb20-340"><a href="#cb20-340" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb20-341"><a href="#cb20-341" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-344"><a href="#cb20-344" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb20-345"><a href="#cb20-345" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb20-346"><a href="#cb20-346" aria-hidden="true" tabindex="-1"></a>    it_deg</span>
+<span id="cb20-347"><a href="#cb20-347" aria-hidden="true" tabindex="-1"></a>    .geo.sjoin_nearest(it_deg, exclusive<span class="op">=</span><span class="va">True</span>, distance_col<span class="op">=</span><span class="st">"distance"</span>)</span>
+<span id="cb20-348"><a href="#cb20-348" aria-hidden="true" tabindex="-1"></a>    .sort(c.distance, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb20-349"><a href="#cb20-349" aria-hidden="true" tabindex="-1"></a>    .select(c.city_name_left, c.city_name_right, c.distance.<span class="bu">round</span>(<span class="dv">4</span>).alias(<span class="st">"deg"</span>))</span>
+<span id="cb20-350"><a href="#cb20-350" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">4</span>)</span>
+<span id="cb20-351"><a href="#cb20-351" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb20-352"><a href="#cb20-352" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb20-353"><a href="#cb20-353" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-354"><a href="#cb20-354" aria-hidden="true" tabindex="-1"></a>**Answer**: The ranking changes at the top. In degrees, Imperia and Cuneo come</span>
+<span id="cb20-355"><a href="#cb20-355" aria-hidden="true" tabindex="-1"></a>out as the most isolated pair, ahead of Olbia and Nuoro, which was the clear</span>
+<span id="cb20-356"><a href="#cb20-356" aria-hidden="true" tabindex="-1"></a>leader in kilometers. Nothing raised an error. The join ran fine and returned</span>
+<span id="cb20-357"><a href="#cb20-357" aria-hidden="true" tabindex="-1"></a>distances, just distances in degrees, which are not a fixed length on the</span>
+<span id="cb20-358"><a href="#cb20-358" aria-hidden="true" tabindex="-1"></a>ground. A degree of longitude is shorter than a degree of latitude at these</span>
+<span id="cb20-359"><a href="#cb20-359" aria-hidden="true" tabindex="-1"></a>latitudes, so an east-west gap like Imperia to Cuneo gets undercounted less</span>
+<span id="cb20-360"><a href="#cb20-360" aria-hidden="true" tabindex="-1"></a>than the mostly north-south Sardinian pairs, and the order shuffles. The</span>
+<span id="cb20-361"><a href="#cb20-361" aria-hidden="true" tabindex="-1"></a>projected answer from question 10 is the honest one; this is the same trap as</span>
+<span id="cb20-362"><a href="#cb20-362" aria-hidden="true" tabindex="-1"></a>computing area in unprojected degrees back in notebook32, now showing up as a</span>
+<span id="cb20-363"><a href="#cb20-363" aria-hidden="true" tabindex="-1"></a>ranking that quietly reorders itself.</span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->

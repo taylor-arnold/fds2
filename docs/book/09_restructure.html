@@ -356,7 +356,7 @@ div.csl-indent {
 <section id="setup" class="level2" data-number="9.1">
 <h2 data-number="9.1" class="anchored" data-anchor-id="setup"><span class="header-section-number">9.1</span> Setup</h2>
 <p>Load the modules and datasets needed for the chapter.</p>
-<div id="c7f6e514" class="cell" data-execution_count="2">
+<div id="33fb675e" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine <span class="im">import</span> ggplot, aes</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> polars <span class="im">import</span> col <span class="im">as</span> c</span>
@@ -392,7 +392,7 @@ div.csl-indent {
 <p>The plant-by-day table with 1,400 rows is tidy for the <em>plant × day</em> unit of observation: <code>plant</code>, <code>day</code>, and <code>height</code> each get their own column, and each row is one measurement of one plant on one day. The plant-by-column table is not tidy for that same unit. Day is no longer a variable stored in a column; it has been scattered across fourteen column names, and a single observation (one plant’s full trajectory) is spread across fourteen cells instead of appearing once.</p>
 <p>This is the detail that makes tidiness easy to misjudge: it is a property of a table <em>relative to a unit of observation</em>, not a property of the values themselves. The wide plant-by-day table is a perfectly tidy table for the unit of observation <em>plant</em>, if what you want is one row summarizing each plant’s height over the two-week window. It is only untidy once you decide the unit of observation you actually need is <em>plant × day</em>.</p>
 <p>We will see this play out concretely later in the chapter with the <code>cellphone</code> dataset, shown below. Its unit of observation is <em>year × country</em>, and in this shape it is tidy: <code>year</code>, <code>iso</code>, and <code>cell</code> each get a column, and each row is one country’s rate in one year.</p>
-<div id="53d4f0e2" class="cell" data-execution_count="3">
+<div id="62542c07" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>cellphone</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
 <div><style>
@@ -483,7 +483,7 @@ div.csl-indent {
 <h2 data-number="9.5" class="anchored" data-anchor-id="pivot-and-unpivot"><span class="header-section-number">9.5</span> Pivot and Unpivot</h2>
 <p>Sometimes the unit of observation in which a data table is stored does not match the unit needed for our analysis. If the stored format uses a compound unit of observation, we can simplify it by using an aggregation to remove one or more components. For example, we could group a <em>plant × day</em> table by plant ID and calculate summary statistics (such as the maximum height over all days) to generate a dataset with <em>plant</em> as the unit of observation. While aggregations are useful, by design they remove information present in the original dataset. Other times, we want to restructure the unit of observation without losing or adding any information. We simply need the data in a different shape for a particular analysis or visualization. To do this, we can use one of two additional data manipulation functions.</p>
 <p>We could have stored the <code>cellphone</code> dataset in a format where the unit of observation was <em>year</em> and each country had its own column. What if we want to work with the data in that format? For example, if we wanted to compute the difference in cellphone ownership between the United States and Canada, we would need the data in this format. We can convert our dataset using the <code>.pivot()</code> method, which requires indicating which column will be used to index the output (this becomes the unit of observation), which column will be used to create the new columns, and which column contains the values that will fill the table.</p>
-<div id="8ced80be" class="cell" data-execution_count="4">
+<div id="d6a86dab" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>cell_wide <span class="op">=</span> (</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    cellphone</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    .pivot(index<span class="op">=</span>c.year, on<span class="op">=</span>c.iso, values<span class="op">=</span>c.cell)</span>
@@ -1511,10 +1511,10 @@ div.csl-indent {
 <p>This is the wide frame described in the tidy data section above. It is tidy for the unit of observation <em>year</em>, and it is exactly the layout we would want if we were computing something like the gap between two specific countries. It is not tidy for the unit of observation <em>year × country</em>, since country has moved out of the data and into the column names.</p>
 <p>It is possible that some combinations of the new rows and columns do not exist in the original DataFrame. When this happens, Python will fill in <code>null</code> values for the missing combinations. Sometimes, particularly if these are counts that we are looking at, we may want to convert all of these missing values to zeros (or another default). To do that, we can call the method <code>.fill_null(0)</code>. The value zero can be changed to any other value that makes sense. This can also be used on individual columns as needed in other analyses.</p>
 <p>Now, what if we want to go the other way? That is, suppose we stored the data originally in the format above (<code>cell_wide</code>) but want to return to the version we started with. This can be achieved by using the <code>.unpivot()</code> method, which requires specifying the index column to use. The new columns created to store the data are given the default names <code>variable</code> and <code>value</code>. These can be changed by setting the <code>variable_name</code> and <code>value_name</code> arguments.</p>
-<div id="c707ff62" class="cell" data-execution_count="5">
+<div id="432f4e41" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  cell_wide</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  .unpivot(index<span class="op">=</span>c.year)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    cell_wide</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    .unpivot(index<span class="op">=</span>c.year)</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
 <div><style>
@@ -1599,19 +1599,19 @@ div.csl-indent {
 </div>
 </div>
 </div>
-<div class="callout callout-style-simple callout-warning callout-titled">
+<div class="callout callout-style-simple callout-note callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Warning</span>Pivot and unpivot syntax
+<span class="screen-reader-only">Note</span>Pivot and unpivot syntax
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
 <div id="callout-1" class="callout-1-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<p>The current version of Polars on Google Colab does not allow using the <code>c.</code> notation when specifying columns as we do with other Polars methods. Instead, you must specify the column as a string, similar to how we do it in plotnine graphics. This has already been changed in the development version of Polars for <code>pivot</code> and will likely change for <code>unpivot</code> in the near future. Check this callout against the version of Polars pinned for the course before each printing of the text; it is describing a moving target and may already be out of date by the time you read it. For now, remember that both <code>pivot</code> and <code>unpivot</code> require a different way of specifying columns compared to other Polars methods.</p>
+<p>Polars does not itself accept the <code>c.</code> notation when specifying columns in <code>pivot</code> and <code>unpivot</code>; these two methods expect plain strings. The <code>funs.py</code> module loaded at the top of every script patches both methods so that the <code>c.</code> notation works the same way it does everywhere else, which is the form used throughout this book. If you ever call <code>pivot</code> or <code>unpivot</code> without having imported <code>funs</code>, specify the columns as strings instead: <code>.pivot(index="year", on="iso", values="cell")</code>.</p>
 </div>
 </div>
 </div>
@@ -1620,15 +1620,15 @@ div.csl-indent {
 <section id="pivoting-for-plotnine" class="level2" data-number="9.6">
 <h2 data-number="9.6" class="anchored" data-anchor-id="pivoting-for-plotnine"><span class="header-section-number">9.6</span> Pivoting for plotnine</h2>
 <p>The tidy data framework was built with a particular use case in mind: it makes plotting predictable. plotnine expects long data, and once you know why, several things about earlier chapters start to make more sense.</p>
-<p>Try mapping a plotnine aesthetic to country using <code>cell_wide</code>. There is no <code>iso</code> column to map, only a separate column for each country, so there is no sensible way to write <code>color=c.iso</code>. Nothing in <code>cell_wide</code> tells plotnine that <code>usa</code> and <code>can</code> and every other column name are all values of the same underlying variable.</p>
-<div id="d5199433" class="cell" data-execution_count="6">
+<p>Try mapping a plotnine aesthetic to country using <code>cell_wide</code>. There is no <code>iso</code> column to map, only a separate column for each country, so there is no sensible way to write <code>color=c.iso</code>. Nothing in <code>cell_wide</code> tells plotnine that <code>USA</code> and <code>CAN</code> and every other column name are all values of the same underlying variable.</p>
+<div id="61824f49" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    ggplot(cell_wide, aes(x<span class="op">=</span>c.year, y<span class="op">=</span>c.usa))</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    ggplot(cell_wide, aes(x<span class="op">=</span>c.year, y<span class="op">=</span>c.USA))</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    .geom_line()</span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>This code runs, but it only gets you a single country’s line, hardcoded by column name, and there is no way to extend it to “one line per country” without writing a separate <code>geom_line()</code> call for every column. Unpivoting fixes this by putting country back into the data as a variable:</p>
-<div id="9c594369" class="cell" data-execution_count="7">
+<div id="86169cdf" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>cell_long <span class="op">=</span> (</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    cell_wide</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    .unpivot(index<span class="op">=</span>c.year, variable_name<span class="op">=</span>c.iso, value_name<span class="op">=</span>c.cell)</span>
@@ -1636,9 +1636,10 @@ div.csl-indent {
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    cell_long</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    .pipe(ggplot, aes(x<span class="op">=</span>c.year, y<span class="op">=</span>c.cell, color<span class="op">=</span>c.iso))</span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    .geom_line()</span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.iso.is_in([<span class="st">"USA"</span>, <span class="st">"GBR"</span>, <span class="st">"IRL"</span>, <span class="st">"CAN"</span>]))</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    .pipe(ggplot, aes(x<span class="op">=</span>c.year, y<span class="op">=</span>c.cell, color<span class="op">=</span>c.iso))</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    .geom_line()</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="6">
 <div>
 <figure class="figure">
@@ -1647,12 +1648,12 @@ div.csl-indent {
 </div>
 </div>
 </div>
-<p>With <code>iso</code> as a column, <code>color="iso"</code> is enough to tell plotnine to draw one line per country. This is also the answer to a question you may have had back when we first plotted <code>cellphone</code> by country: that plot worked on the first try, with no reshaping, because <code>cellphone</code> was already stored long, with one row per <em>year × country</em> combination. The general rule is this: before reaching for <code>ggplot()</code>, check whether the variable you want to map to an aesthetic (color, shape, facet, and so on) has its own column. If it does not, unpivot first.</p>
+<p>With <code>iso</code> as a column, <code>color=c.iso</code> is enough to tell plotnine to draw one line per country; here we also filter to the same four countries as in <a href="04_graphics.html" class="quarto-xref"><span>Chapter 4</span></a>, since a line per each of the 174 countries would be unreadable. This is also the answer to a question you may have had back when we first plotted <code>cellphone</code> by country: that plot worked on the first try, with no reshaping, because <code>cellphone</code> was already stored long, with one row per <em>year × country</em> combination. The general rule is this: before reaching for <code>ggplot()</code>, check whether the variable you want to map to an aesthetic (color, shape, facet, and so on) has its own column. If it does not, unpivot first.</p>
 </section>
 <section id="expand-list-columns" class="level2" data-number="9.7">
 <h2 data-number="9.7" class="anchored" data-anchor-id="expand-list-columns"><span class="header-section-number">9.7</span> Expand List Columns</h2>
 <p>A final type of transformation arises when multiple elements occupy a single cell in a table. This usually occurs only after a data-cleaning step we’ve performed, rather than as raw input from a CSV file. For example, the function <code>str.split</code> can split the text in a DataFrame column into parts. We can use this to split the multiple language codes found in the <code>lang</code> column of our data.</p>
-<div id="8fffe47c" class="cell" data-execution_count="8">
+<div id="069c1f56" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    country</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    .select(c.full_name, c.lang)</span>
@@ -1743,8 +1744,8 @@ div.csl-indent {
 </div>
 </div>
 </div>
-<p>It is hard to work directly with the embedding list structure. Often the easiest way to simplify a data frame that contains list elements is to unravel the lists, duplicating the other columns. Use the <code>.explode()</code> method, passing the column(s) you want to unravel.</p>
-<div id="b9066534" class="cell" data-execution_count="9">
+<p>It is hard to work directly with the embedded list structure. Often the easiest way to simplify a data frame that contains list elements is to unravel the lists, duplicating the other columns. Use the <code>.explode()</code> method, passing the column(s) you want to unravel.</p>
+<div id="4cdf42de" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    country</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    .select(c.full_name, c.lang)</span>
@@ -1840,7 +1841,7 @@ div.csl-indent {
 </section>
 <section id="round-trips-versus-aggregation" class="level2" data-number="9.8">
 <h2 data-number="9.8" class="anchored" data-anchor-id="round-trips-versus-aggregation"><span class="header-section-number">9.8</span> Round Trips Versus Aggregation</h2>
-<p>It is worth being precise about what pivoting and unpivoting do and do not do. They are round trips: pivot a long table to wide, unpivot it back, and (aside from row and column ordering) you have the original table. No values are created or destroyed, only rearranged. Aggregation is not like this. Grouping a <em>plant × day</em> table down to a <em>plant</em> table by taking the maximum height, for instance, throws away every day’s measurement except the one that set the maximum, and there is no operation that gets those measurements back. Pivoting and unpivoting change a table’s shape; aggregation changes its unit of observation, and it does so in one direction only. Keep the distinction in mind, since it is exactly what motivates the “prefer longer” advice for storing data in the first place: a long table can always be pivoted into whatever wide shape an analysis needs, but a table that has already been aggregated cannot be un-aggregated back into it.</p>
+<p>It is worth being precise about what pivoting and unpivoting do and do not do. They are round trips: pivot a long table to wide, unpivot it back, and (aside from row and column ordering) you have the original table. No values are created or destroyed, only rearranged. Aggregation is not like this. Grouping a <em>plant × day</em> table down to a <em>plant</em> table by taking the maximum height, for instance, throws away every day’s measurement except the one that set the maximum, and there is no operation that gets those measurements back. Pivoting and unpivoting change a table’s shape; aggregation changes its unit of observation, and it does so in one direction only. Keep the distinction in mind, since it is exactly what motivates the advice to prefer longer formats for storing data that we will develop in <a href="10_collect.html" class="quarto-xref"><span>Chapter 10</span></a>: a long table can always be pivoted into whatever wide shape an analysis needs, but a table that has already been aggregated cannot be un-aggregated back into it.</p>
 </section>
 <section id="references" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="references">References</h2>

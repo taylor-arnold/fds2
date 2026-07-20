@@ -3,7 +3,7 @@
 ```{python}
 #| include: false
 import warnings
-warnings.filterwarnings('ignore')
+warnings.filterwarnings("ignore")
 ```
 
 ## Setup
@@ -88,7 +88,7 @@ When a dataset has many columns, it is often useful to select or reorder a subse
 )
 ```
 
-We will use `.select` throughout this text to point to the specific columns worth examining. It matters less in a typical data science pipeline, but it becomes important for more complex transformations, such as those in @sec-restructure.
+We will use `.select` throughout this text to point to the specific columns worth examining. Selecting columns matters less in a typical data science pipeline, but it becomes important for more complex transformations, such as those in @sec-restructure.
 
 A related method, `.drop`, lets us specify columns to remove instead. This is handy when a dataset has many columns and only a few need to go.
 
@@ -103,7 +103,7 @@ We often want a subset of a dataset's rows for a particular analysis or visualiz
 )
 ```
 
-The `.tail(n=<int>)` method works the same way but starts from the bottom of the table. The `.drop_nulls()` and `.drop_nans()` methods take no arguments and return only rows without missing values or without invalid numeric results, respectively. Polars keeps those two kinds of gap separate, and the next chapter explains the difference; for now it is enough to know that both methods exist and that neither one removes what the other one does.
+The `.tail(n=<int>)` method works the same way but starts from the bottom of the table. The `.drop_nulls()` and `.drop_nans()` methods require no arguments and return only rows without missing values or without invalid numeric results, respectively. Polars keeps those two kinds of gap separate, and the next chapter explains the difference; for now it is enough to know that both methods exist and that neither one removes what the other one does.
 
 The `.sample` method randomly selects rows. Specify the number of rows with `n=<int>` or a fraction with `fraction=<float>`. Below, we take a random 20% sample of the dataset.
 
@@ -148,7 +148,6 @@ We can combine multiple conditions with the `&` (and) and `|` (or) operators. Wr
 To check whether a value belongs to a larger set, use the `.is_in` method, passing the set of values in square brackets. 
 
 ```{python}
-#| eval: true
 (
     country
     .filter(c.region.is_in(["Europe", "Africa"]))
@@ -196,15 +195,15 @@ The basic pattern for adding a column is the `.with_columns()` method: specify e
 
 Common mathematical transformations are available by adding a `.` after the column name, followed by a function such as `sqrt()` or `log10()`.
 
-The following example takes the square root and the sine of `population` and saves each as a new column. Neither transformation is meaningful here; they are only meant to show the technique.
+The following example takes the square root and the sine of `pop` and saves each as a new column. Neither transformation is meaningful here; they are only meant to show the technique.
 
 ```{python}
 #| eval: false
 (
     country
     .with_columns(
-      pop_sqrt = c.pop.sqrt(),
-      pop_sin = c.pop.sin()
+        pop_sqrt = c.pop.sqrt(),
+        pop_sin = c.pop.sin()
     )
 )
 ```
@@ -289,12 +288,12 @@ The values we produce do not have to be numbers, but text takes one extra step. 
 
 Notice that the second condition, `c.lat.abs() < 35`, is written as if the tropical countries were not there. They have already been claimed by the first `.when()`, so the only rows it can still match are the ones lying at least 23.5 degrees from the equator. Writing each condition as a non-overlapping range would give the same answer, but it would be more work and easier to get wrong.
 
-## R's dplyr and Python Pandas
+## R's dplyr and Python pandas
 
 If you're familiar with `dplyr` in R or `pandas` in Python, the code in this chapter should feel familiar. Function names differ, and each library has its own quirks, but the underlying task is the same: compose a set of methods to transform data into the shape a given analysis needs.
 
 Coming from dplyr, the main adjustments are prefixing column names with `c.`, using methods instead of pipes (the same idea, different syntax), and a few renamed functions—`sort` in place of `arrange`, for instance.
 
-Coming from Pandas involves a few more changes, most of which simplify the code. There is no index column to reset after every operation, no aggregation functions wrapped in tuples, and no `eval` or `query` methods buried behind an extra layer of quoted strings.
+Coming from pandas involves a few more changes, most of which simplify the code. There is no index column to reset after every operation, no aggregation functions wrapped in tuples, and no `eval` or `query` methods buried behind an extra layer of quoted strings.
 
-As with Pandas and dplyr, Polars also provides functions for pivots and table joins, which we cover in @sec-restructure. The arguments differ slightly across the three libraries, but the underlying transformations are much the same.
+As with pandas and dplyr, Polars also provides functions for pivots and table joins, which we cover in @sec-restructure. The arguments differ slightly across the three libraries, but the underlying transformations are much the same.

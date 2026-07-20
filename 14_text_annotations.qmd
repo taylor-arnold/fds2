@@ -3,12 +3,12 @@
 ```{python}
 #| include: false
 import warnings
-warnings.filterwarnings('ignore')
+warnings.filterwarnings("ignore")
 ```
 
 ## Setup
 
-Load all of the modules and datasets needed for the chapter. We also load spacy, a module designed specifically for processing large collections of text.
+Load all of the modules and datasets needed for the chapter. We also load spaCy, a module designed specifically for processing large collections of text.
 
 ```{python}
 #| output: false
@@ -33,9 +33,9 @@ Working with textual data requires a different approach than working with number
 
 This is the first of two chapters on textual data. Here, we introduce tools for turning unstructured text into structured tables that can be analyzed with the techniques developed throughout this book. Once text has been converted into tables of tokens, counts, and annotations, familiar operations such as filtering, grouping, and joining let us ask questions about language. What words distinguish one author from another? What grammatical patterns characterize a corpus? How is a particular word actually used in context? In the next chapter (@sec-text-vec), we build on the annotations created here to represent entire documents as numeric vectors, which lets us measure similarity between documents and compare collections across languages.
 
-We will use spaCy, a modern natural language processing library, to do the linguistic work. SpaCy provides pre-trained models that tokenize text, identify parts of speech, recognize named entities, and parse grammatical structure. Our job is to take the output of these models and reshape it into forms suitable for analysis. To keep that reshaping out of the way, the course's `funs` module includes a small utility class called `DSText` whose functions wrap the spaCy calls we need. Before using each one, we will look at the code behind it so that none of the steps feel like magic.
+We will use spaCy, a modern natural language processing library, to do the linguistic work. SpaCy provides pre-trained models that tokenize text, identify parts of speech, recognize named entities, and parse grammatical structure. Our job is to take the output of these models and reshape it into forms suitable for analysis. To keep that reshaping out of the way, this book's `funs` module includes a small utility class called `DSText` whose functions wrap the spaCy calls we need. Before using each one, we will look at the code behind it so that none of the steps feel like magic.
 
-The documents we analyze in these two chapters are the Wikipedia pages of the 75 British authors whose page views and revision histories we studied in @sec-temporal. There, we worked with metadata *about* the pages: when they were viewed and edited. Here, we finally open the pages themselves and analyze what they say.
+The documents we analyze in these two chapters are the Wikipedia pages of the 75 British and Irish authors whose page views and revision histories we studied in @sec-temporal. There, we worked with metadata *about* the pages: when they were viewed and edited. Here, we finally open the pages themselves and analyze what they say.
 
 ## NLP Pipeline
 
@@ -51,7 +51,7 @@ nlp = spacy.load("en_core_web_sm")
 SpaCy separates its code from its trained models, so the model has to be downloaded once before it can be loaded. If the line above raises an error saying the model cannot be found, run `python -m spacy download en_core_web_sm` from the command line and try again.
 :::
 
-Our primary dataset consists of Wikipedia pages for authors from the United Kingdom. We have a metadata table containing information about each author.
+Our primary dataset consists of Wikipedia pages for authors from Britain and Ireland. We have a metadata table containing information about each author.
 
 ```{python}
 meta
@@ -63,7 +63,7 @@ As well as a separate file giving each of the texts from the documents.
 docs
 ```
 
-The metadata table contains structured information extracted from Wikipedia's infoboxes: birth and death dates, occupations, and other biographical details. The text table contains the prose content of each page, which we will process using natural language techniques.
+The metadata table contains structured information about each author: birth and death years, era, and gender, along with a link to the page and a short description. The text table contains the prose content of each page, which we will process using natural language techniques.
 
 Natural language processing transforms raw text into structured annotations. The `DSText.process` function sends each document through spaCy's processing pipeline, which performs several analyses in sequence: tokenization (splitting text into words and punctuation), part-of-speech tagging (identifying nouns, verbs, adjectives), lemmatization (reducing words to their base forms), named entity recognition (identifying people, places, organizations), and dependency parsing (analyzing grammatical relationships).
 
@@ -101,7 +101,7 @@ anno = DSText.process(docs, nlp)
 anno
 ```
 
-There is a lot of information that has been automatically added to this table, thanks to decades of research in computational linguistics and natural language processing. Each row corresponds to a word or a punctuation mark (created by the process of tokenization), along with metadata describing the token. Notice that reading down the column `token` reproduces the original text. The columns available are:
+There is a lot of information that has been automatically added to this table, thanks to decades of research in computational linguistics and natural language processing. Each row corresponds to a word or a punctuation mark (created by the process of tokenization), along with metadata describing the token. Notice that reading down the column `token_with_ws` reproduces the original text. The columns available are:
 
 - **doc_id**: A key that allows us to group tokens into documents and to link back into the original input table.
 - **sid**: Numeric identifier of the sentence number.
@@ -150,7 +150,7 @@ We can use a similar technique to learn about the contents of each individual do
 )
 ```
 
-The output shows many connections between adjectives and the authors. Here, the connections again fall roughly into two groups. Some of the adjectives are fairly generic (such as "more", "other", and "many") and probably say more about the people writing the pages than about the subjects themselves. Other adjectives provide contextual information about each of the authors. For example, several selected adjectives describe an author's work, such as "Victorian" associated with certain authors and "Gothic" with others. While it is good to see expected relationships to demonstrate the data and techniques are functioning properly, it is also valuable when computational techniques point out the unexpected.
+The output shows many connections between adjectives and the authors. Here, the connections again fall roughly into two groups. Some of the adjectives are fairly generic (such as "more", "other", and "many") and probably say more about the people writing the pages than about the subjects themselves. Other adjectives provide contextual information about each of the authors. For example, several selected adjectives describe an author's work, such as "victorian" for Alfred, Lord Tennyson and Oscar Wilde, "metaphysical" for John Donne, and "supernatural" for Ann Radcliffe. While it is good to see expected relationships to demonstrate the data and techniques are functioning properly, it is also valuable when computational techniques point out the unexpected.
 
 The frequent-adjective lists also expose a limitation of raw counts: the same generic words rise to the top of nearly every page. In the next chapter (@sec-text-vec) we introduce TF-IDF, a weighting scheme built to surface the vocabulary that distinguishes each document from the rest of the collection.
 
@@ -160,7 +160,7 @@ So far we have analyzed individual words in isolation. But meaning often emerges
 
 A unigram is a single token (what we have been working with). A bigram is a pair of adjacent tokens. A trigram is a sequence of three tokens. In general, an n-gram captures local word order, which is lost when we treat documents as unordered collections of words.
 
-Constructing n-grams requires us to look at tokens in context. The window functions that we introduced in @sec-window allow us to access neighboring rows, which we can use to pair each token with the tokens that follow it. There, we shifted page sizes to compare successive Wikipedia revisions; here, exactly the same `.shift()` and `.over()` methods align adjacent words on the same row. This is a nice illustration of the point made at the start of the temporal chapter: any dataset with a meaningful row ordering can be treated with temporal tools, and a text read token-by-token is exactly such a dataset.
+Constructing n-grams requires us to look at tokens in context. The window functions that we introduced in @sec-window allow us to access neighboring rows, which we can use to pair each token with the tokens that follow it. In @sec-temporal, we shifted page sizes to compare successive Wikipedia revisions; here, exactly the same `.shift()` and `.over()` methods align adjacent words on the same row. This is a nice illustration of the point made at the start of the temporal chapter: any dataset with a meaningful row ordering can be treated with temporal tools, and a text read token-by-token is exactly such a dataset.
 
 ```{python}
 bigrams = (
@@ -178,7 +178,7 @@ bigrams = (
 bigrams.select(c.doc_id, c.sid, c.tid, c.lemma, c.next_token, c.bigram)
 ```
 
-The `shift(-1)` operation moves each column up by one position within each document and sentence, so that each row contains both the current token and the following token. We filter to keep only cases where both tokens are alphabetic, excluding bigrams that span punctuation or sentence boundaries.
+The `shift(-1)` operation moves each column up by one position within each document and sentence, so that each row contains both the current token and the following token. Because the filter on alphabetic tokens comes before the shift, each bigram pairs successive words, skipping over any punctuation that fell between them, and the `.over()` grouping keeps pairs from crossing sentence boundaries.
 
 Now we can count bigram frequencies just as we counted unigram frequencies:
 
@@ -194,7 +194,7 @@ Now we can count bigram frequencies just as we counted unigram frequencies:
 
 The most frequent bigrams by raw counts largely consist of functional phrases that appear in many types of text. The phrase "of the" appears often simply because both words are common, not because they form a meaningful unit. To identify true collocations, word pairs that occur together more often than chance would predict, we use *pointwise mutual information* (PMI). PMI compares the observed frequency of a bigram to the frequency we would expect if the two words were independent:
 
-$$ \text{PMI}(w_1, w_2) = \log_2 \frac{P(w_1, w_2)}{P(w_1) \cdot P(w_2)} $$
+$$ \text{PMI}(w_1, w_2) = \log \frac{P(w_1, w_2)}{P(w_1) \cdot P(w_2)} $$
 
 A high PMI indicates that the words co-occur much more frequently than their individual frequencies would suggest. A PMI of zero means the words are independent. Negative PMI (rare in practice for bigrams that actually occur) would indicate the words avoid each other.
 
@@ -249,7 +249,7 @@ And, finally, we can combine the data together to get the PMI scores for each bi
         p_w2 = c.w2_count / total_words
     )
     .with_columns(
-        pmi = (c.p_bigram / (c.p_w1 * c.p_w2)).log(2)
+        pmi = (c.p_bigram / (c.p_w1 * c.p_w2)).log()
     )
     .filter(c.bigram_count >= 5)
     .sort(c.pmi, descending=True)
@@ -349,7 +349,7 @@ We can also examine which entity types are most common overall. Because the summ
 
 Biographical articles naturally contain many dates (birth, death, publication) and references to people and places. The distribution of entity types provides a high-level characterization of the content; a corpus of corporate press releases or scientific abstracts would produce a very different profile.
 
-Entity co-occurrence within documents can reveal relationships. Which people are mentioned together? To find out, we build a table with one row per person mention, join it to itself by document, and count how often each pair shares a page. The filter `c.person < c.person_2` keeps one copy of each pair and removes self-pairs.
+Entity co-occurrence within documents can reveal relationships. Which people are mentioned together? To find out, we build a table with one row per person mention, join it to itself by document, and count the co-occurring pairs of mentions. Because the join works at the level of individual mentions, a pair of people who are each mentioned many times on the same page contributes many pairs to the count. The filter `c.person < c.person_2` keeps one copy of each pair and removes self-pairs.
 
 ```{python}
 people = (
@@ -450,7 +450,7 @@ We can also extract adjective-noun pairs to see how different concepts are descr
 )
 ```
 
-The adjective-noun pairs give a compact picture of how things get described in the corpus, with more precision than the standalone adjective counts from earlier in the chapter: there, we knew an author's page used the word "Gothic" often, while here we know which nouns it was attached to.
+The adjective-noun pairs give a compact picture of how things get described in the corpus, with more precision than the standalone adjective counts from earlier in the chapter: there, we knew an author's page used the word "supernatural" often, while here we know which nouns it was attached to.
 
 ## Keyword in Context (KWIC)
 
@@ -509,7 +509,7 @@ For example, sentence length is one of the simplest style measures. Longer sente
 )
 ```
 
-Type-token ratio (TTR) measures vocabulary richness: the number of unique words (types) divided by the total number of words (tokens). A higher TTR indicates more varied vocabulary.
+Type-token ratio (TTR) measures vocabulary richness: the number of unique lemmas (types) divided by the total number of words (tokens). A higher TTR indicates more varied vocabulary.
 
 ```{python}
 (
@@ -548,7 +548,7 @@ Average word length correlates with vocabulary sophistication. Documents using m
 )
 ```
 
-Finally, function word ratio measures the proportion of grammatical words (articles, prepositions, pronouns) versus content words (nouns, verbs, adjectives). Different genres and styles have characteristic function word profiles.
+Finally, content word ratio measures the proportion of content words (nouns, verbs, adjectives, adverbs) versus grammatical function words (articles, prepositions, pronouns). Different genres and styles have characteristic profiles of content and function words.
 
 ```{python}
 content_pos = ["NOUN", "VERB", "ADJ", "ADV"]
@@ -599,7 +599,7 @@ The plot lets us check whether the two aspects of style move together. Pages wri
 
 ## Summary
 
-In this chapter, we converted raw text into a structured annotation table and analyzed it using the Polars operations developed throughout this book. Each row of the annotation table is a token labeled with its lemma, part of speech, entity type, and grammatical role, and this single table supported a wide range of analyses: frequency counts by part of speech, n-grams and PMI-based collocations, named entities and their co-occurrences, grammatical patterns extracted from the dependency parse, keyword-in-context displays, and stylistic complexity metrics. Along the way we opened up the `DSText` wrapper functions used here to see that each one is built from the same loops, chains, and joins we have been writing all semester.
+In this chapter, we converted raw text into a structured annotation table and analyzed it using the Polars operations developed throughout this book. Each row of the annotation table is a token labeled with its lemma, part of speech, entity type, and grammatical role, and this single table supported a wide range of analyses: frequency counts by part of speech, n-grams and PMI-based collocations, named entities and their co-occurrences, grammatical patterns extracted from the dependency parse, keyword-in-context displays, and stylistic complexity metrics. Along the way we opened up the `DSText` wrapper functions used here to see that each one is built from the same loops, chains, and joins we have been writing throughout this book.
 
 Throughout the chapter, our unit of analysis remained the individual token, or a short window of tokens. In the next chapter, we shift perspective: instead of asking about words within documents, we ask about whole documents within a collection. That change of scale requires a new mathematical representation, the document vector, and it is the bridge between textual data and the numeric modeling tools that occupy the rest of the book.
 

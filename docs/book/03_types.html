@@ -334,7 +334,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="setup" class="level2" data-number="3.1">
 <h2 data-number="3.1" class="anchored" data-anchor-id="setup"><span class="header-section-number">3.1</span> Setup</h2>
 <p>As in every chapter, we begin by loading the modules and datasets used below. This chapter needs Polars, our helper functions, and the <code>country</code> dataset from <a href="01_intro.html" class="quarto-xref"><span>Chapter 1</span></a>. A second, smaller dataset will be read partway through the chapter, at the point where it becomes useful.</p>
-<div id="ae6e5bdf" class="cell" data-execution_count="2">
+<div id="8f0430da" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine <span class="im">import</span> ggplot, aes</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> polars <span class="im">import</span> col <span class="im">as</span> c</span>
@@ -346,14 +346,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="introduction" class="level2" data-number="3.2">
 <h2 data-number="3.2" class="anchored" data-anchor-id="introduction"><span class="header-section-number">3.2</span> Introduction</h2>
-<p>Every time we have printed a DataFrame, the display has shown a short label under each column name: <code>str</code> under the country names, <code>i64</code> under the population counts, <code>f64</code> under the latitudes. These labels are <em>data types</em>. Every column in a DataFrame has exactly one type, and that type determines what the column can do: whether its values can be added together, whether they sort numerically or alphabetically, and how missing entries behave. So far we have been able to ignore them, because the <code>country</code> dataset arrives in good shape. That luck does not hold.</p>
+<p>Every time we have printed a DataFrame, the display has shown a short label under each column name: <code>str</code> under the country names, <code>i64</code> under the GDP figures, <code>f64</code> under the latitudes. These labels are <em>data types</em>. Every column in a DataFrame has exactly one type, and that type determines what the column can do: whether its values can be added together, whether they sort numerically or alphabetically, and how missing entries behave. So far we have been able to ignore them, because the <code>country</code> dataset arrives in good shape. That luck does not hold.</p>
 <p>This chapter has two goals. The first is to explain the type system: what the common types are, how to check them, how to convert a column from one type to another, and what happens when a value is missing or invalid. The second goal is to go back and give a proper account of something we have been using all along. In the last chapter we wrote fragments such as <code>c.pop</code> and <code>c.hdi &gt; 0.9</code> and handed them to <code>.sort()</code>, <code>.select()</code>, <code>.filter()</code>, and <code>.with_columns()</code>, and we said only that they were recipes rather than data. That was true but vague. These fragments are objects called <em>expressions</em>, and understanding what they are explains why the same <code>c.</code> syntax keeps turning up inside method after method for the rest of the book.</p>
 <p>Because the methods from <a href="02_organize.html" class="quarto-xref"><span>Chapter 2</span></a> are now in hand, we will use them freely here to display results, without further comment.</p>
 </section>
 <section id="columns-have-types" class="level2" data-number="3.3">
 <h2 data-number="3.3" class="anchored" data-anchor-id="columns-have-types"><span class="header-section-number">3.3</span> Columns Have Types</h2>
 <p>Printing a DataFrame shows the type of each column directly under its name. To see the full mapping at once, we can ask for the DataFrame’s <em>schema</em>, which lists every column name alongside its type.</p>
-<div id="cfe15c13" class="cell" data-execution_count="3">
+<div id="b5d592de" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>country.schema</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
 <pre><code>Schema([('iso', String),
@@ -375,7 +375,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>Four types cover almost everything in this book. A <code>str</code> (string) column holds text, such as the country names and regions. An <code>i64</code> (64-bit integer) column holds whole numbers. An <code>f64</code> (64-bit floating point) column holds numbers that may have a decimal part, such as latitude or the Human Development Index. The fourth type, <code>bool</code> (Boolean), holds only the values <code>True</code> and <code>False</code>. There is no <code>bool</code> column in <code>country</code> as it is read from the file, but one appears as soon as we ask a yes-or-no question about the data.</p>
 <p>To see one, we can use <code>.select()</code> to place a computed column next to the data it came from. The code below shows each country’s HDI alongside a test of whether that HDI is above 0.9.</p>
-<div id="c5908aa2" class="cell" data-execution_count="4">
+<div id="3d1ade5f" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    country</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    .select(c.iso, c.hdi, high_hdi <span class="op">=</span> c.hdi <span class="op">&gt;</span> <span class="fl">0.9</span>)</span>
@@ -468,7 +468,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="why-types-matter" class="level2" data-number="3.4">
 <h2 data-number="3.4" class="anchored" data-anchor-id="why-types-matter"><span class="header-section-number">3.4</span> Why Types Matter</h2>
 <p>The <code>country</code> data arrives in good shape: numbers are read as numbers and text as text, so there is little reason to think about types at all. Most real datasets are not this polite. To see what goes wrong, we will read a second file, a small table of Massachusetts cities with their ZIP codes, populations, and founding dates.</p>
-<div id="068349ba" class="cell" data-execution_count="5">
+<div id="7050d500" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>cities <span class="op">=</span> pl.read_csv(<span class="st">"data/cities_messy.csv"</span>)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>cities</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
@@ -551,7 +551,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>Look at the printed types. The <code>zip</code> column was read as <code>i64</code>, and every code has lost its leading zero: Boston’s ZIP code is 02108, but the table says 2108. ZIP codes are labels that happen to be written with digits, not quantities, and treating them as integers has silently damaged them. The <code>pop</code> column has the opposite problem. One city’s population was entered as <code>"n/a"</code>, and because a column must have a single type, that one entry forced the entire column to be read as <code>str</code>. The <code>founded</code> column is also <code>str</code>, since <code>read_csv</code> has no way to know those particular strings are dates.</p>
 <p>None of this produces an error message. The file reads, the table prints, and everything looks roughly right. The damage only surfaces when we try to use the data. Suppose we ask for the largest population in the table:</p>
-<div id="b8708201" class="cell" data-execution_count="6">
+<div id="1edbdd51" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    cities</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    .select(c.pop.<span class="bu">max</span>())</span>
@@ -588,8 +588,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="casting" class="level2" data-number="3.5">
 <h2 data-number="3.5" class="anchored" data-anchor-id="casting"><span class="header-section-number">3.5</span> Casting</h2>
 <p>Converting a column from one type to another is called <em>casting</em>, done with the <code>.cast()</code> method on a column. The target type is written with a <code>pl.</code> prefix and a capitalized name: <code>pl.Int64</code>, <code>pl.Float64</code>, <code>pl.String</code>, and <code>pl.Boolean</code> correspond to the four header labels we have seen. These longer names are how Polars refers to types inside code, while the headers use short forms to save space.</p>
-<p>Casting between the numeric types works as you might expect, with one caution. Converting an integer column to <code>pl.Float64</code> is always safe. Going the other way, from floating point to <code>pl.Int64</code>, drops the decimal part entirely rather than rounding. The example below casts latitude to an integer; a latitude of 41.9 becomes 41, and -34.6 becomes -34.</p>
-<div id="45ca9ea6" class="cell" data-execution_count="7">
+<p>Casting between the numeric types works as you might expect, with one caution. Converting an integer column to <code>pl.Float64</code> is always safe. Going the other way, from floating point to <code>pl.Int64</code>, drops the decimal part entirely rather than rounding. The example below casts latitude to an integer; a latitude of 18.8 becomes 18, and -9.4 becomes -9.</p>
+<div id="c408cd02" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    country</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    .select(c.iso, c.lat, lat_int <span class="op">=</span> c.lat.cast(pl.Int64))</span>
@@ -678,12 +678,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>Now back to the broken <code>pop</code> column in <code>cities</code>. Casting it to a numeric type should fix it, but a plain cast fails, because <code>"n/a"</code> cannot be turned into a number. Polars raises an error rather than guessing. To convert the column anyway, we add <code>strict=False</code>, which tells the cast to replace any value it cannot convert with a missing value.</p>
-<div id="8a20d431" class="cell" data-execution_count="8">
+<div id="9eb75231" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    cities</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    .select(</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>      c.city,</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>      pop <span class="op">=</span> c.pop.cast(pl.Int64, strict<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>        c.city,</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>        pop <span class="op">=</span> c.pop.cast(pl.Int64, strict<span class="op">=</span><span class="va">False</span>)</span>
 <span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="8">
@@ -750,7 +750,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="missing-and-invalid-values" class="level2" data-number="3.6">
 <h2 data-number="3.6" class="anchored" data-anchor-id="missing-and-invalid-values"><span class="header-section-number">3.6</span> Missing and Invalid Values</h2>
 <p>The cast above introduced a <code>null</code> into the <code>pop</code> column. A <code>null</code> is Polars’ marker for a missing value, and any column of any type can contain one. Floating point columns can additionally contain a second special value, <code>NaN</code> (short for “not a number”), which is not a missing value but the result of a numerical computation that has no answer. Taking the square root of a negative number is the classic way to produce one:</p>
-<div id="ae2b8590" class="cell" data-execution_count="9">
+<div id="b2a475ed" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    country</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    .select(c.iso, c.lat, lat_sqrt <span class="op">=</span> c.lat.sqrt())</span>
@@ -840,12 +840,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>Countries in the Southern Hemisphere have negative latitudes, so their rows show <code>NaN</code>. Many libraries blur nulls and NaNs together; Polars keeps them separate, and it pays to keep the distinction straight. A <code>null</code> means “we do not have this value.” A <code>NaN</code> means “we computed this value and the mathematics broke.” The two are handled by parallel sets of tools: <code>.is_null()</code> tests for missing values and <code>.is_nan()</code> for invalid ones, <code>.fill_null()</code> replaces missing values and <code>.fill_nan()</code> replaces invalid ones, and the row-dropping methods <code>.drop_nulls()</code> and <code>.drop_nans()</code> from the last chapter remove rows containing each. This is the distinction <a href="02_organize.html" class="quarto-xref"><span>Chapter 2</span></a> promised to explain: dropping nulls does not remove NaNs, and dropping NaNs does not remove nulls.</p>
 <p>The filling methods take the replacement value as their argument. Below, we fill the missing population with 0. Whether 0 is a sensible stand-in depends entirely on what the analysis does next; for a sum it is harmless, while for an average it would quietly drag the result down. There is no universally correct fill value.</p>
-<div id="48f00332" class="cell" data-execution_count="10">
+<div id="ae1c0be9" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    cities</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    .select(</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>      c.city,</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>      pop <span class="op">=</span> c.pop.cast(pl.Int64, strict<span class="op">=</span><span class="va">False</span>).fill_null(<span class="dv">0</span>)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>        c.city,</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>        pop <span class="op">=</span> c.pop.cast(pl.Int64, strict<span class="op">=</span><span class="va">False</span>).fill_null(<span class="dv">0</span>)</span>
 <span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="10">
@@ -913,7 +913,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 data-number="3.7" class="anchored" data-anchor-id="expressions"><span class="header-section-number">3.7</span> Expressions</h2>
 <p>By this point we have written a great many <code>c.</code> fragments: <code>c.pop</code> on its own, <code>c.hdi &gt; 0.9</code>, <code>c.pop.sqrt()</code>, <code>c.pop.cast(pl.Int64, strict=False)</code>. We have handed them to <code>.sort()</code>, <code>.select()</code>, <code>.filter()</code>, and <code>.with_columns()</code>, and we have described them loosely as recipes that Polars runs one row at a time. It is time to be precise, because these fragments are the single idea that the rest of the book is built on.</p>
 <p>Start by doing something we have not done before: type one alone in a cell, with no DataFrame anywhere in sight.</p>
-<div id="9b77e6a7" class="cell" data-execution_count="11">
+<div id="1b219c9f" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>c.pop</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="11">
 col("pop")
@@ -921,7 +921,7 @@ col("pop")
 </div>
 <p>The result is not a column of numbers. It is an object called an <em>expression</em>, and its printed form is essentially a note that says “the column named pop.” No data is attached, and none could be, because <code>c.pop</code> on its own is not connected to any DataFrame. It does not know that <code>country</code> exists. It is a description of a computation, not the computation’s result.</p>
 <p>Expressions can be built up using arithmetic, comparisons, and methods, and each step produces another expression rather than a value. All of the following are expressions, and running any of them alone would again print a description rather than data:</p>
-<div id="15d59d36" class="cell" data-execution_count="12">
+<div id="1228491d" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>c.pop <span class="op">*</span> <span class="dv">1000</span></span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>c.pop.sqrt()</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>c.hdi <span class="op">&gt;</span> <span class="fl">0.9</span></span>
@@ -952,7 +952,7 @@ col("pop")
 <h2 data-number="3.8" class="anchored" data-anchor-id="strings-dates-and-categories"><span class="header-section-number">3.8</span> Strings, Dates, and Categories</h2>
 <p>The four core types are not the whole story, and this section previews two families of tools that get fuller treatment later.</p>
 <p>String columns carry a collection of methods under the <code>.str</code> prefix, covering tasks like changing case, measuring length, and extracting pieces of text. One small example, converting names to uppercase:</p>
-<div id="0a6b5139" class="cell" data-execution_count="13">
+<div id="21fed79a" class="cell" data-execution_count="13">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    country</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    .select(c.iso, name_upper <span class="op">=</span> c.full_name.<span class="bu">str</span>.to_uppercase())</span>
@@ -1028,7 +1028,7 @@ col("pop")
 </div>
 </div>
 <p>Dates get their own types as well. The <code>founded</code> column in <code>cities</code> is currently a <code>str</code>, which means the values can be printed but not treated as points in time; nothing relates <code>"1626-06-24"</code> to <code>"1630-09-07"</code> except alphabetical order, which for dates written year-first happens to coincide with time order, and for most other formats does not. The <code>.str.to_date()</code> method parses text into a genuine <code>date</code> column:</p>
-<div id="61631be5" class="cell" data-execution_count="14">
+<div id="8b7296aa" class="cell" data-execution_count="14">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    cities</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    .select(c.city, founded <span class="op">=</span> c.founded.<span class="bu">str</span>.to_date())</span>

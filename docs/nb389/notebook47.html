@@ -288,13 +288,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="setup" class="level3">
 <h3 class="anchored" data-anchor-id="setup">Setup</h3>
 <p>Run all of the following before starting the notebook.</p>
-<div id="0208f090" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="1">
+<div id="063c1c1b" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="1">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span> wget <span class="op">-</span>q <span class="op">-</span>nc https:<span class="op">//</span>raw.githubusercontent.com<span class="op">/</span>taylor<span class="op">-</span>arnold<span class="op">/</span>fds2<span class="op">/</span>refs<span class="op">/</span>heads<span class="op">/</span>main<span class="op">/</span>funs.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<div id="07e01878" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="2">
+<div id="30e7b2dd" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="2">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
@@ -309,14 +309,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>ub <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<div id="b405aa2d" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="4">
+<div id="d099ad74" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="4">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>fsac <span class="op">=</span> pl.read_csv(ub <span class="op">+</span> <span class="st">"data/fsac.csv"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <p>Unlike the CSV files in earlier notebooks, an image dataset needs the image files themselves on disk before <code>cv2.imread</code> can open them. This cell downloads the photographs referenced in <code>fsac</code> the first time you run it and does nothing on later runs (or if you already have them).</p>
-<div id="f07d85dc" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="5">
+<div id="aaf04e66" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="5">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
@@ -335,7 +335,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol type="1">
 <li>Read the first image in <code>fsac</code> into a NumPy array with <code>cv2.imread</code>, and print the array’s <code>.shape</code>.</li>
 </ol>
-<div id="7c5a4174" class="cell" data-execution_count="6">
+<div id="f8c59393" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>img <span class="op">=</span> cv2.imread(fsac.select(c.filepath).row(<span class="dv">0</span>)[<span class="dv">0</span>])</span>
@@ -349,7 +349,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="2" type="1">
 <li>These photographs were never resized to a standard size. Loop over every row, read each image, and collect its height and width into a table. Then, in one <code>.select()</code>, count how many distinct (height, width) pairs occur and how many images are landscape (wider than tall) versus portrait.</li>
 </ol>
-<div id="53c2c8fd" class="cell" data-execution_count="7">
+<div id="8f0b5c9f" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>sizes <span class="op">=</span> []</span>
@@ -403,9 +403,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>The 500 images come in 105 different sizes, mostly landscape. Every image here has 640 pixels on its long side but a different short side, so any analysis has to be size-independent: a mean over all pixels is fine, but a rule that reached for a fixed pixel location would mean a different thing in each frame.</p>
 <ol start="3" type="1">
-<li>Re-read the first image. Print the 2×2 block of pixels in its upper-left corner (<code>img[:2, :2, :]</code>), then its overall mean, and finally the mean of each of the three channels separately (loop <code>ch</code> over <code>range(3)</code>).</li>
+<li>In the first block, re-read the first image and print the 2×2 block of pixels in its upper-left corner (<code>img[:2, :2, :]</code>). In the second block, print its overall mean. In the third block, print the mean of each of the three channels separately (loop <code>ch</code> over <code>range(3)</code>).</li>
 </ol>
-<div id="4a714466" class="cell" data-execution_count="8">
+<div id="927a83dc" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>img <span class="op">=</span> cv2.imread(fsac.select(c.filepath).row(<span class="dv">0</span>)[<span class="dv">0</span>])</span>
@@ -419,7 +419,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         [15, 18, 22]]], dtype=uint8)</code></pre>
 </div>
 </div>
-<div id="a7ce0f3a" class="cell" data-execution_count="9">
+<div id="f227c0c2" class="cell" data-execution_count="9">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>img.mean()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -428,7 +428,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <pre><code>np.float64(59.60355852014295)</code></pre>
 </div>
 </div>
-<div id="2f77f3cd" class="cell" data-execution_count="10">
+<div id="ea677bca" class="cell" data-execution_count="10">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>[<span class="bu">float</span>(img[:, :, ch].mean()) <span class="cf">for</span> ch <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">3</span>)]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -441,7 +441,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="4" type="1">
 <li>Compute the mean brightness of every image. Loop over the rows, read each one, append its <code>.mean()</code>, and add the result back as a <code>brightness</code> column. Print <code>filepath</code>, <code>photographer</code>, and <code>brightness</code> for the first five rows.</li>
 </ol>
-<div id="a60a4df1" class="cell" data-execution_count="11">
+<div id="47b4bb6b" class="cell" data-execution_count="11">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>brightness <span class="op">=</span> []</span>
@@ -507,9 +507,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <ol start="5" type="1">
-<li>Show the twelve darkest images in a grid with <code>DSImage.plot_image_grid</code> (sort by <code>brightness</code>, take the head, and label the tiles by <code>photographer</code>). Then print the brightness, photographer, and caption for the six darkest, and say what these frames have in common.</li>
+<li>In the first block, show the twelve darkest images in a grid with <code>DSImage.plot_image_grid</code> (sort by <code>brightness</code>, take the head, and label the tiles by <code>photographer</code>). In the second block, print the brightness, photographer, and caption for the six darkest. Say what these frames have in common.</li>
 </ol>
-<div id="70bdec1d" class="cell" data-execution_count="12">
+<div id="1eac2a6c" class="cell" data-execution_count="12">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -527,7 +527,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<div id="b12f16de" class="cell" data-execution_count="13">
+<div id="835b3f5c" class="cell" data-execution_count="13">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -599,7 +599,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="6" type="1">
 <li>Draw a boxplot of <code>brightness</code> by <code>photographer</code>, but only for the photographers who contributed at least 20 images (filter on <code>pl.len().over(c.photographer) &gt;= 20</code>). Order the photographers by their mean brightness, and use <code>coord_flip()</code> so the names stay readable. What pattern do you see?</li>
 </ol>
-<div id="2631629d" class="cell" data-execution_count="14">
+<div id="722bd821" class="cell" data-execution_count="14">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -623,7 +623,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="7" type="1">
 <li>Convert the first image from BGR to HSV color space with <code>cv2.cvtColor</code> and <code>cv2.COLOR_BGR2HSV</code>, and print the shape of the result.</li>
 </ol>
-<div id="f19737dc" class="cell" data-execution_count="15">
+<div id="2898ad5f" class="cell" data-execution_count="15">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>img <span class="op">=</span> cv2.imread(fsac.select(c.filepath).row(<span class="dv">0</span>)[<span class="dv">0</span>])</span>
@@ -638,7 +638,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="8" type="1">
 <li>Run <code>DSImage.compute_colors</code> on that HSV image. Look at the output and check the numbers against what the chapter’s text claims about them.</li>
 </ol>
-<div id="06ff71a2" class="cell" data-execution_count="16">
+<div id="326f01fa" class="cell" data-execution_count="16">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>DSImage.compute_colors(img_hsv)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -659,7 +659,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="9" type="1">
 <li>Compute the color breakdown for every image, collect the results into a DataFrame, and concatenate it onto <code>fsac</code> horizontally (the chapter’s own pattern). Then print the mean of each color column across the whole collection.</li>
 </ol>
-<div id="5a62730b" class="cell" data-execution_count="17">
+<div id="488fd997" class="cell" data-execution_count="17">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>results <span class="op">=</span> []</span>
@@ -674,7 +674,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>fsac.select(results.columns).mean()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stderr">
-<pre><code>/var/folders/5w/rxshd8hd6vv8mxsbj211mr_m0000gn/T/ipykernel_37667/1463469880.py:9: DeprecationWarning: the default behavior of `how='horizontal'` for `concat` is deprecated and will require equal heights in the next breaking release. Use `how='horizontal_extend'` to keep the current behavior.
+<pre><code>/var/folders/5w/rxshd8hd6vv8mxsbj211mr_m0000gn/T/ipykernel_48712/1463469880.py:9: DeprecationWarning: the default behavior of `how='horizontal'` for `concat` is deprecated and will require equal heights in the next breaking release. Use `how='horizontal_extend'` to keep the current behavior.
 (Deprecated in version 1.42.1)</code></pre>
 </div>
 <div class="cell-output cell-output-display" data-execution_count="16">
@@ -732,7 +732,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="10" type="1">
 <li>OpenCV’s BGR ordering is easy to forget, and forgetting it corrupts every color count silently. Take the reddest image in the collection and convert it to HSV two ways: correctly with <code>cv2.COLOR_BGR2HSV</code>, and incorrectly with <code>cv2.COLOR_RGB2HSV</code> (which treats the blue channel as if it were red). Compare the color breakdowns.</li>
 </ol>
-<div id="5f1936e6" class="cell" data-execution_count="18">
+<div id="1fae084b" class="cell" data-execution_count="18">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>red_row <span class="op">=</span> fsac.sort(c.red, descending<span class="op">=</span><span class="va">True</span>).row(<span class="dv">0</span>, named<span class="op">=</span><span class="va">True</span>)</span>
@@ -751,7 +751,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  'neutral': np.float64(43.37974845995893)}</code></pre>
 </div>
 </div>
-<div id="d727fc54" class="cell" data-execution_count="19">
+<div id="014556dc" class="cell" data-execution_count="19">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>DSImage.compute_colors(cv2.cvtColor(img, cv2.COLOR_RGB2HSV))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -770,9 +770,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>Read the correct way, this image is 33% red and 5% blue. Read as if it were RGB, red collapses to 5% and blue jumps to 49%: the two colors swap places. Neither call raises an error, and both return a tidy dictionary that sums to 100, so nothing flags the mistake except knowing the image is red to begin with.</p>
 <ol start="11" type="1">
-<li>Show the twelve reddest images in a grid, and print the caption of the six reddest. Does “red” find red <em>subjects</em>?</li>
+<li>In the first block, show the twelve reddest images in a grid. In the second block, print the caption of the six reddest. Does “red” find red <em>subjects</em>?</li>
 </ol>
-<div id="99549972" class="cell" data-execution_count="20">
+<div id="34f0ada9" class="cell" data-execution_count="20">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -790,7 +790,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<div id="e1dfc6e1" class="cell" data-execution_count="21">
+<div id="0df9215c" class="cell" data-execution_count="21">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -862,7 +862,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="12" type="1">
 <li>Close with a short pipeline that pulls brightness and color together. Group <code>fsac</code> by <code>photographer</code>, keeping only those with at least 20 images, and compute each one’s mean brightness, mean orange, mean blue, and image count. Sort by brightness. Then explain what these pixel features can and cannot tell us.</li>
 </ol>
-<div id="2ebe2df8" class="cell" data-execution_count="22">
+<div id="919014fb" class="cell" data-execution_count="22">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -1555,228 +1555,231 @@ document.addEventListener('DOMContentLoaded', function() {
 <span id="cb31-123"><a href="#cb31-123" aria-hidden="true" tabindex="-1"></a>rule that reached for a fixed pixel location would mean a different thing in</span>
 <span id="cb31-124"><a href="#cb31-124" aria-hidden="true" tabindex="-1"></a>each frame.</span>
 <span id="cb31-125"><a href="#cb31-125" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-126"><a href="#cb31-126" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Re-read the first image. Print the 2×2 block of pixels in its upper-left</span>
-<span id="cb31-127"><a href="#cb31-127" aria-hidden="true" tabindex="-1"></a>corner (<span class="in">`img[:2, :2, :]`</span>), then its overall mean, and finally the mean of</span>
-<span id="cb31-128"><a href="#cb31-128" aria-hidden="true" tabindex="-1"></a>each of the three channels separately (loop <span class="in">`ch`</span> over <span class="in">`range(3)`</span>).</span>
-<span id="cb31-129"><a href="#cb31-129" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-132"><a href="#cb31-132" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb31-133"><a href="#cb31-133" aria-hidden="true" tabindex="-1"></a>img <span class="op">=</span> cv2.imread(fsac.select(c.filepath).row(<span class="dv">0</span>)[<span class="dv">0</span>])</span>
-<span id="cb31-134"><a href="#cb31-134" aria-hidden="true" tabindex="-1"></a>img[:<span class="dv">2</span>, :<span class="dv">2</span>, :]</span>
-<span id="cb31-135"><a href="#cb31-135" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb31-136"><a href="#cb31-136" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-139"><a href="#cb31-139" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb31-140"><a href="#cb31-140" aria-hidden="true" tabindex="-1"></a>img.mean()</span>
-<span id="cb31-141"><a href="#cb31-141" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb31-142"><a href="#cb31-142" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-145"><a href="#cb31-145" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb31-146"><a href="#cb31-146" aria-hidden="true" tabindex="-1"></a>[<span class="bu">float</span>(img[:, :, ch].mean()) <span class="cf">for</span> ch <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">3</span>)]</span>
-<span id="cb31-147"><a href="#cb31-147" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb31-148"><a href="#cb31-148" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-149"><a href="#cb31-149" aria-hidden="true" tabindex="-1"></a>Each pixel is three numbers from 0 to 255. The overall mean, about 59.6,</span>
-<span id="cb31-150"><a href="#cb31-150" aria-hidden="true" tabindex="-1"></a>summarizes the whole frame's brightness. The per-channel means are the giveaway</span>
-<span id="cb31-151"><a href="#cb31-151" aria-hidden="true" tabindex="-1"></a>for BGR ordering: channel 0 (blue) is 56.1 and channel 2 (red) is 63.8, so a</span>
-<span id="cb31-152"><a href="#cb31-152" aria-hidden="true" tabindex="-1"></a>student who assumed channel 0 was red would report this warm, reddish frame as</span>
-<span id="cb31-153"><a href="#cb31-153" aria-hidden="true" tabindex="-1"></a>if its blue were strongest.</span>
-<span id="cb31-154"><a href="#cb31-154" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-155"><a href="#cb31-155" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>Compute the mean brightness of every image. Loop over the rows, read each</span>
-<span id="cb31-156"><a href="#cb31-156" aria-hidden="true" tabindex="-1"></a>one, append its <span class="in">`.mean()`</span>, and add the result back as a <span class="in">`brightness`</span> column.</span>
-<span id="cb31-157"><a href="#cb31-157" aria-hidden="true" tabindex="-1"></a>Print <span class="in">`filepath`</span>, <span class="in">`photographer`</span>, and <span class="in">`brightness`</span> for the first five rows.</span>
-<span id="cb31-158"><a href="#cb31-158" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-161"><a href="#cb31-161" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb31-162"><a href="#cb31-162" aria-hidden="true" tabindex="-1"></a>brightness <span class="op">=</span> []</span>
-<span id="cb31-163"><a href="#cb31-163" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-164"><a href="#cb31-164" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> row <span class="kw">in</span> fsac.iter_rows(named<span class="op">=</span><span class="va">True</span>):</span>
-<span id="cb31-165"><a href="#cb31-165" aria-hidden="true" tabindex="-1"></a>    img <span class="op">=</span> cv2.imread(row[<span class="st">"filepath"</span>])</span>
-<span id="cb31-166"><a href="#cb31-166" aria-hidden="true" tabindex="-1"></a>    brightness.append(img.mean())</span>
-<span id="cb31-167"><a href="#cb31-167" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-168"><a href="#cb31-168" aria-hidden="true" tabindex="-1"></a>fsac <span class="op">=</span> fsac.with_columns(brightness <span class="op">=</span> pl.Series(brightness))</span>
-<span id="cb31-169"><a href="#cb31-169" aria-hidden="true" tabindex="-1"></a>fsac.select(c.filepath, c.photographer, c.brightness).head(<span class="dv">5</span>)</span>
-<span id="cb31-170"><a href="#cb31-170" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb31-171"><a href="#cb31-171" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-172"><a href="#cb31-172" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>Show the twelve darkest images in a grid with <span class="in">`DSImage.plot_image_grid`</span></span>
-<span id="cb31-173"><a href="#cb31-173" aria-hidden="true" tabindex="-1"></a>(sort by <span class="in">`brightness`</span>, take the head, and label the tiles by <span class="in">`photographer`</span>).</span>
-<span id="cb31-174"><a href="#cb31-174" aria-hidden="true" tabindex="-1"></a>Then print the brightness, photographer, and caption for the six darkest, and</span>
-<span id="cb31-175"><a href="#cb31-175" aria-hidden="true" tabindex="-1"></a>say what these frames have in common.</span>
-<span id="cb31-176"><a href="#cb31-176" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-179"><a href="#cb31-179" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb31-180"><a href="#cb31-180" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb31-181"><a href="#cb31-181" aria-hidden="true" tabindex="-1"></a>    fsac</span>
-<span id="cb31-182"><a href="#cb31-182" aria-hidden="true" tabindex="-1"></a>    .sort(c.brightness)</span>
-<span id="cb31-183"><a href="#cb31-183" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">12</span>)</span>
-<span id="cb31-184"><a href="#cb31-184" aria-hidden="true" tabindex="-1"></a>    .pipe(DSImage.plot_image_grid, label_name<span class="op">=</span><span class="st">"photographer"</span>, ncol<span class="op">=</span><span class="dv">4</span>)</span>
-<span id="cb31-185"><a href="#cb31-185" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb31-186"><a href="#cb31-186" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb31-187"><a href="#cb31-187" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-190"><a href="#cb31-190" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb31-191"><a href="#cb31-191" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb31-192"><a href="#cb31-192" aria-hidden="true" tabindex="-1"></a>    fsac</span>
-<span id="cb31-193"><a href="#cb31-193" aria-hidden="true" tabindex="-1"></a>    .sort(c.brightness)</span>
-<span id="cb31-194"><a href="#cb31-194" aria-hidden="true" tabindex="-1"></a>    .select(c.brightness, c.photographer, c.caption)</span>
-<span id="cb31-195"><a href="#cb31-195" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">6</span>)</span>
-<span id="cb31-196"><a href="#cb31-196" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb31-197"><a href="#cb31-197" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb31-198"><a href="#cb31-198" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-199"><a href="#cb31-199" aria-hidden="true" tabindex="-1"></a>The darkest images are night and interior shots: Jack Delano's photographs</span>
-<span id="cb31-200"><a href="#cb31-200" aria-hidden="true" tabindex="-1"></a>of a Chicago railroad yard working around the clock, and Alfred Palmer's</span>
-<span id="cb31-201"><a href="#cb31-201" aria-hidden="true" tabindex="-1"></a>frame taken inside a tank at Fort Knox. The brightness score is being driven</span>
-<span id="cb31-202"><a href="#cb31-202" aria-hidden="true" tabindex="-1"></a>by the dark background, not by the subject. A brightly lit tank photographed</span>
-<span id="cb31-203"><a href="#cb31-203" aria-hidden="true" tabindex="-1"></a>against a black night would score lower than a dull object in a sunlit field.</span>
-<span id="cb31-204"><a href="#cb31-204" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-205"><a href="#cb31-205" aria-hidden="true" tabindex="-1"></a><span class="ss">6. </span>Draw a boxplot of <span class="in">`brightness`</span> by <span class="in">`photographer`</span>, but only for the</span>
-<span id="cb31-206"><a href="#cb31-206" aria-hidden="true" tabindex="-1"></a>photographers who contributed at least 20 images (filter on</span>
-<span id="cb31-207"><a href="#cb31-207" aria-hidden="true" tabindex="-1"></a><span class="in">`pl.len().over(c.photographer) &gt;= 20`</span>). Order the photographers by their mean</span>
-<span id="cb31-208"><a href="#cb31-208" aria-hidden="true" tabindex="-1"></a>brightness, and use <span class="in">`coord_flip()`</span> so the names stay readable. What pattern</span>
-<span id="cb31-209"><a href="#cb31-209" aria-hidden="true" tabindex="-1"></a>do you see?</span>
-<span id="cb31-210"><a href="#cb31-210" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-213"><a href="#cb31-213" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb31-214"><a href="#cb31-214" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb31-215"><a href="#cb31-215" aria-hidden="true" tabindex="-1"></a>    fsac</span>
-<span id="cb31-216"><a href="#cb31-216" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(pl.<span class="bu">len</span>().over(c.photographer) <span class="op">&gt;=</span> <span class="dv">20</span>)</span>
-<span id="cb31-217"><a href="#cb31-217" aria-hidden="true" tabindex="-1"></a>    .sort(c.brightness.mean().over(c.photographer), descending<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb31-218"><a href="#cb31-218" aria-hidden="true" tabindex="-1"></a>    .pipe(ggplot, aes(c.photographer, c.brightness))</span>
-<span id="cb31-219"><a href="#cb31-219" aria-hidden="true" tabindex="-1"></a>    .geom_boxplot()</span>
-<span id="cb31-220"><a href="#cb31-220" aria-hidden="true" tabindex="-1"></a>    .coord_flip()</span>
-<span id="cb31-221"><a href="#cb31-221" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb31-222"><a href="#cb31-222" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb31-223"><a href="#cb31-223" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-224"><a href="#cb31-224" aria-hidden="true" tabindex="-1"></a>Alfred Palmer and Howard Hollem are the darkest on average (both around 60),</span>
-<span id="cb31-225"><a href="#cb31-225" aria-hidden="true" tabindex="-1"></a>and both spent the war shooting inside aircraft factories and defense plants,</span>
-<span id="cb31-226"><a href="#cb31-226" aria-hidden="true" tabindex="-1"></a>where the light is artificial and controlled. John Collier and Jack Delano</span>
-<span id="cb31-227"><a href="#cb31-227" aria-hidden="true" tabindex="-1"></a>are the brightest, with more outdoor and daylight frames. As with the birds</span>
-<span id="cb31-228"><a href="#cb31-228" aria-hidden="true" tabindex="-1"></a>in the chapter, brightness is tracking each photographer's assignment and</span>
-<span id="cb31-229"><a href="#cb31-229" aria-hidden="true" tabindex="-1"></a>setting, not anything about the photographs' merit.</span>
-<span id="cb31-230"><a href="#cb31-230" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-231"><a href="#cb31-231" aria-hidden="true" tabindex="-1"></a><span class="ss">7. </span>Convert the first image from BGR to HSV color space with <span class="in">`cv2.cvtColor`</span></span>
-<span id="cb31-232"><a href="#cb31-232" aria-hidden="true" tabindex="-1"></a>and <span class="in">`cv2.COLOR_BGR2HSV`</span>, and print the shape of the result.</span>
-<span id="cb31-233"><a href="#cb31-233" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-236"><a href="#cb31-236" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb31-237"><a href="#cb31-237" aria-hidden="true" tabindex="-1"></a>img <span class="op">=</span> cv2.imread(fsac.select(c.filepath).row(<span class="dv">0</span>)[<span class="dv">0</span>])</span>
-<span id="cb31-238"><a href="#cb31-238" aria-hidden="true" tabindex="-1"></a>img_hsv <span class="op">=</span> cv2.cvtColor(img, cv2.COLOR_BGR2HSV)</span>
-<span id="cb31-239"><a href="#cb31-239" aria-hidden="true" tabindex="-1"></a>img_hsv.shape</span>
-<span id="cb31-240"><a href="#cb31-240" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb31-241"><a href="#cb31-241" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-242"><a href="#cb31-242" aria-hidden="true" tabindex="-1"></a>The shape is unchanged; the three channels now hold hue, saturation, and</span>
-<span id="cb31-243"><a href="#cb31-243" aria-hidden="true" tabindex="-1"></a>value instead of blue, green, and red. OpenCV packs hue into the range</span>
-<span id="cb31-244"><a href="#cb31-244" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">0, 179</span><span class="co">]</span> rather than the full 0–360° so that it still fits in one byte.</span>
-<span id="cb31-245"><a href="#cb31-245" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-246"><a href="#cb31-246" aria-hidden="true" tabindex="-1"></a><span class="ss">8. </span>Run <span class="in">`DSImage.compute_colors`</span> on that HSV image. Look at the output and</span>
-<span id="cb31-247"><a href="#cb31-247" aria-hidden="true" tabindex="-1"></a>check the numbers against what the chapter's text claims about them.</span>
-<span id="cb31-248"><a href="#cb31-248" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-251"><a href="#cb31-251" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb31-252"><a href="#cb31-252" aria-hidden="true" tabindex="-1"></a>DSImage.compute_colors(img_hsv)</span>
-<span id="cb31-253"><a href="#cb31-253" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb31-254"><a href="#cb31-254" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-255"><a href="#cb31-255" aria-hidden="true" tabindex="-1"></a>The helper returns the share of pixels falling into each hue bucket, plus a</span>
-<span id="cb31-256"><a href="#cb31-256" aria-hidden="true" tabindex="-1"></a><span class="in">`neutral`</span> bucket for pixels too dark or too washed out to have a clear color.</span>
-<span id="cb31-257"><a href="#cb31-257" aria-hidden="true" tabindex="-1"></a>The chapter's prose says these "proportions sum to 1," but the actual helper</span>
-<span id="cb31-258"><a href="#cb31-258" aria-hidden="true" tabindex="-1"></a>returns percentages that sum to 100 — a small gap between the description and</span>
-<span id="cb31-259"><a href="#cb31-259" aria-hidden="true" tabindex="-1"></a>the code that only shows up if you add the numbers yourself. This frame is</span>
-<span id="cb31-260"><a href="#cb31-260" aria-hidden="true" tabindex="-1"></a>86% neutral, with what little color there is leaning orange.</span>
-<span id="cb31-261"><a href="#cb31-261" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-262"><a href="#cb31-262" aria-hidden="true" tabindex="-1"></a><span class="ss">9. </span>Compute the color breakdown for every image, collect the results into a</span>
-<span id="cb31-263"><a href="#cb31-263" aria-hidden="true" tabindex="-1"></a>DataFrame, and concatenate it onto <span class="in">`fsac`</span> horizontally (the chapter's own</span>
-<span id="cb31-264"><a href="#cb31-264" aria-hidden="true" tabindex="-1"></a>pattern). Then print the mean of each color column across the whole</span>
-<span id="cb31-265"><a href="#cb31-265" aria-hidden="true" tabindex="-1"></a>collection.</span>
-<span id="cb31-266"><a href="#cb31-266" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-269"><a href="#cb31-269" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb31-270"><a href="#cb31-270" aria-hidden="true" tabindex="-1"></a>results <span class="op">=</span> []</span>
-<span id="cb31-271"><a href="#cb31-271" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-272"><a href="#cb31-272" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> row <span class="kw">in</span> fsac.iter_rows(named<span class="op">=</span><span class="va">True</span>):</span>
-<span id="cb31-273"><a href="#cb31-273" aria-hidden="true" tabindex="-1"></a>    img <span class="op">=</span> cv2.imread(row[<span class="st">"filepath"</span>])</span>
-<span id="cb31-274"><a href="#cb31-274" aria-hidden="true" tabindex="-1"></a>    img_hsv <span class="op">=</span> cv2.cvtColor(img, cv2.COLOR_BGR2HSV)</span>
-<span id="cb31-275"><a href="#cb31-275" aria-hidden="true" tabindex="-1"></a>    results.append(DSImage.compute_colors(img_hsv))</span>
-<span id="cb31-276"><a href="#cb31-276" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-277"><a href="#cb31-277" aria-hidden="true" tabindex="-1"></a>results <span class="op">=</span> pl.DataFrame(results)</span>
-<span id="cb31-278"><a href="#cb31-278" aria-hidden="true" tabindex="-1"></a>fsac <span class="op">=</span> pl.concat([fsac, results], how<span class="op">=</span><span class="st">"horizontal"</span>)</span>
-<span id="cb31-279"><a href="#cb31-279" aria-hidden="true" tabindex="-1"></a>fsac.select(results.columns).mean()</span>
-<span id="cb31-280"><a href="#cb31-280" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb31-281"><a href="#cb31-281" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-282"><a href="#cb31-282" aria-hidden="true" tabindex="-1"></a>Two-thirds of the average frame is neutral, which fits the muted look of aged</span>
-<span id="cb31-283"><a href="#cb31-283" aria-hidden="true" tabindex="-1"></a>Kodachrome. Among the actual hues, orange dominates at about 16% — the color</span>
-<span id="cb31-284"><a href="#cb31-284" aria-hidden="true" tabindex="-1"></a>of skin, wood, brick, and dirt in these documentary scenes — while blue</span>
-<span id="cb31-285"><a href="#cb31-285" aria-hidden="true" tabindex="-1"></a>(sky) is a distant second and red is under 3%. This is a collection with a</span>
-<span id="cb31-286"><a href="#cb31-286" aria-hidden="true" tabindex="-1"></a>strong warm cast.</span>
-<span id="cb31-287"><a href="#cb31-287" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-288"><a href="#cb31-288" aria-hidden="true" tabindex="-1"></a><span class="ss">10. </span>OpenCV's BGR ordering is easy to forget, and forgetting it corrupts every</span>
-<span id="cb31-289"><a href="#cb31-289" aria-hidden="true" tabindex="-1"></a>color count silently. Take the reddest image in the collection and convert it</span>
-<span id="cb31-290"><a href="#cb31-290" aria-hidden="true" tabindex="-1"></a>to HSV two ways: correctly with <span class="in">`cv2.COLOR_BGR2HSV`</span>, and incorrectly with</span>
-<span id="cb31-291"><a href="#cb31-291" aria-hidden="true" tabindex="-1"></a><span class="in">`cv2.COLOR_RGB2HSV`</span> (which treats the blue channel as if it were red). Compare</span>
-<span id="cb31-292"><a href="#cb31-292" aria-hidden="true" tabindex="-1"></a>the color breakdowns.</span>
-<span id="cb31-293"><a href="#cb31-293" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-296"><a href="#cb31-296" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb31-297"><a href="#cb31-297" aria-hidden="true" tabindex="-1"></a>red_row <span class="op">=</span> fsac.sort(c.red, descending<span class="op">=</span><span class="va">True</span>).row(<span class="dv">0</span>, named<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb31-298"><a href="#cb31-298" aria-hidden="true" tabindex="-1"></a>img <span class="op">=</span> cv2.imread(red_row[<span class="st">"filepath"</span>])</span>
-<span id="cb31-299"><a href="#cb31-299" aria-hidden="true" tabindex="-1"></a>DSImage.compute_colors(cv2.cvtColor(img, cv2.COLOR_BGR2HSV))</span>
-<span id="cb31-300"><a href="#cb31-300" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb31-301"><a href="#cb31-301" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-304"><a href="#cb31-304" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb31-305"><a href="#cb31-305" aria-hidden="true" tabindex="-1"></a>DSImage.compute_colors(cv2.cvtColor(img, cv2.COLOR_RGB2HSV))</span>
-<span id="cb31-306"><a href="#cb31-306" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb31-307"><a href="#cb31-307" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-308"><a href="#cb31-308" aria-hidden="true" tabindex="-1"></a>Read the correct way, this image is 33% red and 5% blue. Read as if it were</span>
-<span id="cb31-309"><a href="#cb31-309" aria-hidden="true" tabindex="-1"></a>RGB, red collapses to 5% and blue jumps to 49%: the two colors swap places.</span>
-<span id="cb31-310"><a href="#cb31-310" aria-hidden="true" tabindex="-1"></a>Neither call raises an error, and both return a tidy dictionary that sums to</span>
-<span id="cb31-311"><a href="#cb31-311" aria-hidden="true" tabindex="-1"></a>100, so nothing flags the mistake except knowing the image is red to begin</span>
-<span id="cb31-312"><a href="#cb31-312" aria-hidden="true" tabindex="-1"></a>with.</span>
-<span id="cb31-313"><a href="#cb31-313" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-314"><a href="#cb31-314" aria-hidden="true" tabindex="-1"></a><span class="ss">11. </span>Show the twelve reddest images in a grid, and print the caption of the six</span>
-<span id="cb31-315"><a href="#cb31-315" aria-hidden="true" tabindex="-1"></a>reddest. Does "red" find red *subjects*?</span>
-<span id="cb31-316"><a href="#cb31-316" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-319"><a href="#cb31-319" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb31-320"><a href="#cb31-320" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb31-321"><a href="#cb31-321" aria-hidden="true" tabindex="-1"></a>    fsac</span>
-<span id="cb31-322"><a href="#cb31-322" aria-hidden="true" tabindex="-1"></a>    .sort(c.red, descending<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb31-323"><a href="#cb31-323" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">12</span>)</span>
-<span id="cb31-324"><a href="#cb31-324" aria-hidden="true" tabindex="-1"></a>    .pipe(DSImage.plot_image_grid, label_name<span class="op">=</span><span class="st">"state"</span>, ncol<span class="op">=</span><span class="dv">4</span>)</span>
-<span id="cb31-325"><a href="#cb31-325" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb31-326"><a href="#cb31-326" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb31-327"><a href="#cb31-327" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-330"><a href="#cb31-330" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb31-331"><a href="#cb31-331" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb31-332"><a href="#cb31-332" aria-hidden="true" tabindex="-1"></a>    fsac</span>
-<span id="cb31-333"><a href="#cb31-333" aria-hidden="true" tabindex="-1"></a>    .sort(c.red, descending<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb31-334"><a href="#cb31-334" aria-hidden="true" tabindex="-1"></a>    .select(c.red, c.state, c.caption)</span>
-<span id="cb31-335"><a href="#cb31-335" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">6</span>)</span>
-<span id="cb31-336"><a href="#cb31-336" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb31-337"><a href="#cb31-337" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb31-338"><a href="#cb31-338" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-339"><a href="#cb31-339" aria-hidden="true" tabindex="-1"></a>Red finds red *things*, but not a single subject: schoolchildren's clothing,</span>
-<span id="cb31-340"><a href="#cb31-340" aria-hidden="true" tabindex="-1"></a>a crowded courthouse square, a scrap-and-salvage depot, a tractor in a field.</span>
-<span id="cb31-341"><a href="#cb31-341" aria-hidden="true" tabindex="-1"></a>Like brightness, the color proportion describes whatever fills the frame —</span>
-<span id="cb31-342"><a href="#cb31-342" aria-hidden="true" tabindex="-1"></a>clothes, machinery, a painted wall — rather than the photograph's ostensible</span>
-<span id="cb31-343"><a href="#cb31-343" aria-hidden="true" tabindex="-1"></a>topic.</span>
-<span id="cb31-344"><a href="#cb31-344" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-345"><a href="#cb31-345" aria-hidden="true" tabindex="-1"></a><span class="ss">12. </span>Close with a short pipeline that pulls brightness and color together.</span>
-<span id="cb31-346"><a href="#cb31-346" aria-hidden="true" tabindex="-1"></a>Group <span class="in">`fsac`</span> by <span class="in">`photographer`</span>, keeping only those with at least 20 images,</span>
-<span id="cb31-347"><a href="#cb31-347" aria-hidden="true" tabindex="-1"></a>and compute each one's mean brightness, mean orange, mean blue, and image</span>
-<span id="cb31-348"><a href="#cb31-348" aria-hidden="true" tabindex="-1"></a>count. Sort by brightness. Then explain what these pixel features can and</span>
-<span id="cb31-349"><a href="#cb31-349" aria-hidden="true" tabindex="-1"></a>cannot tell us.</span>
-<span id="cb31-350"><a href="#cb31-350" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-353"><a href="#cb31-353" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb31-354"><a href="#cb31-354" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb31-355"><a href="#cb31-355" aria-hidden="true" tabindex="-1"></a>    fsac</span>
-<span id="cb31-356"><a href="#cb31-356" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(pl.<span class="bu">len</span>().over(c.photographer) <span class="op">&gt;=</span> <span class="dv">20</span>)</span>
-<span id="cb31-357"><a href="#cb31-357" aria-hidden="true" tabindex="-1"></a>    .group_by(c.photographer, maintain_order<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb31-358"><a href="#cb31-358" aria-hidden="true" tabindex="-1"></a>    .agg(</span>
-<span id="cb31-359"><a href="#cb31-359" aria-hidden="true" tabindex="-1"></a>        brightness <span class="op">=</span> c.brightness.mean(),</span>
-<span id="cb31-360"><a href="#cb31-360" aria-hidden="true" tabindex="-1"></a>        orange <span class="op">=</span> c.orange.mean(),</span>
-<span id="cb31-361"><a href="#cb31-361" aria-hidden="true" tabindex="-1"></a>        blue <span class="op">=</span> c.blue.mean(),</span>
-<span id="cb31-362"><a href="#cb31-362" aria-hidden="true" tabindex="-1"></a>        n <span class="op">=</span> pl.<span class="bu">len</span>()</span>
-<span id="cb31-363"><a href="#cb31-363" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb31-364"><a href="#cb31-364" aria-hidden="true" tabindex="-1"></a>    .sort(c.brightness)</span>
-<span id="cb31-365"><a href="#cb31-365" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb31-366"><a href="#cb31-366" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb31-367"><a href="#cb31-367" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-368"><a href="#cb31-368" aria-hidden="true" tabindex="-1"></a>Every number here is a real, stable difference between photographers: Marion</span>
-<span id="cb31-369"><a href="#cb31-369" aria-hidden="true" tabindex="-1"></a>Post Wolcott's rural frames are the most orange and almost never blue, while</span>
-<span id="cb31-370"><a href="#cb31-370" aria-hidden="true" tabindex="-1"></a>Palmer's and Hollem's factory work carries more blue and less orange. But</span>
-<span id="cb31-371"><a href="#cb31-371" aria-hidden="true" tabindex="-1"></a>notice what these features cannot do. They separate a sunlit wheat field from</span>
-<span id="cb31-372"><a href="#cb31-372" aria-hidden="true" tabindex="-1"></a>a dim factory floor easily, because those differ in light and color, yet they</span>
-<span id="cb31-373"><a href="#cb31-373" aria-hidden="true" tabindex="-1"></a>have no way to tell two differently-lit photographs of the *same* subject</span>
-<span id="cb31-374"><a href="#cb31-374" aria-hidden="true" tabindex="-1"></a>apart, or to recognize that two frames both show a tractor. Brightness and</span>
-<span id="cb31-375"><a href="#cb31-375" aria-hidden="true" tabindex="-1"></a>hue describe the whole frame — its lighting, its background, its film stock —</span>
-<span id="cb31-376"><a href="#cb31-376" aria-hidden="true" tabindex="-1"></a>and never the subject as such. Closing that gap is exactly what the image</span>
-<span id="cb31-377"><a href="#cb31-377" aria-hidden="true" tabindex="-1"></a>embeddings in the next sections are for.</span>
+<span id="cb31-126"><a href="#cb31-126" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>In the first block, re-read the first image and print the 2×2 block of</span>
+<span id="cb31-127"><a href="#cb31-127" aria-hidden="true" tabindex="-1"></a>pixels in its upper-left corner (<span class="in">`img[:2, :2, :]`</span>). In the second block, print</span>
+<span id="cb31-128"><a href="#cb31-128" aria-hidden="true" tabindex="-1"></a>its overall mean. In the third block, print the mean of each of the three</span>
+<span id="cb31-129"><a href="#cb31-129" aria-hidden="true" tabindex="-1"></a>channels separately (loop <span class="in">`ch`</span> over <span class="in">`range(3)`</span>).</span>
+<span id="cb31-130"><a href="#cb31-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-133"><a href="#cb31-133" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb31-134"><a href="#cb31-134" aria-hidden="true" tabindex="-1"></a>img <span class="op">=</span> cv2.imread(fsac.select(c.filepath).row(<span class="dv">0</span>)[<span class="dv">0</span>])</span>
+<span id="cb31-135"><a href="#cb31-135" aria-hidden="true" tabindex="-1"></a>img[:<span class="dv">2</span>, :<span class="dv">2</span>, :]</span>
+<span id="cb31-136"><a href="#cb31-136" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb31-137"><a href="#cb31-137" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-140"><a href="#cb31-140" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb31-141"><a href="#cb31-141" aria-hidden="true" tabindex="-1"></a>img.mean()</span>
+<span id="cb31-142"><a href="#cb31-142" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb31-143"><a href="#cb31-143" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-146"><a href="#cb31-146" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb31-147"><a href="#cb31-147" aria-hidden="true" tabindex="-1"></a>[<span class="bu">float</span>(img[:, :, ch].mean()) <span class="cf">for</span> ch <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">3</span>)]</span>
+<span id="cb31-148"><a href="#cb31-148" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb31-149"><a href="#cb31-149" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-150"><a href="#cb31-150" aria-hidden="true" tabindex="-1"></a>Each pixel is three numbers from 0 to 255. The overall mean, about 59.6,</span>
+<span id="cb31-151"><a href="#cb31-151" aria-hidden="true" tabindex="-1"></a>summarizes the whole frame's brightness. The per-channel means are the giveaway</span>
+<span id="cb31-152"><a href="#cb31-152" aria-hidden="true" tabindex="-1"></a>for BGR ordering: channel 0 (blue) is 56.1 and channel 2 (red) is 63.8, so a</span>
+<span id="cb31-153"><a href="#cb31-153" aria-hidden="true" tabindex="-1"></a>student who assumed channel 0 was red would report this warm, reddish frame as</span>
+<span id="cb31-154"><a href="#cb31-154" aria-hidden="true" tabindex="-1"></a>if its blue were strongest.</span>
+<span id="cb31-155"><a href="#cb31-155" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-156"><a href="#cb31-156" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>Compute the mean brightness of every image. Loop over the rows, read each</span>
+<span id="cb31-157"><a href="#cb31-157" aria-hidden="true" tabindex="-1"></a>one, append its <span class="in">`.mean()`</span>, and add the result back as a <span class="in">`brightness`</span> column.</span>
+<span id="cb31-158"><a href="#cb31-158" aria-hidden="true" tabindex="-1"></a>Print <span class="in">`filepath`</span>, <span class="in">`photographer`</span>, and <span class="in">`brightness`</span> for the first five rows.</span>
+<span id="cb31-159"><a href="#cb31-159" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-162"><a href="#cb31-162" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb31-163"><a href="#cb31-163" aria-hidden="true" tabindex="-1"></a>brightness <span class="op">=</span> []</span>
+<span id="cb31-164"><a href="#cb31-164" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-165"><a href="#cb31-165" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> row <span class="kw">in</span> fsac.iter_rows(named<span class="op">=</span><span class="va">True</span>):</span>
+<span id="cb31-166"><a href="#cb31-166" aria-hidden="true" tabindex="-1"></a>    img <span class="op">=</span> cv2.imread(row[<span class="st">"filepath"</span>])</span>
+<span id="cb31-167"><a href="#cb31-167" aria-hidden="true" tabindex="-1"></a>    brightness.append(img.mean())</span>
+<span id="cb31-168"><a href="#cb31-168" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-169"><a href="#cb31-169" aria-hidden="true" tabindex="-1"></a>fsac <span class="op">=</span> fsac.with_columns(brightness <span class="op">=</span> pl.Series(brightness))</span>
+<span id="cb31-170"><a href="#cb31-170" aria-hidden="true" tabindex="-1"></a>fsac.select(c.filepath, c.photographer, c.brightness).head(<span class="dv">5</span>)</span>
+<span id="cb31-171"><a href="#cb31-171" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb31-172"><a href="#cb31-172" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-173"><a href="#cb31-173" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>In the first block, show the twelve darkest images in a grid with</span>
+<span id="cb31-174"><a href="#cb31-174" aria-hidden="true" tabindex="-1"></a><span class="in">`DSImage.plot_image_grid`</span> (sort by <span class="in">`brightness`</span>, take the head, and label the</span>
+<span id="cb31-175"><a href="#cb31-175" aria-hidden="true" tabindex="-1"></a>tiles by <span class="in">`photographer`</span>). In the second block, print the brightness,</span>
+<span id="cb31-176"><a href="#cb31-176" aria-hidden="true" tabindex="-1"></a>photographer, and caption for the six darkest. Say what these frames have in</span>
+<span id="cb31-177"><a href="#cb31-177" aria-hidden="true" tabindex="-1"></a>common.</span>
+<span id="cb31-178"><a href="#cb31-178" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-181"><a href="#cb31-181" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb31-182"><a href="#cb31-182" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb31-183"><a href="#cb31-183" aria-hidden="true" tabindex="-1"></a>    fsac</span>
+<span id="cb31-184"><a href="#cb31-184" aria-hidden="true" tabindex="-1"></a>    .sort(c.brightness)</span>
+<span id="cb31-185"><a href="#cb31-185" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">12</span>)</span>
+<span id="cb31-186"><a href="#cb31-186" aria-hidden="true" tabindex="-1"></a>    .pipe(DSImage.plot_image_grid, label_name<span class="op">=</span><span class="st">"photographer"</span>, ncol<span class="op">=</span><span class="dv">4</span>)</span>
+<span id="cb31-187"><a href="#cb31-187" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb31-188"><a href="#cb31-188" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb31-189"><a href="#cb31-189" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-192"><a href="#cb31-192" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb31-193"><a href="#cb31-193" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb31-194"><a href="#cb31-194" aria-hidden="true" tabindex="-1"></a>    fsac</span>
+<span id="cb31-195"><a href="#cb31-195" aria-hidden="true" tabindex="-1"></a>    .sort(c.brightness)</span>
+<span id="cb31-196"><a href="#cb31-196" aria-hidden="true" tabindex="-1"></a>    .select(c.brightness, c.photographer, c.caption)</span>
+<span id="cb31-197"><a href="#cb31-197" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">6</span>)</span>
+<span id="cb31-198"><a href="#cb31-198" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb31-199"><a href="#cb31-199" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb31-200"><a href="#cb31-200" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-201"><a href="#cb31-201" aria-hidden="true" tabindex="-1"></a>The darkest images are night and interior shots: Jack Delano's photographs</span>
+<span id="cb31-202"><a href="#cb31-202" aria-hidden="true" tabindex="-1"></a>of a Chicago railroad yard working around the clock, and Alfred Palmer's</span>
+<span id="cb31-203"><a href="#cb31-203" aria-hidden="true" tabindex="-1"></a>frame taken inside a tank at Fort Knox. The brightness score is being driven</span>
+<span id="cb31-204"><a href="#cb31-204" aria-hidden="true" tabindex="-1"></a>by the dark background, not by the subject. A brightly lit tank photographed</span>
+<span id="cb31-205"><a href="#cb31-205" aria-hidden="true" tabindex="-1"></a>against a black night would score lower than a dull object in a sunlit field.</span>
+<span id="cb31-206"><a href="#cb31-206" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-207"><a href="#cb31-207" aria-hidden="true" tabindex="-1"></a><span class="ss">6. </span>Draw a boxplot of <span class="in">`brightness`</span> by <span class="in">`photographer`</span>, but only for the</span>
+<span id="cb31-208"><a href="#cb31-208" aria-hidden="true" tabindex="-1"></a>photographers who contributed at least 20 images (filter on</span>
+<span id="cb31-209"><a href="#cb31-209" aria-hidden="true" tabindex="-1"></a><span class="in">`pl.len().over(c.photographer) &gt;= 20`</span>). Order the photographers by their mean</span>
+<span id="cb31-210"><a href="#cb31-210" aria-hidden="true" tabindex="-1"></a>brightness, and use <span class="in">`coord_flip()`</span> so the names stay readable. What pattern</span>
+<span id="cb31-211"><a href="#cb31-211" aria-hidden="true" tabindex="-1"></a>do you see?</span>
+<span id="cb31-212"><a href="#cb31-212" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-215"><a href="#cb31-215" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb31-216"><a href="#cb31-216" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb31-217"><a href="#cb31-217" aria-hidden="true" tabindex="-1"></a>    fsac</span>
+<span id="cb31-218"><a href="#cb31-218" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(pl.<span class="bu">len</span>().over(c.photographer) <span class="op">&gt;=</span> <span class="dv">20</span>)</span>
+<span id="cb31-219"><a href="#cb31-219" aria-hidden="true" tabindex="-1"></a>    .sort(c.brightness.mean().over(c.photographer), descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb31-220"><a href="#cb31-220" aria-hidden="true" tabindex="-1"></a>    .pipe(ggplot, aes(c.photographer, c.brightness))</span>
+<span id="cb31-221"><a href="#cb31-221" aria-hidden="true" tabindex="-1"></a>    .geom_boxplot()</span>
+<span id="cb31-222"><a href="#cb31-222" aria-hidden="true" tabindex="-1"></a>    .coord_flip()</span>
+<span id="cb31-223"><a href="#cb31-223" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb31-224"><a href="#cb31-224" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb31-225"><a href="#cb31-225" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-226"><a href="#cb31-226" aria-hidden="true" tabindex="-1"></a>Alfred Palmer and Howard Hollem are the darkest on average (both around 60),</span>
+<span id="cb31-227"><a href="#cb31-227" aria-hidden="true" tabindex="-1"></a>and both spent the war shooting inside aircraft factories and defense plants,</span>
+<span id="cb31-228"><a href="#cb31-228" aria-hidden="true" tabindex="-1"></a>where the light is artificial and controlled. John Collier and Jack Delano</span>
+<span id="cb31-229"><a href="#cb31-229" aria-hidden="true" tabindex="-1"></a>are the brightest, with more outdoor and daylight frames. As with the birds</span>
+<span id="cb31-230"><a href="#cb31-230" aria-hidden="true" tabindex="-1"></a>in the chapter, brightness is tracking each photographer's assignment and</span>
+<span id="cb31-231"><a href="#cb31-231" aria-hidden="true" tabindex="-1"></a>setting, not anything about the photographs' merit.</span>
+<span id="cb31-232"><a href="#cb31-232" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-233"><a href="#cb31-233" aria-hidden="true" tabindex="-1"></a><span class="ss">7. </span>Convert the first image from BGR to HSV color space with <span class="in">`cv2.cvtColor`</span></span>
+<span id="cb31-234"><a href="#cb31-234" aria-hidden="true" tabindex="-1"></a>and <span class="in">`cv2.COLOR_BGR2HSV`</span>, and print the shape of the result.</span>
+<span id="cb31-235"><a href="#cb31-235" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-238"><a href="#cb31-238" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb31-239"><a href="#cb31-239" aria-hidden="true" tabindex="-1"></a>img <span class="op">=</span> cv2.imread(fsac.select(c.filepath).row(<span class="dv">0</span>)[<span class="dv">0</span>])</span>
+<span id="cb31-240"><a href="#cb31-240" aria-hidden="true" tabindex="-1"></a>img_hsv <span class="op">=</span> cv2.cvtColor(img, cv2.COLOR_BGR2HSV)</span>
+<span id="cb31-241"><a href="#cb31-241" aria-hidden="true" tabindex="-1"></a>img_hsv.shape</span>
+<span id="cb31-242"><a href="#cb31-242" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb31-243"><a href="#cb31-243" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-244"><a href="#cb31-244" aria-hidden="true" tabindex="-1"></a>The shape is unchanged; the three channels now hold hue, saturation, and</span>
+<span id="cb31-245"><a href="#cb31-245" aria-hidden="true" tabindex="-1"></a>value instead of blue, green, and red. OpenCV packs hue into the range</span>
+<span id="cb31-246"><a href="#cb31-246" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">0, 179</span><span class="co">]</span> rather than the full 0–360° so that it still fits in one byte.</span>
+<span id="cb31-247"><a href="#cb31-247" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-248"><a href="#cb31-248" aria-hidden="true" tabindex="-1"></a><span class="ss">8. </span>Run <span class="in">`DSImage.compute_colors`</span> on that HSV image. Look at the output and</span>
+<span id="cb31-249"><a href="#cb31-249" aria-hidden="true" tabindex="-1"></a>check the numbers against what the chapter's text claims about them.</span>
+<span id="cb31-250"><a href="#cb31-250" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-253"><a href="#cb31-253" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb31-254"><a href="#cb31-254" aria-hidden="true" tabindex="-1"></a>DSImage.compute_colors(img_hsv)</span>
+<span id="cb31-255"><a href="#cb31-255" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb31-256"><a href="#cb31-256" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-257"><a href="#cb31-257" aria-hidden="true" tabindex="-1"></a>The helper returns the share of pixels falling into each hue bucket, plus a</span>
+<span id="cb31-258"><a href="#cb31-258" aria-hidden="true" tabindex="-1"></a><span class="in">`neutral`</span> bucket for pixels too dark or too washed out to have a clear color.</span>
+<span id="cb31-259"><a href="#cb31-259" aria-hidden="true" tabindex="-1"></a>The chapter's prose says these "proportions sum to 1," but the actual helper</span>
+<span id="cb31-260"><a href="#cb31-260" aria-hidden="true" tabindex="-1"></a>returns percentages that sum to 100 — a small gap between the description and</span>
+<span id="cb31-261"><a href="#cb31-261" aria-hidden="true" tabindex="-1"></a>the code that only shows up if you add the numbers yourself. This frame is</span>
+<span id="cb31-262"><a href="#cb31-262" aria-hidden="true" tabindex="-1"></a>86% neutral, with what little color there is leaning orange.</span>
+<span id="cb31-263"><a href="#cb31-263" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-264"><a href="#cb31-264" aria-hidden="true" tabindex="-1"></a><span class="ss">9. </span>Compute the color breakdown for every image, collect the results into a</span>
+<span id="cb31-265"><a href="#cb31-265" aria-hidden="true" tabindex="-1"></a>DataFrame, and concatenate it onto <span class="in">`fsac`</span> horizontally (the chapter's own</span>
+<span id="cb31-266"><a href="#cb31-266" aria-hidden="true" tabindex="-1"></a>pattern). Then print the mean of each color column across the whole</span>
+<span id="cb31-267"><a href="#cb31-267" aria-hidden="true" tabindex="-1"></a>collection.</span>
+<span id="cb31-268"><a href="#cb31-268" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-271"><a href="#cb31-271" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb31-272"><a href="#cb31-272" aria-hidden="true" tabindex="-1"></a>results <span class="op">=</span> []</span>
+<span id="cb31-273"><a href="#cb31-273" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-274"><a href="#cb31-274" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> row <span class="kw">in</span> fsac.iter_rows(named<span class="op">=</span><span class="va">True</span>):</span>
+<span id="cb31-275"><a href="#cb31-275" aria-hidden="true" tabindex="-1"></a>    img <span class="op">=</span> cv2.imread(row[<span class="st">"filepath"</span>])</span>
+<span id="cb31-276"><a href="#cb31-276" aria-hidden="true" tabindex="-1"></a>    img_hsv <span class="op">=</span> cv2.cvtColor(img, cv2.COLOR_BGR2HSV)</span>
+<span id="cb31-277"><a href="#cb31-277" aria-hidden="true" tabindex="-1"></a>    results.append(DSImage.compute_colors(img_hsv))</span>
+<span id="cb31-278"><a href="#cb31-278" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-279"><a href="#cb31-279" aria-hidden="true" tabindex="-1"></a>results <span class="op">=</span> pl.DataFrame(results)</span>
+<span id="cb31-280"><a href="#cb31-280" aria-hidden="true" tabindex="-1"></a>fsac <span class="op">=</span> pl.concat([fsac, results], how<span class="op">=</span><span class="st">"horizontal"</span>)</span>
+<span id="cb31-281"><a href="#cb31-281" aria-hidden="true" tabindex="-1"></a>fsac.select(results.columns).mean()</span>
+<span id="cb31-282"><a href="#cb31-282" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb31-283"><a href="#cb31-283" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-284"><a href="#cb31-284" aria-hidden="true" tabindex="-1"></a>Two-thirds of the average frame is neutral, which fits the muted look of aged</span>
+<span id="cb31-285"><a href="#cb31-285" aria-hidden="true" tabindex="-1"></a>Kodachrome. Among the actual hues, orange dominates at about 16% — the color</span>
+<span id="cb31-286"><a href="#cb31-286" aria-hidden="true" tabindex="-1"></a>of skin, wood, brick, and dirt in these documentary scenes — while blue</span>
+<span id="cb31-287"><a href="#cb31-287" aria-hidden="true" tabindex="-1"></a>(sky) is a distant second and red is under 3%. This is a collection with a</span>
+<span id="cb31-288"><a href="#cb31-288" aria-hidden="true" tabindex="-1"></a>strong warm cast.</span>
+<span id="cb31-289"><a href="#cb31-289" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-290"><a href="#cb31-290" aria-hidden="true" tabindex="-1"></a><span class="ss">10. </span>OpenCV's BGR ordering is easy to forget, and forgetting it corrupts every</span>
+<span id="cb31-291"><a href="#cb31-291" aria-hidden="true" tabindex="-1"></a>color count silently. Take the reddest image in the collection and convert it</span>
+<span id="cb31-292"><a href="#cb31-292" aria-hidden="true" tabindex="-1"></a>to HSV two ways: correctly with <span class="in">`cv2.COLOR_BGR2HSV`</span>, and incorrectly with</span>
+<span id="cb31-293"><a href="#cb31-293" aria-hidden="true" tabindex="-1"></a><span class="in">`cv2.COLOR_RGB2HSV`</span> (which treats the blue channel as if it were red). Compare</span>
+<span id="cb31-294"><a href="#cb31-294" aria-hidden="true" tabindex="-1"></a>the color breakdowns.</span>
+<span id="cb31-295"><a href="#cb31-295" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-298"><a href="#cb31-298" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb31-299"><a href="#cb31-299" aria-hidden="true" tabindex="-1"></a>red_row <span class="op">=</span> fsac.sort(c.red, descending<span class="op">=</span><span class="va">True</span>).row(<span class="dv">0</span>, named<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb31-300"><a href="#cb31-300" aria-hidden="true" tabindex="-1"></a>img <span class="op">=</span> cv2.imread(red_row[<span class="st">"filepath"</span>])</span>
+<span id="cb31-301"><a href="#cb31-301" aria-hidden="true" tabindex="-1"></a>DSImage.compute_colors(cv2.cvtColor(img, cv2.COLOR_BGR2HSV))</span>
+<span id="cb31-302"><a href="#cb31-302" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb31-303"><a href="#cb31-303" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-306"><a href="#cb31-306" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb31-307"><a href="#cb31-307" aria-hidden="true" tabindex="-1"></a>DSImage.compute_colors(cv2.cvtColor(img, cv2.COLOR_RGB2HSV))</span>
+<span id="cb31-308"><a href="#cb31-308" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb31-309"><a href="#cb31-309" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-310"><a href="#cb31-310" aria-hidden="true" tabindex="-1"></a>Read the correct way, this image is 33% red and 5% blue. Read as if it were</span>
+<span id="cb31-311"><a href="#cb31-311" aria-hidden="true" tabindex="-1"></a>RGB, red collapses to 5% and blue jumps to 49%: the two colors swap places.</span>
+<span id="cb31-312"><a href="#cb31-312" aria-hidden="true" tabindex="-1"></a>Neither call raises an error, and both return a tidy dictionary that sums to</span>
+<span id="cb31-313"><a href="#cb31-313" aria-hidden="true" tabindex="-1"></a>100, so nothing flags the mistake except knowing the image is red to begin</span>
+<span id="cb31-314"><a href="#cb31-314" aria-hidden="true" tabindex="-1"></a>with.</span>
+<span id="cb31-315"><a href="#cb31-315" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-316"><a href="#cb31-316" aria-hidden="true" tabindex="-1"></a><span class="ss">11. </span>In the first block, show the twelve reddest images in a grid. In the</span>
+<span id="cb31-317"><a href="#cb31-317" aria-hidden="true" tabindex="-1"></a>second block, print the caption of the six reddest. Does "red" find red</span>
+<span id="cb31-318"><a href="#cb31-318" aria-hidden="true" tabindex="-1"></a>*subjects*?</span>
+<span id="cb31-319"><a href="#cb31-319" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-322"><a href="#cb31-322" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb31-323"><a href="#cb31-323" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb31-324"><a href="#cb31-324" aria-hidden="true" tabindex="-1"></a>    fsac</span>
+<span id="cb31-325"><a href="#cb31-325" aria-hidden="true" tabindex="-1"></a>    .sort(c.red, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb31-326"><a href="#cb31-326" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">12</span>)</span>
+<span id="cb31-327"><a href="#cb31-327" aria-hidden="true" tabindex="-1"></a>    .pipe(DSImage.plot_image_grid, label_name<span class="op">=</span><span class="st">"state"</span>, ncol<span class="op">=</span><span class="dv">4</span>)</span>
+<span id="cb31-328"><a href="#cb31-328" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb31-329"><a href="#cb31-329" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb31-330"><a href="#cb31-330" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-333"><a href="#cb31-333" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb31-334"><a href="#cb31-334" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb31-335"><a href="#cb31-335" aria-hidden="true" tabindex="-1"></a>    fsac</span>
+<span id="cb31-336"><a href="#cb31-336" aria-hidden="true" tabindex="-1"></a>    .sort(c.red, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb31-337"><a href="#cb31-337" aria-hidden="true" tabindex="-1"></a>    .select(c.red, c.state, c.caption)</span>
+<span id="cb31-338"><a href="#cb31-338" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">6</span>)</span>
+<span id="cb31-339"><a href="#cb31-339" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb31-340"><a href="#cb31-340" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb31-341"><a href="#cb31-341" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-342"><a href="#cb31-342" aria-hidden="true" tabindex="-1"></a>Red finds red *things*, but not a single subject: schoolchildren's clothing,</span>
+<span id="cb31-343"><a href="#cb31-343" aria-hidden="true" tabindex="-1"></a>a crowded courthouse square, a scrap-and-salvage depot, a tractor in a field.</span>
+<span id="cb31-344"><a href="#cb31-344" aria-hidden="true" tabindex="-1"></a>Like brightness, the color proportion describes whatever fills the frame —</span>
+<span id="cb31-345"><a href="#cb31-345" aria-hidden="true" tabindex="-1"></a>clothes, machinery, a painted wall — rather than the photograph's ostensible</span>
+<span id="cb31-346"><a href="#cb31-346" aria-hidden="true" tabindex="-1"></a>topic.</span>
+<span id="cb31-347"><a href="#cb31-347" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-348"><a href="#cb31-348" aria-hidden="true" tabindex="-1"></a><span class="ss">12. </span>Close with a short pipeline that pulls brightness and color together.</span>
+<span id="cb31-349"><a href="#cb31-349" aria-hidden="true" tabindex="-1"></a>Group <span class="in">`fsac`</span> by <span class="in">`photographer`</span>, keeping only those with at least 20 images,</span>
+<span id="cb31-350"><a href="#cb31-350" aria-hidden="true" tabindex="-1"></a>and compute each one's mean brightness, mean orange, mean blue, and image</span>
+<span id="cb31-351"><a href="#cb31-351" aria-hidden="true" tabindex="-1"></a>count. Sort by brightness. Then explain what these pixel features can and</span>
+<span id="cb31-352"><a href="#cb31-352" aria-hidden="true" tabindex="-1"></a>cannot tell us.</span>
+<span id="cb31-353"><a href="#cb31-353" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-356"><a href="#cb31-356" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb31-357"><a href="#cb31-357" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb31-358"><a href="#cb31-358" aria-hidden="true" tabindex="-1"></a>    fsac</span>
+<span id="cb31-359"><a href="#cb31-359" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(pl.<span class="bu">len</span>().over(c.photographer) <span class="op">&gt;=</span> <span class="dv">20</span>)</span>
+<span id="cb31-360"><a href="#cb31-360" aria-hidden="true" tabindex="-1"></a>    .group_by(c.photographer, maintain_order<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb31-361"><a href="#cb31-361" aria-hidden="true" tabindex="-1"></a>    .agg(</span>
+<span id="cb31-362"><a href="#cb31-362" aria-hidden="true" tabindex="-1"></a>        brightness <span class="op">=</span> c.brightness.mean(),</span>
+<span id="cb31-363"><a href="#cb31-363" aria-hidden="true" tabindex="-1"></a>        orange <span class="op">=</span> c.orange.mean(),</span>
+<span id="cb31-364"><a href="#cb31-364" aria-hidden="true" tabindex="-1"></a>        blue <span class="op">=</span> c.blue.mean(),</span>
+<span id="cb31-365"><a href="#cb31-365" aria-hidden="true" tabindex="-1"></a>        n <span class="op">=</span> pl.<span class="bu">len</span>()</span>
+<span id="cb31-366"><a href="#cb31-366" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb31-367"><a href="#cb31-367" aria-hidden="true" tabindex="-1"></a>    .sort(c.brightness)</span>
+<span id="cb31-368"><a href="#cb31-368" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb31-369"><a href="#cb31-369" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb31-370"><a href="#cb31-370" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-371"><a href="#cb31-371" aria-hidden="true" tabindex="-1"></a>Every number here is a real, stable difference between photographers: Marion</span>
+<span id="cb31-372"><a href="#cb31-372" aria-hidden="true" tabindex="-1"></a>Post Wolcott's rural frames are the most orange and almost never blue, while</span>
+<span id="cb31-373"><a href="#cb31-373" aria-hidden="true" tabindex="-1"></a>Palmer's and Hollem's factory work carries more blue and less orange. But</span>
+<span id="cb31-374"><a href="#cb31-374" aria-hidden="true" tabindex="-1"></a>notice what these features cannot do. They separate a sunlit wheat field from</span>
+<span id="cb31-375"><a href="#cb31-375" aria-hidden="true" tabindex="-1"></a>a dim factory floor easily, because those differ in light and color, yet they</span>
+<span id="cb31-376"><a href="#cb31-376" aria-hidden="true" tabindex="-1"></a>have no way to tell two differently-lit photographs of the *same* subject</span>
+<span id="cb31-377"><a href="#cb31-377" aria-hidden="true" tabindex="-1"></a>apart, or to recognize that two frames both show a tractor. Brightness and</span>
+<span id="cb31-378"><a href="#cb31-378" aria-hidden="true" tabindex="-1"></a>hue describe the whole frame — its lighting, its background, its film stock —</span>
+<span id="cb31-379"><a href="#cb31-379" aria-hidden="true" tabindex="-1"></a>and never the subject as such. Closing that gap is exactly what the image</span>
+<span id="cb31-380"><a href="#cb31-380" aria-hidden="true" tabindex="-1"></a>embeddings in the next sections are for.</span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->

@@ -15,6 +15,12 @@ Run all of the following before starting the notebook.
 
 ```{python}
 #| tags: [noclear]
+#| eval: false
+! python -m spacy download en_core_web_sm
+```
+
+```{python}
+#| tags: [noclear]
 import polars as pl
 from plotnine import ggplot, aes
 from polars import col as c
@@ -146,7 +152,7 @@ top_pmi = (
         p_w2 = c.w2_count / total_words
     )
     .with_columns(
-        pmi = (c.p_bigram / (c.p_w1 * c.p_w2)).log(2)
+        pmi = (c.p_bigram / (c.p_w1 * c.p_w2)).log()
     )
     .filter(c.bigram_count >= 5)
     .sort(c.pmi, descending=True)
@@ -326,13 +332,14 @@ tighter grammatical filter helps when the word being filtered for is doing
 real evaluative work, but it is not a fix for negation on its own, since
 "not good" is still `good` attached to the same head as `movie`.
 
-8. Find every negated predicate adjective: join tokens with `dep == "neg"`
-to `ADJ` tokens with `dep in ["acomp", "attr"]` that share the same
-`head_idx` within a `doc_id`/`sid` (this is the same "share a head" logic
-question 6 used for subjects and verbs). Count how many negated predicate
-adjectives exist in total, then count how many of them have the negation
-word sitting in the position immediately before the adjective, the only
-case a bigram search like question 1's `shift(-1)` could ever catch.
+8. In the first block, find every negated predicate adjective: join tokens
+with `dep == "neg"` to `ADJ` tokens with `dep in ["acomp", "attr"]` that
+share the same `head_idx` within a `doc_id`/`sid` (this is the same "share a
+head" logic question 6 used for subjects and verbs), and count how many
+negated predicate adjectives exist in total. In the second block, count how
+many of them have the negation word sitting in the position immediately
+before the adjective, the only case a bigram search like question 1's
+`shift(-1)` could ever catch.
 
 ```{python}
 neg = anno.filter(c.dep == "neg").select(c.doc_id, c.sid, neg_tid = c.tid, verb_idx = c.head_idx)

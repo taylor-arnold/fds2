@@ -103,7 +103,7 @@ for page in data["query"]["pages"].values():
 pl.DataFrame(rows)
 ```
 
-The `length` field is the size of the article source in bytes and `touched` records when the page last changed. Every API nests its responses differently, so there is no single recipe. The skill to practice is exploring the structure (print intermediate pieces, read the documentation) and then writing a short loop that flattens exactly the fields you need.
+The `length` field is the size of the article source in bytes and `touched` records when the page was last touched by any event that invalidated its cached version, which is close to but not exactly the time of the last edit. Every API nests its responses differently, so there is no single recipe. The skill to practice is exploring the structure (print intermediate pieces, read the documentation) and then writing a short loop that flattens exactly the fields you need.
 
 ## Being a Polite Client
 
@@ -397,7 +397,9 @@ views
 The timestamps arrive as strings such as `2025010100`, so we slice off the trailing hour digits and parse the rest as a date, then join the underscore-form titles back to the `authors` table to recover the page ID. As a check that the collection worked, here are the daily views for the three Brontë sisters across the year.
 
 ```{python}
-brontes = views.filter(c.doc_id.str.contains("Brontë"))
+brontes = views.filter(
+    c.doc_id.is_in(["Charlotte Brontë", "Emily Brontë", "Anne Brontë"])
+)
 
 (
     ggplot(brontes, aes(c.date, c.views, color=c.doc_id))
@@ -449,11 +451,11 @@ Counting rows per author gives a rough measure of international prominence, and 
 
 The category route gave us 376 novelists, nearly all of them born within a few decades of one another. For some questions that is the right corpus. For others it is the wrong one, and it is worth being honest about why. Suppose we want to ask which authors were alive at the same time. Among 376 Victorians, almost everyone overlaps with almost everyone, and the answer is a wall of yes. The question only becomes interesting over a population that spans centuries.
 
-So we build a second, smaller corpus: 75 British and Irish authors running from Marie de France in the twelfth century to Seamus Heaney in the twenty-first. It is small enough that its tables fit on a printed page, and it is spread thinly enough across time that temporal questions have sparse, legible answers. The chapters on temporal, textual, and network data all work with this corpus; the larger one stays on disk for the exercises.
+So we build a second, smaller corpus: 75 British and Irish authors running from Marie de France in the twelfth century to Seamus Heaney in the twenty-first. It is small enough that its tables fit on a printed page, and it is spread thinly enough across time that temporal questions have sparse, legible answers. The chapters on temporal, textual, and network data all work with this corpus; the larger one stays on disk in case you want to explore it further.
 
 This is the hand-curated route that "Defining the Population" named and declined, so building it costs us the thing that route costs everyone: the titles were typed by a person, and people typing 75 names make mistakes. That is exactly what the redirect machinery is for, and here is where it earns its place.
 
-The list itself, along with each author's birth year, death year, era, and gender, lives in a small curated file in the repository. Those biographical fields do not come from the Action API at all. Somebody compiled them by hand, and a reader who wants to verify them has to check them against something other than Wikipedia. That is not an embarrassment to bury; it is precisely the kind of fact a provenance record exists to state.
+The list itself, along with each author's birth year, death year, era, and gender, as well as a link to each page and a short display name, lives in a small curated file in the repository. Those biographical fields do not come from the Action API at all. Somebody compiled them by hand, and a reader who wants to verify them has to check them against something other than Wikipedia. That is not an embarrassment to bury; it is precisely the kind of fact a provenance record exists to state.
 
 ```{python}
 uk_curated = pl.read_csv("data/wiki_uk_meta.csv.gz")

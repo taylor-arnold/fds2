@@ -1,6 +1,6 @@
 ---
 title: "Notebook37"
-solutions-release-date: "2026-09-23"
+solutions-release-date: "2026-09-28"
 ---
 
 ### Setup
@@ -53,11 +53,11 @@ name. One thing worth knowing before question 1: Atlantic storm names are
 recycled on a six-year rotation, so `name` alone does not pick out a single
 storm. Print results unless a question says otherwise.
 
-1. Filter `storm` to rows where `name` is `"Katrina"`, without filtering on
-`year` yet. Add a row number with `.with_row_index("row_number")` and plot
-`wind` against `row_number` with `geom_line()`. Then select the distinct
-`year` values in this filtered table. What do they tell you about the plot
-you just drew?
+1. In the first block, filter `storm` to rows where `name` is `"Katrina"`,
+without filtering on `year` yet, add a row number with
+`.with_row_index("row_number")`, and plot `wind` against `row_number` with
+`geom_line()`. In the second block, select the distinct `year` values in this
+filtered table. What do they tell you about the plot you just drew?
 
 ```{python}
 q1 = (
@@ -122,10 +122,10 @@ kat = kat.with_columns(date = pl.date(c.year, c.month, c.day))
 )
 ```
 
-4. Redraw the plot from question 3 with `scale_x_date()`, breaking the axis
-every day and labeling it `"%b %d"`, angling the labels 45 degrees so they
-do not collide. Then sort `kat` by `wind`, descending, and print the date,
-wind, category, and status of the top 5 rows.
+4. In the first block, redraw the plot from question 3 with `scale_x_date()`,
+breaking the axis every day and labeling it `"%b %d"`, angling the labels 45
+degrees so they do not collide. In the second block, sort `kat` by `wind`,
+descending, and print the date, wind, category, and status of the top 5 rows.
 
 ```{python}
 (
@@ -188,11 +188,11 @@ and `category`.
 )
 ```
 
-7. Build a `moment` column on `kat` with `pl.datetime(c.year, c.month,
-c.day, c.hour)` and overwrite `kat` with it. Plot `moment` against `wind`
-with `scale_x_datetime()`, same breaks and labels as question 4. Then use
-`.filter()` with `.is_in()` to find the rows whose `hour` is not one of the
-four routine values, 0, 6, 12, or 18.
+7. In the first block, build a `moment` column on `kat` with `pl.datetime(c.year,
+c.month, c.day, c.hour)`, overwrite `kat` with it, and plot `moment` against
+`wind` with `scale_x_datetime()`, same breaks and labels as question 4. In the
+second block, use `.filter()` with `.is_in()` to find the rows whose `hour` is
+not one of the four routine values, 0, 6, 12, or 18.
 
 ```{python}
 kat = kat.with_columns(moment = pl.datetime(c.year, c.month, c.day, c.hour))
@@ -221,9 +221,9 @@ one off-cycle fix shows up on August 25, and two more cluster on August 29,
 right when Katrina was making landfall. That is exactly when forecasters
 most need an observation between the routine ones.
 
-8. Sort `kat` by `wind`, descending, and print `moment`, `wind`, and
-`category` for the top 3. Then filter `kat` to `moment` strictly after the
-top row's timestamp and print how many rows remain.
+8. In the first block, sort `kat` by `wind`, descending, and print `moment`,
+`wind`, and `category` for the top 3. In the second block, filter `kat` to
+`moment` strictly after the top row's timestamp and print how many rows remain.
 
 ```{python}
 (
@@ -307,9 +307,10 @@ descending.
 Nineteen of the thirty-four observations, just over half, were logged
 while Katrina was already a hurricane, not just approaching one.
 
-12. Across the full `storm` table, count the distinct storm `name`s per
-`year`, bucket the years into decades, and compute the average storms
-tracked per decade. Plot the result with `geom_col()`.
+12. Across the full `storm` table, in the first block count the distinct storm
+`name`s per `year`, bucket the years into decades, and compute the average
+storms tracked per decade. In the second block, plot the result with
+`geom_col()`.
 
 ```{python}
 q12 = (

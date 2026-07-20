@@ -109,12 +109,12 @@ rva.select(c.tailnum.n_unique())
 )
 ```
 
-5. Add a `delay_total` column (`dep_delay` plus `arr_delay`), and a
-`status` column built with a chained `pl.when().then().otherwise()`:
-`"cancelled"` when `dep_delay` is null, `"delayed"` when `dep_delay` is
-over 15, and `"on time"` otherwise. Print `carrier`, `dep_delay`,
-`delay_total`, and `status` for 5 rows, then count how many flights fall
-into each status.
+5. In the first block, add a `delay_total` column (`dep_delay` plus
+`arr_delay`), and a `status` column built with a chained
+`pl.when().then().otherwise()`: `"cancelled"` when `dep_delay` is null,
+`"delayed"` when `dep_delay` is over 15, and `"on time"` otherwise; then
+print `carrier`, `dep_delay`, `delay_total`, and `status` for 5 rows. In the
+second block, count how many flights fall into each status.
 
 ```{python}
 q5 = rva.with_columns(
@@ -132,8 +132,8 @@ q5.select(c.carrier, c.dep_delay, c.delay_total, c.status).head(5)
 q5["status"].value_counts()
 ```
 
-6. Print `rva.schema`. Then count the nulls in `dep_time` and in
-`dep_delay` and check that the two counts match.
+6. In the first block, print `rva.schema`. In the second block, count the
+nulls in `dep_time` and in `dep_delay` and check that the two counts match.
 
 ```{python}
 rva.schema
@@ -150,11 +150,11 @@ The counts match because both columns go missing for the same reason: a
 cancelled flight was never scheduled to depart, so it has no actual
 departure time and no delay to measure.
 
-7. Uppercase every `carrier` code in `rva` with `.str.to_uppercase()` and
-print the distinct values (they should look unchanged, since the codes are
-already uppercase). Then, in `plane`, use `.str.contains()` to filter to
-aircraft whose `manufacturer` contains `"BOEING"`, and print how many
-distinct `model` values come back.
+7. In the first block, uppercase every `carrier` code in `rva` with
+`.str.to_uppercase()` and print the distinct values (they should look
+unchanged, since the codes are already uppercase). In the second block, use
+`.str.contains()` in `plane` to filter to aircraft whose `manufacturer`
+contains `"BOEING"`, and print how many distinct `model` values come back.
 
 ```{python}
 rva.select(c.carrier.str.to_uppercase().unique())
@@ -284,8 +284,10 @@ relative to their own carrier's usual performance.
 )
 ```
 
-15. Sort `rva` by `dep_delay`, descending, and print the top 5. Then
-explain what went wrong.
+15. In the first block, sort `rva` by `dep_delay`, descending, and print the
+top 5. Then explain what went wrong. In the second block (below the answer),
+filter out the null `dep_delay` values before sorting the same way, and
+print the top 5 again.
 
 ```{python}
 (
@@ -313,10 +315,11 @@ out before sorting to get a real answer.
 
 The worst flight of the year left almost 30 hours late.
 
-16. Build the same daily table as question 10, but keep `dep_delay`'s mean
-as well as the count. Sort by date, then add `n_cum` (`.cum_sum()` on the
-daily count) and `delay_roll` (a 7-day `.rolling_mean()` of the daily mean
-delay). Plot `delay_roll` against `date` with `geom_line()`.
+16. In the first block, build the same daily table as question 10, but keep
+`dep_delay`'s mean as well as the count; sort by date, then add `n_cum`
+(`.cum_sum()` on the daily count) and `delay_roll` (a 7-day `.rolling_mean()`
+of the daily mean delay), and print the first 5 rows. In the second block,
+plot `delay_roll` against `date` with `geom_line()`.
 
 ```{python}
 q16 = (
@@ -387,10 +390,10 @@ flights before the boxes are even computed.
 )
 ```
 
-21. Before joining to `airport`, check that `faa` is actually a key there
-with `.select(c.faa.n_unique(), pl.len())`. Then join `rva` to `airport`
-with `left_on="dest"` and `right_on="faa"`, group by the airport `name`,
-count the flights to each, and print the 10 busiest destinations.
+21. In the first block, check that `faa` is actually a key in `airport` with
+`.select(c.faa.n_unique(), pl.len())`. In the second block, join `rva` to
+`airport` with `left_on="dest"` and `right_on="faa"`, group by the airport
+`name`, count the flights to each, and print the 10 busiest destinations.
 
 ```{python}
 airport.select(c.faa.n_unique(), pl.len())
@@ -419,12 +422,13 @@ flights and how many distinct tail numbers that is.
 )
 ```
 
-23. Drop cancelled flights, then `.unpivot()` `dep_delay` and `arr_delay`
-into a `delay_type`/`minutes` pair, keeping `carrier` as the index. Plot
-`minutes` by `delay_type` with `geom_boxplot()`, cropped the same way as
-question 18. Then group the long table by `carrier` and `delay_type`,
-take the mean `minutes`, and `.pivot()` it back to one row per carrier
-with a column for each delay type.
+23. In the first block, drop cancelled flights, then `.unpivot()`
+`dep_delay` and `arr_delay` into a `delay_type`/`minutes` pair, keeping
+`carrier` as the index, and print the first 5 rows. In the second block,
+plot `minutes` by `delay_type` with `geom_boxplot()`, cropped the same way
+as question 18. In the third block, group the long table by `carrier` and
+`delay_type`, take the mean `minutes`, and `.pivot()` it back to one row per
+carrier with a column for each delay type.
 
 ```{python}
 q23 = (

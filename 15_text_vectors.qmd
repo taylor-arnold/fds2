@@ -3,7 +3,7 @@
 ```{python}
 #| include: false
 import warnings
-warnings.filterwarnings('ignore')
+warnings.filterwarnings("ignore")
 ```
 
 ## Setup
@@ -32,7 +32,7 @@ anno = DSText.process(docs, nlp)
 
 ## Introduction
 
-In the previous chapter, we transformed the Wikipedia pages of 75 British authors into a table of annotated tokens and analyzed the corpus one word, phrase, or grammatical pattern at a time. Those techniques answer questions about language *within* documents. Many of the most interesting questions about a corpus, however, are questions about the documents themselves. Which two authors have the most similar pages? Do the pages cluster into groups, and do those groups correspond to time periods, genres, or something unexpected? Does the French version of Wikipedia describe these authors differently than the English version?
+In the previous chapter, we transformed the Wikipedia pages of 75 British and Irish authors into a table of annotated tokens and analyzed the corpus one word, phrase, or grammatical pattern at a time. Those techniques answer questions about language *within* documents. Many of the most interesting questions about a corpus, however, are questions about the documents themselves. Which two authors have the most similar pages? Do the pages cluster into groups, and do those groups correspond to time periods, genres, or something unexpected? Does the French version of Wikipedia describe these authors differently than the English version?
 
 Answering questions like these requires comparing whole documents to one another, and comparing documents requires representing each one as a single mathematical object rather than as a stream of tokens. In this chapter we develop that representation in three steps. First, we summarize each document by the counts of the terms it contains, refined by the TF-IDF weighting that emphasizes distinctive vocabulary. Second, we reinterpret these weighted counts geometrically, treating each document as a point in a high-dimensional space. Finally, we use this geometry to measure the distance between documents, to project the whole collection into two dimensions for visualization, and to compare corpora across languages.
 
@@ -117,10 +117,10 @@ n_docs = df.select(c.doc_id.n_unique()).item()
 
 The first `group_by` counts how often each lemma appears in each document, and the window expression `c.tf.sum().over(c.doc_id)` converts those counts into within-document proportions. This means the *tf* in the formula above is a proportion rather than a raw count; the small matrices shown earlier used raw counts only to keep the numbers readable. A second window expression counts how many distinct documents contain each lemma, giving the *df* term. The `filter` step in the middle implements the two arguments `min_df` and `max_df`, which are proportions between zero and one: setting `max_df=0.5`, for instance, drops every lemma appearing in more than half of the documents, and `min_df=0.01` drops lemmas appearing in fewer than 1% of them. The `max_df` cutoff acts as an automatic stop word list tailored to the corpus, removing whatever vocabulary is common to most of the pages instead of relying on a fixed list.
 
-Rather than producing the wide matrix described in the small examples above, the chain leaves the output in long format (see @sec-restructure for a review of wide versus long), with one non-zero combination of term and document in each row. We run it here on the annotations, removing only the rarest terms.
+Rather than producing the wide matrix described in the small examples above, the chain leaves the output in long format (see @sec-restructure for a review of wide versus long), with one non-zero combination of term and document in each row. We run it here on the annotations, dropping every lemma that appears in more than half of the documents. With only 75 documents, the smallest possible document frequency is 1/75, so the `min_df=0.01` filter removes nothing here; it is a guard that earns its keep on larger corpora.
 
 ```{python}
-tfidf = DSText.compute_tfidf(anno, min_df=0.01, max_df=1.0)
+tfidf = DSText.compute_tfidf(anno, min_df=0.01, max_df=0.5)
 tfidf
 ```
 
@@ -137,17 +137,17 @@ Once we have this table, we can combine the top terms from each document to char
 )
 ```
 
-The top TF-IDF terms for each document tend to be proper nouns and domain-specific vocabulary that distinguish one article from another. Compare these to the simple frequency counts from the previous chapter: TF-IDF downweights generic terms like "year" and "work" that appear across all of the biographies, and what remains are the names, places, and titles that actually identify each author.
+The top TF-IDF terms for each document tend to be proper nouns and domain-specific vocabulary that distinguish one article from another. Compare these to the simple frequency counts from the previous chapter: the `max_df` cutoff removes generic terms like "year" and "work" that appear across nearly all of the biographies, and what remains are the names, places, and titles that actually identify each author.
 
 ## Documents as Vectors
 
 The TF-IDF matrix introduced above contains a row for each document and a column for each term, with the TF-IDF weight in each cell. There is a productive way to think about this structure: each row of the matrix is a list of numbers that describes a document. We can interpret this list of numbers as a set of coordinates, turning each document into a *point in space*. This geometric perspective connects textual analysis to the statistical modeling and dimensionality reduction tools that we have developed throughout this book.
 
-To build intuition for this idea, let's start with just two terms. Suppose we look at the TF-IDF scores for the lemmas "poem" and "novel" across our collection of author pages. Each document has a TF-IDF score for "poem" and a TF-IDF score for "novel", giving us two numbers per document. We can plot these as coordinates on a standard scatter plot, with one axis for each term. Because the wrapper returns its results in long format, we first pivot the two terms into columns and fill the missing combinations with zero.
+To build intuition for this idea, let's start with just two terms. Suppose we look at the TF-IDF scores for the lemmas "poem" and "novel" across our collection of author pages. Each document has a TF-IDF score for "poem" and a TF-IDF score for "novel", giving us two numbers per document. We can plot these as coordinates on a standard scatter plot, with one axis for each term. Both lemmas are common enough in this corpus that the `max_df=0.5` cutoff removed them from the `tfidf` table above, so for this illustration we recompute the scores without the cap. Because the wrapper returns its results in long format, we then pivot the two terms into columns and fill the missing combinations with zero.
 
 ```{python}
 (
-    tfidf
+    DSText.compute_tfidf(anno, min_df=0.01)
     .filter(c.lemma.is_in(["poem", "novel"]))
     .pivot(on="lemma", index="doc_id", values="tfidf")
     .fill_null(0)
@@ -156,7 +156,7 @@ To build intuition for this idea, let's start with just two terms. Suppose we lo
 )
 ```
 
-In this two-dimensional view, the position of each document tells us something meaningful. Authors whose Wikipedia pages discuss poetry extensively appear far to the right. Those whose pages focus on novels appear near the top. Authors associated with both forms sit in the upper-right region, while those associated with neither sit near the origin. Documents that are close together in this space have similar usage patterns for these two terms.
+In this two-dimensional view, the position of each document tells us something meaningful. Authors whose Wikipedia pages discuss poetry extensively appear far to the right. Those whose pages focus on novels appear near the top. Authors associated with both forms sit in the upper-right region. Documents with a zero weight for both terms do not appear at all: the long table has no rows for them, so the pivot drops them rather than placing them at the origin. Documents that are close together in this space have similar usage patterns for these two terms.
 
 Now imagine extending this idea beyond two terms. Rather than plotting documents along axes for just "poem" and "novel", we could add a third axis for "play", creating a three-dimensional space where each document is a point. We could keep going: add axes for "war", "london", "publish", "child", and every other term in our vocabulary. If the vocabulary contains $V$ terms, each document becomes a point in $V$-dimensional space. Mathematically, we represent document $d$ as a vector of TF-IDF scores:
 
@@ -189,13 +189,13 @@ The code below puts this idea into practice using the wrapper function `umap_tex
 )
 ```
 
-The `min_df` and `max_df` parameters filter the vocabulary before constructing the document vectors: terms appearing in fewer than 1% of documents or more than 50% of documents are excluded. This removes both rare terms, which add noise, and ubiquitous terms, which add no discriminative power, so the representation is built on the most informative vocabulary. The UMAP algorithm then finds a two-dimensional arrangement that preserves, as much as possible, the distances between documents in the original high-dimensional space. The result is a map of the corpus where proximity reflects similarity in language use.
+The `min_df` and `max_df` parameters filter the vocabulary before constructing the document vectors: terms appearing in more than 50% of documents are excluded, and terms appearing in fewer than 1% would be as well, though with only 75 documents that floor removes nothing. Dropping the ubiquitous terms, which add no discriminative power, builds the representation on the most informative vocabulary; the rare-term filter does its work on larger corpora, where it removes noise. The UMAP algorithm then finds a two-dimensional arrangement that preserves, as much as possible, the distances between documents in the original high-dimensional space. The result is a map of the corpus where proximity reflects similarity in language use.
 
 ## Document Distances
 
 The UMAP plot gives a visual impression of which documents are similar, but for many applications we need the similarities themselves as numbers. Which page is the single closest match to the Jane Austen page? Which pairs of pages are so similar that we might link them together? Questions like these call for an explicit *distance* defined between every pair of document vectors.
 
-The most familiar notion of distance, the straight-line Euclidean distance between two points, turns out to be a poor choice for document vectors. The reason is document length. A long Wikipedia page and a short one about the same subject use similar vocabulary in similar *proportions*, but the long page has systematically larger TF-IDF values simply because its counts are larger. In Euclidean terms, the long document sits much farther from the origin, and length differences swamp the vocabulary differences we actually care about.
+The most familiar notion of distance, the straight-line Euclidean distance between two points, turns out to be a poor choice for document vectors. What we care about is the *mix* of vocabulary a document uses, and Euclidean distance responds to the overall magnitude of the vectors as much as to that mix. The problem is at its worst when term frequencies are raw counts, as they are in many TF-IDF implementations: a long Wikipedia page and a short one about the same subject use similar vocabulary in similar *proportions*, but the long page then has systematically larger values, sits much farther from the origin, and length differences swamp the vocabulary differences we actually care about. Our wrapper's within-document proportions soften this, but documents still differ in overall magnitude, and that magnitude is not something we want a distance to measure.
 
 The standard fix is to measure the *angle* between the two vectors rather than the straight-line distance between their endpoints. Two documents that use vocabulary in the same proportions point in the same direction from the origin, regardless of their lengths, so the angle between them is small. Mathematically, the angle distance between documents $a$ and $b$ is computed from the normalized inner product of their vectors:
 
@@ -259,20 +259,20 @@ And sorting within groups extends the same idea to every document at once, findi
 
 The nearest-neighbor table is worth reading against literary history. We would expect contemporaries to match with contemporaries and poets with poets, and the rows that depart from that expectation are often the most interesting ones to follow up on. The distances themselves also give a sense of scale: some documents have a very close nearest neighbor, while others sit relatively far from everything else in the collection, an observation we could not make from the UMAP plot alone.
 
-Finally, since we will reuse these distances in the next chapter, we save the table to disk.
+Finally, we save the table to disk so that it can be reused later without redoing the annotation and distance computations.
 
 ```{python}
 #| eval: false
 text_dist.write_csv("data/wiki_uk_text_dist.csv")
 ```
 
-In @sec-networks, this table of pairwise distances becomes an ingredient for building networks: by connecting documents whose distance falls below a threshold, or by linking each document to its nearest neighbors, we can convert the geometry of the corpus into an explicit relational structure and analyze it with network tools.
+In @sec-networks, we will see how a table of pairwise distances like this one becomes an ingredient for building networks: by connecting documents whose distance falls below a threshold, or by linking each document to its nearest neighbors, the geometry of a corpus can be converted into an explicit relational structure and analyzed with network tools.
 
 ## Across Languages
 
 One of the reasons that we enjoy using the content of Wikipedia pages as example datasets for textual analysis is that it is possible to get the page text in a large number of different languages. This lets us study how differences across languages and cultures affect the way that knowledge is created and distributed.
 
-Let's see how our text analysis pipeline can be modified to work with Wikipedia pages from the French version of the site. SpaCy provides models for many different languages; as with the English model, the French one may need to be downloaded once with `python -m spacy download fr_core_news_sm` before it can be loaded.
+Let's see how our text analysis pipeline can be modified to work with Wikipedia pages from the French version of the site. Two of the 75 authors have no page in the French edition, so the French corpus holds 73 documents rather than 75. SpaCy provides models for many different languages; as with the English model, the French one may need to be downloaded once with `python -m spacy download fr_core_news_sm` before it can be loaded.
 
 ```{python}
 nlp_fr = spacy.load("fr_core_news_sm")
@@ -308,7 +308,7 @@ The vector representation developed in this chapter applies to the French annota
 
 ```{python}
 (
-    DSText.compute_tfidf(anno_fr, min_df=0.01, max_df=1.0)
+    DSText.compute_tfidf(anno_fr, min_df=0.01, max_df=0.5)
     .sort([c.doc_id, c.tfidf], descending=[False, True])
     .group_by(c.doc_id)
     .head(10)

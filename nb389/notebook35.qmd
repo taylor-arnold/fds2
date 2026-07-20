@@ -1,6 +1,6 @@
 ---
 title: "Notebook35"
-solutions-release-date: "2026-09-16"
+solutions-release-date: "2026-09-21"
 ---
 
 ### Setup
@@ -11,6 +11,12 @@ Run all of the following before starting the notebook.
 #| tags: [noclear]
 #| eval: false
 ! wget -q -nc https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/funs.py
+```
+
+```{python}
+#| tags: [noclear]
+#| eval: false
+! pip install requests-cache --quiet
 ```
 
 ```{python}
@@ -60,10 +66,10 @@ histories, page views, and language links the rest of the chapter covers, so
 nothing here is thrown away once the notebook ends. Print results unless a
 question says otherwise.
 
-1. Send a single request for `"Donald Knuth"`'s page info (`action="query"`,
-`prop="info"`) with `session.get()`. Print the status code, then parse
-`.json()` and pull `page_id`, `title`, `length`, and `touched` out of it into
-a one-row `pl.DataFrame`.
+1. In the first block, send a single request for `"Donald Knuth"`'s page
+info (`action="query"`, `prop="info"`) with `session.get()` and print the
+status code. In the second block, parse `.json()` and pull `page_id`,
+`title`, `length`, and `touched` out of it into a one-row `pl.DataFrame`.
 
 ```{python}
 params = {
@@ -90,11 +96,12 @@ pl.DataFrame([{
 2. Wikimedia asks clients to send a descriptive `User-Agent`, request
 serially, and cache what comes back; clearing `session.cookies` before every
 request matters too, since Wikimedia's `Vary: Cookie` header means a
-leftover cookie would quietly defeat the cache on every rerun. Write a
-`polite_get(url, params)` helper that clears cookies, calls `session.get()`,
-raises on a bad status with `.raise_for_status()`, and sleeps 0.2 seconds
-only when the response did not come from the cache. Call it twice in a row
-for `"Barbara Liskov"`'s page info and print `.from_cache` for both calls.
+leftover cookie would quietly defeat the cache on every rerun. In the first
+block, write a `polite_get(url, params)` helper that clears cookies, calls
+`session.get()`, raises on a bad status with `.raise_for_status()`, and
+sleeps 0.2 seconds only when the response did not come from the cache. In
+the second block, call it twice in a row for `"Barbara Liskov"`'s page info
+and print `.from_cache` for both calls.
 
 ```{python}
 def polite_get(url, params=None):
@@ -123,13 +130,14 @@ with identical parameters, is answered entirely out of the local SQLite
 cache (`True`). This is what lets the whole notebook re-run in seconds
 instead of minutes once the cache is warm.
 
-3. Write `category_members(category)`: loop over `list="categorymembers"`
-with `cmtype="page"` (excludes subcategories and files) and `cmlimit="max"`,
-following the `continue` block until it disappears. Run it for
-`"Category:Turing Award laureates"`, build a `laureates` table with
-`page_id` and `doc_id` columns, drop any duplicate `page_id` with
-`.unique(subset="page_id", keep="first")`, and sort by `doc_id`. Print the
-shape, then the first and last 5 rows.
+3. In the first block, write `category_members(category)`: loop over
+`list="categorymembers"` with `cmtype="page"` (excludes subcategories and
+files) and `cmlimit="max"`, following the `continue` block until it
+disappears. In the second block, run it for `"Category:Turing Award
+laureates"`, build a `laureates` table with `page_id` and `doc_id` columns,
+drop any duplicate `page_id` with `.unique(subset="page_id", keep="first")`,
+sort by `doc_id`, and print the shape. In the third block print the first 5
+rows; in the fourth, print the last 5.
 
 ```{python}
 def category_members(category):
@@ -194,10 +202,11 @@ scientist)` instead. The other 75 laureates have names specific enough that
 no such collision exists, so nothing needs to be added to theirs.
 
 5. Someone typing this population from memory would not always type the
-canonical title. Send one `prop="info"` request with `redirects=1` for
-`"Vinton Cerf"`, `"Ronald Rivest"`, `"Edsger Dijkstra"`, and a fake title,
-`"Not A Real Turing Laureate Page"`. Print the `redirects` block, then the
-`pages` entries flagged `missing`.
+canonical title. In the first block, send one `prop="info"` request with
+`redirects=1` for `"Vinton Cerf"`, `"Ronald Rivest"`, `"Edsger Dijkstra"`,
+and a fake title, `"Not A Real Turing Laureate Page"`, and print the
+`redirects` block. In the second block, print the `pages` entries flagged
+`missing`.
 
 ```{python}
 params = {
@@ -224,13 +233,14 @@ the book's.
 
 6. Two of question 4's disambiguated laureates, `John McCarthy (computer
 scientist)` and `David Patterson (computer scientist)`, are also the
-*plain* form of a name some other Wikipedia article uses. Request
-`prop="info"` with `redirects=1` for the plain titles `"John McCarthy"` and
-`"David Patterson"` (no parentheses), and print the `pageid` each resolves
-to. Compare those IDs against the `page_id` values `laureates` has on file
-for the same two people, then request `prop="extracts"` (`exintro=1`) for
-the two plain-title page IDs and print the start of each extract. What
-happened, and why wouldn't question 5's check have caught it?
+*plain* form of a name some other Wikipedia article uses. In the first
+block, request `prop="info"` with `redirects=1` for the plain titles `"John
+McCarthy"` and `"David Patterson"` (no parentheses), and print the `pageid`
+each resolves to. In the second block, filter `laureates` to those same two
+people so you can compare those IDs against the `page_id` values it has on
+file. In the third block, request `prop="extracts"` (`exintro=1`) for the
+two plain-title page IDs and print the start of each extract. What happened,
+and why wouldn't question 5's check have caught it?
 
 ```{python}
 params = {
@@ -278,11 +288,12 @@ into the corpus under an innocent-looking title. Requesting the exact
 titles the category itself supplied, the way `laureates` already does,
 sidesteps the trap entirely.
 
-7. Loop over every `page_id` in `laureates`, request `prop="extracts"` with
-`explaintext=1`, and collect each `page_id` with its plain-text `text`.
-Join the result back to `laureates` to attach `doc_id`, keeping `page_id`
-and `doc_id` as the first two columns. Print the shape, then filter to
-`c.text == ""` and print how many rows come back.
+7. In the first block, loop over every `page_id` in `laureates`, request
+`prop="extracts"` with `explaintext=1`, collect each `page_id` with its
+plain-text `text`, join the result back to `laureates` to attach `doc_id`
+(keeping `page_id` and `doc_id` as the first two columns), and print the
+shape. In the second block, filter to `c.text == ""` and print how many
+rows come back.
 
 ```{python}
 rows = []
@@ -329,10 +340,10 @@ introduction used. That line was recovered from the API, not typed by us,
 which is itself a small check that the collection pipeline is pulling real
 article content.
 
-9. Add an `n_chars` column to `texts` with `.str.len_chars()`. Sort
-descending and print the 5 laureates with the longest collected articles,
-then sort ascending and print the 5 shortest. What seems to drive the
-difference?
+9. In the first block, add an `n_chars` column to `texts` with
+`.str.len_chars()`, then sort descending and print the 5 laureates with the
+longest collected articles. In the second block, sort ascending and print
+the 5 shortest. What seems to drive the difference?
 
 ```{python}
 texts = texts.with_columns(n_chars = c.text.str.len_chars())
@@ -368,7 +379,8 @@ itself. The laureates at the bottom did foundational, frequently cited work
 that most Wikipedia readers never go looking for by name.
 
 10. Filter `texts` to rows whose `text` contains `"Bell Labs"` with
-`.str.contains()`. Print the matching `doc_id` values and the count.
+`.str.contains()`. In the first block, print the matching `doc_id` values;
+in the second, print the count.
 
 ```{python}
 bell_labs = texts.filter(c.text.str.contains("Bell Labs"))

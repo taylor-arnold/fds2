@@ -15,6 +15,13 @@ Run all of the following before starting the notebook.
 
 ```{python}
 #| tags: [noclear]
+#| eval: false
+! pip install umap-learn --quiet
+! python -m spacy download en_core_web_sm
+```
+
+```{python}
+#| tags: [noclear]
 import polars as pl
 from plotnine import ggplot, aes
 from polars import col as c
@@ -75,12 +82,13 @@ print(tfidf.shape)
 tfidf.select(c.lemma.n_unique())
 ```
 
-2. Pick two lemmas, `"olympic"` and `"profit"`, and pivot their TF-IDF scores
-into two columns, filling missing combinations with zero. Join `label` on
-and plot every document as its `doc_id`, positioned by these two scores and
-colored by `label`. How many documents have a nonzero score for both terms?
-Compare this to the book's `poem`/`novel` example, where authors who write
-in both forms show up in the upper-right corner of the plot.
+2. In the first block, pick two lemmas, `"olympic"` and `"profit"`, pivot
+their TF-IDF scores into two columns, filling missing combinations with zero,
+join `label` on, and plot every document as its `doc_id`, positioned by these
+two scores and colored by `label`. In the second block, filter to the
+documents with a nonzero score for both terms. How many are there? Compare
+this to the book's `poem`/`novel` example, where authors who write in both
+forms show up in the upper-right corner of the plot.
 
 ```{python}
 scatter_df = (
@@ -137,10 +145,13 @@ print(round(avg_nonzero, 1), "nonzero terms per document, on average")
 on average, only about 24 of the corpus's 917 lemmas, a concrete number
 behind the chapter's description of a TF-IDF matrix as a *sparse embedding*.
 
-4. Build a 2D UMAP projection of the corpus with `umap_text`, using
-`min_df=0.01` and `max_df=0.5` as the chapter does, and plot each document's
-`label` at its projected position, colored by `label`. Does the plot show
-four clean, separated clusters the way the book's biography pages did?
+4. In the first block, build a 2D UMAP projection of the corpus with
+`umap_text`, using `min_df=0.01` and `max_df=0.5` as the chapter does, and
+plot each document's `label` at its projected position, colored by `label`.
+In the second block, find each point's nearest neighbor in the projection and
+print the share whose neighbor carries the same `label`, both overall and
+broken down by `label`. Does the plot show four clean, separated clusters the
+way the book's biography pages did?
 
 ```{python}
 umap_full = (
@@ -272,12 +283,14 @@ hardest (56%, 28 of 50) in both the full-dimensional distances and the 2D
 projection built from them.
 
 9. The chapter argues that plain Euclidean distance is a poor choice for
-document vectors because document length distorts it. Test this directly:
-build the raw (non-length-normalized) TF-IDF matrix with the same
-`min_df`/`max_df` used above, compute the Euclidean distance between every
-pair of rows, and find each document's Euclidean nearest neighbor. Which
-document (or documents) get picked as the nearest neighbor unreasonably
-often?
+document vectors because document length distorts it. Test this directly. In
+the first block, build the raw (non-length-normalized) TF-IDF matrix with the
+same `min_df`/`max_df` used above, compute the Euclidean distance between
+every pair of rows, find each document's Euclidean nearest neighbor, and count
+how often each document gets chosen as one. In the second block, print
+`doc120070`'s Euclidean nearest neighbor and its angle-distance nearest
+neighbor. Which document (or documents) get picked as the nearest neighbor
+unreasonably often?
 
 ```{python}
 mat2 = (
@@ -321,9 +334,9 @@ print(euclid_nn.filter(c.doc_id == "doc120070"))
 print(nn.filter(c.doc_id == "doc120070"))
 ```
 
-10. Find the single closest pair of documents in the whole corpus under the
-angle distance, and print both articles' full text to confirm by eye what
-makes them so close.
+10. In the first block, find the single closest pair of documents in the
+whole corpus under the angle distance. In the second block, print both
+articles' full text to confirm by eye what makes them so close.
 
 ```{python}
 closest_pair = text_dist.sort(c.distance).head(1)
@@ -343,9 +356,10 @@ apart: Medtronic's quarterly earnings. The angle distance has found a real
 near-duplicate, not a coincidence of vocabulary.
 
 11. `text_dist_both` also contains pairs at the maximum possible distance,
-$\pi/2$, meaning the two documents share no filtered vocabulary at all. Find
-the document involved in the most such pairs, and look at its top TF-IDF
-terms to explain why.
+$\pi/2$, meaning the two documents share no filtered vocabulary at all. In
+the first block, find the document involved in the most such pairs. In the
+second block, print that document's text and look at its top TF-IDF terms to
+explain why.
 
 ```{python}
 lonely = (

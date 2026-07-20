@@ -370,7 +370,7 @@ window.Quarto = {
 <section id="setup" class="level2" data-number="13.1">
 <h2 data-number="13.1" class="anchored" data-anchor-id="setup"><span class="header-section-number">13.1</span> Setup</h2>
 <p>Load all of the modules and datasets needed for the chapter.</p>
-<div id="bb74e34b" class="cell" data-execution_count="2">
+<div id="08a86d5e" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine <span class="im">import</span> ggplot, aes, element_text</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> polars <span class="im">import</span> col <span class="im">as</span> c</span>
@@ -385,14 +385,14 @@ window.Quarto = {
 <section id="introduction" class="level2" data-number="13.2">
 <h2 data-number="13.2" class="anchored" data-anchor-id="introduction"><span class="header-section-number">13.2</span> Introduction</h2>
 <p>This chapter is about data with a temporal component: any dataset with one or more variables recording dates or times, and more broadly any dataset whose rows have a meaningful order. We begin with data that carries explicit dates and times, since that is where the special data types and functions live. The later sections widen the scope to ordered data generally, which is why the tools there apply well beyond time series.</p>
-<p>The data comes from the corpus of 75 British and Irish authors that we assembled at the end of <a href="12_apis.html" class="quarto-xref"><span>Chapter 12</span></a>. Two of its tables are temporal. One records how many people viewed each author’s Wikipedia page on each day of 2025. The other records the most recent 500 edits made to each author’s page, with a timestamp, an editor, the size of the article after the edit, and the editor’s summary comment. A third table gives each author’s birth and death years, which we will need at the end of the chapter.</p>
+<p>The data comes from the corpus of 75 British and Irish authors that we assembled at the end of <a href="12_apis.html" class="quarto-xref"><span>Chapter 12</span></a>. Two of its tables are temporal. One records how many people viewed each author’s Wikipedia page on nearly every day of 2025. The other records the most recent edits made to each author’s page, up to 500 of them, with a timestamp, an editor, the size of the article after the edit, and the editor’s summary comment. A third table gives each author’s birth and death years, which we will need at the end of the chapter.</p>
 <p>A word about what is new here and what is not. Two of this chapter’s central tools are ones you have already met. Window functions were the subject of <a href="06_window.html" class="quarto-xref"><span>Chapter 6</span></a>, where <code>.shift()</code> and <code>.over()</code> were introduced on the cellphone data, and conditional joins appeared in <a href="08_combine.html" class="quarto-xref"><span>Chapter 8</span></a>, where <code>.join_asof()</code> and <code>.join_where()</code> matched countries on inequalities rather than exact keys. Both come back in this chapter, and both sections say so plainly when they do. This is deliberate rather than accidental. Those tools were introduced on data that had an order but no clock, and time is where they do their real work, so it is worth walking through them a second time on data that actually has dates in it. Where a section is retracing ground, it opens by naming the chapter that covered it and summarizing what you should already know, then moves on to the part that is genuinely new. If a reprise feels too fast, the original treatment is the place to go back to.</p>
 <p>The material that is new to this chapter is the temporal type system itself: dates, datetimes, time zones, truncation, and durations, along with the two window and join operations that only make sense once a dataset has real timestamps in it.</p>
 </section>
 <section id="temporal-data-and-ordering" class="level2" data-number="13.3">
 <h2 data-number="13.3" class="anchored" data-anchor-id="temporal-data-and-ordering"><span class="header-section-number">13.3</span> Temporal Data and Ordering</h2>
-<p>Let’s start with the page view data. For each of the 75 authors we have a record of how many people looked at their Wikipedia page on each day of 2025, so the data is organized with one row for each combination of author and day.</p>
-<div id="18341a87" class="cell" data-execution_count="3">
+<p>Let’s start with the page view data. For each of the 75 authors we have a record of how many people looked at their Wikipedia page on each day of 2025, so the data is organized with one row for each author and each day on which the page was viewed, which for most pages is every day of the year.</p>
+<div id="6011a8b7" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>page_views</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
 <div><style>
@@ -518,7 +518,7 @@ window.Quarto = {
 </div>
 <p>The time variables are given the way <a href="10_collect.html" class="quarto-xref"><span>Chapter 10</span></a> recommended for recording dates, with individual columns for year, month, and day. Because all three are stored as numbers, the data can be put in chronological order with <code>.sort()</code> on year, then month, then day. It already is.</p>
 <p>How could we show the change in page views over time for a single author? One approach is to add a numeric column running down the dataset using a row number. Below is an example of the code to create a line plot using this approach:</p>
-<div id="afea2abe" class="cell" data-execution_count="4">
+<div id="b8bc4007" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    page_views</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.doc_id <span class="op">==</span> <span class="st">"Geoffrey Chaucer"</span>)</span>
@@ -539,11 +539,11 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>This is not a bad place to begin. The x-axis is the day number, and in many applications that is exactly what we need. Chaucer’s page holds a fairly stable level of around fourteen hundred views a day, with a good deal of short-term noise and a few pronounced spikes. But notice how hard it is to say anything about <em>when</em> those spikes happened. The tallest one sits somewhere around day forty-five, which is not a fact anybody can use. There is also a hidden assumption in the plot: the row number only tracks the date because the data happens to be sampled uniformly, one row per day, with nothing missing. Sort the data differently, or lose a few days, and the axis quietly starts lying.</p>
+<p>This is not a bad place to begin. The x-axis is the day number, and in many applications that is exactly what we need. Chaucer’s page holds a fairly stable level of around fourteen hundred views a day, with a good deal of short-term noise and a few pronounced spikes. But notice how hard it is to say anything about <em>when</em> those spikes happened. The tallest one sits somewhere around day forty-five, which is not a fact anybody can use. There is also a hidden assumption in the plot: the row number only tracks the date because the data happens to be sampled uniformly, one row per day, with nothing missing. Sort the data differently, or lose a few days, and the axis quietly starts lying. Losing days is not hypothetical here: the source omits days on which a page recorded no views, so some of the quieter pages in this table are missing a handful of days already.</p>
 <p>Another way to work with dates is to convert them to a fractional year. Here the months and days are folded into the year as a fraction:</p>
 <p><span class="math display">\[ year_{frac} = year + \frac{month - 1}{12} + \frac{day - 1}{12 \cdot 31}\]</span></p>
 <p>We subtract one from the month and day so that, for example, 1 July 2020 (halfway through the year) comes out as <code>2020.5</code>. We could make this more exact by accounting for months shorter than 31 days, but as a first pass it works well.</p>
-<div id="532b5284" class="cell" data-execution_count="5">
+<div id="d6aa14a3" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    page_views</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.doc_id <span class="op">==</span> <span class="st">"Geoffrey Chaucer"</span>)</span>
@@ -567,14 +567,14 @@ window.Quarto = {
 </div>
 </div>
 <p>This improves on the first plot in a few ways. We can roughly read off what date each point corresponds to, and the code works whether or not the data is sorted, evenly spaced, or complete. The cost is an axis that needs explaining to anyone who reads the figure. The same approach extends to times. If we also knew the hour of each observation, the formula would become:</p>
-<p><span class="math display">\[ year_{frac} = year + \frac{month - 1}{12} + \frac{day - 1}{12 \cdot 31} + \frac{hour - 1}{24 \cdot 12 \cdot 31}\]</span></p>
+<p><span class="math display">\[ year_{frac} = year + \frac{month - 1}{12} + \frac{day - 1}{12 \cdot 31} + \frac{hour}{24 \cdot 12 \cdot 31}\]</span></p>
 <p>And if we only cared about time elapsed since some event, such as the start of an experiment, we could take the difference from a fixed fractional year.</p>
 <p>Fractional times are genuinely useful. They can represent an arbitrarily precise moment as an ordinary number, which means they slot into models and functions that know nothing about dates and require no special handling. They are a good way to explore data quickly. But when we want axis labels a reader can understand, or want to ask questions like “what day of the week was this,” we need a type that knows it is a date.</p>
 </section>
 <section id="date-objects" class="level2" data-number="13.4">
 <h2 data-number="13.4" class="anchored" data-anchor-id="date-objects"><span class="header-section-number">13.4</span> Date Objects</h2>
 <p>Most of the variables we have worked with so far are strings or numbers. Dates sit somewhere in between. They are like numbers in that they have a natural order, differences between them are meaningful, and they can be placed on a continuous scale. But they also have structure that numbers do not: a date belongs to a month, falls on a weekday, and sits some irregular number of days from the next date. Extracting that structure requires a dedicated data type. In Polars, <code>pl.date()</code> constructs one from its components.</p>
-<div id="0b4efa4c" class="cell" data-execution_count="6">
+<div id="d537151b" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>chaucer <span class="op">=</span> (</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    page_views</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.doc_id <span class="op">==</span> <span class="st">"Geoffrey Chaucer"</span>)</span>
@@ -719,7 +719,7 @@ window.Quarto = {
 </div>
 </div>
 <p>The new column has the data type <code>Date</code>. This is the payoff for storing the components separately, as <a href="10_collect.html" class="quarto-xref"><span>Chapter 10</span></a> advised: the components are easy to record without error and easy to combine, whereas a malformed date string is a problem you discover much later. Once a column is a real date, plotnine makes sensible choices about how to label an axis without being told anything.</p>
-<div id="b178bdf3" class="cell" data-execution_count="7">
+<div id="9a6b6950" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    chaucer</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    .pipe(ggplot, aes(c.date, c.views))</span>
@@ -739,7 +739,7 @@ window.Quarto = {
 </div>
 </div>
 <p>Now the spikes have addresses. We can change how often the axis is labeled with <code>scale_x_date()</code> and the <code>date_breaks</code> option, which takes a duration string such as <code>"1 week"</code> or <code>"3 months"</code>. The <code>date_labels</code> option controls the format of each label.</p>
-<div id="e7699a32" class="cell" data-execution_count="8">
+<div id="29153ff1" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    chaucer</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    .pipe(ggplot, aes(c.date, c.views))</span>
@@ -761,7 +761,7 @@ window.Quarto = {
 </div>
 </div>
 <p>Having a date object also lets us pull information out of it, through the <code>.dt</code> namespace. The tallest spike in the plot is worth chasing down, and sorting by views identifies it immediately.</p>
-<div id="fec44d84" class="cell" data-execution_count="9">
+<div id="be762c16" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    chaucer</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    .sort(c.views, descending<span class="op">=</span><span class="va">True</span>)</span>
@@ -816,7 +816,7 @@ window.Quarto = {
 </div>
 <p>Chaucer’s biggest day of 2025 was 14 February, with nearly twice his typical traffic. This is not a coincidence. His poem <em>Parlement of Foules</em> contains the earliest known association of St.&nbsp;Valentine’s Day with romantic love, a connection that gets rediscovered by a lot of people every year on exactly that date. This is the kind of finding that the day-number plot made invisible and the date-aware plot hands over immediately.</p>
 <p>The <code>.dt</code> namespace also gives us the weekday, which lets us ask whether reading habits vary across the week. Here we extract the weekday and average the page views within each one.</p>
-<div id="f390d606" class="cell" data-execution_count="10">
+<div id="6c628eea" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    chaucer</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
@@ -884,7 +884,7 @@ window.Quarto = {
 </div>
 <p>Weekdays are numbered with Monday as 1 and Sunday as 7. The pattern is mild but consistent: Chaucer gets read on weekdays and rested on Saturdays, which is roughly what we would expect of a page carried by coursework rather than by leisure.</p>
 <p>Dates can also be compared and filtered like numbers. Below we keep only the days after 14 February, using <code>pl.date()</code> to build a date to compare against.</p>
-<div id="04a7640c" class="cell" data-execution_count="11">
+<div id="4d33636a" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    chaucer</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.date <span class="op">&gt;</span> pl.date(<span class="dv">2025</span>, <span class="dv">2</span>, <span class="dv">14</span>))</span>
@@ -1045,7 +1045,7 @@ window.Quarto = {
 <h2 data-number="13.5" class="anchored" data-anchor-id="datetime-objects"><span class="header-section-number">13.5</span> Datetime Objects</h2>
 <p>The page view data records a date and nothing finer. Often we know more precisely when something happened, down to the hour, minute, or second. We use the term <em>datetime</em> for an object that stores a precise moment, which requires both a date and a time of day. Dates have a natural precision of one day; datetimes do not, and the useful granularity depends entirely on the data. Some sources give only the hour, while others, such as broadcast logs, record milliseconds. Polars stores datetimes with microsecond precision by default, which is finer than anything we will need here.</p>
 <p>The revision histories carry exactly this kind of timestamp. Recall from <a href="12_apis.html" class="quarto-xref"><span>Chapter 12</span></a> that we deliberately wrote them out as strings, in the <code>YYYY-MM-DD HH:MM:SS</code> format that <a href="10_collect.html" class="quarto-xref"><span>Chapter 10</span></a> recommends, rather than parsing them at collection time. Turning them into datetime objects is the first thing this chapter does with them.</p>
-<div id="78956091" class="cell" data-execution_count="12">
+<div id="90550270" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>page_revisions <span class="op">=</span> (</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    page_revisions</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
@@ -1188,9 +1188,9 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>The <code>timestamp</code> column now has the type <code>Datetime</code>, giving the second at which each edit was saved. Because the string was written in the ISO-8601 format, <code>.str.to_datetime()</code> parses it without being told the layout. A format string can be passed if the data uses some other convention, and often must be, since a date like <code>03/04/2025</code> is ambiguous in a way that <code>2025-04-03</code> is not. That ambiguity is the whole argument for the ISO format.</p>
+<p>The <code>timestamp</code> column now has the type <code>Datetime</code>, giving the second at which each edit was saved. Because the string was written in the ISO-8601 date format, with a space in place of the standard’s <code>T</code> separator, <code>.str.to_datetime()</code> parses it without being told the layout. A format string can be passed if the data uses some other convention, and often must be, since a date like <code>03/04/2025</code> is ambiguous in a way that <code>2025-04-03</code> is not. That ambiguity is the whole argument for the ISO format.</p>
 <p>Each row also carries the editor’s username (anyone can edit a Wikipedia page), the size in bytes of the article after the edit, and a short comment describing the change. Plotting size against time shows the article growing, and shows the moments when large sections were added or removed.</p>
-<div id="fd3487b5" class="cell" data-execution_count="13">
+<div id="db9d3dd6" class="cell" data-execution_count="13">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>selected_authors <span class="op">=</span> [<span class="st">"Geoffrey Chaucer"</span>, <span class="st">"Emily Brontë"</span>]</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -1214,9 +1214,9 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>The two lines cover very different stretches of time, and the reason is worth pausing on. We collected the 500 most recent edits for every page, not every edit ever made, so the window we observe is not a fixed span of years but a fixed number of events. Emily Brontë’s page is edited often, so her last 500 edits reach back only to late 2024. Chaucer’s page moves more slowly, so the same 500 edits carry us back to 2021. The observation window is different for every author, and any comparison that forgets this will end up comparing a busy year and a quiet half-decade as though they were the same thing.</p>
+<p>The two lines cover very different stretches of time, and the reason is worth pausing on. We collected up to 500 of the most recent edits for every page, not every edit ever made, so the window we observe is not a fixed span of years but a capped number of events. Emily Brontë’s page is edited often, so her last 500 edits reach back only to late 2024. Chaucer’s page moves more slowly, so the same 500 edits carry us back to 2021. The observation window is different for every author, and any comparison that forgets this will end up comparing a busy year and a quiet half-decade as though they were the same thing.</p>
 <p>We can label the axis with <code>scale_x_datetime()</code>, which works like <code>scale_x_date()</code> but understands times as well as dates.</p>
-<div id="082a3cc2" class="cell" data-execution_count="14">
+<div id="1b32c4ce" class="cell" data-execution_count="14">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    page_revisions</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.doc_id.is_in(selected_authors))</span>
@@ -1241,7 +1241,7 @@ window.Quarto = {
 </div>
 </div>
 <p>Filtering by a range of times zooms into a region of the data, which is often the only way to see structure that a multi-year plot flattens. Here we keep the edits made from 2025 onward.</p>
-<div id="d184848b" class="cell" data-execution_count="15">
+<div id="f96f7b12" class="cell" data-execution_count="15">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    page_revisions</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.doc_id.is_in(selected_authors))</span>
@@ -1387,7 +1387,7 @@ window.Quarto = {
 <section id="language-and-time-zones" class="level2" data-number="13.6">
 <h2 data-number="13.6" class="anchored" data-anchor-id="language-and-time-zones"><span class="header-section-number">13.6</span> Language and Time Zones</h2>
 <p>So far our summaries of dates and times have been numeric. Notice that the weekday example above gave us the numbers 1 through 7 rather than names. Polars can produce string names for weekdays and months, but the output depends on the locale configured on the machine running the code, which makes it a poor thing to build an analysis on. The numeric components below are portable, and they are what most analyses want anyway.</p>
-<div id="e8e47d86" class="cell" data-execution_count="16">
+<div id="71d0edf2" class="cell" data-execution_count="16">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    page_revisions</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">10</span>)</span>
@@ -1520,7 +1520,7 @@ window.Quarto = {
 <p>The other regional problem is time zones. The concept seems simple and the practice is anything but; an impressive share of the bugs in the history of computing trace back to some edge case in time zone handling.</p>
 <p>A datetime in Polars is either <em>naive</em>, carrying no time zone information at all, or <em>aware</em>, tagged with a specific zone. This distinction matters because the two are not interchangeable, and two different methods move between them. The <code>.dt.replace_time_zone()</code> method attaches a zone to a naive datetime, asserting what the clock reading meant without changing the reading itself. The <code>.dt.convert_time_zone()</code> method takes an aware datetime and expresses the same instant in a different zone, which does change the reading. Attaching is a claim about what the data always meant; converting is an arithmetic operation on a known instant.</p>
 <p>Our timestamps came out of the parse naive, because the string we stored carried no zone. But we know from <a href="12_apis.html" class="quarto-xref"><span>Chapter 12</span></a> that Wikipedia reports all revision timestamps in UTC, as most technical sources with a global audience do. So the correct first move is to attach UTC, and only then convert.</p>
-<div id="37bf3c5a" class="cell" data-execution_count="17">
+<div id="f644d29c" class="cell" data-execution_count="17">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    page_revisions</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">10</span>)</span>
@@ -1601,7 +1601,7 @@ window.Quarto = {
 <p>It is tempting to skip the first step and call <code>.dt.convert_time_zone()</code> on the naive column directly. Polars will let you, and on this data it even gives the right answer, which is precisely what makes it dangerous. Converting a naive datetime silently assumes it was UTC to begin with. That assumption happens to hold for us, so nothing breaks and nothing warns. Feed the same code a column of naive local timestamps from some other source and it will shift every one of them by the offset from UTC, quietly and without complaint. Writing <code>.dt.replace_time_zone("UTC")</code> first costs one line and turns a hidden assumption into a statement in the code, where a reader can check it.</p>
 <p>The mirror-image mistake is calling <code>.dt.replace_time_zone()</code> on a column that is already aware. That overwrites the zone label while leaving the clock reading untouched, which moves the instant by however many hours separate the two zones. Attaching a zone and converting between zones look similar and do opposite things, and confusing them is the most common way to corrupt a timestamp.</p>
 <p>With the zone attached, we can present the data in the local terms of whatever audience we have. The code below counts edits by the hour of the day in New York.</p>
-<div id="c2e803d5" class="cell" data-execution_count="18">
+<div id="2a80dc27" class="cell" data-execution_count="18">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>hourly_edits <span class="op">=</span> (</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    page_revisions</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
@@ -1643,7 +1643,7 @@ window.Quarto = {
 <h2 data-number="13.7" class="anchored" data-anchor-id="truncating-dates"><span class="header-section-number">13.7</span> Truncating Dates</h2>
 <p>We have seen how to build date and datetime objects and how to extract their components. A related operation is reducing a timestamp’s precision, which is more useful than it might sound. Our revisions are recorded to the second, and that is finer than almost any question we want to ask of them. Grouping by an exact second would put nearly every edit in a group of its own.</p>
 <p>The <code>.dt.truncate()</code> method rounds a date or datetime down to a given duration. Setting the duration to <code>"1h"</code> discards the minutes and seconds; <code>"1d"</code> discards the time entirely.</p>
-<div id="f91d9d0e" class="cell" data-execution_count="19">
+<div id="3fa8475e" class="cell" data-execution_count="19">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    page_revisions</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">10</span>)</span>
@@ -1732,7 +1732,7 @@ window.Quarto = {
 </div>
 </div>
 <p>The value of truncation is that it turns a continuous timestamp into a categorical bin, and bins are things we can group by. Every edit made during the same hour now shares an identical value, so <code>.group_by()</code> can collect them. This makes truncation the standard first step in turning an event log into a time series. There is a companion method, <code>.dt.round()</code>, which rounds to the nearest unit rather than downward, and <code>.dt.date()</code>, which extracts the date part of a datetime directly.</p>
-<div id="9be36b08" class="cell" data-execution_count="20">
+<div id="2be172e2" class="cell" data-execution_count="20">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    page_revisions</span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
@@ -1812,7 +1812,7 @@ window.Quarto = {
 </div>
 </div>
 <p>Above we discarded the time component and counted edits per day, which surfaces the busiest days in the corpus. The opposite move is sometimes wanted: keep the time of day and throw away the date, so that patterns which repeat daily become visible. Extracting the hour does this.</p>
-<div id="afb5b674" class="cell" data-execution_count="21">
+<div id="e6ae75cb" class="cell" data-execution_count="21">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    page_revisions</span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
@@ -1900,7 +1900,7 @@ window.Quarto = {
 <p>Window functions were the subject of <a href="06_window.html" class="quarto-xref"><span>Chapter 6</span></a>, so this section is a return visit rather than an introduction. The two ideas you should carry in from that chapter are these. First, a window function computes a value for every row while looking at other rows, which is what separates it from an aggregation: <code>.agg()</code> collapses a group to one row, while <code>.over()</code> writes the group’s answer onto every row of the group and keeps them all. Second, the functions that look up and down a column, <code>.shift()</code> chief among them, depend entirely on the order of the rows, which means they belong immediately after a <code>.sort()</code>, and they need <code>.over()</code> to stop them running across the boundary between one group and the next. In <a href="06_window.html" class="quarto-xref"><span>Chapter 6</span></a> that was the cellphone data, where a year-over-year change computed without <code>.over(c.iso)</code> would have subtracted the last year of one country from the first year of the next.</p>
 <p>That is the whole toolkit, and it transfers here unchanged. What changes is that our rows are now separated by real, irregular stretches of time, which opens up questions the cellphone data could not ask.</p>
 <p>Take the page revisions. We have the size of each article after each edit, and what we would like is the size <em>of</em> each edit: how many bytes it added or removed. That value is not in the data, but it is the difference between one row and the row before it, within the same page. The pattern is exactly the one from <a href="06_window.html" class="quarto-xref"><span>Chapter 6</span></a>.</p>
-<div id="7b2be265" class="cell" data-execution_count="22">
+<div id="2eb95539" class="cell" data-execution_count="22">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    page_revisions</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    .sort(c.doc_id, c.timestamp)</span>
@@ -2007,7 +2007,7 @@ window.Quarto = {
 </div>
 <p>The <code>.sort()</code> establishes what “the previous row” means, <code>.shift(1)</code> reaches back to it, and <code>.over(c.doc_id)</code> guarantees that the first edit of one author’s page never subtracts the last edit of another’s. The first row of each author has no predecessor and so gets a <code>null</code>, which propagates through the subtraction. All of this should feel familiar.</p>
 <p>One thing we can now do that <a href="06_window.html" class="quarto-xref"><span>Chapter 6</span></a> deliberately postponed is use the shortcut. That chapter wrote the subtraction out longhand and noted that <code>.diff()</code> does the same job in one step, but kept the long form so the mechanics stayed visible. The mechanics are visible by now, so we can collect on the promise.</p>
-<div id="e898fc20" class="cell" data-execution_count="23">
+<div id="1bc1fdd4" class="cell" data-execution_count="23">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    page_revisions</span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    .sort(c.doc_id, c.timestamp)</span>
@@ -2114,7 +2114,7 @@ window.Quarto = {
 </div>
 <p>The results are identical. Note that <code>.over()</code> is still required: <code>.diff()</code> is an ordered function like any other and will happily run off the end of one group into the next.</p>
 <p>Now for something the cellphone data could not have shown us. Wikipedia has a distinctive editing pathology: an edit gets made, someone disagrees, and the page is <em>reverted</em> to its previous state. A reversion leaves a fingerprint in the size column, because the article returns to a size it held two edits ago. Reaching back two rows instead of one is a matter of passing a different argument to <code>.shift()</code>.</p>
-<div id="e67e5b1c" class="cell" data-execution_count="24">
+<div id="a18bc796" class="cell" data-execution_count="24">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>reversions <span class="op">=</span> (</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    page_revisions</span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    .sort(c.doc_id, c.timestamp)</span>
@@ -2236,7 +2236,7 @@ window.Quarto = {
 </div>
 </div>
 <p>That is a substantial number of edits that put a page back where it was two edits earlier. The criterion is a heuristic rather than a proof, since two unrelated edits could coincidentally cancel out, but the pattern is strong enough to study. Counting reversions per page shows where the disputes are.</p>
-<div id="3bf483ad" class="cell" data-execution_count="25">
+<div id="f0611956" class="cell" data-execution_count="25">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    reversions</span>
 <span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    .group_by(c.doc_id)</span>
@@ -2314,7 +2314,7 @@ window.Quarto = {
 <section id="durations" class="level2" data-number="13.9">
 <h2 data-number="13.9" class="anchored" data-anchor-id="durations"><span class="header-section-number">13.9</span> Durations</h2>
 <p>Subtracting two datetimes gives an object of a type we have not met: a <code>Duration</code>, representing an elapsed span of time rather than a moment in it. The distinction is the same one that separates a date from a number of days. Combining a duration with the window pattern from the previous section answers a natural question about our data, which is how much time passes between consecutive edits to a page.</p>
-<div id="03155e58" class="cell" data-execution_count="26">
+<div id="186efcc1" class="cell" data-execution_count="26">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    page_revisions</span>
 <span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    .sort(c.doc_id, c.timestamp)</span>
@@ -2408,7 +2408,7 @@ window.Quarto = {
 </div>
 </div>
 <p>The <code>since_last</code> column holds durations, printed in a readable form but stored underneath as a count of microseconds. Durations aggregate like any other numeric column, so averaging them per author gives a direct measure of how actively each page is maintained.</p>
-<div id="2da1be9c" class="cell" data-execution_count="27">
+<div id="f5672780" class="cell" data-execution_count="27">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    page_revisions</span>
 <span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    .sort(c.doc_id, c.timestamp)</span>
@@ -2522,14 +2522,14 @@ window.Quarto = {
 </div>
 <p>Emily Brontë’s page turns over roughly once a day. At the other end, Charlotte Smith’s page sits untouched for six months at a stretch. The <code>avg_gap</code> column is itself a duration, which reads well but does not plot or compare across units. For that we convert with one of the <code>.dt.total_*()</code> methods, of which <code>.dt.total_hours()</code> above is one; the family also includes <code>.dt.total_days()</code>, <code>.dt.total_minutes()</code>, and <code>.dt.total_seconds()</code>.</p>
 <p>Choose that unit with some care, because these methods truncate toward zero rather than rounding. Had we asked for <code>.dt.total_days()</code> here, every gap shorter than twenty-four hours would have become exactly zero, and the busiest pages, the ones whose gaps are measured in hours, would have had their averages dragged toward nothing. The unit needs to be finer than the intervals being measured.</p>
-<p>Remember too the caveat from earlier. Because we hold the 500 most recent edits rather than the full history, the authors at the top of this table are the ones whose observation window is shortest. The ranking describes editing intensity in the recent past, not across the whole life of the encyclopedia.</p>
+<p>Remember too the caveat from earlier. Because we hold up to the 500 most recent edits rather than the full history, the authors at the top of this table are the ones whose observation window is shortest. The ranking describes editing intensity in the recent past, not across the whole life of the encyclopedia.</p>
 </section>
 <section id="rolling-windows-in-time" class="level2" data-number="13.10">
 <h2 data-number="13.10" class="anchored" data-anchor-id="rolling-windows-in-time"><span class="header-section-number">13.10</span> Rolling Windows in Time</h2>
 <p>There is one more window function to meet, and it is the one that could not have been taught in <a href="06_window.html" class="quarto-xref"><span>Chapter 6</span></a>. That chapter introduced <code>.rolling_mean()</code>, which smooths a series by averaging each row with the rows near it, and defines “near” as a count of rows: <code>window_size=5</code> means this row and the four above it. It also flagged, in its closing section, that Polars offers time-aware versions of these functions, and left them for later. This is later.</p>
 <p>The distinction matters enormously here, and the revision data shows why. A row-count window assumes that consecutive rows are equally spaced, which is exactly what the cellphone data guaranteed and what our revisions violate. Two consecutive edits to Chaucer’s page might be forty seconds apart or eight months apart. A five-row window over that series averages together whatever five edits happen to be adjacent, spanning a day in one place and a year in another. The window is measured in the wrong units.</p>
 <p>What we want is a window defined by a span of <em>time</em>: average the article size over the last thirty days, however many edits that happens to include. The <code>.rolling_mean_by()</code> method does this, taking the column holding the timestamps as <code>by</code> and the span as <code>window_size</code>, written as a duration string.</p>
-<div id="393e7c5c" class="cell" data-execution_count="28">
+<div id="db96aeb1" class="cell" data-execution_count="28">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>    page_revisions</span>
 <span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.doc_id <span class="op">==</span> <span class="st">"Geoffrey Chaucer"</span>)</span>
@@ -2563,7 +2563,7 @@ window.Quarto = {
 <p><a href="08_combine.html" class="quarto-xref"><span>Chapter 8</span></a> demonstrated both on the country data, matching African countries to Asian ones by Gini coefficient. It also noted, in passing, that <code>.join_asof()</code> was invented for time series and got its name from asking what a value was <em>as of</em> a particular moment. That is the case we can finally make properly.</p>
 <p>Here is the problem. We have two tables about the same authors, measured on different clocks. Page views are recorded once per day. Revisions are recorded to the second. Suppose we want to know how many people were reading a page on the day it was edited, perhaps to ask whether edits follow attention. There is no exact key to join on, because no revision happened at midnight precisely, which is the only timestamp the page view table contains.</p>
 <p>An asof join is built for exactly this. We give each daily view count a datetime, sort both tables, and ask Polars to match each revision backward to the most recent view record at or before it.</p>
-<div id="95857b28" class="cell" data-execution_count="29">
+<div id="e21ee8ab" class="cell" data-execution_count="29">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>views_daily <span class="op">=</span> (</span>
 <span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    page_views</span>
 <span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    .select(</span>
@@ -2584,8 +2584,8 @@ window.Quarto = {
 <span id="cb28-18"><a href="#cb28-18" aria-hidden="true" tabindex="-1"></a>    edits_2025</span>
 <span id="cb28-19"><a href="#cb28-19" aria-hidden="true" tabindex="-1"></a>    .join_asof(</span>
 <span id="cb28-20"><a href="#cb28-20" aria-hidden="true" tabindex="-1"></a>        views_daily,</span>
-<span id="cb28-21"><a href="#cb28-21" aria-hidden="true" tabindex="-1"></a>        left_on<span class="op">=</span><span class="st">"timestamp"</span>,</span>
-<span id="cb28-22"><a href="#cb28-22" aria-hidden="true" tabindex="-1"></a>        right_on<span class="op">=</span><span class="st">"moment"</span>,</span>
+<span id="cb28-21"><a href="#cb28-21" aria-hidden="true" tabindex="-1"></a>        left_on<span class="op">=</span>c.timestamp,</span>
+<span id="cb28-22"><a href="#cb28-22" aria-hidden="true" tabindex="-1"></a>        right_on<span class="op">=</span>c.moment,</span>
 <span id="cb28-23"><a href="#cb28-23" aria-hidden="true" tabindex="-1"></a>        by<span class="op">=</span><span class="st">"doc_id"</span>,</span>
 <span id="cb28-24"><a href="#cb28-24" aria-hidden="true" tabindex="-1"></a>        strategy<span class="op">=</span><span class="st">"backward"</span></span>
 <span id="cb28-25"><a href="#cb28-25" aria-hidden="true" tabindex="-1"></a>    )</span>
@@ -2691,7 +2691,7 @@ window.Quarto = {
 <p>Every edit now carries the page view count for the day it was made. The <code>by="doc_id"</code> argument is doing important work: it requires an exact match on the author before the nearest-in-time search begins, so Chaucer’s edits are matched against Chaucer’s traffic and nobody else’s. Without it, the join would happily pair an edit to Chaucer’s page with Virginia Woolf’s readership. This is the same boundary problem that <code>.over()</code> solves for window functions, wearing a different hat.</p>
 <p>Note also the <code>strategy="backward"</code>, which is the default and the right choice here. It matches each revision to the most recent view record at or before it, which for a daily series means the count for the day the edit happened. Setting it to <code>"forward"</code> would match the next day’s count instead, and <code>"nearest"</code> would pick whichever is closer in either direction, which for this data would sometimes reach into the future.</p>
 <p>With the tables joined, we can ask the question we came for.</p>
-<div id="53ad4f84" class="cell" data-execution_count="30">
+<div id="e373c379" class="cell" data-execution_count="30">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>    edits_with_views</span>
 <span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    .group_by(c.doc_id)</span>
@@ -2781,7 +2781,7 @@ window.Quarto = {
 </div>
 </div>
 <p>The other conditional join, <code>.join_where()</code>, handles cases where no notion of “nearest” applies and we simply want every pair of rows satisfying some condition. Our <code>meta</code> table gives each author’s birth and death year, so we can ask which authors were alive at the same time: pair author A with author B whenever B was born during A’s lifetime.</p>
-<div id="a127ef29" class="cell" data-execution_count="31">
+<div id="8a941fc1" class="cell" data-execution_count="31">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>overlap <span class="op">=</span> (</span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>    meta</span>
 <span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    .join_where(</span>
@@ -2822,81 +2822,81 @@ window.Quarto = {
 </thead>
 <tbody>
 <tr class="odd">
-<td>"William Langland"</td>
-<td>1332</td>
-<td>1386</td>
-<td>"Geoffrey Chaucer"</td>
-<td>1343</td>
+<td>"Stephen Spender"</td>
+<td>1909</td>
+<td>1995</td>
+<td>"Seamus Heaney"</td>
+<td>1939</td>
 </tr>
 <tr class="even">
-<td>"William Langland"</td>
-<td>1332</td>
-<td>1386</td>
-<td>"Margery Kempe"</td>
-<td>1373</td>
-</tr>
-<tr class="odd">
-<td>"Geoffrey Chaucer"</td>
-<td>1343</td>
-<td>1400</td>
-<td>"Margery Kempe"</td>
-<td>1373</td>
-</tr>
-<tr class="even">
-<td>"John Gower"</td>
-<td>1330</td>
-<td>1408</td>
-<td>"William Langland"</td>
-<td>1332</td>
-</tr>
-<tr class="odd">
-<td>"John Gower"</td>
-<td>1330</td>
-<td>1408</td>
-<td>"Geoffrey Chaucer"</td>
-<td>1343</td>
-</tr>
-<tr class="even">
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-</tr>
-<tr class="odd">
-<td>"Edward Upward"</td>
-<td>1903</td>
-<td>2009</td>
 <td>"Daphne du Maurier"</td>
 <td>1907</td>
+<td>1989</td>
+<td>"Seamus Heaney"</td>
+<td>1939</td>
+</tr>
+<tr class="odd">
+<td>"Daphne du Maurier"</td>
+<td>1907</td>
+<td>1989</td>
+<td>"Stephen Spender"</td>
+<td>1909</td>
 </tr>
 <tr class="even">
-<td>"Edward Upward"</td>
-<td>1903</td>
-<td>2009</td>
+<td>"Daphne du Maurier"</td>
+<td>1907</td>
+<td>1989</td>
 <td>"W. H. Auden"</td>
 <td>1907</td>
 </tr>
 <tr class="odd">
-<td>"Edward Upward"</td>
-<td>1903</td>
-<td>2009</td>
+<td>"Daphne du Maurier"</td>
+<td>1907</td>
+<td>1989</td>
 <td>"Louis MacNeice"</td>
 <td>1907</td>
 </tr>
 <tr class="even">
-<td>"Edward Upward"</td>
-<td>1903</td>
-<td>2009</td>
-<td>"Stephen Spender"</td>
-<td>1909</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
 </tr>
 <tr class="odd">
-<td>"Edward Upward"</td>
-<td>1903</td>
-<td>2009</td>
-<td>"Seamus Heaney"</td>
-<td>1939</td>
+<td>"William Langland"</td>
+<td>1332</td>
+<td>1386</td>
+<td>"Geoffrey Chaucer"</td>
+<td>1343</td>
+</tr>
+<tr class="even">
+<td>"John Gower"</td>
+<td>1330</td>
+<td>1408</td>
+<td>"Thomas Malory"</td>
+<td>1405</td>
+</tr>
+<tr class="odd">
+<td>"John Gower"</td>
+<td>1330</td>
+<td>1408</td>
+<td>"Margery Kempe"</td>
+<td>1373</td>
+</tr>
+<tr class="even">
+<td>"John Gower"</td>
+<td>1330</td>
+<td>1408</td>
+<td>"Geoffrey Chaucer"</td>
+<td>1343</td>
+</tr>
+<tr class="odd">
+<td>"John Gower"</td>
+<td>1330</td>
+<td>1408</td>
+<td>"William Langland"</td>
+<td>1332</td>
 </tr>
 </tbody>
 </table>

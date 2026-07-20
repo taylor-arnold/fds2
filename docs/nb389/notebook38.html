@@ -288,13 +288,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="setup" class="level3">
 <h3 class="anchored" data-anchor-id="setup">Setup</h3>
 <p>Run all of the following before starting the notebook.</p>
-<div id="b8603dc4" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="1">
+<div id="fd29fede" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="1">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span> wget <span class="op">-</span>q <span class="op">-</span>nc https:<span class="op">//</span>raw.githubusercontent.com<span class="op">/</span>taylor<span class="op">-</span>arnold<span class="op">/</span>fds2<span class="op">/</span>refs<span class="op">/</span>heads<span class="op">/</span>main<span class="op">/</span>funs.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<div id="2631e401" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="2">
+<div id="963a2829" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="2">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
@@ -306,7 +306,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>ub <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<div id="8ca459b8" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="4">
+<div id="191bf6b9" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="4">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>klog <span class="op">=</span> pl.read_csv(ub <span class="op">+</span> <span class="st">"data/keylog.csv.gz"</span>)</span>
@@ -320,7 +320,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol type="1">
 <li><code>t0</code> and <code>t1</code> cannot become real dates, since no calendar sits behind them, but they can still become real <code>Datetime</code> objects: casting elapsed milliseconds to an integer and then to <code>pl.Datetime("ms")</code> is exactly how a Unix timestamp already works, it just anchors the clock at 1970-01-01 instead of the moment recording began. Add <code>press</code> and <code>release</code> columns to <code>klog</code> this way, from <code>t0</code> and <code>t1</code>, and overwrite <code>klog</code> with the result. Then filter to the one session stored in <code>klog["id"][0]</code>, truncate <code>press</code> to 10-second bins with <code>.dt.truncate("10s")</code>, group by the bucket, count the keystrokes in each one, and sort by bucket.</li>
 </ol>
-<div id="38423064" class="cell" data-execution_count="5">
+<div id="98edb26f" class="cell" data-execution_count="5">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>klog <span class="op">=</span> klog.with_columns(</span>
@@ -418,7 +418,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="2" type="1">
 <li>The anchor in question 1 is arbitrary, but it is the <em>same</em> arbitrary moment for all 823 sessions, so a bucket built the same way pools everyone’s first minute together, everyone’s second minute together, and so on. Truncate the full <code>klog</code> (not just one session) to 1-minute bins, group by the bucket, and compute the number of distinct sessions still active and the average <code>dur</code> in each one. Sort by bucket and print the first 15 rows.</li>
 </ol>
-<div id="a4a720ab" class="cell" data-execution_count="6">
+<div id="6230b89a" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>q2 <span class="op">=</span> (</span>
@@ -522,7 +522,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="3" type="1">
 <li>Before trusting <code>dur_after</code>, check it. Sort <code>klog</code> by <code>id</code> and <code>press</code>, compute <code>c.dur.shift(-1).over(c.id)</code>, and count how many rows disagree with the stored <code>dur_after</code> by more than 0.05.</li>
 </ol>
-<div id="d598ad00" class="cell" data-execution_count="7">
+<div id="513ebc65" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>klog <span class="op">=</span> klog.sort(c.<span class="bu">id</span>, c.press)</span>
@@ -573,7 +573,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="4" type="1">
 <li>Build a <code>gap</code> column on <code>klog</code>: the time between when the previous key was released and this one was pressed, <code>c.press - c.release.shift(1).over(c.id)</code>. Overwrite <code>klog</code> with it and print <code>id</code>, <code>press</code>, <code>release</code>, and <code>gap</code> for the first 5 rows of the session from question 1.</li>
 </ol>
-<div id="aff4228e" class="cell" data-execution_count="8">
+<div id="f42b5a74" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>klog <span class="op">=</span> klog.with_columns(</span>
@@ -650,7 +650,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="5" type="1">
 <li>Filter <code>klog</code> to rows where <code>gap</code> exceeds 2 seconds, a real pause in typing rather than ordinary key-to-key rhythm. Group by <code>id</code>, count the pauses per person, and print the 5 people with the most.</li>
 </ol>
-<div id="6774cae8" class="cell" data-execution_count="9">
+<div id="c52288a8" class="cell" data-execution_count="9">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>pauses <span class="op">=</span> klog.<span class="bu">filter</span>(c.gap <span class="op">&gt;</span> pl.duration(seconds<span class="op">=</span><span class="dv">2</span>))</span>
@@ -713,7 +713,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="6" type="1">
 <li>Compute each person’s average <code>gap</code> in milliseconds (<code>.dt.total_milliseconds()</code>), join the result onto <code>meta</code>, group by <code>cefr</code>, and compute the number of participants and the average gap per group. Sort by average gap.</li>
 </ol>
-<div id="f40c2af4" class="cell" data-execution_count="10">
+<div id="b9210bcb" class="cell" data-execution_count="10">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>avg_gap <span class="op">=</span> (</span>
@@ -781,9 +781,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p><strong>Answer</strong>: The gap rises exactly as CEFR falls: 402.1 ms for the 550 people at <code>C1/C2</code>, 585.9 ms for the 260 at <code>B1/B2</code>, and 667.4 ms for the 13 at <code>A1/A2</code>. Milliseconds is the right unit here, since most gaps are well under a second; asking for <code>.dt.total_seconds()</code> instead would floor almost every one of them to 0 and erase this pattern entirely, the same truncation trap the book raises for day-scale durations. The <code>A1/A2</code> row is worth a second look regardless: 13 people is a thin group to average, and the true weakest tier could look quite different with a few more participants in it.</p>
 <ol start="7" type="1">
-<li>Durations aggregate like any other number, which means a single extreme value can dominate one person’s average even while barely touching the whole corpus’s. Sort the per-person average from question 6’s setup by <code>avg_gap_ms</code> descending and find the single largest <code>gap</code> in all of <code>klog</code> alongside the <code>id</code> it belongs to. Then compare the corpus-wide average gap with and without that one person’s rows.</li>
+<li>Durations aggregate like any other number, which means a single extreme value can dominate one person’s average even while barely touching the whole corpus’s. In the first block, sort the per-person average from question 6’s setup by <code>avg_gap_ms</code> descending and print the top 3. In the second block, find the single largest <code>gap</code> in all of <code>klog</code> and print its <code>id</code>, <code>press</code>, <code>gap</code>, and <code>dur</code>. In the third block, group all gap rows by whether the <code>id</code> differs from that person’s and compute the average gap and count in each group. In the fourth block, compute the corpus-wide average gap and count across every row.</li>
 </ol>
-<div id="c1165ebb" class="cell" data-execution_count="11">
+<div id="67a56a96" class="cell" data-execution_count="11">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>avg_gap_ranked <span class="op">=</span> (</span>
@@ -835,7 +835,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<div id="9c494935" class="cell" data-execution_count="12">
+<div id="2f132ae0" class="cell" data-execution_count="12">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>worst_gap <span class="op">=</span> klog.drop_nulls(c.gap).sort(c.gap, descending<span class="op">=</span><span class="va">True</span>).head(<span class="dv">1</span>)</span>
@@ -878,7 +878,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<div id="ade1ba3c" class="cell" data-execution_count="13">
+<div id="1922398d" class="cell" data-execution_count="13">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>all_rows <span class="op">=</span> klog.drop_nulls(c.gap)</span>
@@ -933,7 +933,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<div id="2e0e430e" class="cell" data-execution_count="14">
+<div id="fc7c9aff" class="cell" data-execution_count="14">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>all_rows.select(</span>
@@ -975,7 +975,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="8" type="1">
 <li><code>.rolling_mean_by()</code> smooths a series by a span of time rather than a count of rows, the right tool here since keystrokes are not evenly spaced. For the session from question 1, compute <code>gap</code> in milliseconds and a 15-second rolling mean of it with <code>by=c.press</code>. Plot the raw values in grey and the smoothed line in red against <code>press</code>.</li>
 </ol>
-<div id="7c912fb9" class="cell" data-execution_count="15">
+<div id="00b4c7e8" class="cell" data-execution_count="15">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>one <span class="op">=</span> (</span>
@@ -1016,9 +1016,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>The red line surfaces the handful of real hesitations inside all the grey jitter, the same way the book’s rolling mean pulled Chaucer’s trajectory out of a jagged edit history.</p>
 <ol start="9" type="1">
-<li>Question 8 filtered to one session before rolling, which is the only reason no <code>.over()</code> was needed. Compute the same 15-second rolling mean of <code>gap_ms</code> across the <em>entire</em> <code>klog</code>, first with <code>.over(c.id)</code> and then without it, and compare both versions restricted back down to the session from question 1 (its first 10 rows). Then count how many distinct <code>id</code>s have a keystroke landing inside that session’s own first 15 seconds of anchor time.</li>
+<li>Question 8 filtered to one session before rolling, which is the only reason no <code>.over()</code> was needed. In the first block, compute the same 15-second rolling mean of <code>gap_ms</code> across the <em>entire</em> <code>klog</code>, once with <code>.over(c.id)</code> and once without it, then restrict both versions back down to the session from question 1, join them, and print the first 10 rows. In the second block, count how many distinct <code>id</code>s have a keystroke landing inside that session’s own first 15 seconds of anchor time.</li>
 </ol>
-<div id="216a551d" class="cell" data-execution_count="16">
+<div id="8c4bdaa3" class="cell" data-execution_count="16">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>klog <span class="op">=</span> klog.with_columns(gap_ms <span class="op">=</span> c.gap.dt.total_milliseconds())</span>
@@ -1138,7 +1138,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<div id="709fca35" class="cell" data-execution_count="17">
+<div id="55e4df6e" class="cell" data-execution_count="17">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>first_press <span class="op">=</span> one[<span class="st">"press"</span>].<span class="bu">min</span>()</span>
@@ -1182,7 +1182,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="10" type="1">
 <li><code>.join_asof()</code> matches each row to the nearest value in another table rather than an exact one. Build a table of “resume” moments: every row from question 5’s pause filter, keeping only <code>id</code> and <code>press</code> (renamed <code>pause_press</code>). Asof-join all of <code>klog</code> to it, backward, matched by <code>id</code>, and compute <code>since_pause</code>, the milliseconds between each keystroke and the most recent pause that preceded it. Group by whether <code>since_pause</code> is under 1000 (recently resumed) and compare the average <code>dur</code> and count in each group, including the group where no pause has happened yet at all.</li>
 </ol>
-<div id="cc6846c3" class="cell" data-execution_count="18">
+<div id="2778e56f" class="cell" data-execution_count="18">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>resumes <span class="op">=</span> (</span>
@@ -1213,7 +1213,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stderr">
-<pre><code>/var/folders/5w/rxshd8hd6vv8mxsbj211mr_m0000gn/T/ipykernel_37504/4033767379.py:10: UserWarning: Sortedness of columns cannot be checked when 'by' groups provided</code></pre>
+<pre><code>/var/folders/5w/rxshd8hd6vv8mxsbj211mr_m0000gn/T/ipykernel_48394/4033767379.py:10: UserWarning: Sortedness of columns cannot be checked when 'by' groups provided</code></pre>
 </div>
 <div class="cell-output cell-output-display" data-execution_count="17">
 <div><style>
@@ -1260,9 +1260,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p><strong>Answer</strong>: <code>just_resumed</code> comes back with three groups, not two, since <code>since_pause</code> is <code>null</code> for the 42,678 keystrokes typed before anyone’s first pause. Those <code>null</code> rows hold the shortest average, 74.2 ms, keys typed within a second of resuming hold the longest, 80.8 ms, and everything typed a full second or more after resuming sits in between at 76.9 ms. That ordering is suggestive of a real restart cost, but read it cautiously: question 2 already showed hold times climbing as a session goes on, and by the time most people have hit even one 2-second pause they are already well past their first minute, so part of this gap could be question 2’s slowdown showing up again rather than a genuine cost of resuming. Separating the two would need controlling for elapsed time directly, which is more than this question asks for.</p>
 <ol start="11" type="1">
-<li><code>.join_where()</code> keeps every pair of rows satisfying a condition, not just an equality. Physical key rollover, pressing the next key before releasing the last one, would show up as one row’s <code>press</code> (renamed <code>press_right</code> after a self-join) falling before another row’s <code>release</code> while that same row’s <code>release_right</code> falls after the first row’s <code>press</code>. Add a row index to the session from question 1 and self-join it with <code>.join_where()</code> on that overlap condition, excluding a row pairing with itself. Then confirm the finding holds for the whole corpus by checking the smallest value <code>gap</code> ever takes.</li>
+<li><code>.join_where()</code> keeps every pair of rows satisfying a condition, not just an equality. Physical key rollover, pressing the next key before releasing the last one, would show up as one row’s <code>press</code> (renamed <code>press_right</code> after a self-join) falling before another row’s <code>release</code> while that same row’s <code>release_right</code> falls after the first row’s <code>press</code>. In the first block, add a row index to the session from question 1, self-join it with <code>.join_where()</code> on that overlap condition, excluding a row pairing with itself, and print the number of overlapping pairs. In the second block, confirm the finding holds for the whole corpus by checking the smallest value <code>gap</code> ever takes.</li>
 </ol>
-<div id="a0246741" class="cell" data-execution_count="19">
+<div id="0cea9891" class="cell" data-execution_count="19">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>indexed <span class="op">=</span> one.with_row_index(<span class="st">"rn"</span>)</span>
@@ -1301,7 +1301,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<div id="f51acb9f" class="cell" data-execution_count="20">
+<div id="ac262ec8" class="cell" data-execution_count="20">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>klog.select(c.gap.dt.total_milliseconds().<span class="bu">min</span>())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -2050,241 +2050,245 @@ document.addEventListener('DOMContentLoaded', function() {
 <span id="cb22-243"><a href="#cb22-243" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb22-244"><a href="#cb22-244" aria-hidden="true" tabindex="-1"></a><span class="ss">7. </span>Durations aggregate like any other number, which means a single extreme</span>
 <span id="cb22-245"><a href="#cb22-245" aria-hidden="true" tabindex="-1"></a>value can dominate one person's average even while barely touching the</span>
-<span id="cb22-246"><a href="#cb22-246" aria-hidden="true" tabindex="-1"></a>whole corpus's. Sort the per-person average from question 6's setup by</span>
-<span id="cb22-247"><a href="#cb22-247" aria-hidden="true" tabindex="-1"></a><span class="in">`avg_gap_ms`</span> descending and find the single largest <span class="in">`gap`</span> in all of <span class="in">`klog`</span></span>
-<span id="cb22-248"><a href="#cb22-248" aria-hidden="true" tabindex="-1"></a>alongside the <span class="in">`id`</span> it belongs to. Then compare the corpus-wide average gap</span>
-<span id="cb22-249"><a href="#cb22-249" aria-hidden="true" tabindex="-1"></a>with and without that one person's rows.</span>
-<span id="cb22-250"><a href="#cb22-250" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-253"><a href="#cb22-253" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb22-254"><a href="#cb22-254" aria-hidden="true" tabindex="-1"></a>avg_gap_ranked <span class="op">=</span> (</span>
-<span id="cb22-255"><a href="#cb22-255" aria-hidden="true" tabindex="-1"></a>    klog</span>
-<span id="cb22-256"><a href="#cb22-256" aria-hidden="true" tabindex="-1"></a>    .drop_nulls(c.gap)</span>
-<span id="cb22-257"><a href="#cb22-257" aria-hidden="true" tabindex="-1"></a>    .group_by(c.<span class="bu">id</span>)</span>
-<span id="cb22-258"><a href="#cb22-258" aria-hidden="true" tabindex="-1"></a>    .agg(</span>
-<span id="cb22-259"><a href="#cb22-259" aria-hidden="true" tabindex="-1"></a>        avg_gap_ms <span class="op">=</span> c.gap.dt.total_milliseconds().mean()</span>
-<span id="cb22-260"><a href="#cb22-260" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb22-261"><a href="#cb22-261" aria-hidden="true" tabindex="-1"></a>    .sort(c.avg_gap_ms, descending<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb22-262"><a href="#cb22-262" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb22-263"><a href="#cb22-263" aria-hidden="true" tabindex="-1"></a>avg_gap_ranked.head(<span class="dv">3</span>)</span>
-<span id="cb22-264"><a href="#cb22-264" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb22-265"><a href="#cb22-265" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-268"><a href="#cb22-268" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb22-269"><a href="#cb22-269" aria-hidden="true" tabindex="-1"></a>worst_gap <span class="op">=</span> klog.drop_nulls(c.gap).sort(c.gap, descending<span class="op">=</span><span class="va">True</span>).head(<span class="dv">1</span>)</span>
-<span id="cb22-270"><a href="#cb22-270" aria-hidden="true" tabindex="-1"></a>worst_id <span class="op">=</span> worst_gap[<span class="st">"id"</span>][<span class="dv">0</span>]</span>
-<span id="cb22-271"><a href="#cb22-271" aria-hidden="true" tabindex="-1"></a>worst_gap.select(c.<span class="bu">id</span>, c.press, c.gap, c.dur)</span>
-<span id="cb22-272"><a href="#cb22-272" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb22-273"><a href="#cb22-273" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-276"><a href="#cb22-276" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb22-277"><a href="#cb22-277" aria-hidden="true" tabindex="-1"></a>all_rows <span class="op">=</span> klog.drop_nulls(c.gap)</span>
-<span id="cb22-278"><a href="#cb22-278" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-279"><a href="#cb22-279" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb22-280"><a href="#cb22-280" aria-hidden="true" tabindex="-1"></a>    all_rows</span>
-<span id="cb22-281"><a href="#cb22-281" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
-<span id="cb22-282"><a href="#cb22-282" aria-hidden="true" tabindex="-1"></a>        excl <span class="op">=</span> c.<span class="bu">id</span> <span class="op">!=</span> worst_id</span>
-<span id="cb22-283"><a href="#cb22-283" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb22-284"><a href="#cb22-284" aria-hidden="true" tabindex="-1"></a>    .group_by(c.excl)</span>
-<span id="cb22-285"><a href="#cb22-285" aria-hidden="true" tabindex="-1"></a>    .agg(</span>
-<span id="cb22-286"><a href="#cb22-286" aria-hidden="true" tabindex="-1"></a>        avg_gap_ms <span class="op">=</span> c.gap.dt.total_milliseconds().mean().<span class="bu">round</span>(<span class="dv">1</span>),</span>
-<span id="cb22-287"><a href="#cb22-287" aria-hidden="true" tabindex="-1"></a>        n <span class="op">=</span> pl.<span class="bu">len</span>()</span>
-<span id="cb22-288"><a href="#cb22-288" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb22-289"><a href="#cb22-289" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb22-290"><a href="#cb22-290" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb22-291"><a href="#cb22-291" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-294"><a href="#cb22-294" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb22-295"><a href="#cb22-295" aria-hidden="true" tabindex="-1"></a>all_rows.select(</span>
-<span id="cb22-296"><a href="#cb22-296" aria-hidden="true" tabindex="-1"></a>    avg_gap_ms <span class="op">=</span> c.gap.dt.total_milliseconds().mean().<span class="bu">round</span>(<span class="dv">1</span>),</span>
-<span id="cb22-297"><a href="#cb22-297" aria-hidden="true" tabindex="-1"></a>    n <span class="op">=</span> pl.<span class="bu">len</span>()</span>
-<span id="cb22-298"><a href="#cb22-298" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb22-299"><a href="#cb22-299" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb22-300"><a href="#cb22-300" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-301"><a href="#cb22-301" aria-hidden="true" tabindex="-1"></a>**Answer**: The single largest gap in the whole corpus is 42 minutes 57.8</span>
-<span id="cb22-302"><a href="#cb22-302" aria-hidden="true" tabindex="-1"></a>seconds, one row belonging to <span class="in">`R_3m3ibeMP74Zoz1W`</span>, whose entire session</span>
-<span id="cb22-303"><a href="#cb22-303" aria-hidden="true" tabindex="-1"></a>lasts 52 minutes 30 seconds, so this one pause swallows 82% of their</span>
-<span id="cb22-304"><a href="#cb22-304" aria-hidden="true" tabindex="-1"></a>recorded time. That one row alone is enough to push this person's average</span>
-<span id="cb22-305"><a href="#cb22-305" aria-hidden="true" tabindex="-1"></a>gap (2209.6 ms) to the third highest of all 823 people, ahead of everyone</span>
-<span id="cb22-306"><a href="#cb22-306" aria-hidden="true" tabindex="-1"></a>who paused often but never paused this *long*. Yet the corpus-wide average</span>
-<span id="cb22-307"><a href="#cb22-307" aria-hidden="true" tabindex="-1"></a>across all 1,144,228 gaps is 457.7 ms, and dropping this one person's rows</span>
-<span id="cb22-308"><a href="#cb22-308" aria-hidden="true" tabindex="-1"></a>entirely moves it to only 455.6 ms. The same duration column is fragile at</span>
-<span id="cb22-309"><a href="#cb22-309" aria-hidden="true" tabindex="-1"></a>the individual level and almost immovable in bulk.</span>
-<span id="cb22-310"><a href="#cb22-310" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-311"><a href="#cb22-311" aria-hidden="true" tabindex="-1"></a><span class="ss">8. </span><span class="in">`.rolling_mean_by()`</span> smooths a series by a span of time rather than a</span>
-<span id="cb22-312"><a href="#cb22-312" aria-hidden="true" tabindex="-1"></a>count of rows, the right tool here since keystrokes are not evenly spaced.</span>
-<span id="cb22-313"><a href="#cb22-313" aria-hidden="true" tabindex="-1"></a>For the session from question 1, compute <span class="in">`gap`</span> in milliseconds and a 15-second</span>
-<span id="cb22-314"><a href="#cb22-314" aria-hidden="true" tabindex="-1"></a>rolling mean of it with <span class="in">`by=c.press`</span>. Plot the raw values in grey and the</span>
-<span id="cb22-315"><a href="#cb22-315" aria-hidden="true" tabindex="-1"></a>smoothed line in red against <span class="in">`press`</span>.</span>
-<span id="cb22-316"><a href="#cb22-316" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-319"><a href="#cb22-319" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb22-320"><a href="#cb22-320" aria-hidden="true" tabindex="-1"></a>one <span class="op">=</span> (</span>
-<span id="cb22-321"><a href="#cb22-321" aria-hidden="true" tabindex="-1"></a>    klog</span>
-<span id="cb22-322"><a href="#cb22-322" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.<span class="bu">id</span> <span class="op">==</span> one_id)</span>
-<span id="cb22-323"><a href="#cb22-323" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
-<span id="cb22-324"><a href="#cb22-324" aria-hidden="true" tabindex="-1"></a>        gap_ms <span class="op">=</span> c.gap.dt.total_milliseconds()</span>
-<span id="cb22-325"><a href="#cb22-325" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb22-246"><a href="#cb22-246" aria-hidden="true" tabindex="-1"></a>whole corpus's. In the first block, sort the per-person average from</span>
+<span id="cb22-247"><a href="#cb22-247" aria-hidden="true" tabindex="-1"></a>question 6's setup by <span class="in">`avg_gap_ms`</span> descending and print the top 3. In the</span>
+<span id="cb22-248"><a href="#cb22-248" aria-hidden="true" tabindex="-1"></a>second block, find the single largest <span class="in">`gap`</span> in all of <span class="in">`klog`</span> and print its</span>
+<span id="cb22-249"><a href="#cb22-249" aria-hidden="true" tabindex="-1"></a><span class="in">`id`</span>, <span class="in">`press`</span>, <span class="in">`gap`</span>, and <span class="in">`dur`</span>. In the third block, group all gap rows by</span>
+<span id="cb22-250"><a href="#cb22-250" aria-hidden="true" tabindex="-1"></a>whether the <span class="in">`id`</span> differs from that person's and compute the average gap and</span>
+<span id="cb22-251"><a href="#cb22-251" aria-hidden="true" tabindex="-1"></a>count in each group. In the fourth block, compute the corpus-wide average</span>
+<span id="cb22-252"><a href="#cb22-252" aria-hidden="true" tabindex="-1"></a>gap and count across every row.</span>
+<span id="cb22-253"><a href="#cb22-253" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-256"><a href="#cb22-256" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb22-257"><a href="#cb22-257" aria-hidden="true" tabindex="-1"></a>avg_gap_ranked <span class="op">=</span> (</span>
+<span id="cb22-258"><a href="#cb22-258" aria-hidden="true" tabindex="-1"></a>    klog</span>
+<span id="cb22-259"><a href="#cb22-259" aria-hidden="true" tabindex="-1"></a>    .drop_nulls(c.gap)</span>
+<span id="cb22-260"><a href="#cb22-260" aria-hidden="true" tabindex="-1"></a>    .group_by(c.<span class="bu">id</span>)</span>
+<span id="cb22-261"><a href="#cb22-261" aria-hidden="true" tabindex="-1"></a>    .agg(</span>
+<span id="cb22-262"><a href="#cb22-262" aria-hidden="true" tabindex="-1"></a>        avg_gap_ms <span class="op">=</span> c.gap.dt.total_milliseconds().mean()</span>
+<span id="cb22-263"><a href="#cb22-263" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb22-264"><a href="#cb22-264" aria-hidden="true" tabindex="-1"></a>    .sort(c.avg_gap_ms, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb22-265"><a href="#cb22-265" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-266"><a href="#cb22-266" aria-hidden="true" tabindex="-1"></a>avg_gap_ranked.head(<span class="dv">3</span>)</span>
+<span id="cb22-267"><a href="#cb22-267" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-268"><a href="#cb22-268" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-271"><a href="#cb22-271" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb22-272"><a href="#cb22-272" aria-hidden="true" tabindex="-1"></a>worst_gap <span class="op">=</span> klog.drop_nulls(c.gap).sort(c.gap, descending<span class="op">=</span><span class="va">True</span>).head(<span class="dv">1</span>)</span>
+<span id="cb22-273"><a href="#cb22-273" aria-hidden="true" tabindex="-1"></a>worst_id <span class="op">=</span> worst_gap[<span class="st">"id"</span>][<span class="dv">0</span>]</span>
+<span id="cb22-274"><a href="#cb22-274" aria-hidden="true" tabindex="-1"></a>worst_gap.select(c.<span class="bu">id</span>, c.press, c.gap, c.dur)</span>
+<span id="cb22-275"><a href="#cb22-275" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-276"><a href="#cb22-276" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-279"><a href="#cb22-279" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb22-280"><a href="#cb22-280" aria-hidden="true" tabindex="-1"></a>all_rows <span class="op">=</span> klog.drop_nulls(c.gap)</span>
+<span id="cb22-281"><a href="#cb22-281" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-282"><a href="#cb22-282" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb22-283"><a href="#cb22-283" aria-hidden="true" tabindex="-1"></a>    all_rows</span>
+<span id="cb22-284"><a href="#cb22-284" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb22-285"><a href="#cb22-285" aria-hidden="true" tabindex="-1"></a>        excl <span class="op">=</span> c.<span class="bu">id</span> <span class="op">!=</span> worst_id</span>
+<span id="cb22-286"><a href="#cb22-286" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb22-287"><a href="#cb22-287" aria-hidden="true" tabindex="-1"></a>    .group_by(c.excl)</span>
+<span id="cb22-288"><a href="#cb22-288" aria-hidden="true" tabindex="-1"></a>    .agg(</span>
+<span id="cb22-289"><a href="#cb22-289" aria-hidden="true" tabindex="-1"></a>        avg_gap_ms <span class="op">=</span> c.gap.dt.total_milliseconds().mean().<span class="bu">round</span>(<span class="dv">1</span>),</span>
+<span id="cb22-290"><a href="#cb22-290" aria-hidden="true" tabindex="-1"></a>        n <span class="op">=</span> pl.<span class="bu">len</span>()</span>
+<span id="cb22-291"><a href="#cb22-291" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb22-292"><a href="#cb22-292" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-293"><a href="#cb22-293" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-294"><a href="#cb22-294" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-297"><a href="#cb22-297" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb22-298"><a href="#cb22-298" aria-hidden="true" tabindex="-1"></a>all_rows.select(</span>
+<span id="cb22-299"><a href="#cb22-299" aria-hidden="true" tabindex="-1"></a>    avg_gap_ms <span class="op">=</span> c.gap.dt.total_milliseconds().mean().<span class="bu">round</span>(<span class="dv">1</span>),</span>
+<span id="cb22-300"><a href="#cb22-300" aria-hidden="true" tabindex="-1"></a>    n <span class="op">=</span> pl.<span class="bu">len</span>()</span>
+<span id="cb22-301"><a href="#cb22-301" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-302"><a href="#cb22-302" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-303"><a href="#cb22-303" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-304"><a href="#cb22-304" aria-hidden="true" tabindex="-1"></a>**Answer**: The single largest gap in the whole corpus is 42 minutes 57.8</span>
+<span id="cb22-305"><a href="#cb22-305" aria-hidden="true" tabindex="-1"></a>seconds, one row belonging to <span class="in">`R_3m3ibeMP74Zoz1W`</span>, whose entire session</span>
+<span id="cb22-306"><a href="#cb22-306" aria-hidden="true" tabindex="-1"></a>lasts 52 minutes 30 seconds, so this one pause swallows 82% of their</span>
+<span id="cb22-307"><a href="#cb22-307" aria-hidden="true" tabindex="-1"></a>recorded time. That one row alone is enough to push this person's average</span>
+<span id="cb22-308"><a href="#cb22-308" aria-hidden="true" tabindex="-1"></a>gap (2209.6 ms) to the third highest of all 823 people, ahead of everyone</span>
+<span id="cb22-309"><a href="#cb22-309" aria-hidden="true" tabindex="-1"></a>who paused often but never paused this *long*. Yet the corpus-wide average</span>
+<span id="cb22-310"><a href="#cb22-310" aria-hidden="true" tabindex="-1"></a>across all 1,144,228 gaps is 457.7 ms, and dropping this one person's rows</span>
+<span id="cb22-311"><a href="#cb22-311" aria-hidden="true" tabindex="-1"></a>entirely moves it to only 455.6 ms. The same duration column is fragile at</span>
+<span id="cb22-312"><a href="#cb22-312" aria-hidden="true" tabindex="-1"></a>the individual level and almost immovable in bulk.</span>
+<span id="cb22-313"><a href="#cb22-313" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-314"><a href="#cb22-314" aria-hidden="true" tabindex="-1"></a><span class="ss">8. </span><span class="in">`.rolling_mean_by()`</span> smooths a series by a span of time rather than a</span>
+<span id="cb22-315"><a href="#cb22-315" aria-hidden="true" tabindex="-1"></a>count of rows, the right tool here since keystrokes are not evenly spaced.</span>
+<span id="cb22-316"><a href="#cb22-316" aria-hidden="true" tabindex="-1"></a>For the session from question 1, compute <span class="in">`gap`</span> in milliseconds and a 15-second</span>
+<span id="cb22-317"><a href="#cb22-317" aria-hidden="true" tabindex="-1"></a>rolling mean of it with <span class="in">`by=c.press`</span>. Plot the raw values in grey and the</span>
+<span id="cb22-318"><a href="#cb22-318" aria-hidden="true" tabindex="-1"></a>smoothed line in red against <span class="in">`press`</span>.</span>
+<span id="cb22-319"><a href="#cb22-319" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-322"><a href="#cb22-322" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb22-323"><a href="#cb22-323" aria-hidden="true" tabindex="-1"></a>one <span class="op">=</span> (</span>
+<span id="cb22-324"><a href="#cb22-324" aria-hidden="true" tabindex="-1"></a>    klog</span>
+<span id="cb22-325"><a href="#cb22-325" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.<span class="bu">id</span> <span class="op">==</span> one_id)</span>
 <span id="cb22-326"><a href="#cb22-326" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
-<span id="cb22-327"><a href="#cb22-327" aria-hidden="true" tabindex="-1"></a>        gap_smooth <span class="op">=</span> c.gap_ms.rolling_mean_by(by<span class="op">=</span>c.press, window_size<span class="op">=</span><span class="st">"15s"</span>)</span>
+<span id="cb22-327"><a href="#cb22-327" aria-hidden="true" tabindex="-1"></a>        gap_ms <span class="op">=</span> c.gap.dt.total_milliseconds()</span>
 <span id="cb22-328"><a href="#cb22-328" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb22-329"><a href="#cb22-329" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb22-330"><a href="#cb22-330" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-331"><a href="#cb22-331" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb22-332"><a href="#cb22-332" aria-hidden="true" tabindex="-1"></a>    one</span>
-<span id="cb22-333"><a href="#cb22-333" aria-hidden="true" tabindex="-1"></a>    .pipe(ggplot, aes(c.press, c.gap_ms))</span>
-<span id="cb22-334"><a href="#cb22-334" aria-hidden="true" tabindex="-1"></a>    .geom_line(color<span class="op">=</span><span class="st">"grey"</span>)</span>
-<span id="cb22-335"><a href="#cb22-335" aria-hidden="true" tabindex="-1"></a>    .geom_line(aes(y<span class="op">=</span>c.gap_smooth), color<span class="op">=</span><span class="st">"red"</span>)</span>
-<span id="cb22-336"><a href="#cb22-336" aria-hidden="true" tabindex="-1"></a>    .scale_x_datetime(date_labels<span class="op">=</span><span class="st">"%M:%S"</span>)</span>
-<span id="cb22-337"><a href="#cb22-337" aria-hidden="true" tabindex="-1"></a>    .labs(</span>
-<span id="cb22-338"><a href="#cb22-338" aria-hidden="true" tabindex="-1"></a>        title<span class="op">=</span><span class="st">"Inter-Key Gap, Raw and 15-Second Rolling Mean"</span>,</span>
-<span id="cb22-339"><a href="#cb22-339" aria-hidden="true" tabindex="-1"></a>        x<span class="op">=</span><span class="st">"Press Time (mm:ss)"</span>,</span>
-<span id="cb22-340"><a href="#cb22-340" aria-hidden="true" tabindex="-1"></a>        y<span class="op">=</span><span class="st">"Gap (ms)"</span></span>
-<span id="cb22-341"><a href="#cb22-341" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb22-342"><a href="#cb22-342" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb22-343"><a href="#cb22-343" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb22-344"><a href="#cb22-344" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-345"><a href="#cb22-345" aria-hidden="true" tabindex="-1"></a>The red line surfaces the handful of real hesitations inside all the grey</span>
-<span id="cb22-346"><a href="#cb22-346" aria-hidden="true" tabindex="-1"></a>jitter, the same way the book's rolling mean pulled Chaucer's trajectory out</span>
-<span id="cb22-347"><a href="#cb22-347" aria-hidden="true" tabindex="-1"></a>of a jagged edit history.</span>
-<span id="cb22-348"><a href="#cb22-348" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-349"><a href="#cb22-349" aria-hidden="true" tabindex="-1"></a><span class="ss">9. </span>Question 8 filtered to one session before rolling, which is the only</span>
-<span id="cb22-350"><a href="#cb22-350" aria-hidden="true" tabindex="-1"></a>reason no <span class="in">`.over()`</span> was needed. Compute the same 15-second rolling mean of</span>
-<span id="cb22-351"><a href="#cb22-351" aria-hidden="true" tabindex="-1"></a><span class="in">`gap_ms`</span> across the *entire* <span class="in">`klog`</span>, first with <span class="in">`.over(c.id)`</span> and then</span>
-<span id="cb22-352"><a href="#cb22-352" aria-hidden="true" tabindex="-1"></a>without it, and compare both versions restricted back down to the session</span>
-<span id="cb22-353"><a href="#cb22-353" aria-hidden="true" tabindex="-1"></a>from question 1 (its first 10 rows). Then count how many distinct <span class="in">`id`</span>s</span>
-<span id="cb22-354"><a href="#cb22-354" aria-hidden="true" tabindex="-1"></a>have a keystroke landing inside that session's own first 15 seconds of</span>
-<span id="cb22-355"><a href="#cb22-355" aria-hidden="true" tabindex="-1"></a>anchor time.</span>
-<span id="cb22-356"><a href="#cb22-356" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-359"><a href="#cb22-359" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb22-360"><a href="#cb22-360" aria-hidden="true" tabindex="-1"></a>klog <span class="op">=</span> klog.with_columns(gap_ms <span class="op">=</span> c.gap.dt.total_milliseconds())</span>
-<span id="cb22-361"><a href="#cb22-361" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-362"><a href="#cb22-362" aria-hidden="true" tabindex="-1"></a>correct <span class="op">=</span> (</span>
-<span id="cb22-363"><a href="#cb22-363" aria-hidden="true" tabindex="-1"></a>    klog</span>
-<span id="cb22-364"><a href="#cb22-364" aria-hidden="true" tabindex="-1"></a>    .sort(c.press)</span>
-<span id="cb22-365"><a href="#cb22-365" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
-<span id="cb22-366"><a href="#cb22-366" aria-hidden="true" tabindex="-1"></a>        gap_smooth_grouped <span class="op">=</span> c.gap_ms.rolling_mean_by(by<span class="op">=</span>c.press, window_size<span class="op">=</span><span class="st">"15s"</span>).over(c.<span class="bu">id</span>)</span>
-<span id="cb22-367"><a href="#cb22-367" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb22-368"><a href="#cb22-368" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.<span class="bu">id</span> <span class="op">==</span> one_id)</span>
-<span id="cb22-369"><a href="#cb22-369" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb22-370"><a href="#cb22-370" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-371"><a href="#cb22-371" aria-hidden="true" tabindex="-1"></a>wrong <span class="op">=</span> (</span>
-<span id="cb22-372"><a href="#cb22-372" aria-hidden="true" tabindex="-1"></a>    klog</span>
-<span id="cb22-373"><a href="#cb22-373" aria-hidden="true" tabindex="-1"></a>    .sort(c.press)</span>
-<span id="cb22-374"><a href="#cb22-374" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
-<span id="cb22-375"><a href="#cb22-375" aria-hidden="true" tabindex="-1"></a>        gap_smooth_pooled <span class="op">=</span> c.gap_ms.rolling_mean_by(by<span class="op">=</span>c.press, window_size<span class="op">=</span><span class="st">"15s"</span>)</span>
-<span id="cb22-376"><a href="#cb22-376" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb22-377"><a href="#cb22-377" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.<span class="bu">id</span> <span class="op">==</span> one_id)</span>
-<span id="cb22-378"><a href="#cb22-378" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb22-379"><a href="#cb22-379" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-380"><a href="#cb22-380" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb22-381"><a href="#cb22-381" aria-hidden="true" tabindex="-1"></a>    correct</span>
-<span id="cb22-382"><a href="#cb22-382" aria-hidden="true" tabindex="-1"></a>    .select(c.press, c.gap_ms, c.gap_smooth_grouped)</span>
-<span id="cb22-383"><a href="#cb22-383" aria-hidden="true" tabindex="-1"></a>    .join(wrong.select(c.press, c.gap_smooth_pooled), on<span class="op">=</span><span class="st">"press"</span>)</span>
-<span id="cb22-384"><a href="#cb22-384" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">10</span>)</span>
-<span id="cb22-385"><a href="#cb22-385" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb22-386"><a href="#cb22-386" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb22-387"><a href="#cb22-387" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-390"><a href="#cb22-390" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb22-391"><a href="#cb22-391" aria-hidden="true" tabindex="-1"></a>first_press <span class="op">=</span> one[<span class="st">"press"</span>].<span class="bu">min</span>()</span>
-<span id="cb22-392"><a href="#cb22-392" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-393"><a href="#cb22-393" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb22-394"><a href="#cb22-394" aria-hidden="true" tabindex="-1"></a>    klog</span>
-<span id="cb22-395"><a href="#cb22-395" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(</span>
-<span id="cb22-396"><a href="#cb22-396" aria-hidden="true" tabindex="-1"></a>        (c.press <span class="op">&gt;=</span> first_press) <span class="op">&amp;</span> (c.press <span class="op">&lt;</span> first_press <span class="op">+</span> pl.duration(seconds<span class="op">=</span><span class="dv">15</span>))</span>
-<span id="cb22-397"><a href="#cb22-397" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb22-398"><a href="#cb22-398" aria-hidden="true" tabindex="-1"></a>    .select(c.<span class="bu">id</span>.n_unique())</span>
-<span id="cb22-399"><a href="#cb22-399" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb22-400"><a href="#cb22-400" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb22-401"><a href="#cb22-401" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-402"><a href="#cb22-402" aria-hidden="true" tabindex="-1"></a>**Answer**: Grouped, the smoothed gap for this session moves the way</span>
-<span id="cb22-403"><a href="#cb22-403" aria-hidden="true" tabindex="-1"></a>question 8's plot showed, tracking real hesitations. Pooled, it barely</span>
-<span id="cb22-404"><a href="#cb22-404" aria-hidden="true" tabindex="-1"></a>moves at all, sitting near 164-170 ms almost every row, because the anchor</span>
-<span id="cb22-405"><a href="#cb22-405" aria-hidden="true" tabindex="-1"></a>from question 1 puts *everyone's* first few seconds at the same clock</span>
-<span id="cb22-406"><a href="#cb22-406" aria-hidden="true" tabindex="-1"></a>reading. 393 different people have a keystroke inside just this one</span>
-<span id="cb22-407"><a href="#cb22-407" aria-hidden="true" tabindex="-1"></a>session's opening 15 seconds, so the ungrouped rolling mean is averaging</span>
-<span id="cb22-408"><a href="#cb22-408" aria-hidden="true" tabindex="-1"></a>this person together with 392 strangers who happen to share their elapsed</span>
-<span id="cb22-409"><a href="#cb22-409" aria-hidden="true" tabindex="-1"></a>time, not their session. <span class="in">`.over(c.id)`</span> is not a nicety here; without it the</span>
-<span id="cb22-410"><a href="#cb22-410" aria-hidden="true" tabindex="-1"></a>result is a different, meaningless quantity that still runs without error.</span>
-<span id="cb22-411"><a href="#cb22-411" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-412"><a href="#cb22-412" aria-hidden="true" tabindex="-1"></a><span class="ss">10. </span><span class="in">`.join_asof()`</span> matches each row to the nearest value in another table</span>
-<span id="cb22-413"><a href="#cb22-413" aria-hidden="true" tabindex="-1"></a>rather than an exact one. Build a table of "resume" moments: every row from</span>
-<span id="cb22-414"><a href="#cb22-414" aria-hidden="true" tabindex="-1"></a>question 5's pause filter, keeping only <span class="in">`id`</span> and <span class="in">`press`</span> (renamed</span>
-<span id="cb22-415"><a href="#cb22-415" aria-hidden="true" tabindex="-1"></a><span class="in">`pause_press`</span>). Asof-join all of <span class="in">`klog`</span> to it, backward, matched by <span class="in">`id`</span>,</span>
-<span id="cb22-416"><a href="#cb22-416" aria-hidden="true" tabindex="-1"></a>and compute <span class="in">`since_pause`</span>, the milliseconds between each keystroke and the</span>
-<span id="cb22-417"><a href="#cb22-417" aria-hidden="true" tabindex="-1"></a>most recent pause that preceded it. Group by whether <span class="in">`since_pause`</span> is under</span>
-<span id="cb22-418"><a href="#cb22-418" aria-hidden="true" tabindex="-1"></a>1000 (recently resumed) and compare the average <span class="in">`dur`</span> and count in each</span>
-<span id="cb22-419"><a href="#cb22-419" aria-hidden="true" tabindex="-1"></a>group, including the group where no pause has happened yet at all.</span>
-<span id="cb22-420"><a href="#cb22-420" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-423"><a href="#cb22-423" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb22-424"><a href="#cb22-424" aria-hidden="true" tabindex="-1"></a>resumes <span class="op">=</span> (</span>
-<span id="cb22-425"><a href="#cb22-425" aria-hidden="true" tabindex="-1"></a>    pauses</span>
-<span id="cb22-426"><a href="#cb22-426" aria-hidden="true" tabindex="-1"></a>    .select(c.<span class="bu">id</span>, pause_press <span class="op">=</span> c.press)</span>
-<span id="cb22-427"><a href="#cb22-427" aria-hidden="true" tabindex="-1"></a>    .sort(c.<span class="bu">id</span>, c.pause_press)</span>
-<span id="cb22-428"><a href="#cb22-428" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb22-429"><a href="#cb22-429" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-430"><a href="#cb22-430" aria-hidden="true" tabindex="-1"></a>with_resume <span class="op">=</span> (</span>
-<span id="cb22-431"><a href="#cb22-431" aria-hidden="true" tabindex="-1"></a>    klog</span>
-<span id="cb22-432"><a href="#cb22-432" aria-hidden="true" tabindex="-1"></a>    .sort(c.<span class="bu">id</span>, c.press)</span>
-<span id="cb22-433"><a href="#cb22-433" aria-hidden="true" tabindex="-1"></a>    .join_asof(resumes, left_on<span class="op">=</span><span class="st">"press"</span>, right_on<span class="op">=</span><span class="st">"pause_press"</span>, by<span class="op">=</span><span class="st">"id"</span>, strategy<span class="op">=</span><span class="st">"backward"</span>)</span>
-<span id="cb22-434"><a href="#cb22-434" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
-<span id="cb22-435"><a href="#cb22-435" aria-hidden="true" tabindex="-1"></a>        since_pause <span class="op">=</span> (c.press <span class="op">-</span> c.pause_press).dt.total_milliseconds()</span>
-<span id="cb22-436"><a href="#cb22-436" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb22-437"><a href="#cb22-437" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb22-438"><a href="#cb22-438" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-439"><a href="#cb22-439" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb22-440"><a href="#cb22-440" aria-hidden="true" tabindex="-1"></a>    with_resume</span>
-<span id="cb22-441"><a href="#cb22-441" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
-<span id="cb22-442"><a href="#cb22-442" aria-hidden="true" tabindex="-1"></a>        just_resumed <span class="op">=</span> c.since_pause <span class="op">&lt;</span> <span class="dv">1000</span></span>
-<span id="cb22-443"><a href="#cb22-443" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb22-444"><a href="#cb22-444" aria-hidden="true" tabindex="-1"></a>    .group_by(c.just_resumed)</span>
-<span id="cb22-445"><a href="#cb22-445" aria-hidden="true" tabindex="-1"></a>    .agg(</span>
-<span id="cb22-446"><a href="#cb22-446" aria-hidden="true" tabindex="-1"></a>        n <span class="op">=</span> pl.<span class="bu">len</span>(),</span>
-<span id="cb22-447"><a href="#cb22-447" aria-hidden="true" tabindex="-1"></a>        avg_dur <span class="op">=</span> c.dur.mean().<span class="bu">round</span>(<span class="dv">1</span>)</span>
-<span id="cb22-448"><a href="#cb22-448" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb22-449"><a href="#cb22-449" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb22-450"><a href="#cb22-450" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb22-451"><a href="#cb22-451" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-452"><a href="#cb22-452" aria-hidden="true" tabindex="-1"></a>**Answer**: <span class="in">`just_resumed`</span> comes back with three groups, not two, since</span>
-<span id="cb22-453"><a href="#cb22-453" aria-hidden="true" tabindex="-1"></a><span class="in">`since_pause`</span> is <span class="in">`null`</span> for the 42,678 keystrokes typed before anyone's</span>
-<span id="cb22-454"><a href="#cb22-454" aria-hidden="true" tabindex="-1"></a>first pause. Those <span class="in">`null`</span> rows hold the shortest average, 74.2 ms, keys</span>
-<span id="cb22-455"><a href="#cb22-455" aria-hidden="true" tabindex="-1"></a>typed within a second of resuming hold the longest, 80.8 ms, and everything</span>
-<span id="cb22-456"><a href="#cb22-456" aria-hidden="true" tabindex="-1"></a>typed a full second or more after resuming sits in between at 76.9 ms. That</span>
-<span id="cb22-457"><a href="#cb22-457" aria-hidden="true" tabindex="-1"></a>ordering is suggestive of a real restart cost, but read it cautiously:</span>
-<span id="cb22-458"><a href="#cb22-458" aria-hidden="true" tabindex="-1"></a>question 2 already showed hold times climbing as a session goes on, and by</span>
-<span id="cb22-459"><a href="#cb22-459" aria-hidden="true" tabindex="-1"></a>the time most people have hit even one 2-second pause they are already well</span>
-<span id="cb22-460"><a href="#cb22-460" aria-hidden="true" tabindex="-1"></a>past their first minute, so part of this gap could be question 2's slowdown</span>
-<span id="cb22-461"><a href="#cb22-461" aria-hidden="true" tabindex="-1"></a>showing up again rather than a genuine cost of resuming. Separating the two</span>
-<span id="cb22-462"><a href="#cb22-462" aria-hidden="true" tabindex="-1"></a>would need controlling for elapsed time directly, which is more than this</span>
-<span id="cb22-463"><a href="#cb22-463" aria-hidden="true" tabindex="-1"></a>question asks for.</span>
-<span id="cb22-464"><a href="#cb22-464" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-465"><a href="#cb22-465" aria-hidden="true" tabindex="-1"></a><span class="ss">11. </span><span class="in">`.join_where()`</span> keeps every pair of rows satisfying a condition, not</span>
-<span id="cb22-466"><a href="#cb22-466" aria-hidden="true" tabindex="-1"></a>just an equality. Physical key rollover, pressing the next key before</span>
-<span id="cb22-467"><a href="#cb22-467" aria-hidden="true" tabindex="-1"></a>releasing the last one, would show up as one row's <span class="in">`press`</span> (renamed</span>
-<span id="cb22-468"><a href="#cb22-468" aria-hidden="true" tabindex="-1"></a><span class="in">`press_right`</span> after a self-join) falling before another row's <span class="in">`release`</span></span>
-<span id="cb22-469"><a href="#cb22-469" aria-hidden="true" tabindex="-1"></a>while that same row's <span class="in">`release_right`</span> falls after the first row's <span class="in">`press`</span>.</span>
-<span id="cb22-470"><a href="#cb22-470" aria-hidden="true" tabindex="-1"></a>Add a row index to the session from question 1 and self-join it with</span>
-<span id="cb22-471"><a href="#cb22-471" aria-hidden="true" tabindex="-1"></a><span class="in">`.join_where()`</span> on that overlap condition, excluding a row pairing with</span>
-<span id="cb22-472"><a href="#cb22-472" aria-hidden="true" tabindex="-1"></a>itself. Then confirm the finding holds for the whole corpus by checking the</span>
-<span id="cb22-473"><a href="#cb22-473" aria-hidden="true" tabindex="-1"></a>smallest value <span class="in">`gap`</span> ever takes.</span>
-<span id="cb22-474"><a href="#cb22-474" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-477"><a href="#cb22-477" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb22-478"><a href="#cb22-478" aria-hidden="true" tabindex="-1"></a>indexed <span class="op">=</span> one.with_row_index(<span class="st">"rn"</span>)</span>
-<span id="cb22-479"><a href="#cb22-479" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-480"><a href="#cb22-480" aria-hidden="true" tabindex="-1"></a>overlaps <span class="op">=</span> indexed.join_where(</span>
-<span id="cb22-481"><a href="#cb22-481" aria-hidden="true" tabindex="-1"></a>    indexed,</span>
-<span id="cb22-482"><a href="#cb22-482" aria-hidden="true" tabindex="-1"></a>    (c.press_right <span class="op">&lt;</span> c.release) <span class="op">&amp;</span> (c.release_right <span class="op">&gt;</span> c.press) <span class="op">&amp;</span> (c.rn <span class="op">!=</span> c.rn_right)</span>
-<span id="cb22-483"><a href="#cb22-483" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb22-484"><a href="#cb22-484" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-485"><a href="#cb22-485" aria-hidden="true" tabindex="-1"></a>overlaps.select(pl.<span class="bu">len</span>())</span>
-<span id="cb22-486"><a href="#cb22-486" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb22-487"><a href="#cb22-487" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-490"><a href="#cb22-490" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb22-491"><a href="#cb22-491" aria-hidden="true" tabindex="-1"></a>klog.select(c.gap.dt.total_milliseconds().<span class="bu">min</span>())</span>
-<span id="cb22-492"><a href="#cb22-492" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb22-493"><a href="#cb22-493" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-494"><a href="#cb22-494" aria-hidden="true" tabindex="-1"></a>**Answer**: Zero overlapping pairs in this session, and the corpus-wide</span>
-<span id="cb22-495"><a href="#cb22-495" aria-hidden="true" tabindex="-1"></a>minimum <span class="in">`gap`</span> is exactly 0 milliseconds, never negative, which is the same</span>
-<span id="cb22-496"><a href="#cb22-496" aria-hidden="true" tabindex="-1"></a>finding stated the fast way: nobody in this dataset ever presses a key</span>
-<span id="cb22-497"><a href="#cb22-497" aria-hidden="true" tabindex="-1"></a>before releasing the last one. Running the full interval self-join on all</span>
-<span id="cb22-498"><a href="#cb22-498" aria-hidden="true" tabindex="-1"></a>823 sessions to double check would mean joining some sessions against</span>
-<span id="cb22-499"><a href="#cb22-499" aria-hidden="true" tabindex="-1"></a>themselves at over a thousand rows apiece, far more computation than the</span>
-<span id="cb22-500"><a href="#cb22-500" aria-hidden="true" tabindex="-1"></a>single-column minimum needed to answer the same question.</span>
+<span id="cb22-329"><a href="#cb22-329" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb22-330"><a href="#cb22-330" aria-hidden="true" tabindex="-1"></a>        gap_smooth <span class="op">=</span> c.gap_ms.rolling_mean_by(by<span class="op">=</span>c.press, window_size<span class="op">=</span><span class="st">"15s"</span>)</span>
+<span id="cb22-331"><a href="#cb22-331" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb22-332"><a href="#cb22-332" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-333"><a href="#cb22-333" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-334"><a href="#cb22-334" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb22-335"><a href="#cb22-335" aria-hidden="true" tabindex="-1"></a>    one</span>
+<span id="cb22-336"><a href="#cb22-336" aria-hidden="true" tabindex="-1"></a>    .pipe(ggplot, aes(c.press, c.gap_ms))</span>
+<span id="cb22-337"><a href="#cb22-337" aria-hidden="true" tabindex="-1"></a>    .geom_line(color<span class="op">=</span><span class="st">"grey"</span>)</span>
+<span id="cb22-338"><a href="#cb22-338" aria-hidden="true" tabindex="-1"></a>    .geom_line(aes(y<span class="op">=</span>c.gap_smooth), color<span class="op">=</span><span class="st">"red"</span>)</span>
+<span id="cb22-339"><a href="#cb22-339" aria-hidden="true" tabindex="-1"></a>    .scale_x_datetime(date_labels<span class="op">=</span><span class="st">"%M:%S"</span>)</span>
+<span id="cb22-340"><a href="#cb22-340" aria-hidden="true" tabindex="-1"></a>    .labs(</span>
+<span id="cb22-341"><a href="#cb22-341" aria-hidden="true" tabindex="-1"></a>        title<span class="op">=</span><span class="st">"Inter-Key Gap, Raw and 15-Second Rolling Mean"</span>,</span>
+<span id="cb22-342"><a href="#cb22-342" aria-hidden="true" tabindex="-1"></a>        x<span class="op">=</span><span class="st">"Press Time (mm:ss)"</span>,</span>
+<span id="cb22-343"><a href="#cb22-343" aria-hidden="true" tabindex="-1"></a>        y<span class="op">=</span><span class="st">"Gap (ms)"</span></span>
+<span id="cb22-344"><a href="#cb22-344" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb22-345"><a href="#cb22-345" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-346"><a href="#cb22-346" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-347"><a href="#cb22-347" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-348"><a href="#cb22-348" aria-hidden="true" tabindex="-1"></a>The red line surfaces the handful of real hesitations inside all the grey</span>
+<span id="cb22-349"><a href="#cb22-349" aria-hidden="true" tabindex="-1"></a>jitter, the same way the book's rolling mean pulled Chaucer's trajectory out</span>
+<span id="cb22-350"><a href="#cb22-350" aria-hidden="true" tabindex="-1"></a>of a jagged edit history.</span>
+<span id="cb22-351"><a href="#cb22-351" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-352"><a href="#cb22-352" aria-hidden="true" tabindex="-1"></a><span class="ss">9. </span>Question 8 filtered to one session before rolling, which is the only</span>
+<span id="cb22-353"><a href="#cb22-353" aria-hidden="true" tabindex="-1"></a>reason no <span class="in">`.over()`</span> was needed. In the first block, compute the same</span>
+<span id="cb22-354"><a href="#cb22-354" aria-hidden="true" tabindex="-1"></a>15-second rolling mean of <span class="in">`gap_ms`</span> across the *entire* <span class="in">`klog`</span>, once with</span>
+<span id="cb22-355"><a href="#cb22-355" aria-hidden="true" tabindex="-1"></a><span class="in">`.over(c.id)`</span> and once without it, then restrict both versions back down to</span>
+<span id="cb22-356"><a href="#cb22-356" aria-hidden="true" tabindex="-1"></a>the session from question 1, join them, and print the first 10 rows. In the</span>
+<span id="cb22-357"><a href="#cb22-357" aria-hidden="true" tabindex="-1"></a>second block, count how many distinct <span class="in">`id`</span>s have a keystroke landing inside</span>
+<span id="cb22-358"><a href="#cb22-358" aria-hidden="true" tabindex="-1"></a>that session's own first 15 seconds of anchor time.</span>
+<span id="cb22-359"><a href="#cb22-359" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-362"><a href="#cb22-362" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb22-363"><a href="#cb22-363" aria-hidden="true" tabindex="-1"></a>klog <span class="op">=</span> klog.with_columns(gap_ms <span class="op">=</span> c.gap.dt.total_milliseconds())</span>
+<span id="cb22-364"><a href="#cb22-364" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-365"><a href="#cb22-365" aria-hidden="true" tabindex="-1"></a>correct <span class="op">=</span> (</span>
+<span id="cb22-366"><a href="#cb22-366" aria-hidden="true" tabindex="-1"></a>    klog</span>
+<span id="cb22-367"><a href="#cb22-367" aria-hidden="true" tabindex="-1"></a>    .sort(c.press)</span>
+<span id="cb22-368"><a href="#cb22-368" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb22-369"><a href="#cb22-369" aria-hidden="true" tabindex="-1"></a>        gap_smooth_grouped <span class="op">=</span> c.gap_ms.rolling_mean_by(by<span class="op">=</span>c.press, window_size<span class="op">=</span><span class="st">"15s"</span>).over(c.<span class="bu">id</span>)</span>
+<span id="cb22-370"><a href="#cb22-370" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb22-371"><a href="#cb22-371" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.<span class="bu">id</span> <span class="op">==</span> one_id)</span>
+<span id="cb22-372"><a href="#cb22-372" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-373"><a href="#cb22-373" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-374"><a href="#cb22-374" aria-hidden="true" tabindex="-1"></a>wrong <span class="op">=</span> (</span>
+<span id="cb22-375"><a href="#cb22-375" aria-hidden="true" tabindex="-1"></a>    klog</span>
+<span id="cb22-376"><a href="#cb22-376" aria-hidden="true" tabindex="-1"></a>    .sort(c.press)</span>
+<span id="cb22-377"><a href="#cb22-377" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb22-378"><a href="#cb22-378" aria-hidden="true" tabindex="-1"></a>        gap_smooth_pooled <span class="op">=</span> c.gap_ms.rolling_mean_by(by<span class="op">=</span>c.press, window_size<span class="op">=</span><span class="st">"15s"</span>)</span>
+<span id="cb22-379"><a href="#cb22-379" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb22-380"><a href="#cb22-380" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.<span class="bu">id</span> <span class="op">==</span> one_id)</span>
+<span id="cb22-381"><a href="#cb22-381" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-382"><a href="#cb22-382" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-383"><a href="#cb22-383" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb22-384"><a href="#cb22-384" aria-hidden="true" tabindex="-1"></a>    correct</span>
+<span id="cb22-385"><a href="#cb22-385" aria-hidden="true" tabindex="-1"></a>    .select(c.press, c.gap_ms, c.gap_smooth_grouped)</span>
+<span id="cb22-386"><a href="#cb22-386" aria-hidden="true" tabindex="-1"></a>    .join(wrong.select(c.press, c.gap_smooth_pooled), on<span class="op">=</span><span class="st">"press"</span>)</span>
+<span id="cb22-387"><a href="#cb22-387" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">10</span>)</span>
+<span id="cb22-388"><a href="#cb22-388" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-389"><a href="#cb22-389" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-390"><a href="#cb22-390" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-393"><a href="#cb22-393" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb22-394"><a href="#cb22-394" aria-hidden="true" tabindex="-1"></a>first_press <span class="op">=</span> one[<span class="st">"press"</span>].<span class="bu">min</span>()</span>
+<span id="cb22-395"><a href="#cb22-395" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-396"><a href="#cb22-396" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb22-397"><a href="#cb22-397" aria-hidden="true" tabindex="-1"></a>    klog</span>
+<span id="cb22-398"><a href="#cb22-398" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(</span>
+<span id="cb22-399"><a href="#cb22-399" aria-hidden="true" tabindex="-1"></a>        (c.press <span class="op">&gt;=</span> first_press) <span class="op">&amp;</span> (c.press <span class="op">&lt;</span> first_press <span class="op">+</span> pl.duration(seconds<span class="op">=</span><span class="dv">15</span>))</span>
+<span id="cb22-400"><a href="#cb22-400" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb22-401"><a href="#cb22-401" aria-hidden="true" tabindex="-1"></a>    .select(c.<span class="bu">id</span>.n_unique())</span>
+<span id="cb22-402"><a href="#cb22-402" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-403"><a href="#cb22-403" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-404"><a href="#cb22-404" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-405"><a href="#cb22-405" aria-hidden="true" tabindex="-1"></a>**Answer**: Grouped, the smoothed gap for this session moves the way</span>
+<span id="cb22-406"><a href="#cb22-406" aria-hidden="true" tabindex="-1"></a>question 8's plot showed, tracking real hesitations. Pooled, it barely</span>
+<span id="cb22-407"><a href="#cb22-407" aria-hidden="true" tabindex="-1"></a>moves at all, sitting near 164-170 ms almost every row, because the anchor</span>
+<span id="cb22-408"><a href="#cb22-408" aria-hidden="true" tabindex="-1"></a>from question 1 puts *everyone's* first few seconds at the same clock</span>
+<span id="cb22-409"><a href="#cb22-409" aria-hidden="true" tabindex="-1"></a>reading. 393 different people have a keystroke inside just this one</span>
+<span id="cb22-410"><a href="#cb22-410" aria-hidden="true" tabindex="-1"></a>session's opening 15 seconds, so the ungrouped rolling mean is averaging</span>
+<span id="cb22-411"><a href="#cb22-411" aria-hidden="true" tabindex="-1"></a>this person together with 392 strangers who happen to share their elapsed</span>
+<span id="cb22-412"><a href="#cb22-412" aria-hidden="true" tabindex="-1"></a>time, not their session. <span class="in">`.over(c.id)`</span> is not a nicety here; without it the</span>
+<span id="cb22-413"><a href="#cb22-413" aria-hidden="true" tabindex="-1"></a>result is a different, meaningless quantity that still runs without error.</span>
+<span id="cb22-414"><a href="#cb22-414" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-415"><a href="#cb22-415" aria-hidden="true" tabindex="-1"></a><span class="ss">10. </span><span class="in">`.join_asof()`</span> matches each row to the nearest value in another table</span>
+<span id="cb22-416"><a href="#cb22-416" aria-hidden="true" tabindex="-1"></a>rather than an exact one. Build a table of "resume" moments: every row from</span>
+<span id="cb22-417"><a href="#cb22-417" aria-hidden="true" tabindex="-1"></a>question 5's pause filter, keeping only <span class="in">`id`</span> and <span class="in">`press`</span> (renamed</span>
+<span id="cb22-418"><a href="#cb22-418" aria-hidden="true" tabindex="-1"></a><span class="in">`pause_press`</span>). Asof-join all of <span class="in">`klog`</span> to it, backward, matched by <span class="in">`id`</span>,</span>
+<span id="cb22-419"><a href="#cb22-419" aria-hidden="true" tabindex="-1"></a>and compute <span class="in">`since_pause`</span>, the milliseconds between each keystroke and the</span>
+<span id="cb22-420"><a href="#cb22-420" aria-hidden="true" tabindex="-1"></a>most recent pause that preceded it. Group by whether <span class="in">`since_pause`</span> is under</span>
+<span id="cb22-421"><a href="#cb22-421" aria-hidden="true" tabindex="-1"></a>1000 (recently resumed) and compare the average <span class="in">`dur`</span> and count in each</span>
+<span id="cb22-422"><a href="#cb22-422" aria-hidden="true" tabindex="-1"></a>group, including the group where no pause has happened yet at all.</span>
+<span id="cb22-423"><a href="#cb22-423" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-426"><a href="#cb22-426" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb22-427"><a href="#cb22-427" aria-hidden="true" tabindex="-1"></a>resumes <span class="op">=</span> (</span>
+<span id="cb22-428"><a href="#cb22-428" aria-hidden="true" tabindex="-1"></a>    pauses</span>
+<span id="cb22-429"><a href="#cb22-429" aria-hidden="true" tabindex="-1"></a>    .select(c.<span class="bu">id</span>, pause_press <span class="op">=</span> c.press)</span>
+<span id="cb22-430"><a href="#cb22-430" aria-hidden="true" tabindex="-1"></a>    .sort(c.<span class="bu">id</span>, c.pause_press)</span>
+<span id="cb22-431"><a href="#cb22-431" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-432"><a href="#cb22-432" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-433"><a href="#cb22-433" aria-hidden="true" tabindex="-1"></a>with_resume <span class="op">=</span> (</span>
+<span id="cb22-434"><a href="#cb22-434" aria-hidden="true" tabindex="-1"></a>    klog</span>
+<span id="cb22-435"><a href="#cb22-435" aria-hidden="true" tabindex="-1"></a>    .sort(c.<span class="bu">id</span>, c.press)</span>
+<span id="cb22-436"><a href="#cb22-436" aria-hidden="true" tabindex="-1"></a>    .join_asof(resumes, left_on<span class="op">=</span><span class="st">"press"</span>, right_on<span class="op">=</span><span class="st">"pause_press"</span>, by<span class="op">=</span><span class="st">"id"</span>, strategy<span class="op">=</span><span class="st">"backward"</span>)</span>
+<span id="cb22-437"><a href="#cb22-437" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb22-438"><a href="#cb22-438" aria-hidden="true" tabindex="-1"></a>        since_pause <span class="op">=</span> (c.press <span class="op">-</span> c.pause_press).dt.total_milliseconds()</span>
+<span id="cb22-439"><a href="#cb22-439" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb22-440"><a href="#cb22-440" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-441"><a href="#cb22-441" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-442"><a href="#cb22-442" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb22-443"><a href="#cb22-443" aria-hidden="true" tabindex="-1"></a>    with_resume</span>
+<span id="cb22-444"><a href="#cb22-444" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb22-445"><a href="#cb22-445" aria-hidden="true" tabindex="-1"></a>        just_resumed <span class="op">=</span> c.since_pause <span class="op">&lt;</span> <span class="dv">1000</span></span>
+<span id="cb22-446"><a href="#cb22-446" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb22-447"><a href="#cb22-447" aria-hidden="true" tabindex="-1"></a>    .group_by(c.just_resumed)</span>
+<span id="cb22-448"><a href="#cb22-448" aria-hidden="true" tabindex="-1"></a>    .agg(</span>
+<span id="cb22-449"><a href="#cb22-449" aria-hidden="true" tabindex="-1"></a>        n <span class="op">=</span> pl.<span class="bu">len</span>(),</span>
+<span id="cb22-450"><a href="#cb22-450" aria-hidden="true" tabindex="-1"></a>        avg_dur <span class="op">=</span> c.dur.mean().<span class="bu">round</span>(<span class="dv">1</span>)</span>
+<span id="cb22-451"><a href="#cb22-451" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb22-452"><a href="#cb22-452" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-453"><a href="#cb22-453" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-454"><a href="#cb22-454" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-455"><a href="#cb22-455" aria-hidden="true" tabindex="-1"></a>**Answer**: <span class="in">`just_resumed`</span> comes back with three groups, not two, since</span>
+<span id="cb22-456"><a href="#cb22-456" aria-hidden="true" tabindex="-1"></a><span class="in">`since_pause`</span> is <span class="in">`null`</span> for the 42,678 keystrokes typed before anyone's</span>
+<span id="cb22-457"><a href="#cb22-457" aria-hidden="true" tabindex="-1"></a>first pause. Those <span class="in">`null`</span> rows hold the shortest average, 74.2 ms, keys</span>
+<span id="cb22-458"><a href="#cb22-458" aria-hidden="true" tabindex="-1"></a>typed within a second of resuming hold the longest, 80.8 ms, and everything</span>
+<span id="cb22-459"><a href="#cb22-459" aria-hidden="true" tabindex="-1"></a>typed a full second or more after resuming sits in between at 76.9 ms. That</span>
+<span id="cb22-460"><a href="#cb22-460" aria-hidden="true" tabindex="-1"></a>ordering is suggestive of a real restart cost, but read it cautiously:</span>
+<span id="cb22-461"><a href="#cb22-461" aria-hidden="true" tabindex="-1"></a>question 2 already showed hold times climbing as a session goes on, and by</span>
+<span id="cb22-462"><a href="#cb22-462" aria-hidden="true" tabindex="-1"></a>the time most people have hit even one 2-second pause they are already well</span>
+<span id="cb22-463"><a href="#cb22-463" aria-hidden="true" tabindex="-1"></a>past their first minute, so part of this gap could be question 2's slowdown</span>
+<span id="cb22-464"><a href="#cb22-464" aria-hidden="true" tabindex="-1"></a>showing up again rather than a genuine cost of resuming. Separating the two</span>
+<span id="cb22-465"><a href="#cb22-465" aria-hidden="true" tabindex="-1"></a>would need controlling for elapsed time directly, which is more than this</span>
+<span id="cb22-466"><a href="#cb22-466" aria-hidden="true" tabindex="-1"></a>question asks for.</span>
+<span id="cb22-467"><a href="#cb22-467" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-468"><a href="#cb22-468" aria-hidden="true" tabindex="-1"></a><span class="ss">11. </span><span class="in">`.join_where()`</span> keeps every pair of rows satisfying a condition, not</span>
+<span id="cb22-469"><a href="#cb22-469" aria-hidden="true" tabindex="-1"></a>just an equality. Physical key rollover, pressing the next key before</span>
+<span id="cb22-470"><a href="#cb22-470" aria-hidden="true" tabindex="-1"></a>releasing the last one, would show up as one row's <span class="in">`press`</span> (renamed</span>
+<span id="cb22-471"><a href="#cb22-471" aria-hidden="true" tabindex="-1"></a><span class="in">`press_right`</span> after a self-join) falling before another row's <span class="in">`release`</span></span>
+<span id="cb22-472"><a href="#cb22-472" aria-hidden="true" tabindex="-1"></a>while that same row's <span class="in">`release_right`</span> falls after the first row's <span class="in">`press`</span>.</span>
+<span id="cb22-473"><a href="#cb22-473" aria-hidden="true" tabindex="-1"></a>In the first block, add a row index to the session from question 1,</span>
+<span id="cb22-474"><a href="#cb22-474" aria-hidden="true" tabindex="-1"></a>self-join it with <span class="in">`.join_where()`</span> on that overlap condition, excluding a row</span>
+<span id="cb22-475"><a href="#cb22-475" aria-hidden="true" tabindex="-1"></a>pairing with itself, and print the number of overlapping pairs. In the</span>
+<span id="cb22-476"><a href="#cb22-476" aria-hidden="true" tabindex="-1"></a>second block, confirm the finding holds for the whole corpus by checking the</span>
+<span id="cb22-477"><a href="#cb22-477" aria-hidden="true" tabindex="-1"></a>smallest value <span class="in">`gap`</span> ever takes.</span>
+<span id="cb22-478"><a href="#cb22-478" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-481"><a href="#cb22-481" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb22-482"><a href="#cb22-482" aria-hidden="true" tabindex="-1"></a>indexed <span class="op">=</span> one.with_row_index(<span class="st">"rn"</span>)</span>
+<span id="cb22-483"><a href="#cb22-483" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-484"><a href="#cb22-484" aria-hidden="true" tabindex="-1"></a>overlaps <span class="op">=</span> indexed.join_where(</span>
+<span id="cb22-485"><a href="#cb22-485" aria-hidden="true" tabindex="-1"></a>    indexed,</span>
+<span id="cb22-486"><a href="#cb22-486" aria-hidden="true" tabindex="-1"></a>    (c.press_right <span class="op">&lt;</span> c.release) <span class="op">&amp;</span> (c.release_right <span class="op">&gt;</span> c.press) <span class="op">&amp;</span> (c.rn <span class="op">!=</span> c.rn_right)</span>
+<span id="cb22-487"><a href="#cb22-487" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-488"><a href="#cb22-488" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-489"><a href="#cb22-489" aria-hidden="true" tabindex="-1"></a>overlaps.select(pl.<span class="bu">len</span>())</span>
+<span id="cb22-490"><a href="#cb22-490" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-491"><a href="#cb22-491" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-494"><a href="#cb22-494" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb22-495"><a href="#cb22-495" aria-hidden="true" tabindex="-1"></a>klog.select(c.gap.dt.total_milliseconds().<span class="bu">min</span>())</span>
+<span id="cb22-496"><a href="#cb22-496" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-497"><a href="#cb22-497" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-498"><a href="#cb22-498" aria-hidden="true" tabindex="-1"></a>**Answer**: Zero overlapping pairs in this session, and the corpus-wide</span>
+<span id="cb22-499"><a href="#cb22-499" aria-hidden="true" tabindex="-1"></a>minimum <span class="in">`gap`</span> is exactly 0 milliseconds, never negative, which is the same</span>
+<span id="cb22-500"><a href="#cb22-500" aria-hidden="true" tabindex="-1"></a>finding stated the fast way: nobody in this dataset ever presses a key</span>
+<span id="cb22-501"><a href="#cb22-501" aria-hidden="true" tabindex="-1"></a>before releasing the last one. Running the full interval self-join on all</span>
+<span id="cb22-502"><a href="#cb22-502" aria-hidden="true" tabindex="-1"></a>823 sessions to double check would mean joining some sessions against</span>
+<span id="cb22-503"><a href="#cb22-503" aria-hidden="true" tabindex="-1"></a>themselves at over a thousand rows apiece, far more computation than the</span>
+<span id="cb22-504"><a href="#cb22-504" aria-hidden="true" tabindex="-1"></a>single-column minimum needed to answer the same question.</span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->

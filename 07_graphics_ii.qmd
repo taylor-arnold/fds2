@@ -3,7 +3,7 @@
 ```{python}
 #| include: false
 import warnings
-warnings.filterwarnings('ignore')
+warnings.filterwarnings("ignore")
 ```
 
 ## Setup
@@ -13,7 +13,8 @@ Load all of the modules and datasets needed for the chapter.
 ```{python}
 #| output: false
 import polars as pl
-from plotnine import ggplot, aes
+from plotnine import ggplot, aes, theme_set, theme_minimal
+from mizani.breaks import breaks_width
 from polars import col as c
 
 import funs
@@ -24,7 +25,7 @@ cellphone = pl.read_csv("data/countries_cellphone.csv")
 
 ## Introduction
 
-In Chapter 4 we built visualizations one row at a time. Each point, each text label, and each line segment came directly from a single record in the data. In Chapter 5 we learned to do something quite different: group the rows of a table and compute a summary for each group with `group_by` and `agg`. This chapter joins those two ideas together.
+In @sec-graphics we built visualizations one row at a time. Each point, each text label, and each line segment came directly from a single record in the data. In @sec-group we learned to do something quite different: group the rows of a table and compute a summary for each group with `group_by` and `agg`. This chapter joins those two ideas together.
 
 That join is the whole point of the geometries we start with here. A bar chart of counts, a boxplot for each region, a histogram: none of these draw one shape per row. Each one first runs a grouped computation over the data and then draws the result. Once you see that a statistical geometry is a `group_by` and `agg` in disguise, the rest of this chapter is mostly about control and polish: choosing the scales that map data to color and position, splitting a plot into small panels, and labeling everything so the result is ready to show to someone else.
 
@@ -32,7 +33,7 @@ That join is the whole point of the geometries we start with here. A bar chart o
 
 Every geometry we have used so far draws one object per row. A point geometry places one point per country; a text geometry writes one label per country; a line geometry connects one row to the next. The geometries in the next few sections work differently. Before drawing anything, they run a computation over groups of rows, and the objects in the finished plot correspond to that computation rather than to individual records.
 
-The clearest way to see this is to do the computation ourselves first. Suppose we want to know how many countries fall into each subregion. In Chapter 5 we would answer that by grouping and counting.
+The clearest way to see this is to do the computation ourselves first. Suppose we want to know how many countries fall into each subregion. In @sec-group we would answer that by grouping and counting.
 
 ```{python}
 (
@@ -74,7 +75,7 @@ We can reproduce the plot above by aggregating first and piping the result strai
 )
 ```
 
-The bars are the same as in the plot above, but they arrive in a readable order, and the labor is split differently. Here we counted the countries ourselves and `geom_col` only drew the numbers. Notice that nothing in the plotting code asked for the ordering; it came from the `.sort()` we ran on the table before plotting it. The next section takes that idea apart. This pattern, aggregate and then pipe into a column geometry, is the one you will use most often once your data grows past toy examples, because real summaries usually involve more than a plain count: an average price per category, a total revenue per month, a median score per group. Compute the summary you want with the tools from Chapter 5, then plot it with `geom_col`.
+The bars are the same as in the plot above, but they arrive in a readable order, and the labor is split differently. Here we counted the countries ourselves and `geom_col` only drew the numbers. Notice that nothing in the plotting code asked for the ordering; it came from the `.sort()` we ran on the table before plotting it. The next section takes that idea apart. This pattern, aggregate and then pipe into a column geometry, is the one you will use most often once your data grows past toy examples, because real summaries usually involve more than a plain count: an average price per category, a total revenue per month, a median score per group. Compute the summary you want with the tools from @sec-group, then plot it with `geom_col`.
 
 The two geometries look nearly identical on the page and are a reliable source of confusion, so it is worth stating the difference plainly: it is a question of who does the counting. `geom_bar` takes a single categorical aesthetic and counts the rows in each category for you, so the height of each bar is a tally it computes internally. `geom_col` takes both an `x` and a `y` and draws each `y` value as given, so you supply the height. Reach for `geom_bar` when you want the raw count of how many rows fall into each category and you would rather not compute it yourself, and reach for `geom_col` when the number you want to show is already in the frame. If you ever find yourself computing a count with `group_by` only to feed it to `geom_bar`, you wanted `geom_col`.
 
@@ -128,7 +129,7 @@ Counting works for categories. For a numeric column we first have to decide what
 ::: {.callout-note collapse="true"}
 ## Interpreting a histogram
 
-If interpreting a histogram feels difficult, walk through one bar. Take the example above and look at the bar spanning 0.4 to 0.5 on the x-axis. Its height on the y-axis is about 11, which means 11 countries have an HDI between 0.4 and 0.5. In the same way, roughly 26 countries fall between 0.8 and 0.9, and about 33 between 0.9 and 1.0.
+If interpreting a histogram feels difficult, walk through one bar. Take the example above and look at the bar spanning 0.4 to 0.5 on the x-axis. Its height on the y-axis is about 11, which means 11 countries have an HDI between 0.4 and 0.5. In the same way, roughly 27 countries fall between 0.8 and 0.9, and about 32 between 0.9 and 1.0.
 :::
 
 We can instead set `bins` to a whole number to fix the total count of bins. That is quicker when we do not yet know the scale of the data, though the resulting counts are harder to read off directly.
@@ -223,7 +224,7 @@ Many other scales exist. For example, `scale_size_area` makes point sizes propor
 The default scale for the x-axis is `scale_x_continuous`, with `scale_y_continuous` playing the same role for the y-axis. Adding either one on its own changes nothing, but both take optional arguments that adjust how the plot is drawn. Setting `breaks` controls where the labels and grid lines fall along the axis; we usually set it with a helper such as `breaks_width`, which places a break at a fixed spacing. Setting `limits` to a pair of numbers fixes the start and end of the plotted range, and we can pass `None` for one end to leave that side to the default. The code below draws the same data as our original scatter plot, but with grid lines and labels every 0.05 of HDI along the horizontal axis and a vertical axis pinned to start at zero.
 
 ```{python}
-#| eval: False
+#| eval: false
 (
     country
     .filter(c.region == "Europe")
@@ -234,7 +235,7 @@ The default scale for the x-axis is `scale_x_continuous`, with `scale_y_continuo
 )
 ```
 
-Finally, two scale types are useful for working with colors directly. Sometimes a column already holds the color for each observation, in which case `scale_color_identity` tells the plot to use those colors as given. Another option is `scale_color_manual`, which lets you assign an exact color to each category. Below is the syntax for setting a color per subregion in the `countries` data.
+Finally, two scale types are useful for working with colors directly. Sometimes a column already holds the color for each observation, in which case `scale_color_identity` tells the plot to use those colors as given. Another option is `scale_color_manual`, which lets you assign an exact color to each category. Below is the syntax for setting a color per subregion in the `country` data.
 
 ```{python}
 #| eval: false
@@ -267,7 +268,7 @@ Facets are another way to show differences across the levels of a categorical va
 )
 ```
 
-By default every panel shares one x-axis and one y-axis, which is what lets us compare them at a glance: a taller bar in one panel really is taller. The `scales` option changes that. Setting it to `free_x`, `free_y`, or `free` gives each panel its own range, which makes a small panel legible and, in the same stroke, destroys the comparison the facets were for. Reach for it rarely, and say so when you do. A related function, `facet_grid`, takes two variables and arranges the panels across both rows and columns; it accepts `scales` as well, along with a `space` option that lets the panels themselves differ in size.
+By default every panel shares one x-axis and one y-axis, which is what lets us compare them at a glance: a higher point in one panel really is higher. The `scales` option changes that. Setting it to `free_x`, `free_y`, or `free` gives each panel its own range, which makes a small panel legible and, in the same stroke, destroys the comparison the facets were for. Reach for it rarely, and say so when you do. A related function, `facet_grid`, takes two variables and arranges the panels across both rows and columns; it accepts `scales` as well, along with a `space` option that lets the panels themselves differ in size.
 
 Facets can make certain relationships far easier to read and give your output a polished, professional look. Use them with some restraint, though. People new to data science tend to overuse them badly. They work best when you have only a few categories and have already used the other tools in this chapter and the last to bring out the patterns in the data.
 
@@ -289,12 +290,12 @@ To change the labels, we add a `labs` layer. Inside it, we assign text to the ae
         color="Subregion",
         title="Relationship between HDI and Happiness",
         subtitle="Europe",
-        caption="Data from the Gapminder"
+        caption="Data from Gapminder"
     )
 )
 ```
 
-The other way to prepare a plot for distribution is to change its theme. Themes govern the look of the non-data elements: axis labels, ticks, grid lines, and the background. We have been using `theme_minimal()` throughout, which is a good fit for exploration because it strips away clutter while keeping the grid lines that help us read values. For external publication we often prefer something even sparer, in the spirit of Edward Tufte's work on data visualization, which aims to spend as little ink as possible on anything other than the data itself [@tufte1987]. We select a theme by adding its function to the plot, or by setting it once with `theme_set` so that every later plot picks it up.
+The other way to prepare a plot for distribution is to change its theme. Themes govern the look of the non-data elements: axis labels, ticks, grid lines, and the background. We have been using `theme_minimal()` throughout, which is a good fit for exploration because it strips away clutter while keeping the grid lines that help us read values. For external publication we often prefer something even sparer, in the spirit of Edward Tufte's work on data visualization, which aims to spend as little ink as possible on anything other than the data itself [@tufte1983]. We select a theme by adding its function to the plot, or by setting it once with `theme_set` so that every later plot picks it up.
 
 ```{python}
 #| eval: false

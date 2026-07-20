@@ -15,6 +15,12 @@ Run all of the following before starting the notebook.
 
 ```{python}
 #| tags: [noclear]
+#| eval: false
+! python -m spacy download en_core_web_sm
+```
+
+```{python}
+#| tags: [noclear]
 import polars as pl
 from plotnine import ggplot, aes
 from polars import col as c
@@ -62,8 +68,9 @@ reviews. The first few questions deal with that mess directly, in the same
 spirit as the chapter's warning that the wrapper functions are not magic.
 Print results unless a question says otherwise.
 
-1. Count how many reviews fall into each `label`. Then count how many of the
-200 reviews contain the literal string `"<br />"` somewhere in their `text`.
+1. In the first block, count how many reviews fall into each `label`. In the
+second block, count how many of the 200 reviews contain the literal string
+`"<br />"` somewhere in their `text`.
 
 ```{python}
 docs_raw.group_by(c.label).agg(n = pl.len())
@@ -111,10 +118,10 @@ docs = docs_raw.with_columns(
 docs.select(c.text.str.contains("<br />").sum())
 ```
 
-4. Run `DSText.process()` on the full, cleaned `docs` table to build `anno`.
-Print its shape. Then confirm that `doc_id`, `sid`, and `tid` together form a
-valid key for `anno`, the same `.group_by()`-then-`.filter()` check used for
-any other table's key.
+4. In the first block, run `DSText.process()` on the full, cleaned `docs`
+table to build `anno` and print its shape. In the second block, confirm that
+`doc_id`, `sid`, and `tid` together form a valid key for `anno`, the same
+`.group_by()`-then-`.filter()` check used for any other table's key.
 
 ```{python}
 anno = DSText.process(docs.select(c.doc_id, c.text), nlp)

@@ -3,7 +3,7 @@
 ```{python}
 #| include: false
 import warnings
-warnings.filterwarnings('ignore')
+warnings.filterwarnings("ignore")
 ```
 
 ## Setup
@@ -33,7 +33,7 @@ Polars has no built-in support for geometry. The standard Python library for spa
 
 The simplest type of spatial data consists of points: individual locations specified by their coordinates. Points can represent cities, sensor stations, retail locations, or anything else that can reasonably be reduced to a single spot on the map. Each point is defined by two numbers, a longitude (the east-west position) and a latitude (the north-south position).
 
-We begin with a dataset describing metropolitan statistical areas (MSAs) in the United States. Each row is a single metro region, with columns for population, economic indicators, and geographic coordinates.
+We begin with a dataset describing core-based statistical areas (CBSAs) in the United States, which include both metropolitan and micropolitan areas. Each row is a single region, with columns for population, economic indicators, and geographic coordinates.
 
 ```{python}
 metro
@@ -65,7 +65,7 @@ metro = metro.geo.points_from_xy("lon", "lat")
 metro
 ```
 
-The result is the same `geometry` column of readable WKT strings, such as `POINT (-86.8 32.4)`, plus the `_crs` helper column recording the coordinate system.
+The result is the same `geometry` column of readable WKT strings, such as `POINT (-74.101056 40.76877)` for New York, plus the `_crs` helper column recording the coordinate system.
 
 ## Coordinate Systems (CRS)
 
@@ -94,7 +94,7 @@ The `to_crs` method transforms the coordinates from the current CRS into a new o
 )
 ```
 
-The shape of the point cloud now looks much more like the familiar outline of the continental United States. Alaska and Hawaii, if present in the data, would appear distorted under this projection because it is optimized for the lower 48 states.
+The shape of the point cloud now looks much more like the familiar outline of the continental United States. Alaska and Hawaii, which are present in the data, appear distorted under this projection because it is optimized for the lower 48 states.
 
 ::: {.callout-note collapse="true"}
 ## Why projections matter
@@ -120,7 +120,7 @@ While points are useful for representing discrete locations, many spatial phenom
 
 Spatial data is commonly stored in specialized file formats that can encode complex geometries along with their attributes. The [GeoJSON](https://geojson.org/) format is particularly popular for web applications because it is based on JSON (JavaScript Object Notation) and can be read by virtually any programming language. GeoJSON files have a standardized structure in which each row of the equivalent table is called a *feature*, and all features are collected into a *FeatureCollection*. The official specification is maintained by the Internet Engineering Task Force as [RFC 7946](https://datatracker.ietf.org/doc/html/rfc7946).
 
-Other common formats include Shapefiles (a legacy format still widely used), GeoPackage (a modern SQLite-based format), and database formats like PostGIS. The `funs.read_file` function can read most of them, returning a Polars DataFrame with the geometries already converted to WKT.
+Other common formats include Shapefiles (a legacy format still widely used), GeoPackage (a modern SQLite-based format), and spatial databases like PostGIS. The `funs.read_file` function can read most of them, returning a Polars DataFrame with the geometries already converted to WKT.
 
 ```{python}
 state = funs.read_file("data/acs_state.geojson")
@@ -163,7 +163,7 @@ Most of the techniques in this chapter apply to all geometry types, though some 
 
 ## Polygon Metrics
 
-Once we have polygons, we can compute geometric properties from them. Two useful ones are the *centroid* (the geometric center of a polygon) and the *area* (the amount of surface the boundary encloses). Both are only meaningful in a projected CRS; computed on raw latitude and longitude they come out as nonsense numbers in squared degrees. So we first project the states and keep the projected version from here on.
+Once we have polygons, we can compute geometric properties from them. Two useful ones are the *centroid* (the geometric center of a polygon) and the *area* (the amount of surface the boundary encloses). Both are only meaningful in a projected CRS; computed on raw latitude and longitude, the centroid comes out as a biased point and the area as a nonsense number in squared degrees. So we first project the states and keep the projected version from here on.
 
 ```{python}
 state = state.geo.to_crs(5069)
@@ -181,7 +181,7 @@ The `area` property returns ordinary numbers rather than geometries, so the name
 
 ```{python}
 state = state.geo.area
-state.sort(c.area).select(c.name, c.area)
+state.sort(c.area, descending=True).select(c.name, c.area)
 ```
 
 The results are in square meters, the default unit for most projected coordinate systems; dividing by 1,000,000 would give square kilometers. As expected, Alaska is the largest state by a wide margin, followed by Texas and California.

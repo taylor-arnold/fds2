@@ -59,9 +59,10 @@ system, so the first question projects both into EPSG:7791 and saves them
 back. After that, the join and geometry-building steps get reassigned; the
 plain lookups and counts should just be printed.
 
-1. Build a point `geometry` for `it_city` with `it_city.geo.points_from_xy(
-"lon", "lat")`, then project it into EPSG:7791 and save it back. Project
-`prov` into EPSG:7791 as well and save that too. Print both `_crs` columns to
+1. In the first block, build a point `geometry` for `it_city` with
+`it_city.geo.points_from_xy("lon", "lat")`, project it into EPSG:7791 and save
+it back, and project `prov` into EPSG:7791 as well and save that too. In the
+second block print `it_city`'s `_crs` column; in the third, print `prov`'s, to
 confirm they now agree.
 
 ```{python}
@@ -103,8 +104,9 @@ province.
 
 3. A spatial join is an inner join by default, so a city that fell outside
 every province polygon would be dropped with no error. Guard against that:
-compare the row count of the join to the row count of `it_city`. Did every
-city match?
+compare the row count of the join to the row count of `it_city`. In the first
+block, print the row count of the join; in the second, print the row count of
+`it_city`. Did every city match?
 
 ```{python}
 it_city.geo.sjoin(prov).select(pl.len())
@@ -287,9 +289,10 @@ towns and mountain towns, where the next city over 20,000 is genuinely far.
 
 11. The distances in question 10 are only meaningful because the table was
 projected. Repeat the nearest-neighbor join on an *unprojected* copy of the
-cities and look at what happens to the ranking. Load the cities fresh, build
-points but leave them in EPSG:4326, run the same join, and print the four most
-isolated by `distance`. Does the top of the list still agree with question 10?
+cities and look at what happens to the ranking. In the first block, load the cities fresh and build points but
+leave them in EPSG:4326. In the second block, run the same join and print the
+four most isolated by `distance`. Does the top of the list still agree with
+question 10?
 
 ```{python}
 it_deg = (

@@ -3,7 +3,7 @@
 ```{python}
 #| include: false
 import warnings
-warnings.filterwarnings('ignore')
+warnings.filterwarnings("ignore")
 ```
 
 ## Setup
@@ -29,7 +29,7 @@ In @sec-organize, we used data operations to modify a single dataset in Python: 
 
 Primary keys are a core concept we need to understand to combine two datasets in Python. A *primary key* consists of one or more columns that can uniquely and minimally identify a row of data. For example, in our `country` dataset the column `iso` is a primary key. The column `full_name` is also a primary key. In database theory a distinction is made between *candidate keys* (any set of one or more columns that could serve as a primary key) and the specific primary key chosen for a table. This distinction is less applicable to data science work, where we will use the term primary key to refer to any possible way of identifying a row in our dataset.
 
-A *foreign key* is a primary key from one table that appears in another table. For example, we might have a dataset of customers, with one column indicating the `iso` of the country in which they live. We join multiple tables by associating the primary key in one table with the matching foreign key in another. Notice that the difference between primary and foreign is the table in which the key appears, not the information itself. The value `iso` is both a primary key in the countries dataset and a foreign key in the customers dataset. The connection between these two tables is called a *relation*. This is where the term *relational database* comes from.
+A *foreign key* is a primary key from one table that appears in another table. For example, we might have a dataset of customers, with one column indicating the `iso` of the country in which they live. We join multiple tables by associating the primary key in one table with the matching foreign key in another. Notice that the difference between primary and foreign is the table in which the key appears, not the information itself. The column `iso` is both a primary key in the countries dataset and a foreign key in the customers dataset. The connection between these two tables is called a *relation*. This is where the term *relational database* comes from.
 
 ## Joining by Relation
 
@@ -66,9 +66,9 @@ The terminology of "left" and "right" tables comes from thinking about how the j
 ::: {.callout-note collapse="true"}
 ## Equi-joins: inner, left, right, full, semi, anti, cross
 
-There are six different options that we can assign to the `how` parameter in the table join method. The default, `inner`, returns only rows that match in both tables. `Left` joins return all rows from the left DataFrame; `right` joins return all rows from the right DataFrame. `Full` joins (rarely used) return all rows from both tables. A `semi` join returns only rows from the left table that have a match in the right table; no additional columns are added. An `anti` join returns only rows in the left table that do not match any rows in the right table. These six options are called equi-joins because they work by finding where the key(s) in one table are equal to the key(s) in another table. We'll come back to semi- and anti-joins below, since they are useful enough to deserve their own worked example.
+There are seven different options that we can assign to the `how` parameter in the table join method. The default, `inner`, returns only rows that match in both tables. `left` joins return all rows from the left DataFrame; `right` joins return all rows from the right DataFrame. `full` joins (rarely used) return all rows from both tables. A `semi` join returns only rows from the left table that have a match in the right table; no additional columns are added. An `anti` join returns only rows in the left table that do not match any rows in the right table. These six options are called equi-joins because they work by finding where the key(s) in one table are equal to the key(s) in another table. We'll come back to semi- and anti-joins below, since they are useful enough to deserve their own worked example.
 
-A cross join returns all combinations of rows from the two tables, with no key required. It has several interesting applications, which we will see in later chapters.
+The seventh option, a cross join, returns all combinations of rows from the two tables, with no key required. It has several interesting applications, which we will see in later chapters.
 :::
 
 There are several other modifications that we can apply to the basic syntax. For example, if our key has multiple columns, we can pass a list to `on` instead of a single value. Here is the code to join on two matching columns from the two DataFrames.
@@ -87,7 +87,7 @@ Or, if the key has different names in the two tables, we can describe them with 
 #| eval: false
 (
     table_one
-    .join(table_two, left_on=c.key_col1, right_on=c.key_col1)
+    .join(table_two, left_on=c.key_col1, right_on=c.key_col2)
 )
 ```
 
@@ -146,7 +146,7 @@ As noted above, we can add the option `how=` with the values `inner` (default), 
 
 ## Filtering Joins: Semi and Anti
 
-Not every join is meant to add columns. Sometimes we just want to know which rows in one table have a match in another table, or which ones do not, without pulling in any of the second table's columns. These are called filtering joins, because they act like the `.filter()` method: they select a subset of rows rather than adding new information. There are two variants. A *semi-join* keeps only the rows in the left table that have a match in the right table. An *anti-join* keeps only the rows in the left table that do *not* have a match. When there is a single key column, semi- and anti-joins can be replaced by a call to `.is_in()`; their real value shows up once there are multiple key columns and we want to know whether a specific combination matches, which `.is_in()` cannot express.
+Not every join is meant to add columns. Sometimes we just want to know which rows in one table have a match in another table, or which ones do not, without pulling in any of the second table's columns. These are called filtering joins, because they act like the `.filter()` method: they select a subset of rows rather than adding new information. There are two variants. A *semi-join* keeps only the rows in the left table that have a match in the right table. An *anti-join* keeps only the rows in the left table that do *not* have a match. When there is a single key column, semi- and anti-joins can be replaced by a call to `.is_in()`; their real value shows up once there are multiple key columns and we want to know whether a specific combination matches, which `.is_in()` cannot easily express.
 
 Filtering joins are also a quick way to check data quality. Above, we saw that joining `border` to `c_sml` on `iso` dropped the DataFrame from 829 rows down to 641, because `c_sml` only contains countries with full economic data. But is that the *whole* explanation? We can check by comparing `border` against the full `country` table (not the trimmed-down `c_sml`) using an anti-join, which will show us every row in `border` whose `iso` value has no match in `country` at all.
 
@@ -179,7 +179,7 @@ Now watch what happens when we join `border` to this corrupted table instead of 
 )
 ```
 
-Recall that the first five rows of `border` all correspond to Afghanistan. Each one of those rows now matches *two* rows in `bad_c_sml` instead of one, so the join produces five extra rows, 646 instead of 641, all of them duplicate copies of Afghanistan's borders. Nothing in the code raised an error. Polars did exactly what we asked: it matched every row in the left table against every matching row in the right table, however many there were. If this had been a real dataset and we hadn't been watching the row count carefully, we might not have noticed the duplication at all, especially in a larger table where the extra rows blend in.
+Recall that the first rows of `border` all correspond to Afghanistan; there are six of them. Each one of those rows now matches *two* rows in `bad_c_sml` instead of one, so the join produces six extra rows, 647 instead of 641, all of them duplicate copies of Afghanistan's borders. Nothing in the code raised an error. Polars did exactly what we asked: it matched every row in the left table against every matching row in the right table, however many there were. If this had been a real dataset and we hadn't been watching the row count carefully, we might not have noticed the duplication at all, especially in a larger table where the extra rows blend in.
 
 This is why it pays to check the key column *before* joining, rather than after. Back in @sec-group we used `n_unique()` alongside `len()` to check whether a column had repeated values; the same check tells us immediately whether a table is safe to use as the right-hand side of a join.
 
@@ -195,7 +195,7 @@ The first check passes: `iso` is a genuine primary key in `c_sml`, one row per c
 
 ## Conditional Joins
 
-In this section, we introduce two additional kinds of joins that are helpful when working with certain types of complex data. Both of these allow us to join by relationships between keys that do not require values to be exactly equal. To start, let's create two subsets of our `countries` data, separating out countries in Africa and in Asia, and sorting by the Gini coefficient. We remove any missing values from the output.
+In this section, we introduce two additional kinds of joins that are helpful when working with certain types of complex data. Both of these allow us to join by relationships between keys that do not require values to be exactly equal. To start, let's create two subsets of our `country` data, separating out countries in Africa and in Asia, and sorting by the Gini coefficient. We remove any missing values from the output.
 
 ```{python}
 africa = (
@@ -223,7 +223,7 @@ The function `.join_asof` combines two datasets by matching each row in the firs
 )
 ```
 
-The original motivation for the `.join_asof` method was to join two time-series datasets. The idea is that we might want the current (most recent) value from one table relative to another. Hence the function's name and the fact that it uses the `backward` strategy by default to find the nearest value in the second dataset that is less than (i.e., earlier than) the value in the first. You can set the strategy to `forward` to look in the other direction, or to `nearest` to find the closest value. You can also add additional keys with the `by`, `by_left`, or `by_right` options; these keys must match exactly before performing the nearest search. The tables must be pre-sorted by the join key(s) for the function to work.
+The original motivation for the `.join_asof` method was to join two time-series datasets. The idea is that we might want the current (most recent) value from one table relative to another. Hence the function's name and the fact that it uses the `backward` strategy by default to find the nearest value in the second dataset that is less than or equal to (i.e., no later than) the value in the first. You can set the strategy to `forward` to look in the other direction, or to `nearest` to find the closest value. You can also add additional keys with the `by`, `by_left`, or `by_right` options; these keys must match exactly before performing the nearest search. The tables must be pre-sorted by the join key(s) for the function to work.
 
 If we need to do more exotic joins between two tables, we can use the `.join_where` method. It takes one or more expressions in the same format used by the `.filter` method to specify exactly which pairs of rows to keep in the joined dataset. To refer to columns that share the same name in both datasets, use the `_right` suffix to indicate the second dataset. Below is an example that finds all pairs of countries in Africa and Asia where the difference in the Gini coefficient is less than 5.
 
@@ -241,7 +241,7 @@ This method can be slow because it needs to manually check every combination of 
 
 ## Attaching a Group Summary
 
-In @sec-group we saw how `.group_by()` and `.agg()` collapse a dataset down to one row per group, and how `.over()` computes a group-level statistic while keeping every original row. Joins give us a second way to reach the same result as `.agg()` followed by a join, so it's worth comparing them directly.
+In @sec-group we saw how `.group_by()` and `.agg()` collapse a dataset down to one row per group, and how `.over()` computes a group-level statistic while keeping every original row. Using `.agg()` followed by a join gives us a second way to reach the same result as `.over()`, so it's worth comparing them directly.
 
 Suppose we want to attach each country's regional average Gini coefficient to every row of `country`, without collapsing the table. The `.over()` approach does this in a single step.
 
@@ -269,5 +269,3 @@ region_avg = (
 ```
 
 Both produce the same output column. `.over()` is more concise and is the natural choice when the summary is the only thing you need. The agg-then-join version is worth reaching for when you need the intermediate summary table for its own sake (to inspect it, plot it, or join it against something else), since `.group_by().agg()` gives you that table directly, while `.over()` never materializes it at all.
-
-## References {-}

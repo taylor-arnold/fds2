@@ -56,8 +56,9 @@ are tracked as their own regions). `covid` has no polygon of its own, so
 region is a grouping that has to be joined onto `prov` before it can be
 mapped. Print results unless a question says otherwise.
 
-1. Build a point `geometry` for `it_city`, then project both `it_city` and
-`prov` into EPSG:7791. Print both `_crs` columns to confirm they agree.
+1. In the first block, build a point `geometry` for `it_city`, then project
+both `it_city` and `prov` into EPSG:7791. In the second block, print
+`it_city`'s `_crs` column; in the third, print `prov`'s, to confirm they agree.
 
 ```{python}
 it_city = it_city.geo.points_from_xy("lon", "lat").geo.to_crs(7791)
@@ -92,7 +93,9 @@ darkness is really a map of how close together the cities themselves are,
 not of anything about the discs.
 
 3. Compare `it_city.geo.sjoin(prov)` to `it_city.geo.buffer(20_000).geo.sjoin(
-prov)`. Print the row count of each. What does the jump mean?
+prov)`. In the first block, print the row count of `it_city.geo.sjoin(prov)`;
+in the second, print the row count of the buffered join. What does the jump
+mean?
 
 ```{python}
 it_city.geo.sjoin(prov).select(pl.len())
@@ -136,11 +139,11 @@ provinces, and grouping by name here quietly merges their match counts
 together, the same duplicate-name trap from last time showing up in a new
 spot.
 
-5. Build a province-to-region lookup from `covid` (`select` `region` and
-`province`, then `.unique()`) and check it is a clean key with
-`.select(c.province.n_unique(), pl.len())`. Then join it onto `prov` and print
-how many provinces failed to match (`c.region.is_null().sum()`) and how many
-distinct regions came through (`c.region.n_unique()`).
+5. In the first block, build a province-to-region lookup from `covid` (`select`
+`region` and `province`, then `.unique()`) and check it is a clean key with
+`.select(c.province.n_unique(), pl.len())`. In the second block, join it onto
+`prov` and print how many provinces failed to match (`c.region.is_null().sum()`)
+and how many distinct regions came through (`c.region.n_unique()`).
 
 ```{python}
 region_map = covid.select(c.region, c.province).unique()
@@ -182,9 +185,10 @@ artifact of summing province areas: it is genuinely the largest of the 20
 traditional regions, and the sum here recovers that from 9 separate province
 polygons without ever being told the answer directly.
 
-7. Plot the dissolved `region` table with `geom_map(fill="white", color=
-"black")` and `coord_fixed()`. Compare the row count of `region` to the row
-count of `prov`. What happened to the province borders?
+7. In the first block, plot the dissolved `region` table with `geom_map(fill=
+"white", color="black")` and `coord_fixed()`. In the second block, print the
+row count of `region` to compare against `prov`'s. What happened to the
+province borders?
 
 ```{python}
 (
@@ -204,8 +208,9 @@ the 21 regional outlines. `dissolve` did to the polygons what a `group_by`
 does to a table, merging every row that shares a key into one and discarding
 the internal structure that key no longer distinguishes.
 
-8. Explode the full `prov` table with `.geo.explode()` and print the row
-count before and after. Then group the exploded table by `province`, count
+8. In the first block, print the row count of `prov`. In the second block,
+explode the full `prov` table with `.geo.explode()` and print the new row
+count. In the third block, group the exploded table by `province`, count
 the parts, and print the five provinces with the most.
 
 ```{python}
@@ -283,10 +288,11 @@ Practices section in concrete form: an operation like `explode` can run
 cleanly and still hand back results that need a second look before they are
 trusted.
 
-11. Count total vertices in `prov` with `.geo.count_coordinates()`
-(`.select(c.count_coordinates.sum())`), then repeat after
-`.geo.simplify(5_000)`. Print both totals, then plot the simplified provinces
-with `geom_map(fill="white", color="black")` and `coord_fixed()`.
+11. In the first block, count total vertices in `prov` with
+`.geo.count_coordinates()` (`.select(c.count_coordinates.sum())`). In the
+second block, repeat the count after `.geo.simplify(5_000)`. In the third
+block, plot the simplified provinces with `geom_map(fill="white", color=
+"black")` and `coord_fixed()`.
 
 ```{python}
 prov.geo.count_coordinates().select(c.count_coordinates.sum())

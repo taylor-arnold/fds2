@@ -288,44 +288,50 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="setup" class="level3">
 <h3 class="anchored" data-anchor-id="setup">Setup</h3>
 <p>Run all of the following before starting the notebook.</p>
-<div id="dfc4d583" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="1">
+<div id="42cc35c8" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="1">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span> wget <span class="op">-</span>q <span class="op">-</span>nc https:<span class="op">//</span>raw.githubusercontent.com<span class="op">/</span>taylor<span class="op">-</span>arnold<span class="op">/</span>fds2<span class="op">/</span>refs<span class="op">/</span>heads<span class="op">/</span>main<span class="op">/</span>funs.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<div id="c75318ec" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="2">
+<div id="46e756c6" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="2">
 <details class="code-fold">
 <summary>View code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine <span class="im">import</span> ggplot, aes</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> polars <span class="im">import</span> col <span class="im">as</span> c</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> funs</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> funs <span class="im">import</span> DSText</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> spacy</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>ub <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span> python <span class="op">-</span>m spacy download en_core_web_sm</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<div id="ffd5b0f8" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="4">
+<div id="db5c9058" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="3">
 <details class="code-fold">
 <summary>View code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>docs_raw <span class="op">=</span> (</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    pl.read_parquet(ub <span class="op">+</span> <span class="st">"data/imdb5k_pca.parquet"</span>)</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    .select(c.<span class="bu">id</span>, c.label, c.text)</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    .rename({<span class="st">"id"</span>: <span class="st">"doc_id"</span>})</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    .sort(c.doc_id)</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    .group_by(c.label, maintain_order<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">100</span>)</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine <span class="im">import</span> ggplot, aes</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> polars <span class="im">import</span> col <span class="im">as</span> c</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> funs</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> funs <span class="im">import</span> DSText</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> spacy</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>ub <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<div id="d5cbae73" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="5">
+<div id="6d518613" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="5">
 <details class="code-fold">
 <summary>View code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>nlp <span class="op">=</span> spacy.load(<span class="st">"en_core_web_sm"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>docs_raw <span class="op">=</span> (</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    pl.read_parquet(ub <span class="op">+</span> <span class="st">"data/imdb5k_pca.parquet"</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    .select(c.<span class="bu">id</span>, c.label, c.text)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    .rename({<span class="st">"id"</span>: <span class="st">"doc_id"</span>})</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    .sort(c.doc_id)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    .group_by(c.label, maintain_order<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">100</span>)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div id="2f5f910c" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="6">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>nlp <span class="op">=</span> spacy.load(<span class="st">"en_core_web_sm"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 </section>
@@ -333,12 +339,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h3 class="anchored" data-anchor-id="questions">Questions</h3>
 <p><code>docs_raw</code> holds 200 IMDb movie reviews, 100 labeled <code>"positive"</code> and 100 labeled <code>"negative"</code>, each with a <code>doc_id</code> and the raw <code>text</code> of the review. This is a different, smaller corpus than the one the chapter itself uses for its Wikipedia author pages, and it comes with a mess of its own: IMDb’s reviews were originally scraped from a web page, and the literal characters <code>&lt;br /&gt;</code> (an HTML line break) are still sitting inside the text of many reviews. The first few questions deal with that mess directly, in the same spirit as the chapter’s warning that the wrapper functions are not magic. Print results unless a question says otherwise.</p>
 <ol type="1">
-<li>Count how many reviews fall into each <code>label</code>. Then count how many of the 200 reviews contain the literal string <code>"&lt;br /&gt;"</code> somewhere in their <code>text</code>.</li>
+<li>In the first block, count how many reviews fall into each <code>label</code>. In the second block, count how many of the 200 reviews contain the literal string <code>"&lt;br /&gt;"</code> somewhere in their <code>text</code>.</li>
 </ol>
-<div id="fda9477f" class="cell" data-execution_count="6">
+<div id="f778cfed" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>View code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>docs_raw.group_by(c.label).agg(n <span class="op">=</span> pl.<span class="bu">len</span>())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>docs_raw.group_by(c.label).agg(n <span class="op">=</span> pl.<span class="bu">len</span>())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="5">
 <div><style>
@@ -362,11 +368,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
-<td>"positive"</td>
+<td>"negative"</td>
 <td>100</td>
 </tr>
 <tr class="even">
-<td>"negative"</td>
+<td>"positive"</td>
 <td>100</td>
 </tr>
 </tbody>
@@ -374,10 +380,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<div id="304f1dd5" class="cell" data-execution_count="7">
+<div id="27308f5d" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>View code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>docs_raw.select(c.text.<span class="bu">str</span>.contains(<span class="st">"&lt;br /&gt;"</span>).<span class="bu">sum</span>())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>docs_raw.select(c.text.<span class="bu">str</span>.contains(<span class="st">"&lt;br /&gt;"</span>).<span class="bu">sum</span>())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="6">
 <div><style>
@@ -409,19 +415,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="2" type="1">
 <li>Before cleaning anything, see what the raw HTML does to the pipeline. Run <code>DSText.process()</code> on just review <code>doc0001</code>, then filter the result to tokens whose <code>token</code> contains <code>"&lt;br"</code> and print <code>token</code>, <code>upos</code>, and <code>is_alpha</code>.</li>
 </ol>
-<div id="19e74767" class="cell" data-execution_count="8">
+<div id="52ad7f06" class="cell" data-execution_count="9">
 <details class="code-fold">
 <summary>View code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>example <span class="op">=</span> DSText.process(</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    docs_raw.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> <span class="st">"doc0001"</span>).select(c.doc_id, c.text),</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    nlp</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    example</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.token.<span class="bu">str</span>.contains(<span class="st">"&lt;br"</span>))</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    .select(c.token, c.upos, c.is_alpha)</span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>example <span class="op">=</span> DSText.process(</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    docs_raw.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> <span class="st">"doc0001"</span>).select(c.doc_id, c.text),</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    nlp</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    example</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.token.<span class="bu">str</span>.contains(<span class="st">"&lt;br"</span>))</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    .select(c.token, c.upos, c.is_alpha)</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="7">
 <div><style>
@@ -495,14 +501,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="3" type="1">
 <li>Build <code>docs</code> from <code>docs_raw</code> by replacing every <code>"&lt;br /&gt;"</code> with a single space. Confirm the count from question 1 is now zero.</li>
 </ol>
-<div id="cfcb5e6f" class="cell" data-execution_count="9">
+<div id="35f24e04" class="cell" data-execution_count="10">
 <details class="code-fold">
 <summary>View code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>docs <span class="op">=</span> docs_raw.with_columns(</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    text <span class="op">=</span> c.text.<span class="bu">str</span>.replace_all(<span class="st">"&lt;br /&gt;"</span>, <span class="st">" "</span>)</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>docs.select(c.text.<span class="bu">str</span>.contains(<span class="st">"&lt;br /&gt;"</span>).<span class="bu">sum</span>())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>docs <span class="op">=</span> docs_raw.with_columns(</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    text <span class="op">=</span> c.text.<span class="bu">str</span>.replace_all(<span class="st">"&lt;br /&gt;"</span>, <span class="st">" "</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>docs.select(c.text.<span class="bu">str</span>.contains(<span class="st">"&lt;br /&gt;"</span>).<span class="bu">sum</span>())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="8">
 <div><style>
@@ -532,27 +538,27 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <ol start="4" type="1">
-<li>Run <code>DSText.process()</code> on the full, cleaned <code>docs</code> table to build <code>anno</code>. Print its shape. Then confirm that <code>doc_id</code>, <code>sid</code>, and <code>tid</code> together form a valid key for <code>anno</code>, the same <code>.group_by()</code>-then-<code>.filter()</code> check used for any other table’s key.</li>
+<li>In the first block, run <code>DSText.process()</code> on the full, cleaned <code>docs</code> table to build <code>anno</code> and print its shape. In the second block, confirm that <code>doc_id</code>, <code>sid</code>, and <code>tid</code> together form a valid key for <code>anno</code>, the same <code>.group_by()</code>-then-<code>.filter()</code> check used for any other table’s key.</li>
 </ol>
-<div id="c8145983" class="cell" data-execution_count="10">
+<div id="6bf63d85" class="cell" data-execution_count="11">
 <details class="code-fold">
 <summary>View code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>anno <span class="op">=</span> DSText.process(docs.select(c.doc_id, c.text), nlp)</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>anno.shape</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>anno <span class="op">=</span> DSText.process(docs.select(c.doc_id, c.text), nlp)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>anno.shape</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="9">
 <pre><code>(51992, 15)</code></pre>
 </div>
 </div>
-<div id="012bfe65" class="cell" data-execution_count="11">
+<div id="14cc2412" class="cell" data-execution_count="12">
 <details class="code-fold">
 <summary>View code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    anno</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    .group_by(c.doc_id, c.sid, c.tid)</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    .agg(count <span class="op">=</span> pl.<span class="bu">len</span>())</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.count <span class="op">&gt;</span> <span class="dv">1</span>)</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    anno</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    .group_by(c.doc_id, c.sid, c.tid)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    .agg(count <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.count <span class="op">&gt;</span> <span class="dv">1</span>)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="10">
 <div><style>
@@ -588,14 +594,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="5" type="1">
 <li>Look at the first sentence of <code>doc0001</code> on its own: filter <code>anno</code> to <code>doc_id == "doc0001"</code> and <code>sid == 1</code>, and select <code>tid</code>, <code>token</code>, and <code>upos</code>.</li>
 </ol>
-<div id="ddda6483" class="cell" data-execution_count="12">
+<div id="5d20187f" class="cell" data-execution_count="13">
 <details class="code-fold">
 <summary>View code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    anno</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.doc_id <span class="op">==</span> <span class="st">"doc0001"</span>, c.sid <span class="op">==</span> <span class="dv">1</span>)</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    .select(c.tid, c.token, c.upos)</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    anno</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.doc_id <span class="op">==</span> <span class="st">"doc0001"</span>, c.sid <span class="op">==</span> <span class="dv">1</span>)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    .select(c.tid, c.token, c.upos)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="11">
 <div><style>
@@ -678,20 +684,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="6" type="1">
 <li>Reconstruct the full cleaned text of <code>doc0001</code> from <code>anno</code> by sorting on <code>sid</code> and <code>tid</code> and joining <code>token_with_ws</code> back together. Compare it to the <code>text</code> value for <code>doc0001</code> in <code>docs</code> and confirm they match exactly.</li>
 </ol>
-<div id="e899fe1d" class="cell" data-execution_count="13">
+<div id="d32914ea" class="cell" data-execution_count="14">
 <details class="code-fold">
 <summary>View code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>recon <span class="op">=</span> (</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    anno</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.doc_id <span class="op">==</span> <span class="st">"doc0001"</span>)</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    .sort(c.sid, c.tid)</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    .select(c.token_with_ws.<span class="bu">str</span>.join(<span class="st">""</span>))</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    .item()</span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>original <span class="op">=</span> docs.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> <span class="st">"doc0001"</span>).select(c.text).item()</span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>recon <span class="op">==</span> original</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>recon <span class="op">=</span> (</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    anno</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.doc_id <span class="op">==</span> <span class="st">"doc0001"</span>)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    .sort(c.sid, c.tid)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    .select(c.token_with_ws.<span class="bu">str</span>.join(<span class="st">""</span>))</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    .item()</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>original <span class="op">=</span> docs.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> <span class="st">"doc0001"</span>).select(c.text).item()</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>recon <span class="op">==</span> original</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="12">
 <pre><code>True</code></pre>
@@ -700,18 +706,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="7" type="1">
 <li>Find the 10 most frequent nouns across the whole corpus: filter <code>anno</code> to <code>upos == "NOUN"</code>, group by <code>lemma</code>, count, and sort in descending order.</li>
 </ol>
-<div id="912006ea" class="cell" data-execution_count="14">
+<div id="6abfd503" class="cell" data-execution_count="15">
 <details class="code-fold">
 <summary>View code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>top_nouns <span class="op">=</span> (</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    anno</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.upos <span class="op">==</span> <span class="st">"NOUN"</span>)</span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    .group_by(c.lemma)</span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    .agg(count <span class="op">=</span> pl.<span class="bu">len</span>())</span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    .sort(c.count, descending<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">10</span>)</span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>top_nouns</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>top_nouns <span class="op">=</span> (</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    anno</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.upos <span class="op">==</span> <span class="st">"NOUN"</span>)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    .group_by(c.lemma)</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    .agg(count <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    .sort(c.count, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">10</span>)</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>top_nouns</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="13">
 <div><style>
@@ -783,21 +789,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="8" type="1">
 <li>Plot the top 10 nouns from question 7 as a bar chart with <code>geom_col()</code>, flipping the coordinates so the noun labels are readable.</li>
 </ol>
-<div id="b0fd82bc" class="cell" data-execution_count="15">
+<div id="3d288d83" class="cell" data-execution_count="16">
 <details class="code-fold">
 <summary>View code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    top_nouns</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    .pipe(ggplot, aes(c.lemma, c.count))</span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    .geom_col()</span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    .coord_flip()</span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    .labs(title<span class="op">=</span><span class="st">"Most Frequent Nouns"</span>, x<span class="op">=</span><span class="st">"Noun"</span>, y<span class="op">=</span><span class="st">"Count"</span>)</span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    top_nouns</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    .pipe(ggplot, aes(c.lemma, c.count))</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    .geom_col()</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    .coord_flip()</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    .labs(title<span class="op">=</span><span class="st">"Most Frequent Nouns"</span>, x<span class="op">=</span><span class="st">"Noun"</span>, y<span class="op">=</span><span class="st">"Count"</span>)</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="14">
 <div>
 <figure class="figure">
-<p><a href="notebook39_files/figure-html/cell-16-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="notebook39_files/figure-html/cell-16-output-1.png" width="672" height="480" class="figure-img"></a></p>
+<p><a href="notebook39_files/figure-html/cell-17-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="notebook39_files/figure-html/cell-17-output-1.png" width="672" height="480" class="figure-img"></a></p>
 </figure>
 </div>
 </div>
@@ -805,23 +811,23 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="9" type="1">
 <li>Find the 10 most frequent adjectives within each <code>label</code>. Join <code>anno</code> to the <code>doc_id</code>/<code>label</code> pairs in <code>docs</code>, filter to alphabetic adjectives, group by <code>label</code> and <code>lemma</code>, count, and take the top 10 rows within each <code>label</code>.</li>
 </ol>
-<div id="0d927584" class="cell" data-execution_count="16">
+<div id="71b7af3e" class="cell" data-execution_count="17">
 <details class="code-fold">
 <summary>View code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>adj_by_label <span class="op">=</span> (</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    anno</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    .join(docs.select(c.doc_id, c.label), on<span class="op">=</span>c.doc_id)</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.upos <span class="op">==</span> <span class="st">"ADJ"</span>, c.is_alpha)</span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    .group_by(c.label, c.lemma)</span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    .agg(count <span class="op">=</span> pl.<span class="bu">len</span>())</span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    .sort([c.label, c.count], descending<span class="op">=</span>[<span class="va">False</span>, <span class="va">True</span>])</span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>    adj_by_label</span>
-<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    .group_by(c.label, maintain_order<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">10</span>)</span>
-<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>adj_by_label <span class="op">=</span> (</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    anno</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    .join(docs.select(c.doc_id, c.label), on<span class="op">=</span>c.doc_id)</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.upos <span class="op">==</span> <span class="st">"ADJ"</span>, c.is_alpha)</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    .group_by(c.label, c.lemma)</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    .agg(count <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>    .sort([c.label, c.count], descending<span class="op">=</span>[<span class="va">False</span>, <span class="va">True</span>])</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>    adj_by_label</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>    .group_by(c.label, maintain_order<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">10</span>)</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="15">
 <div><style>
@@ -909,14 +915,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="10" type="1">
 <li>Filter <code>adj_by_label</code> to just the lemmas <code>"good"</code> and <code>"bad"</code> and print the count for each label. Sentiment labels aside, why doesn’t a simple count of these two words cleanly separate the positive reviews from the negative ones?</li>
 </ol>
-<div id="2f12c7ed" class="cell" data-execution_count="17">
+<div id="b7fdef55" class="cell" data-execution_count="18">
 <details class="code-fold">
 <summary>View code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    adj_by_label</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.lemma.is_in([<span class="st">"good"</span>, <span class="st">"bad"</span>]))</span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    .sort(c.label, c.lemma)</span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    adj_by_label</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.lemma.is_in([<span class="st">"good"</span>, <span class="st">"bad"</span>]))</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    .sort(c.label, c.lemma)</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="16">
 <div><style>
@@ -970,25 +976,25 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="11" type="1">
 <li>Run <code>DSText.process()</code> on <code>docs_raw</code> (the <em>uncleaned</em> text) to build <code>anno_dirty</code>, covering the same 200 reviews. Compare the <code>NOUN</code> counts for <code>movie</code> and <code>film</code> in <code>anno_dirty</code> against the counts already sitting in <code>top_nouns</code> from the cleaned version.</li>
 </ol>
-<div id="65105fb5" class="cell" data-execution_count="18">
+<div id="3b817eae" class="cell" data-execution_count="19">
 <details class="code-fold">
 <summary>View code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>anno_dirty <span class="op">=</span> DSText.process(docs_raw.select(c.doc_id, c.text), nlp)</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>clean_counts <span class="op">=</span> (</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    top_nouns</span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.lemma.is_in([<span class="st">"movie"</span>, <span class="st">"film"</span>]))</span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    .rename({<span class="st">"count"</span>: <span class="st">"count_clean"</span>})</span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>dirty_counts <span class="op">=</span> (</span>
-<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>    anno_dirty</span>
-<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.upos <span class="op">==</span> <span class="st">"NOUN"</span>, c.lemma.is_in([<span class="st">"movie"</span>, <span class="st">"film"</span>]))</span>
-<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>    .group_by(c.lemma)</span>
-<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>    .agg(count_dirty <span class="op">=</span> pl.<span class="bu">len</span>())</span>
-<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>clean_counts.join(dirty_counts, on<span class="op">=</span>c.lemma)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>anno_dirty <span class="op">=</span> DSText.process(docs_raw.select(c.doc_id, c.text), nlp)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>clean_counts <span class="op">=</span> (</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    top_nouns</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.lemma.is_in([<span class="st">"movie"</span>, <span class="st">"film"</span>]))</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    .rename({<span class="st">"count"</span>: <span class="st">"count_clean"</span>})</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>dirty_counts <span class="op">=</span> (</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>    anno_dirty</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.upos <span class="op">==</span> <span class="st">"NOUN"</span>, c.lemma.is_in([<span class="st">"movie"</span>, <span class="st">"film"</span>]))</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>    .group_by(c.lemma)</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>    .agg(count_dirty <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>clean_counts.join(dirty_counts, on<span class="op">=</span>c.lemma)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="17">
 <div><style>
@@ -1014,14 +1020,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
-<td>"movie"</td>
-<td>440</td>
-<td>432</td>
-</tr>
-<tr class="even">
 <td>"film"</td>
 <td>346</td>
 <td>340</td>
+</tr>
+<tr class="even">
+<td>"movie"</td>
+<td>440</td>
+<td>432</td>
 </tr>
 </tbody>
 </table>
@@ -1520,280 +1526,287 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
   </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Notebook39"</span></span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="an">solutions-release-date:</span><span class="co"> "2026-10-05"</span></span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="fu">### Setup</span></span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>Run all of the following before starting the notebook.</span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [noclear]</span></span>
-<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
-<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a><span class="op">!</span> wget <span class="op">-</span>q <span class="op">-</span>nc https:<span class="op">//</span>raw.githubusercontent.com<span class="op">/</span>taylor<span class="op">-</span>arnold<span class="op">/</span>fds2<span class="op">/</span>refs<span class="op">/</span>heads<span class="op">/</span>main<span class="op">/</span>funs.py</span>
-<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [noclear]</span></span>
-<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
-<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine <span class="im">import</span> ggplot, aes</span>
-<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> polars <span class="im">import</span> col <span class="im">as</span> c</span>
-<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> funs</span>
-<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> funs <span class="im">import</span> DSText</span>
-<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-29"><a href="#cb20-29" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> spacy</span>
-<span id="cb20-30"><a href="#cb20-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-31"><a href="#cb20-31" aria-hidden="true" tabindex="-1"></a>ub <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"</span></span>
-<span id="cb20-32"><a href="#cb20-32" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb20-33"><a href="#cb20-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-36"><a href="#cb20-36" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb20-37"><a href="#cb20-37" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [remove]</span></span>
-<span id="cb20-38"><a href="#cb20-38" aria-hidden="true" tabindex="-1"></a><span class="co">#| include: false</span></span>
-<span id="cb20-39"><a href="#cb20-39" aria-hidden="true" tabindex="-1"></a>ub <span class="op">=</span> <span class="st">""</span></span>
-<span id="cb20-40"><a href="#cb20-40" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb20-41"><a href="#cb20-41" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-44"><a href="#cb20-44" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb20-45"><a href="#cb20-45" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [noclear]</span></span>
-<span id="cb20-46"><a href="#cb20-46" aria-hidden="true" tabindex="-1"></a>docs_raw <span class="op">=</span> (</span>
-<span id="cb20-47"><a href="#cb20-47" aria-hidden="true" tabindex="-1"></a>    pl.read_parquet(ub <span class="op">+</span> <span class="st">"data/imdb5k_pca.parquet"</span>)</span>
-<span id="cb20-48"><a href="#cb20-48" aria-hidden="true" tabindex="-1"></a>    .select(c.<span class="bu">id</span>, c.label, c.text)</span>
-<span id="cb20-49"><a href="#cb20-49" aria-hidden="true" tabindex="-1"></a>    .rename({<span class="st">"id"</span>: <span class="st">"doc_id"</span>})</span>
-<span id="cb20-50"><a href="#cb20-50" aria-hidden="true" tabindex="-1"></a>    .sort(c.doc_id)</span>
-<span id="cb20-51"><a href="#cb20-51" aria-hidden="true" tabindex="-1"></a>    .group_by(c.label, maintain_order<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb20-52"><a href="#cb20-52" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">100</span>)</span>
-<span id="cb20-53"><a href="#cb20-53" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb20-54"><a href="#cb20-54" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb20-55"><a href="#cb20-55" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-58"><a href="#cb20-58" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb20-59"><a href="#cb20-59" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [noclear]</span></span>
-<span id="cb20-60"><a href="#cb20-60" aria-hidden="true" tabindex="-1"></a>nlp <span class="op">=</span> spacy.load(<span class="st">"en_core_web_sm"</span>)</span>
-<span id="cb20-61"><a href="#cb20-61" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb20-62"><a href="#cb20-62" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-63"><a href="#cb20-63" aria-hidden="true" tabindex="-1"></a><span class="fu">### Questions</span></span>
-<span id="cb20-64"><a href="#cb20-64" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-65"><a href="#cb20-65" aria-hidden="true" tabindex="-1"></a><span class="in">`docs_raw`</span> holds 200 IMDb movie reviews, 100 labeled <span class="in">`"positive"`</span> and 100</span>
-<span id="cb20-66"><a href="#cb20-66" aria-hidden="true" tabindex="-1"></a>labeled <span class="in">`"negative"`</span>, each with a <span class="in">`doc_id`</span> and the raw <span class="in">`text`</span> of the review.</span>
-<span id="cb20-67"><a href="#cb20-67" aria-hidden="true" tabindex="-1"></a>This is a different, smaller corpus than the one the chapter itself uses for</span>
-<span id="cb20-68"><a href="#cb20-68" aria-hidden="true" tabindex="-1"></a>its Wikipedia author pages, and it comes with a mess of its own: IMDb's</span>
-<span id="cb20-69"><a href="#cb20-69" aria-hidden="true" tabindex="-1"></a>reviews were originally scraped from a web page, and the literal characters</span>
-<span id="cb20-70"><a href="#cb20-70" aria-hidden="true" tabindex="-1"></a><span class="in">`&lt;br /&gt;`</span> (an HTML line break) are still sitting inside the text of many</span>
-<span id="cb20-71"><a href="#cb20-71" aria-hidden="true" tabindex="-1"></a>reviews. The first few questions deal with that mess directly, in the same</span>
-<span id="cb20-72"><a href="#cb20-72" aria-hidden="true" tabindex="-1"></a>spirit as the chapter's warning that the wrapper functions are not magic.</span>
-<span id="cb20-73"><a href="#cb20-73" aria-hidden="true" tabindex="-1"></a>Print results unless a question says otherwise.</span>
-<span id="cb20-74"><a href="#cb20-74" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-75"><a href="#cb20-75" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Count how many reviews fall into each <span class="in">`label`</span>. Then count how many of the</span>
-<span id="cb20-76"><a href="#cb20-76" aria-hidden="true" tabindex="-1"></a>200 reviews contain the literal string <span class="in">`"&lt;br /&gt;"`</span> somewhere in their <span class="in">`text`</span>.</span>
-<span id="cb20-77"><a href="#cb20-77" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-80"><a href="#cb20-80" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb20-81"><a href="#cb20-81" aria-hidden="true" tabindex="-1"></a>docs_raw.group_by(c.label).agg(n <span class="op">=</span> pl.<span class="bu">len</span>())</span>
-<span id="cb20-82"><a href="#cb20-82" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb20-83"><a href="#cb20-83" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-86"><a href="#cb20-86" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb20-87"><a href="#cb20-87" aria-hidden="true" tabindex="-1"></a>docs_raw.select(c.text.<span class="bu">str</span>.contains(<span class="st">"&lt;br /&gt;"</span>).<span class="bu">sum</span>())</span>
-<span id="cb20-88"><a href="#cb20-88" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb20-89"><a href="#cb20-89" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-90"><a href="#cb20-90" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Before cleaning anything, see what the raw HTML does to the pipeline.</span>
-<span id="cb20-91"><a href="#cb20-91" aria-hidden="true" tabindex="-1"></a>Run <span class="in">`DSText.process()`</span> on just review <span class="in">`doc0001`</span>, then filter the result to</span>
-<span id="cb20-92"><a href="#cb20-92" aria-hidden="true" tabindex="-1"></a>tokens whose <span class="in">`token`</span> contains <span class="in">`"&lt;br"`</span> and print <span class="in">`token`</span>, <span class="in">`upos`</span>, and</span>
-<span id="cb20-93"><a href="#cb20-93" aria-hidden="true" tabindex="-1"></a><span class="in">`is_alpha`</span>.</span>
-<span id="cb20-94"><a href="#cb20-94" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-97"><a href="#cb20-97" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb20-98"><a href="#cb20-98" aria-hidden="true" tabindex="-1"></a>example <span class="op">=</span> DSText.process(</span>
-<span id="cb20-99"><a href="#cb20-99" aria-hidden="true" tabindex="-1"></a>    docs_raw.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> <span class="st">"doc0001"</span>).select(c.doc_id, c.text),</span>
-<span id="cb20-100"><a href="#cb20-100" aria-hidden="true" tabindex="-1"></a>    nlp</span>
-<span id="cb20-101"><a href="#cb20-101" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb20-102"><a href="#cb20-102" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-103"><a href="#cb20-103" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb20-104"><a href="#cb20-104" aria-hidden="true" tabindex="-1"></a>    example</span>
-<span id="cb20-105"><a href="#cb20-105" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.token.<span class="bu">str</span>.contains(<span class="st">"&lt;br"</span>))</span>
-<span id="cb20-106"><a href="#cb20-106" aria-hidden="true" tabindex="-1"></a>    .select(c.token, c.upos, c.is_alpha)</span>
-<span id="cb20-107"><a href="#cb20-107" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb20-108"><a href="#cb20-108" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb20-109"><a href="#cb20-109" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-110"><a href="#cb20-110" aria-hidden="true" tabindex="-1"></a>Every one of these tokens has <span class="in">`is_alpha`</span> equal to <span class="in">`False`</span>, but three of them</span>
-<span id="cb20-111"><a href="#cb20-111" aria-hidden="true" tabindex="-1"></a>still get labeled <span class="in">`NOUN`</span> by the tagger, and the same string, <span class="in">`"/&gt;&lt;br"`</span>,</span>
-<span id="cb20-112"><a href="#cb20-112" aria-hidden="true" tabindex="-1"></a>comes back tagged three different ways (<span class="in">`PUNCT`</span>, <span class="in">`NOUN`</span>, <span class="in">`NUM`</span>) depending on</span>
-<span id="cb20-113"><a href="#cb20-113" aria-hidden="true" tabindex="-1"></a>what happens to sit next to it. None of this is the tagger's fault; it is</span>
-<span id="cb20-114"><a href="#cb20-114" aria-hidden="true" tabindex="-1"></a>being handed text that was never a real sentence to begin with. Because the</span>
-<span id="cb20-115"><a href="#cb20-115" aria-hidden="true" tabindex="-1"></a>chapter's own noun-frequency query in the next section filters only on</span>
-<span id="cb20-116"><a href="#cb20-116" aria-hidden="true" tabindex="-1"></a><span class="in">`upos`</span>, these contaminated tokens would sneak into a noun count without</span>
-<span id="cb20-117"><a href="#cb20-117" aria-hidden="true" tabindex="-1"></a><span class="in">`is_alpha`</span> ever being checked.</span>
-<span id="cb20-118"><a href="#cb20-118" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-119"><a href="#cb20-119" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Build <span class="in">`docs`</span> from <span class="in">`docs_raw`</span> by replacing every <span class="in">`"&lt;br /&gt;"`</span> with a single</span>
-<span id="cb20-120"><a href="#cb20-120" aria-hidden="true" tabindex="-1"></a>space. Confirm the count from question 1 is now zero.</span>
-<span id="cb20-121"><a href="#cb20-121" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-124"><a href="#cb20-124" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb20-125"><a href="#cb20-125" aria-hidden="true" tabindex="-1"></a>docs <span class="op">=</span> docs_raw.with_columns(</span>
-<span id="cb20-126"><a href="#cb20-126" aria-hidden="true" tabindex="-1"></a>    text <span class="op">=</span> c.text.<span class="bu">str</span>.replace_all(<span class="st">"&lt;br /&gt;"</span>, <span class="st">" "</span>)</span>
-<span id="cb20-127"><a href="#cb20-127" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb20-128"><a href="#cb20-128" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-129"><a href="#cb20-129" aria-hidden="true" tabindex="-1"></a>docs.select(c.text.<span class="bu">str</span>.contains(<span class="st">"&lt;br /&gt;"</span>).<span class="bu">sum</span>())</span>
-<span id="cb20-130"><a href="#cb20-130" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb20-131"><a href="#cb20-131" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-132"><a href="#cb20-132" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>Run <span class="in">`DSText.process()`</span> on the full, cleaned <span class="in">`docs`</span> table to build <span class="in">`anno`</span>.</span>
-<span id="cb20-133"><a href="#cb20-133" aria-hidden="true" tabindex="-1"></a>Print its shape. Then confirm that <span class="in">`doc_id`</span>, <span class="in">`sid`</span>, and <span class="in">`tid`</span> together form a</span>
-<span id="cb20-134"><a href="#cb20-134" aria-hidden="true" tabindex="-1"></a>valid key for <span class="in">`anno`</span>, the same <span class="in">`.group_by()`</span>-then-<span class="in">`.filter()`</span> check used for</span>
-<span id="cb20-135"><a href="#cb20-135" aria-hidden="true" tabindex="-1"></a>any other table's key.</span>
-<span id="cb20-136"><a href="#cb20-136" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-139"><a href="#cb20-139" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb20-140"><a href="#cb20-140" aria-hidden="true" tabindex="-1"></a>anno <span class="op">=</span> DSText.process(docs.select(c.doc_id, c.text), nlp)</span>
-<span id="cb20-141"><a href="#cb20-141" aria-hidden="true" tabindex="-1"></a>anno.shape</span>
-<span id="cb20-142"><a href="#cb20-142" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb20-143"><a href="#cb20-143" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-146"><a href="#cb20-146" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb20-147"><a href="#cb20-147" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb20-148"><a href="#cb20-148" aria-hidden="true" tabindex="-1"></a>    anno</span>
-<span id="cb20-149"><a href="#cb20-149" aria-hidden="true" tabindex="-1"></a>    .group_by(c.doc_id, c.sid, c.tid)</span>
-<span id="cb20-150"><a href="#cb20-150" aria-hidden="true" tabindex="-1"></a>    .agg(count <span class="op">=</span> pl.<span class="bu">len</span>())</span>
-<span id="cb20-151"><a href="#cb20-151" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.count <span class="op">&gt;</span> <span class="dv">1</span>)</span>
-<span id="cb20-152"><a href="#cb20-152" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb20-153"><a href="#cb20-153" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb20-154"><a href="#cb20-154" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-155"><a href="#cb20-155" aria-hidden="true" tabindex="-1"></a>No rows come back, so the triple identifies a single token with nothing</span>
-<span id="cb20-156"><a href="#cb20-156" aria-hidden="true" tabindex="-1"></a>left over.</span>
-<span id="cb20-157"><a href="#cb20-157" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-158"><a href="#cb20-158" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>Look at the first sentence of <span class="in">`doc0001`</span> on its own: filter <span class="in">`anno`</span> to</span>
-<span id="cb20-159"><a href="#cb20-159" aria-hidden="true" tabindex="-1"></a><span class="in">`doc_id == "doc0001"`</span> and <span class="in">`sid == 1`</span>, and select <span class="in">`tid`</span>, <span class="in">`token`</span>, and <span class="in">`upos`</span>.</span>
-<span id="cb20-160"><a href="#cb20-160" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-163"><a href="#cb20-163" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb20-164"><a href="#cb20-164" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb20-165"><a href="#cb20-165" aria-hidden="true" tabindex="-1"></a>    anno</span>
-<span id="cb20-166"><a href="#cb20-166" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.doc_id <span class="op">==</span> <span class="st">"doc0001"</span>, c.sid <span class="op">==</span> <span class="dv">1</span>)</span>
-<span id="cb20-167"><a href="#cb20-167" aria-hidden="true" tabindex="-1"></a>    .select(c.tid, c.token, c.upos)</span>
-<span id="cb20-168"><a href="#cb20-168" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb20-169"><a href="#cb20-169" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb20-170"><a href="#cb20-170" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-171"><a href="#cb20-171" aria-hidden="true" tabindex="-1"></a><span class="ss">6. </span>Reconstruct the full cleaned text of <span class="in">`doc0001`</span> from <span class="in">`anno`</span> by sorting on</span>
-<span id="cb20-172"><a href="#cb20-172" aria-hidden="true" tabindex="-1"></a><span class="in">`sid`</span> and <span class="in">`tid`</span> and joining <span class="in">`token_with_ws`</span> back together. Compare it to the</span>
-<span id="cb20-173"><a href="#cb20-173" aria-hidden="true" tabindex="-1"></a><span class="in">`text`</span> value for <span class="in">`doc0001`</span> in <span class="in">`docs`</span> and confirm they match exactly.</span>
-<span id="cb20-174"><a href="#cb20-174" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-177"><a href="#cb20-177" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb20-178"><a href="#cb20-178" aria-hidden="true" tabindex="-1"></a>recon <span class="op">=</span> (</span>
-<span id="cb20-179"><a href="#cb20-179" aria-hidden="true" tabindex="-1"></a>    anno</span>
-<span id="cb20-180"><a href="#cb20-180" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.doc_id <span class="op">==</span> <span class="st">"doc0001"</span>)</span>
-<span id="cb20-181"><a href="#cb20-181" aria-hidden="true" tabindex="-1"></a>    .sort(c.sid, c.tid)</span>
-<span id="cb20-182"><a href="#cb20-182" aria-hidden="true" tabindex="-1"></a>    .select(c.token_with_ws.<span class="bu">str</span>.join(<span class="st">""</span>))</span>
-<span id="cb20-183"><a href="#cb20-183" aria-hidden="true" tabindex="-1"></a>    .item()</span>
-<span id="cb20-184"><a href="#cb20-184" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb20-185"><a href="#cb20-185" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-186"><a href="#cb20-186" aria-hidden="true" tabindex="-1"></a>original <span class="op">=</span> docs.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> <span class="st">"doc0001"</span>).select(c.text).item()</span>
-<span id="cb20-187"><a href="#cb20-187" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-188"><a href="#cb20-188" aria-hidden="true" tabindex="-1"></a>recon <span class="op">==</span> original</span>
-<span id="cb20-189"><a href="#cb20-189" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb20-190"><a href="#cb20-190" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-191"><a href="#cb20-191" aria-hidden="true" tabindex="-1"></a><span class="ss">7. </span>Find the 10 most frequent nouns across the whole corpus: filter <span class="in">`anno`</span> to</span>
-<span id="cb20-192"><a href="#cb20-192" aria-hidden="true" tabindex="-1"></a><span class="in">`upos == "NOUN"`</span>, group by <span class="in">`lemma`</span>, count, and sort in descending order.</span>
-<span id="cb20-193"><a href="#cb20-193" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-196"><a href="#cb20-196" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb20-197"><a href="#cb20-197" aria-hidden="true" tabindex="-1"></a>top_nouns <span class="op">=</span> (</span>
-<span id="cb20-198"><a href="#cb20-198" aria-hidden="true" tabindex="-1"></a>    anno</span>
-<span id="cb20-199"><a href="#cb20-199" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.upos <span class="op">==</span> <span class="st">"NOUN"</span>)</span>
-<span id="cb20-200"><a href="#cb20-200" aria-hidden="true" tabindex="-1"></a>    .group_by(c.lemma)</span>
-<span id="cb20-201"><a href="#cb20-201" aria-hidden="true" tabindex="-1"></a>    .agg(count <span class="op">=</span> pl.<span class="bu">len</span>())</span>
-<span id="cb20-202"><a href="#cb20-202" aria-hidden="true" tabindex="-1"></a>    .sort(c.count, descending<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb20-203"><a href="#cb20-203" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">10</span>)</span>
-<span id="cb20-204"><a href="#cb20-204" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb20-205"><a href="#cb20-205" aria-hidden="true" tabindex="-1"></a>top_nouns</span>
-<span id="cb20-206"><a href="#cb20-206" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb20-207"><a href="#cb20-207" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-208"><a href="#cb20-208" aria-hidden="true" tabindex="-1"></a>Unlike the chapter's biography pages, where the most common nouns spread</span>
-<span id="cb20-209"><a href="#cb20-209" aria-hidden="true" tabindex="-1"></a>across a handful of different themes, this list is dominated by the two</span>
-<span id="cb20-210"><a href="#cb20-210" aria-hidden="true" tabindex="-1"></a>words for the thing being reviewed. <span class="in">`movie`</span> and <span class="in">`film`</span> alone account for</span>
-<span id="cb20-211"><a href="#cb20-211" aria-hidden="true" tabindex="-1"></a>more mentions than the next four nouns combined, a reminder that the most</span>
-<span id="cb20-212"><a href="#cb20-212" aria-hidden="true" tabindex="-1"></a>frequent word in a collection is not always the most informative one.</span>
-<span id="cb20-213"><a href="#cb20-213" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-214"><a href="#cb20-214" aria-hidden="true" tabindex="-1"></a><span class="ss">8. </span>Plot the top 10 nouns from question 7 as a bar chart with <span class="in">`geom_col()`</span>,</span>
-<span id="cb20-215"><a href="#cb20-215" aria-hidden="true" tabindex="-1"></a>flipping the coordinates so the noun labels are readable.</span>
-<span id="cb20-216"><a href="#cb20-216" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-219"><a href="#cb20-219" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb20-220"><a href="#cb20-220" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb20-221"><a href="#cb20-221" aria-hidden="true" tabindex="-1"></a>    top_nouns</span>
-<span id="cb20-222"><a href="#cb20-222" aria-hidden="true" tabindex="-1"></a>    .pipe(ggplot, aes(c.lemma, c.count))</span>
-<span id="cb20-223"><a href="#cb20-223" aria-hidden="true" tabindex="-1"></a>    .geom_col()</span>
-<span id="cb20-224"><a href="#cb20-224" aria-hidden="true" tabindex="-1"></a>    .coord_flip()</span>
-<span id="cb20-225"><a href="#cb20-225" aria-hidden="true" tabindex="-1"></a>    .labs(title<span class="op">=</span><span class="st">"Most Frequent Nouns"</span>, x<span class="op">=</span><span class="st">"Noun"</span>, y<span class="op">=</span><span class="st">"Count"</span>)</span>
-<span id="cb20-226"><a href="#cb20-226" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb20-227"><a href="#cb20-227" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb20-228"><a href="#cb20-228" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-229"><a href="#cb20-229" aria-hidden="true" tabindex="-1"></a><span class="ss">9. </span>Find the 10 most frequent adjectives within each <span class="in">`label`</span>. Join <span class="in">`anno`</span> to</span>
-<span id="cb20-230"><a href="#cb20-230" aria-hidden="true" tabindex="-1"></a>the <span class="in">`doc_id`</span>/<span class="in">`label`</span> pairs in <span class="in">`docs`</span>, filter to alphabetic adjectives, group</span>
-<span id="cb20-231"><a href="#cb20-231" aria-hidden="true" tabindex="-1"></a>by <span class="in">`label`</span> and <span class="in">`lemma`</span>, count, and take the top 10 rows within each <span class="in">`label`</span>.</span>
-<span id="cb20-232"><a href="#cb20-232" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-235"><a href="#cb20-235" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb20-236"><a href="#cb20-236" aria-hidden="true" tabindex="-1"></a>adj_by_label <span class="op">=</span> (</span>
-<span id="cb20-237"><a href="#cb20-237" aria-hidden="true" tabindex="-1"></a>    anno</span>
-<span id="cb20-238"><a href="#cb20-238" aria-hidden="true" tabindex="-1"></a>    .join(docs.select(c.doc_id, c.label), on<span class="op">=</span>c.doc_id)</span>
-<span id="cb20-239"><a href="#cb20-239" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.upos <span class="op">==</span> <span class="st">"ADJ"</span>, c.is_alpha)</span>
-<span id="cb20-240"><a href="#cb20-240" aria-hidden="true" tabindex="-1"></a>    .group_by(c.label, c.lemma)</span>
-<span id="cb20-241"><a href="#cb20-241" aria-hidden="true" tabindex="-1"></a>    .agg(count <span class="op">=</span> pl.<span class="bu">len</span>())</span>
-<span id="cb20-242"><a href="#cb20-242" aria-hidden="true" tabindex="-1"></a>    .sort([c.label, c.count], descending<span class="op">=</span>[<span class="va">False</span>, <span class="va">True</span>])</span>
-<span id="cb20-243"><a href="#cb20-243" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb20-244"><a href="#cb20-244" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-245"><a href="#cb20-245" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb20-246"><a href="#cb20-246" aria-hidden="true" tabindex="-1"></a>    adj_by_label</span>
-<span id="cb20-247"><a href="#cb20-247" aria-hidden="true" tabindex="-1"></a>    .group_by(c.label, maintain_order<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb20-248"><a href="#cb20-248" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">10</span>)</span>
-<span id="cb20-249"><a href="#cb20-249" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb20-250"><a href="#cb20-250" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb20-251"><a href="#cb20-251" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-252"><a href="#cb20-252" aria-hidden="true" tabindex="-1"></a><span class="ss">10. </span>Filter <span class="in">`adj_by_label`</span> to just the lemmas <span class="in">`"good"`</span> and <span class="in">`"bad"`</span> and print</span>
-<span id="cb20-253"><a href="#cb20-253" aria-hidden="true" tabindex="-1"></a>the count for each label. Sentiment labels aside, why doesn't a simple count</span>
-<span id="cb20-254"><a href="#cb20-254" aria-hidden="true" tabindex="-1"></a>of these two words cleanly separate the positive reviews from the negative</span>
-<span id="cb20-255"><a href="#cb20-255" aria-hidden="true" tabindex="-1"></a>ones?</span>
-<span id="cb20-256"><a href="#cb20-256" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-259"><a href="#cb20-259" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb20-260"><a href="#cb20-260" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb20-261"><a href="#cb20-261" aria-hidden="true" tabindex="-1"></a>    adj_by_label</span>
-<span id="cb20-262"><a href="#cb20-262" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.lemma.is_in([<span class="st">"good"</span>, <span class="st">"bad"</span>]))</span>
-<span id="cb20-263"><a href="#cb20-263" aria-hidden="true" tabindex="-1"></a>    .sort(c.label, c.lemma)</span>
-<span id="cb20-264"><a href="#cb20-264" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb20-265"><a href="#cb20-265" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb20-266"><a href="#cb20-266" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-267"><a href="#cb20-267" aria-hidden="true" tabindex="-1"></a>**Answer**: <span class="in">`bad`</span> is heavily one-sided, 86 uses in negative reviews against</span>
-<span id="cb20-268"><a href="#cb20-268" aria-hidden="true" tabindex="-1"></a>only 17 in positive ones. <span class="in">`good`</span>, on the other hand, shows up 80 times in</span>
-<span id="cb20-269"><a href="#cb20-269" aria-hidden="true" tabindex="-1"></a>positive reviews but still 65 times in negative ones, nearly as often. The</span>
-<span id="cb20-270"><a href="#cb20-270" aria-hidden="true" tabindex="-1"></a>sentence pulled out in question 5, "this movie is not good," is exactly why:</span>
-<span id="cb20-271"><a href="#cb20-271" aria-hidden="true" tabindex="-1"></a>a negation flips the sentiment of a sentence without removing the positive</span>
-<span id="cb20-272"><a href="#cb20-272" aria-hidden="true" tabindex="-1"></a>word that carries it. The chapter's own introduction makes the same point</span>
-<span id="cb20-273"><a href="#cb20-273" aria-hidden="true" tabindex="-1"></a>about "not bad" being a mild compliment. A raw adjective count has no way to</span>
-<span id="cb20-274"><a href="#cb20-274" aria-hidden="true" tabindex="-1"></a>see the "not" sitting three tokens away; it would need the dependency</span>
-<span id="cb20-275"><a href="#cb20-275" aria-hidden="true" tabindex="-1"></a>information from later in the chapter to catch it.</span>
-<span id="cb20-276"><a href="#cb20-276" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-277"><a href="#cb20-277" aria-hidden="true" tabindex="-1"></a><span class="ss">11. </span>Run <span class="in">`DSText.process()`</span> on <span class="in">`docs_raw`</span> (the *uncleaned* text) to build</span>
-<span id="cb20-278"><a href="#cb20-278" aria-hidden="true" tabindex="-1"></a><span class="in">`anno_dirty`</span>, covering the same 200 reviews. Compare the <span class="in">`NOUN`</span> counts for</span>
-<span id="cb20-279"><a href="#cb20-279" aria-hidden="true" tabindex="-1"></a><span class="in">`movie`</span> and <span class="in">`film`</span> in <span class="in">`anno_dirty`</span> against the counts already sitting in</span>
-<span id="cb20-280"><a href="#cb20-280" aria-hidden="true" tabindex="-1"></a><span class="in">`top_nouns`</span> from the cleaned version.</span>
-<span id="cb20-281"><a href="#cb20-281" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-284"><a href="#cb20-284" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb20-285"><a href="#cb20-285" aria-hidden="true" tabindex="-1"></a>anno_dirty <span class="op">=</span> DSText.process(docs_raw.select(c.doc_id, c.text), nlp)</span>
-<span id="cb20-286"><a href="#cb20-286" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-287"><a href="#cb20-287" aria-hidden="true" tabindex="-1"></a>clean_counts <span class="op">=</span> (</span>
-<span id="cb20-288"><a href="#cb20-288" aria-hidden="true" tabindex="-1"></a>    top_nouns</span>
-<span id="cb20-289"><a href="#cb20-289" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.lemma.is_in([<span class="st">"movie"</span>, <span class="st">"film"</span>]))</span>
-<span id="cb20-290"><a href="#cb20-290" aria-hidden="true" tabindex="-1"></a>    .rename({<span class="st">"count"</span>: <span class="st">"count_clean"</span>})</span>
-<span id="cb20-291"><a href="#cb20-291" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb20-292"><a href="#cb20-292" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-293"><a href="#cb20-293" aria-hidden="true" tabindex="-1"></a>dirty_counts <span class="op">=</span> (</span>
-<span id="cb20-294"><a href="#cb20-294" aria-hidden="true" tabindex="-1"></a>    anno_dirty</span>
-<span id="cb20-295"><a href="#cb20-295" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.upos <span class="op">==</span> <span class="st">"NOUN"</span>, c.lemma.is_in([<span class="st">"movie"</span>, <span class="st">"film"</span>]))</span>
-<span id="cb20-296"><a href="#cb20-296" aria-hidden="true" tabindex="-1"></a>    .group_by(c.lemma)</span>
-<span id="cb20-297"><a href="#cb20-297" aria-hidden="true" tabindex="-1"></a>    .agg(count_dirty <span class="op">=</span> pl.<span class="bu">len</span>())</span>
-<span id="cb20-298"><a href="#cb20-298" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb20-299"><a href="#cb20-299" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-300"><a href="#cb20-300" aria-hidden="true" tabindex="-1"></a>clean_counts.join(dirty_counts, on<span class="op">=</span>c.lemma)</span>
-<span id="cb20-301"><a href="#cb20-301" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb20-302"><a href="#cb20-302" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-303"><a href="#cb20-303" aria-hidden="true" tabindex="-1"></a><span class="in">`movie`</span> loses 8 mentions and <span class="in">`film`</span> loses 6 when the HTML is left in, even</span>
-<span id="cb20-304"><a href="#cb20-304" aria-hidden="true" tabindex="-1"></a>though the top-10 list in question 7 would look almost identical either</span>
-<span id="cb20-305"><a href="#cb20-305" aria-hidden="true" tabindex="-1"></a>way. spaCy's tokenizer merges a word directly against the <span class="in">`&lt;br`</span> that</span>
-<span id="cb20-306"><a href="#cb20-306" aria-hidden="true" tabindex="-1"></a>follows it, the same way question 2 caught it happening to a single</span>
-<span id="cb20-307"><a href="#cb20-307" aria-hidden="true" tabindex="-1"></a>review, and each merge quietly removes one real instance of <span class="in">`movie`</span> or</span>
-<span id="cb20-308"><a href="#cb20-308" aria-hidden="true" tabindex="-1"></a><span class="in">`film`</span> from the count without raising an error. A list that looks unchanged</span>
-<span id="cb20-309"><a href="#cb20-309" aria-hidden="true" tabindex="-1"></a>is not the same thing as a count that is unchanged; the fix from question 3</span>
-<span id="cb20-310"><a href="#cb20-310" aria-hidden="true" tabindex="-1"></a>was worth doing before, not after, running the pipeline on all 200 reviews.</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Notebook39"</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="an">solutions-release-date:</span><span class="co"> "2026-10-05"</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="fu">### Setup</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>Run all of the following before starting the notebook.</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [noclear]</span></span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a><span class="op">!</span> wget <span class="op">-</span>q <span class="op">-</span>nc https:<span class="op">//</span>raw.githubusercontent.com<span class="op">/</span>taylor<span class="op">-</span>arnold<span class="op">/</span>fds2<span class="op">/</span>refs<span class="op">/</span>heads<span class="op">/</span>main<span class="op">/</span>funs.py</span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [noclear]</span></span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a><span class="op">!</span> python <span class="op">-</span>m spacy download en_core_web_sm</span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-28"><a href="#cb21-28" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb21-29"><a href="#cb21-29" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [noclear]</span></span>
+<span id="cb21-30"><a href="#cb21-30" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb21-31"><a href="#cb21-31" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine <span class="im">import</span> ggplot, aes</span>
+<span id="cb21-32"><a href="#cb21-32" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> polars <span class="im">import</span> col <span class="im">as</span> c</span>
+<span id="cb21-33"><a href="#cb21-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-34"><a href="#cb21-34" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> funs</span>
+<span id="cb21-35"><a href="#cb21-35" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> funs <span class="im">import</span> DSText</span>
+<span id="cb21-36"><a href="#cb21-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-37"><a href="#cb21-37" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> spacy</span>
+<span id="cb21-38"><a href="#cb21-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-39"><a href="#cb21-39" aria-hidden="true" tabindex="-1"></a>ub <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"</span></span>
+<span id="cb21-40"><a href="#cb21-40" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb21-41"><a href="#cb21-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-44"><a href="#cb21-44" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb21-45"><a href="#cb21-45" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [remove]</span></span>
+<span id="cb21-46"><a href="#cb21-46" aria-hidden="true" tabindex="-1"></a><span class="co">#| include: false</span></span>
+<span id="cb21-47"><a href="#cb21-47" aria-hidden="true" tabindex="-1"></a>ub <span class="op">=</span> <span class="st">""</span></span>
+<span id="cb21-48"><a href="#cb21-48" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb21-49"><a href="#cb21-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-52"><a href="#cb21-52" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb21-53"><a href="#cb21-53" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [noclear]</span></span>
+<span id="cb21-54"><a href="#cb21-54" aria-hidden="true" tabindex="-1"></a>docs_raw <span class="op">=</span> (</span>
+<span id="cb21-55"><a href="#cb21-55" aria-hidden="true" tabindex="-1"></a>    pl.read_parquet(ub <span class="op">+</span> <span class="st">"data/imdb5k_pca.parquet"</span>)</span>
+<span id="cb21-56"><a href="#cb21-56" aria-hidden="true" tabindex="-1"></a>    .select(c.<span class="bu">id</span>, c.label, c.text)</span>
+<span id="cb21-57"><a href="#cb21-57" aria-hidden="true" tabindex="-1"></a>    .rename({<span class="st">"id"</span>: <span class="st">"doc_id"</span>})</span>
+<span id="cb21-58"><a href="#cb21-58" aria-hidden="true" tabindex="-1"></a>    .sort(c.doc_id)</span>
+<span id="cb21-59"><a href="#cb21-59" aria-hidden="true" tabindex="-1"></a>    .group_by(c.label, maintain_order<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb21-60"><a href="#cb21-60" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">100</span>)</span>
+<span id="cb21-61"><a href="#cb21-61" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-62"><a href="#cb21-62" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb21-63"><a href="#cb21-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-66"><a href="#cb21-66" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb21-67"><a href="#cb21-67" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [noclear]</span></span>
+<span id="cb21-68"><a href="#cb21-68" aria-hidden="true" tabindex="-1"></a>nlp <span class="op">=</span> spacy.load(<span class="st">"en_core_web_sm"</span>)</span>
+<span id="cb21-69"><a href="#cb21-69" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb21-70"><a href="#cb21-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-71"><a href="#cb21-71" aria-hidden="true" tabindex="-1"></a><span class="fu">### Questions</span></span>
+<span id="cb21-72"><a href="#cb21-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-73"><a href="#cb21-73" aria-hidden="true" tabindex="-1"></a><span class="in">`docs_raw`</span> holds 200 IMDb movie reviews, 100 labeled <span class="in">`"positive"`</span> and 100</span>
+<span id="cb21-74"><a href="#cb21-74" aria-hidden="true" tabindex="-1"></a>labeled <span class="in">`"negative"`</span>, each with a <span class="in">`doc_id`</span> and the raw <span class="in">`text`</span> of the review.</span>
+<span id="cb21-75"><a href="#cb21-75" aria-hidden="true" tabindex="-1"></a>This is a different, smaller corpus than the one the chapter itself uses for</span>
+<span id="cb21-76"><a href="#cb21-76" aria-hidden="true" tabindex="-1"></a>its Wikipedia author pages, and it comes with a mess of its own: IMDb's</span>
+<span id="cb21-77"><a href="#cb21-77" aria-hidden="true" tabindex="-1"></a>reviews were originally scraped from a web page, and the literal characters</span>
+<span id="cb21-78"><a href="#cb21-78" aria-hidden="true" tabindex="-1"></a><span class="in">`&lt;br /&gt;`</span> (an HTML line break) are still sitting inside the text of many</span>
+<span id="cb21-79"><a href="#cb21-79" aria-hidden="true" tabindex="-1"></a>reviews. The first few questions deal with that mess directly, in the same</span>
+<span id="cb21-80"><a href="#cb21-80" aria-hidden="true" tabindex="-1"></a>spirit as the chapter's warning that the wrapper functions are not magic.</span>
+<span id="cb21-81"><a href="#cb21-81" aria-hidden="true" tabindex="-1"></a>Print results unless a question says otherwise.</span>
+<span id="cb21-82"><a href="#cb21-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-83"><a href="#cb21-83" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>In the first block, count how many reviews fall into each <span class="in">`label`</span>. In the</span>
+<span id="cb21-84"><a href="#cb21-84" aria-hidden="true" tabindex="-1"></a>second block, count how many of the 200 reviews contain the literal string</span>
+<span id="cb21-85"><a href="#cb21-85" aria-hidden="true" tabindex="-1"></a><span class="in">`"&lt;br /&gt;"`</span> somewhere in their <span class="in">`text`</span>.</span>
+<span id="cb21-86"><a href="#cb21-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-89"><a href="#cb21-89" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb21-90"><a href="#cb21-90" aria-hidden="true" tabindex="-1"></a>docs_raw.group_by(c.label).agg(n <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb21-91"><a href="#cb21-91" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb21-92"><a href="#cb21-92" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-95"><a href="#cb21-95" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb21-96"><a href="#cb21-96" aria-hidden="true" tabindex="-1"></a>docs_raw.select(c.text.<span class="bu">str</span>.contains(<span class="st">"&lt;br /&gt;"</span>).<span class="bu">sum</span>())</span>
+<span id="cb21-97"><a href="#cb21-97" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb21-98"><a href="#cb21-98" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-99"><a href="#cb21-99" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Before cleaning anything, see what the raw HTML does to the pipeline.</span>
+<span id="cb21-100"><a href="#cb21-100" aria-hidden="true" tabindex="-1"></a>Run <span class="in">`DSText.process()`</span> on just review <span class="in">`doc0001`</span>, then filter the result to</span>
+<span id="cb21-101"><a href="#cb21-101" aria-hidden="true" tabindex="-1"></a>tokens whose <span class="in">`token`</span> contains <span class="in">`"&lt;br"`</span> and print <span class="in">`token`</span>, <span class="in">`upos`</span>, and</span>
+<span id="cb21-102"><a href="#cb21-102" aria-hidden="true" tabindex="-1"></a><span class="in">`is_alpha`</span>.</span>
+<span id="cb21-103"><a href="#cb21-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-106"><a href="#cb21-106" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb21-107"><a href="#cb21-107" aria-hidden="true" tabindex="-1"></a>example <span class="op">=</span> DSText.process(</span>
+<span id="cb21-108"><a href="#cb21-108" aria-hidden="true" tabindex="-1"></a>    docs_raw.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> <span class="st">"doc0001"</span>).select(c.doc_id, c.text),</span>
+<span id="cb21-109"><a href="#cb21-109" aria-hidden="true" tabindex="-1"></a>    nlp</span>
+<span id="cb21-110"><a href="#cb21-110" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-111"><a href="#cb21-111" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-112"><a href="#cb21-112" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb21-113"><a href="#cb21-113" aria-hidden="true" tabindex="-1"></a>    example</span>
+<span id="cb21-114"><a href="#cb21-114" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.token.<span class="bu">str</span>.contains(<span class="st">"&lt;br"</span>))</span>
+<span id="cb21-115"><a href="#cb21-115" aria-hidden="true" tabindex="-1"></a>    .select(c.token, c.upos, c.is_alpha)</span>
+<span id="cb21-116"><a href="#cb21-116" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-117"><a href="#cb21-117" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb21-118"><a href="#cb21-118" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-119"><a href="#cb21-119" aria-hidden="true" tabindex="-1"></a>Every one of these tokens has <span class="in">`is_alpha`</span> equal to <span class="in">`False`</span>, but three of them</span>
+<span id="cb21-120"><a href="#cb21-120" aria-hidden="true" tabindex="-1"></a>still get labeled <span class="in">`NOUN`</span> by the tagger, and the same string, <span class="in">`"/&gt;&lt;br"`</span>,</span>
+<span id="cb21-121"><a href="#cb21-121" aria-hidden="true" tabindex="-1"></a>comes back tagged three different ways (<span class="in">`PUNCT`</span>, <span class="in">`NOUN`</span>, <span class="in">`NUM`</span>) depending on</span>
+<span id="cb21-122"><a href="#cb21-122" aria-hidden="true" tabindex="-1"></a>what happens to sit next to it. None of this is the tagger's fault; it is</span>
+<span id="cb21-123"><a href="#cb21-123" aria-hidden="true" tabindex="-1"></a>being handed text that was never a real sentence to begin with. Because the</span>
+<span id="cb21-124"><a href="#cb21-124" aria-hidden="true" tabindex="-1"></a>chapter's own noun-frequency query in the next section filters only on</span>
+<span id="cb21-125"><a href="#cb21-125" aria-hidden="true" tabindex="-1"></a><span class="in">`upos`</span>, these contaminated tokens would sneak into a noun count without</span>
+<span id="cb21-126"><a href="#cb21-126" aria-hidden="true" tabindex="-1"></a><span class="in">`is_alpha`</span> ever being checked.</span>
+<span id="cb21-127"><a href="#cb21-127" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-128"><a href="#cb21-128" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Build <span class="in">`docs`</span> from <span class="in">`docs_raw`</span> by replacing every <span class="in">`"&lt;br /&gt;"`</span> with a single</span>
+<span id="cb21-129"><a href="#cb21-129" aria-hidden="true" tabindex="-1"></a>space. Confirm the count from question 1 is now zero.</span>
+<span id="cb21-130"><a href="#cb21-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-133"><a href="#cb21-133" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb21-134"><a href="#cb21-134" aria-hidden="true" tabindex="-1"></a>docs <span class="op">=</span> docs_raw.with_columns(</span>
+<span id="cb21-135"><a href="#cb21-135" aria-hidden="true" tabindex="-1"></a>    text <span class="op">=</span> c.text.<span class="bu">str</span>.replace_all(<span class="st">"&lt;br /&gt;"</span>, <span class="st">" "</span>)</span>
+<span id="cb21-136"><a href="#cb21-136" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-137"><a href="#cb21-137" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-138"><a href="#cb21-138" aria-hidden="true" tabindex="-1"></a>docs.select(c.text.<span class="bu">str</span>.contains(<span class="st">"&lt;br /&gt;"</span>).<span class="bu">sum</span>())</span>
+<span id="cb21-139"><a href="#cb21-139" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb21-140"><a href="#cb21-140" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-141"><a href="#cb21-141" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>In the first block, run <span class="in">`DSText.process()`</span> on the full, cleaned <span class="in">`docs`</span></span>
+<span id="cb21-142"><a href="#cb21-142" aria-hidden="true" tabindex="-1"></a>table to build <span class="in">`anno`</span> and print its shape. In the second block, confirm that</span>
+<span id="cb21-143"><a href="#cb21-143" aria-hidden="true" tabindex="-1"></a><span class="in">`doc_id`</span>, <span class="in">`sid`</span>, and <span class="in">`tid`</span> together form a valid key for <span class="in">`anno`</span>, the same</span>
+<span id="cb21-144"><a href="#cb21-144" aria-hidden="true" tabindex="-1"></a><span class="in">`.group_by()`</span>-then-<span class="in">`.filter()`</span> check used for any other table's key.</span>
+<span id="cb21-145"><a href="#cb21-145" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-148"><a href="#cb21-148" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb21-149"><a href="#cb21-149" aria-hidden="true" tabindex="-1"></a>anno <span class="op">=</span> DSText.process(docs.select(c.doc_id, c.text), nlp)</span>
+<span id="cb21-150"><a href="#cb21-150" aria-hidden="true" tabindex="-1"></a>anno.shape</span>
+<span id="cb21-151"><a href="#cb21-151" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb21-152"><a href="#cb21-152" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-155"><a href="#cb21-155" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb21-156"><a href="#cb21-156" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb21-157"><a href="#cb21-157" aria-hidden="true" tabindex="-1"></a>    anno</span>
+<span id="cb21-158"><a href="#cb21-158" aria-hidden="true" tabindex="-1"></a>    .group_by(c.doc_id, c.sid, c.tid)</span>
+<span id="cb21-159"><a href="#cb21-159" aria-hidden="true" tabindex="-1"></a>    .agg(count <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb21-160"><a href="#cb21-160" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.count <span class="op">&gt;</span> <span class="dv">1</span>)</span>
+<span id="cb21-161"><a href="#cb21-161" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-162"><a href="#cb21-162" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb21-163"><a href="#cb21-163" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-164"><a href="#cb21-164" aria-hidden="true" tabindex="-1"></a>No rows come back, so the triple identifies a single token with nothing</span>
+<span id="cb21-165"><a href="#cb21-165" aria-hidden="true" tabindex="-1"></a>left over.</span>
+<span id="cb21-166"><a href="#cb21-166" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-167"><a href="#cb21-167" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>Look at the first sentence of <span class="in">`doc0001`</span> on its own: filter <span class="in">`anno`</span> to</span>
+<span id="cb21-168"><a href="#cb21-168" aria-hidden="true" tabindex="-1"></a><span class="in">`doc_id == "doc0001"`</span> and <span class="in">`sid == 1`</span>, and select <span class="in">`tid`</span>, <span class="in">`token`</span>, and <span class="in">`upos`</span>.</span>
+<span id="cb21-169"><a href="#cb21-169" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-172"><a href="#cb21-172" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb21-173"><a href="#cb21-173" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb21-174"><a href="#cb21-174" aria-hidden="true" tabindex="-1"></a>    anno</span>
+<span id="cb21-175"><a href="#cb21-175" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.doc_id <span class="op">==</span> <span class="st">"doc0001"</span>, c.sid <span class="op">==</span> <span class="dv">1</span>)</span>
+<span id="cb21-176"><a href="#cb21-176" aria-hidden="true" tabindex="-1"></a>    .select(c.tid, c.token, c.upos)</span>
+<span id="cb21-177"><a href="#cb21-177" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-178"><a href="#cb21-178" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb21-179"><a href="#cb21-179" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-180"><a href="#cb21-180" aria-hidden="true" tabindex="-1"></a><span class="ss">6. </span>Reconstruct the full cleaned text of <span class="in">`doc0001`</span> from <span class="in">`anno`</span> by sorting on</span>
+<span id="cb21-181"><a href="#cb21-181" aria-hidden="true" tabindex="-1"></a><span class="in">`sid`</span> and <span class="in">`tid`</span> and joining <span class="in">`token_with_ws`</span> back together. Compare it to the</span>
+<span id="cb21-182"><a href="#cb21-182" aria-hidden="true" tabindex="-1"></a><span class="in">`text`</span> value for <span class="in">`doc0001`</span> in <span class="in">`docs`</span> and confirm they match exactly.</span>
+<span id="cb21-183"><a href="#cb21-183" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-186"><a href="#cb21-186" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb21-187"><a href="#cb21-187" aria-hidden="true" tabindex="-1"></a>recon <span class="op">=</span> (</span>
+<span id="cb21-188"><a href="#cb21-188" aria-hidden="true" tabindex="-1"></a>    anno</span>
+<span id="cb21-189"><a href="#cb21-189" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.doc_id <span class="op">==</span> <span class="st">"doc0001"</span>)</span>
+<span id="cb21-190"><a href="#cb21-190" aria-hidden="true" tabindex="-1"></a>    .sort(c.sid, c.tid)</span>
+<span id="cb21-191"><a href="#cb21-191" aria-hidden="true" tabindex="-1"></a>    .select(c.token_with_ws.<span class="bu">str</span>.join(<span class="st">""</span>))</span>
+<span id="cb21-192"><a href="#cb21-192" aria-hidden="true" tabindex="-1"></a>    .item()</span>
+<span id="cb21-193"><a href="#cb21-193" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-194"><a href="#cb21-194" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-195"><a href="#cb21-195" aria-hidden="true" tabindex="-1"></a>original <span class="op">=</span> docs.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> <span class="st">"doc0001"</span>).select(c.text).item()</span>
+<span id="cb21-196"><a href="#cb21-196" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-197"><a href="#cb21-197" aria-hidden="true" tabindex="-1"></a>recon <span class="op">==</span> original</span>
+<span id="cb21-198"><a href="#cb21-198" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb21-199"><a href="#cb21-199" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-200"><a href="#cb21-200" aria-hidden="true" tabindex="-1"></a><span class="ss">7. </span>Find the 10 most frequent nouns across the whole corpus: filter <span class="in">`anno`</span> to</span>
+<span id="cb21-201"><a href="#cb21-201" aria-hidden="true" tabindex="-1"></a><span class="in">`upos == "NOUN"`</span>, group by <span class="in">`lemma`</span>, count, and sort in descending order.</span>
+<span id="cb21-202"><a href="#cb21-202" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-205"><a href="#cb21-205" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb21-206"><a href="#cb21-206" aria-hidden="true" tabindex="-1"></a>top_nouns <span class="op">=</span> (</span>
+<span id="cb21-207"><a href="#cb21-207" aria-hidden="true" tabindex="-1"></a>    anno</span>
+<span id="cb21-208"><a href="#cb21-208" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.upos <span class="op">==</span> <span class="st">"NOUN"</span>)</span>
+<span id="cb21-209"><a href="#cb21-209" aria-hidden="true" tabindex="-1"></a>    .group_by(c.lemma)</span>
+<span id="cb21-210"><a href="#cb21-210" aria-hidden="true" tabindex="-1"></a>    .agg(count <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb21-211"><a href="#cb21-211" aria-hidden="true" tabindex="-1"></a>    .sort(c.count, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb21-212"><a href="#cb21-212" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">10</span>)</span>
+<span id="cb21-213"><a href="#cb21-213" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-214"><a href="#cb21-214" aria-hidden="true" tabindex="-1"></a>top_nouns</span>
+<span id="cb21-215"><a href="#cb21-215" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb21-216"><a href="#cb21-216" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-217"><a href="#cb21-217" aria-hidden="true" tabindex="-1"></a>Unlike the chapter's biography pages, where the most common nouns spread</span>
+<span id="cb21-218"><a href="#cb21-218" aria-hidden="true" tabindex="-1"></a>across a handful of different themes, this list is dominated by the two</span>
+<span id="cb21-219"><a href="#cb21-219" aria-hidden="true" tabindex="-1"></a>words for the thing being reviewed. <span class="in">`movie`</span> and <span class="in">`film`</span> alone account for</span>
+<span id="cb21-220"><a href="#cb21-220" aria-hidden="true" tabindex="-1"></a>more mentions than the next four nouns combined, a reminder that the most</span>
+<span id="cb21-221"><a href="#cb21-221" aria-hidden="true" tabindex="-1"></a>frequent word in a collection is not always the most informative one.</span>
+<span id="cb21-222"><a href="#cb21-222" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-223"><a href="#cb21-223" aria-hidden="true" tabindex="-1"></a><span class="ss">8. </span>Plot the top 10 nouns from question 7 as a bar chart with <span class="in">`geom_col()`</span>,</span>
+<span id="cb21-224"><a href="#cb21-224" aria-hidden="true" tabindex="-1"></a>flipping the coordinates so the noun labels are readable.</span>
+<span id="cb21-225"><a href="#cb21-225" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-228"><a href="#cb21-228" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb21-229"><a href="#cb21-229" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb21-230"><a href="#cb21-230" aria-hidden="true" tabindex="-1"></a>    top_nouns</span>
+<span id="cb21-231"><a href="#cb21-231" aria-hidden="true" tabindex="-1"></a>    .pipe(ggplot, aes(c.lemma, c.count))</span>
+<span id="cb21-232"><a href="#cb21-232" aria-hidden="true" tabindex="-1"></a>    .geom_col()</span>
+<span id="cb21-233"><a href="#cb21-233" aria-hidden="true" tabindex="-1"></a>    .coord_flip()</span>
+<span id="cb21-234"><a href="#cb21-234" aria-hidden="true" tabindex="-1"></a>    .labs(title<span class="op">=</span><span class="st">"Most Frequent Nouns"</span>, x<span class="op">=</span><span class="st">"Noun"</span>, y<span class="op">=</span><span class="st">"Count"</span>)</span>
+<span id="cb21-235"><a href="#cb21-235" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-236"><a href="#cb21-236" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb21-237"><a href="#cb21-237" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-238"><a href="#cb21-238" aria-hidden="true" tabindex="-1"></a><span class="ss">9. </span>Find the 10 most frequent adjectives within each <span class="in">`label`</span>. Join <span class="in">`anno`</span> to</span>
+<span id="cb21-239"><a href="#cb21-239" aria-hidden="true" tabindex="-1"></a>the <span class="in">`doc_id`</span>/<span class="in">`label`</span> pairs in <span class="in">`docs`</span>, filter to alphabetic adjectives, group</span>
+<span id="cb21-240"><a href="#cb21-240" aria-hidden="true" tabindex="-1"></a>by <span class="in">`label`</span> and <span class="in">`lemma`</span>, count, and take the top 10 rows within each <span class="in">`label`</span>.</span>
+<span id="cb21-241"><a href="#cb21-241" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-244"><a href="#cb21-244" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb21-245"><a href="#cb21-245" aria-hidden="true" tabindex="-1"></a>adj_by_label <span class="op">=</span> (</span>
+<span id="cb21-246"><a href="#cb21-246" aria-hidden="true" tabindex="-1"></a>    anno</span>
+<span id="cb21-247"><a href="#cb21-247" aria-hidden="true" tabindex="-1"></a>    .join(docs.select(c.doc_id, c.label), on<span class="op">=</span>c.doc_id)</span>
+<span id="cb21-248"><a href="#cb21-248" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.upos <span class="op">==</span> <span class="st">"ADJ"</span>, c.is_alpha)</span>
+<span id="cb21-249"><a href="#cb21-249" aria-hidden="true" tabindex="-1"></a>    .group_by(c.label, c.lemma)</span>
+<span id="cb21-250"><a href="#cb21-250" aria-hidden="true" tabindex="-1"></a>    .agg(count <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb21-251"><a href="#cb21-251" aria-hidden="true" tabindex="-1"></a>    .sort([c.label, c.count], descending<span class="op">=</span>[<span class="va">False</span>, <span class="va">True</span>])</span>
+<span id="cb21-252"><a href="#cb21-252" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-253"><a href="#cb21-253" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-254"><a href="#cb21-254" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb21-255"><a href="#cb21-255" aria-hidden="true" tabindex="-1"></a>    adj_by_label</span>
+<span id="cb21-256"><a href="#cb21-256" aria-hidden="true" tabindex="-1"></a>    .group_by(c.label, maintain_order<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb21-257"><a href="#cb21-257" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">10</span>)</span>
+<span id="cb21-258"><a href="#cb21-258" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-259"><a href="#cb21-259" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb21-260"><a href="#cb21-260" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-261"><a href="#cb21-261" aria-hidden="true" tabindex="-1"></a><span class="ss">10. </span>Filter <span class="in">`adj_by_label`</span> to just the lemmas <span class="in">`"good"`</span> and <span class="in">`"bad"`</span> and print</span>
+<span id="cb21-262"><a href="#cb21-262" aria-hidden="true" tabindex="-1"></a>the count for each label. Sentiment labels aside, why doesn't a simple count</span>
+<span id="cb21-263"><a href="#cb21-263" aria-hidden="true" tabindex="-1"></a>of these two words cleanly separate the positive reviews from the negative</span>
+<span id="cb21-264"><a href="#cb21-264" aria-hidden="true" tabindex="-1"></a>ones?</span>
+<span id="cb21-265"><a href="#cb21-265" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-268"><a href="#cb21-268" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb21-269"><a href="#cb21-269" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb21-270"><a href="#cb21-270" aria-hidden="true" tabindex="-1"></a>    adj_by_label</span>
+<span id="cb21-271"><a href="#cb21-271" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.lemma.is_in([<span class="st">"good"</span>, <span class="st">"bad"</span>]))</span>
+<span id="cb21-272"><a href="#cb21-272" aria-hidden="true" tabindex="-1"></a>    .sort(c.label, c.lemma)</span>
+<span id="cb21-273"><a href="#cb21-273" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-274"><a href="#cb21-274" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb21-275"><a href="#cb21-275" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-276"><a href="#cb21-276" aria-hidden="true" tabindex="-1"></a>**Answer**: <span class="in">`bad`</span> is heavily one-sided, 86 uses in negative reviews against</span>
+<span id="cb21-277"><a href="#cb21-277" aria-hidden="true" tabindex="-1"></a>only 17 in positive ones. <span class="in">`good`</span>, on the other hand, shows up 80 times in</span>
+<span id="cb21-278"><a href="#cb21-278" aria-hidden="true" tabindex="-1"></a>positive reviews but still 65 times in negative ones, nearly as often. The</span>
+<span id="cb21-279"><a href="#cb21-279" aria-hidden="true" tabindex="-1"></a>sentence pulled out in question 5, "this movie is not good," is exactly why:</span>
+<span id="cb21-280"><a href="#cb21-280" aria-hidden="true" tabindex="-1"></a>a negation flips the sentiment of a sentence without removing the positive</span>
+<span id="cb21-281"><a href="#cb21-281" aria-hidden="true" tabindex="-1"></a>word that carries it. The chapter's own introduction makes the same point</span>
+<span id="cb21-282"><a href="#cb21-282" aria-hidden="true" tabindex="-1"></a>about "not bad" being a mild compliment. A raw adjective count has no way to</span>
+<span id="cb21-283"><a href="#cb21-283" aria-hidden="true" tabindex="-1"></a>see the "not" sitting three tokens away; it would need the dependency</span>
+<span id="cb21-284"><a href="#cb21-284" aria-hidden="true" tabindex="-1"></a>information from later in the chapter to catch it.</span>
+<span id="cb21-285"><a href="#cb21-285" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-286"><a href="#cb21-286" aria-hidden="true" tabindex="-1"></a><span class="ss">11. </span>Run <span class="in">`DSText.process()`</span> on <span class="in">`docs_raw`</span> (the *uncleaned* text) to build</span>
+<span id="cb21-287"><a href="#cb21-287" aria-hidden="true" tabindex="-1"></a><span class="in">`anno_dirty`</span>, covering the same 200 reviews. Compare the <span class="in">`NOUN`</span> counts for</span>
+<span id="cb21-288"><a href="#cb21-288" aria-hidden="true" tabindex="-1"></a><span class="in">`movie`</span> and <span class="in">`film`</span> in <span class="in">`anno_dirty`</span> against the counts already sitting in</span>
+<span id="cb21-289"><a href="#cb21-289" aria-hidden="true" tabindex="-1"></a><span class="in">`top_nouns`</span> from the cleaned version.</span>
+<span id="cb21-290"><a href="#cb21-290" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-293"><a href="#cb21-293" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb21-294"><a href="#cb21-294" aria-hidden="true" tabindex="-1"></a>anno_dirty <span class="op">=</span> DSText.process(docs_raw.select(c.doc_id, c.text), nlp)</span>
+<span id="cb21-295"><a href="#cb21-295" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-296"><a href="#cb21-296" aria-hidden="true" tabindex="-1"></a>clean_counts <span class="op">=</span> (</span>
+<span id="cb21-297"><a href="#cb21-297" aria-hidden="true" tabindex="-1"></a>    top_nouns</span>
+<span id="cb21-298"><a href="#cb21-298" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.lemma.is_in([<span class="st">"movie"</span>, <span class="st">"film"</span>]))</span>
+<span id="cb21-299"><a href="#cb21-299" aria-hidden="true" tabindex="-1"></a>    .rename({<span class="st">"count"</span>: <span class="st">"count_clean"</span>})</span>
+<span id="cb21-300"><a href="#cb21-300" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-301"><a href="#cb21-301" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-302"><a href="#cb21-302" aria-hidden="true" tabindex="-1"></a>dirty_counts <span class="op">=</span> (</span>
+<span id="cb21-303"><a href="#cb21-303" aria-hidden="true" tabindex="-1"></a>    anno_dirty</span>
+<span id="cb21-304"><a href="#cb21-304" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.upos <span class="op">==</span> <span class="st">"NOUN"</span>, c.lemma.is_in([<span class="st">"movie"</span>, <span class="st">"film"</span>]))</span>
+<span id="cb21-305"><a href="#cb21-305" aria-hidden="true" tabindex="-1"></a>    .group_by(c.lemma)</span>
+<span id="cb21-306"><a href="#cb21-306" aria-hidden="true" tabindex="-1"></a>    .agg(count_dirty <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb21-307"><a href="#cb21-307" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-308"><a href="#cb21-308" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-309"><a href="#cb21-309" aria-hidden="true" tabindex="-1"></a>clean_counts.join(dirty_counts, on<span class="op">=</span>c.lemma)</span>
+<span id="cb21-310"><a href="#cb21-310" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb21-311"><a href="#cb21-311" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-312"><a href="#cb21-312" aria-hidden="true" tabindex="-1"></a><span class="in">`movie`</span> loses 8 mentions and <span class="in">`film`</span> loses 6 when the HTML is left in, even</span>
+<span id="cb21-313"><a href="#cb21-313" aria-hidden="true" tabindex="-1"></a>though the top-10 list in question 7 would look almost identical either</span>
+<span id="cb21-314"><a href="#cb21-314" aria-hidden="true" tabindex="-1"></a>way. spaCy's tokenizer merges a word directly against the <span class="in">`&lt;br`</span> that</span>
+<span id="cb21-315"><a href="#cb21-315" aria-hidden="true" tabindex="-1"></a>follows it, the same way question 2 caught it happening to a single</span>
+<span id="cb21-316"><a href="#cb21-316" aria-hidden="true" tabindex="-1"></a>review, and each merge quietly removes one real instance of <span class="in">`movie`</span> or</span>
+<span id="cb21-317"><a href="#cb21-317" aria-hidden="true" tabindex="-1"></a><span class="in">`film`</span> from the count without raising an error. A list that looks unchanged</span>
+<span id="cb21-318"><a href="#cb21-318" aria-hidden="true" tabindex="-1"></a>is not the same thing as a count that is unchanged; the fix from question 3</span>
+<span id="cb21-319"><a href="#cb21-319" aria-hidden="true" tabindex="-1"></a>was worth doing before, not after, running the pipeline on all 200 reviews.</span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->

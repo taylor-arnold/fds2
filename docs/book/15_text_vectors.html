@@ -365,7 +365,7 @@ window.Quarto = {
 <section id="setup" class="level2" data-number="15.1">
 <h2 data-number="15.1" class="anchored" data-anchor-id="setup"><span class="header-section-number">15.1</span> Setup</h2>
 <p>Load all of the modules and datasets needed for the chapter. We re-create the annotation table from the previous chapter, which serves as the starting point for everything we do here.</p>
-<div id="334a3ad0" class="cell" data-execution_count="2">
+<div id="cb760499" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine <span class="im">import</span> ggplot, aes</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> polars <span class="im">import</span> col <span class="im">as</span> c</span>
@@ -386,7 +386,7 @@ window.Quarto = {
 </section>
 <section id="introduction" class="level2" data-number="15.2">
 <h2 data-number="15.2" class="anchored" data-anchor-id="introduction"><span class="header-section-number">15.2</span> Introduction</h2>
-<p>In the previous chapter, we transformed the Wikipedia pages of 75 British authors into a table of annotated tokens and analyzed the corpus one word, phrase, or grammatical pattern at a time. Those techniques answer questions about language <em>within</em> documents. Many of the most interesting questions about a corpus, however, are questions about the documents themselves. Which two authors have the most similar pages? Do the pages cluster into groups, and do those groups correspond to time periods, genres, or something unexpected? Does the French version of Wikipedia describe these authors differently than the English version?</p>
+<p>In the previous chapter, we transformed the Wikipedia pages of 75 British and Irish authors into a table of annotated tokens and analyzed the corpus one word, phrase, or grammatical pattern at a time. Those techniques answer questions about language <em>within</em> documents. Many of the most interesting questions about a corpus, however, are questions about the documents themselves. Which two authors have the most similar pages? Do the pages cluster into groups, and do those groups correspond to time periods, genres, or something unexpected? Does the French version of Wikipedia describe these authors differently than the English version?</p>
 <p>Answering questions like these requires comparing whole documents to one another, and comparing documents requires representing each one as a single mathematical object rather than as a stream of tokens. In this chapter we develop that representation in three steps. First, we summarize each document by the counts of the terms it contains, refined by the TF-IDF weighting that emphasizes distinctive vocabulary. Second, we reinterpret these weighted counts geometrically, treating each document as a point in a high-dimensional space. Finally, we use this geometry to measure the distance between documents, to project the whole collection into two dimensions for visualization, and to compare corpora across languages.</p>
 <p>The geometric perspective developed here matters well beyond this chapter. The distances between documents that we compute become the raw material for the distance and nearest-neighbor networks of <a href="16_network_data.html" class="quarto-xref"><span>Chapter 16</span></a>, and the general strategy of converting complex objects into numeric vectors reappears when we work with images.</p>
 </section>
@@ -400,111 +400,111 @@ window.Quarto = {
 <li>add the onion and olive oil to the pan</li>
 </ol>
 <p>This is what the term-frequency matrix looks like:</p>
-<div id="2f24d74c" class="cell" data-execution_count="3">
+<div id="722e589c" class="cell" data-execution_count="3">
 <div class="cell-output cell-output-display" data-execution_count="3">
 <style type="text/css">
-#T_21563_row0_col0, #T_21563_row0_col4, #T_21563_row0_col5, #T_21563_row0_col6, #T_21563_row0_col8, #T_21563_row0_col9, #T_21563_row0_col11, #T_21563_row1_col0, #T_21563_row1_col1, #T_21563_row1_col4, #T_21563_row1_col5, #T_21563_row1_col6, #T_21563_row1_col7, #T_21563_row1_col8, #T_21563_row1_col9, #T_21563_row1_col11, #T_21563_row2_col0, #T_21563_row2_col1, #T_21563_row2_col2, #T_21563_row2_col7, #T_21563_row2_col8, #T_21563_row2_col11, #T_21563_row3_col2, #T_21563_row3_col3, #T_21563_row3_col4, #T_21563_row3_col9 {
+#T_9f018_row0_col0, #T_9f018_row0_col4, #T_9f018_row0_col5, #T_9f018_row0_col6, #T_9f018_row0_col8, #T_9f018_row0_col9, #T_9f018_row0_col11, #T_9f018_row1_col0, #T_9f018_row1_col1, #T_9f018_row1_col4, #T_9f018_row1_col5, #T_9f018_row1_col6, #T_9f018_row1_col7, #T_9f018_row1_col8, #T_9f018_row1_col9, #T_9f018_row1_col11, #T_9f018_row2_col0, #T_9f018_row2_col1, #T_9f018_row2_col2, #T_9f018_row2_col7, #T_9f018_row2_col8, #T_9f018_row2_col11, #T_9f018_row3_col2, #T_9f018_row3_col3, #T_9f018_row3_col4, #T_9f018_row3_col9 {
   background-color: #f7fbff;
   color: #000000;
 }
-#T_21563_row0_col1, #T_21563_row0_col2, #T_21563_row0_col3, #T_21563_row0_col7, #T_21563_row0_col10, #T_21563_row1_col3, #T_21563_row1_col10, #T_21563_row2_col3, #T_21563_row2_col4, #T_21563_row2_col5, #T_21563_row2_col6, #T_21563_row2_col9, #T_21563_row2_col10, #T_21563_row3_col0, #T_21563_row3_col1, #T_21563_row3_col5, #T_21563_row3_col6, #T_21563_row3_col7, #T_21563_row3_col8, #T_21563_row3_col11 {
+#T_9f018_row0_col1, #T_9f018_row0_col2, #T_9f018_row0_col3, #T_9f018_row0_col7, #T_9f018_row0_col10, #T_9f018_row1_col3, #T_9f018_row1_col10, #T_9f018_row2_col3, #T_9f018_row2_col4, #T_9f018_row2_col5, #T_9f018_row2_col6, #T_9f018_row2_col9, #T_9f018_row2_col10, #T_9f018_row3_col0, #T_9f018_row3_col1, #T_9f018_row3_col5, #T_9f018_row3_col6, #T_9f018_row3_col7, #T_9f018_row3_col8, #T_9f018_row3_col11 {
   background-color: #abd0e6;
   color: #000000;
 }
-#T_21563_row1_col2 {
+#T_9f018_row1_col2 {
   background-color: #08306b;
   color: #f1f1f1;
 }
-#T_21563_row3_col10 {
+#T_9f018_row3_col10 {
   background-color: #3787c0;
   color: #f1f1f1;
 }
 </style>
 
-<div id="T_21563" class="quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true">
+<div id="T_9f018" class="quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true">
 <figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="T_21563-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="T_9f018-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;15.1: Term Frequencies
 </figcaption>
-<div aria-describedby="T_21563-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<table id="T_21563" class="caption-top table table-sm table-striped small">
+<div aria-describedby="T_9f018-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table id="T_9f018" class="caption-top table table-sm table-striped small">
 <thead>
 <tr class="header">
 <th class="blank level0" data-quarto-table-cell-role="th">&nbsp;</th>
-<th id="T_21563_level0_col0" class="col_heading level0 col0" data-quarto-table-cell-role="th">add</th>
-<th id="T_21563_level0_col1" class="col_heading level0 col1" data-quarto-table-cell-role="th">and</th>
-<th id="T_21563_level0_col2" class="col_heading level0 col2" data-quarto-table-cell-role="th">chop</th>
-<th id="T_21563_level0_col3" class="col_heading level0 col3" data-quarto-table-cell-role="th">garlic</th>
-<th id="T_21563_level0_col4" class="col_heading level0 col4" data-quarto-table-cell-role="th">in</th>
-<th id="T_21563_level0_col5" class="col_heading level0 col5" data-quarto-table-cell-role="th">oil</th>
-<th id="T_21563_level0_col6" class="col_heading level0 col6" data-quarto-table-cell-role="th">olive</th>
-<th id="T_21563_level0_col7" class="col_heading level0 col7" data-quarto-table-cell-role="th">onion</th>
-<th id="T_21563_level0_col8" class="col_heading level0 col8" data-quarto-table-cell-role="th">pan</th>
-<th id="T_21563_level0_col9" class="col_heading level0 col9" data-quarto-table-cell-role="th">sauté</th>
-<th id="T_21563_level0_col10" class="col_heading level0 col10" data-quarto-table-cell-role="th">the</th>
-<th id="T_21563_level0_col11" class="col_heading level0 col11" data-quarto-table-cell-role="th">to</th>
+<th id="T_9f018_level0_col0" class="col_heading level0 col0" data-quarto-table-cell-role="th">add</th>
+<th id="T_9f018_level0_col1" class="col_heading level0 col1" data-quarto-table-cell-role="th">and</th>
+<th id="T_9f018_level0_col2" class="col_heading level0 col2" data-quarto-table-cell-role="th">chop</th>
+<th id="T_9f018_level0_col3" class="col_heading level0 col3" data-quarto-table-cell-role="th">garlic</th>
+<th id="T_9f018_level0_col4" class="col_heading level0 col4" data-quarto-table-cell-role="th">in</th>
+<th id="T_9f018_level0_col5" class="col_heading level0 col5" data-quarto-table-cell-role="th">oil</th>
+<th id="T_9f018_level0_col6" class="col_heading level0 col6" data-quarto-table-cell-role="th">olive</th>
+<th id="T_9f018_level0_col7" class="col_heading level0 col7" data-quarto-table-cell-role="th">onion</th>
+<th id="T_9f018_level0_col8" class="col_heading level0 col8" data-quarto-table-cell-role="th">pan</th>
+<th id="T_9f018_level0_col9" class="col_heading level0 col9" data-quarto-table-cell-role="th">sauté</th>
+<th id="T_9f018_level0_col10" class="col_heading level0 col10" data-quarto-table-cell-role="th">the</th>
+<th id="T_9f018_level0_col11" class="col_heading level0 col11" data-quarto-table-cell-role="th">to</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<th id="T_21563_level0_row0" class="row_heading level0 row0" data-quarto-table-cell-role="th">Doc 1</th>
-<td id="T_21563_row0_col0" class="data row0 col0">0</td>
-<td id="T_21563_row0_col1" class="data row0 col1">1</td>
-<td id="T_21563_row0_col2" class="data row0 col2">1</td>
-<td id="T_21563_row0_col3" class="data row0 col3">1</td>
-<td id="T_21563_row0_col4" class="data row0 col4">0</td>
-<td id="T_21563_row0_col5" class="data row0 col5">0</td>
-<td id="T_21563_row0_col6" class="data row0 col6">0</td>
-<td id="T_21563_row0_col7" class="data row0 col7">1</td>
-<td id="T_21563_row0_col8" class="data row0 col8">0</td>
-<td id="T_21563_row0_col9" class="data row0 col9">0</td>
-<td id="T_21563_row0_col10" class="data row0 col10">1</td>
-<td id="T_21563_row0_col11" class="data row0 col11">0</td>
+<th id="T_9f018_level0_row0" class="row_heading level0 row0" data-quarto-table-cell-role="th">Doc 1</th>
+<td id="T_9f018_row0_col0" class="data row0 col0">0</td>
+<td id="T_9f018_row0_col1" class="data row0 col1">1</td>
+<td id="T_9f018_row0_col2" class="data row0 col2">1</td>
+<td id="T_9f018_row0_col3" class="data row0 col3">1</td>
+<td id="T_9f018_row0_col4" class="data row0 col4">0</td>
+<td id="T_9f018_row0_col5" class="data row0 col5">0</td>
+<td id="T_9f018_row0_col6" class="data row0 col6">0</td>
+<td id="T_9f018_row0_col7" class="data row0 col7">1</td>
+<td id="T_9f018_row0_col8" class="data row0 col8">0</td>
+<td id="T_9f018_row0_col9" class="data row0 col9">0</td>
+<td id="T_9f018_row0_col10" class="data row0 col10">1</td>
+<td id="T_9f018_row0_col11" class="data row0 col11">0</td>
 </tr>
 <tr class="even">
-<th id="T_21563_level0_row1" class="row_heading level0 row1" data-quarto-table-cell-role="th">Doc 2</th>
-<td id="T_21563_row1_col0" class="data row1 col0">0</td>
-<td id="T_21563_row1_col1" class="data row1 col1">0</td>
-<td id="T_21563_row1_col2" class="data row1 col2">3</td>
-<td id="T_21563_row1_col3" class="data row1 col3">1</td>
-<td id="T_21563_row1_col4" class="data row1 col4">0</td>
-<td id="T_21563_row1_col5" class="data row1 col5">0</td>
-<td id="T_21563_row1_col6" class="data row1 col6">0</td>
-<td id="T_21563_row1_col7" class="data row1 col7">0</td>
-<td id="T_21563_row1_col8" class="data row1 col8">0</td>
-<td id="T_21563_row1_col9" class="data row1 col9">0</td>
-<td id="T_21563_row1_col10" class="data row1 col10">1</td>
-<td id="T_21563_row1_col11" class="data row1 col11">0</td>
+<th id="T_9f018_level0_row1" class="row_heading level0 row1" data-quarto-table-cell-role="th">Doc 2</th>
+<td id="T_9f018_row1_col0" class="data row1 col0">0</td>
+<td id="T_9f018_row1_col1" class="data row1 col1">0</td>
+<td id="T_9f018_row1_col2" class="data row1 col2">3</td>
+<td id="T_9f018_row1_col3" class="data row1 col3">1</td>
+<td id="T_9f018_row1_col4" class="data row1 col4">0</td>
+<td id="T_9f018_row1_col5" class="data row1 col5">0</td>
+<td id="T_9f018_row1_col6" class="data row1 col6">0</td>
+<td id="T_9f018_row1_col7" class="data row1 col7">0</td>
+<td id="T_9f018_row1_col8" class="data row1 col8">0</td>
+<td id="T_9f018_row1_col9" class="data row1 col9">0</td>
+<td id="T_9f018_row1_col10" class="data row1 col10">1</td>
+<td id="T_9f018_row1_col11" class="data row1 col11">0</td>
 </tr>
 <tr class="odd">
-<th id="T_21563_level0_row2" class="row_heading level0 row2" data-quarto-table-cell-role="th">Doc 3</th>
-<td id="T_21563_row2_col0" class="data row2 col0">0</td>
-<td id="T_21563_row2_col1" class="data row2 col1">0</td>
-<td id="T_21563_row2_col2" class="data row2 col2">0</td>
-<td id="T_21563_row2_col3" class="data row2 col3">1</td>
-<td id="T_21563_row2_col4" class="data row2 col4">1</td>
-<td id="T_21563_row2_col5" class="data row2 col5">1</td>
-<td id="T_21563_row2_col6" class="data row2 col6">1</td>
-<td id="T_21563_row2_col7" class="data row2 col7">0</td>
-<td id="T_21563_row2_col8" class="data row2 col8">0</td>
-<td id="T_21563_row2_col9" class="data row2 col9">1</td>
-<td id="T_21563_row2_col10" class="data row2 col10">1</td>
-<td id="T_21563_row2_col11" class="data row2 col11">0</td>
+<th id="T_9f018_level0_row2" class="row_heading level0 row2" data-quarto-table-cell-role="th">Doc 3</th>
+<td id="T_9f018_row2_col0" class="data row2 col0">0</td>
+<td id="T_9f018_row2_col1" class="data row2 col1">0</td>
+<td id="T_9f018_row2_col2" class="data row2 col2">0</td>
+<td id="T_9f018_row2_col3" class="data row2 col3">1</td>
+<td id="T_9f018_row2_col4" class="data row2 col4">1</td>
+<td id="T_9f018_row2_col5" class="data row2 col5">1</td>
+<td id="T_9f018_row2_col6" class="data row2 col6">1</td>
+<td id="T_9f018_row2_col7" class="data row2 col7">0</td>
+<td id="T_9f018_row2_col8" class="data row2 col8">0</td>
+<td id="T_9f018_row2_col9" class="data row2 col9">1</td>
+<td id="T_9f018_row2_col10" class="data row2 col10">1</td>
+<td id="T_9f018_row2_col11" class="data row2 col11">0</td>
 </tr>
 <tr class="even">
-<th id="T_21563_level0_row3" class="row_heading level0 row3" data-quarto-table-cell-role="th">Doc 4</th>
-<td id="T_21563_row3_col0" class="data row3 col0">1</td>
-<td id="T_21563_row3_col1" class="data row3 col1">1</td>
-<td id="T_21563_row3_col2" class="data row3 col2">0</td>
-<td id="T_21563_row3_col3" class="data row3 col3">0</td>
-<td id="T_21563_row3_col4" class="data row3 col4">0</td>
-<td id="T_21563_row3_col5" class="data row3 col5">1</td>
-<td id="T_21563_row3_col6" class="data row3 col6">1</td>
-<td id="T_21563_row3_col7" class="data row3 col7">1</td>
-<td id="T_21563_row3_col8" class="data row3 col8">1</td>
-<td id="T_21563_row3_col9" class="data row3 col9">0</td>
-<td id="T_21563_row3_col10" class="data row3 col10">2</td>
-<td id="T_21563_row3_col11" class="data row3 col11">1</td>
+<th id="T_9f018_level0_row3" class="row_heading level0 row3" data-quarto-table-cell-role="th">Doc 4</th>
+<td id="T_9f018_row3_col0" class="data row3 col0">1</td>
+<td id="T_9f018_row3_col1" class="data row3 col1">1</td>
+<td id="T_9f018_row3_col2" class="data row3 col2">0</td>
+<td id="T_9f018_row3_col3" class="data row3 col3">0</td>
+<td id="T_9f018_row3_col4" class="data row3 col4">0</td>
+<td id="T_9f018_row3_col5" class="data row3 col5">1</td>
+<td id="T_9f018_row3_col6" class="data row3 col6">1</td>
+<td id="T_9f018_row3_col7" class="data row3 col7">1</td>
+<td id="T_9f018_row3_col8" class="data row3 col8">1</td>
+<td id="T_9f018_row3_col9" class="data row3 col9">0</td>
+<td id="T_9f018_row3_col10" class="data row3 col10">2</td>
+<td id="T_9f018_row3_col11" class="data row3 col11">1</td>
 </tr>
 </tbody>
 </table>
@@ -518,123 +518,123 @@ Table&nbsp;15.1: Term Frequencies
 <p><span class="math display">\[ \text{tfidf} = \text{tf} \times \left(\log\left(\frac{N + 1}{\text{df} + 1}\right) + 1 \right) \]</span></p>
 <p>Here, <em>N</em> is the total number of documents. Adding one to the numerator and denominator inside the logarithm, and adding one to the result, is a common smoothing convention (used, for example, by scikit-learn) that keeps the score well-behaved for rare terms. The score measures how important a term is in describing a document in the context of the other documents. If we select words with the highest TF-IDF score for each document, these should give a good measurement of what terms best describe each document uniquely from the rest of the collection. Note that while the scaling functions given above are popular choices, they are not universal. Other papers and software may make different choices with moderate effects on the output results.</p>
 <p>For comparison, here is what the corresponding TF-IDF matrix looks like for our small example of four phrases. Notice that while the non-zero numbers change from the TF example, all of the zeros in the original matrix remain zero here.</p>
-<div id="e8893715" class="cell" data-execution_count="4">
+<div id="b09b936a" class="cell" data-execution_count="4">
 <div class="cell-output cell-output-display" data-execution_count="4">
 <style type="text/css">
-#T_8a20c_row0_col0, #T_8a20c_row0_col4, #T_8a20c_row0_col5, #T_8a20c_row0_col6, #T_8a20c_row0_col8, #T_8a20c_row0_col9, #T_8a20c_row0_col11, #T_8a20c_row1_col0, #T_8a20c_row1_col1, #T_8a20c_row1_col4, #T_8a20c_row1_col5, #T_8a20c_row1_col6, #T_8a20c_row1_col7, #T_8a20c_row1_col8, #T_8a20c_row1_col9, #T_8a20c_row1_col11, #T_8a20c_row2_col0, #T_8a20c_row2_col1, #T_8a20c_row2_col2, #T_8a20c_row2_col7, #T_8a20c_row2_col8, #T_8a20c_row2_col11, #T_8a20c_row3_col2, #T_8a20c_row3_col3, #T_8a20c_row3_col4, #T_8a20c_row3_col9 {
+#T_313ec_row0_col0, #T_313ec_row0_col4, #T_313ec_row0_col5, #T_313ec_row0_col6, #T_313ec_row0_col8, #T_313ec_row0_col9, #T_313ec_row0_col11, #T_313ec_row1_col0, #T_313ec_row1_col1, #T_313ec_row1_col4, #T_313ec_row1_col5, #T_313ec_row1_col6, #T_313ec_row1_col7, #T_313ec_row1_col8, #T_313ec_row1_col9, #T_313ec_row1_col11, #T_313ec_row2_col0, #T_313ec_row2_col1, #T_313ec_row2_col2, #T_313ec_row2_col7, #T_313ec_row2_col8, #T_313ec_row2_col11, #T_313ec_row3_col2, #T_313ec_row3_col3, #T_313ec_row3_col4, #T_313ec_row3_col9 {
   background-color: #fff5eb;
   color: #000000;
 }
-#T_8a20c_row0_col1, #T_8a20c_row0_col2, #T_8a20c_row0_col7, #T_8a20c_row2_col5, #T_8a20c_row2_col6, #T_8a20c_row3_col1, #T_8a20c_row3_col5, #T_8a20c_row3_col6, #T_8a20c_row3_col7 {
+#T_313ec_row0_col1, #T_313ec_row0_col2, #T_313ec_row0_col7, #T_313ec_row2_col5, #T_313ec_row2_col6, #T_313ec_row3_col1, #T_313ec_row3_col5, #T_313ec_row3_col6, #T_313ec_row3_col7 {
   background-color: #fdb97d;
   color: #000000;
 }
-#T_8a20c_row0_col3, #T_8a20c_row1_col3, #T_8a20c_row2_col3 {
+#T_313ec_row0_col3, #T_313ec_row1_col3, #T_313ec_row2_col3 {
   background-color: #fdca99;
   color: #000000;
 }
-#T_8a20c_row0_col10, #T_8a20c_row1_col10, #T_8a20c_row2_col10 {
+#T_313ec_row0_col10, #T_313ec_row1_col10, #T_313ec_row2_col10 {
   background-color: #fdd5ad;
   color: #000000;
 }
-#T_8a20c_row1_col2 {
+#T_313ec_row1_col2 {
   background-color: #7f2704;
   color: #f1f1f1;
 }
-#T_8a20c_row2_col4, #T_8a20c_row2_col9, #T_8a20c_row3_col0, #T_8a20c_row3_col8, #T_8a20c_row3_col11 {
+#T_313ec_row2_col4, #T_313ec_row2_col9, #T_313ec_row3_col0, #T_313ec_row3_col8, #T_313ec_row3_col11 {
   background-color: #fda159;
   color: #000000;
 }
-#T_8a20c_row3_col10 {
+#T_313ec_row3_col10 {
   background-color: #fd9d53;
   color: #000000;
 }
 </style>
 
-<div id="T_8a20c" class="quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true">
+<div id="T_313ec" class="quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true">
 <figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="T_8a20c-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="T_313ec-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;15.2: TF-IDF Matrix
 </figcaption>
-<div aria-describedby="T_8a20c-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<table id="T_8a20c" class="caption-top table table-sm table-striped small">
+<div aria-describedby="T_313ec-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table id="T_313ec" class="caption-top table table-sm table-striped small">
 <thead>
 <tr class="header">
 <th class="blank level0" data-quarto-table-cell-role="th">&nbsp;</th>
-<th id="T_8a20c_level0_col0" class="col_heading level0 col0" data-quarto-table-cell-role="th">add</th>
-<th id="T_8a20c_level0_col1" class="col_heading level0 col1" data-quarto-table-cell-role="th">and</th>
-<th id="T_8a20c_level0_col2" class="col_heading level0 col2" data-quarto-table-cell-role="th">chop</th>
-<th id="T_8a20c_level0_col3" class="col_heading level0 col3" data-quarto-table-cell-role="th">garlic</th>
-<th id="T_8a20c_level0_col4" class="col_heading level0 col4" data-quarto-table-cell-role="th">in</th>
-<th id="T_8a20c_level0_col5" class="col_heading level0 col5" data-quarto-table-cell-role="th">oil</th>
-<th id="T_8a20c_level0_col6" class="col_heading level0 col6" data-quarto-table-cell-role="th">olive</th>
-<th id="T_8a20c_level0_col7" class="col_heading level0 col7" data-quarto-table-cell-role="th">onion</th>
-<th id="T_8a20c_level0_col8" class="col_heading level0 col8" data-quarto-table-cell-role="th">pan</th>
-<th id="T_8a20c_level0_col9" class="col_heading level0 col9" data-quarto-table-cell-role="th">sauté</th>
-<th id="T_8a20c_level0_col10" class="col_heading level0 col10" data-quarto-table-cell-role="th">the</th>
-<th id="T_8a20c_level0_col11" class="col_heading level0 col11" data-quarto-table-cell-role="th">to</th>
+<th id="T_313ec_level0_col0" class="col_heading level0 col0" data-quarto-table-cell-role="th">add</th>
+<th id="T_313ec_level0_col1" class="col_heading level0 col1" data-quarto-table-cell-role="th">and</th>
+<th id="T_313ec_level0_col2" class="col_heading level0 col2" data-quarto-table-cell-role="th">chop</th>
+<th id="T_313ec_level0_col3" class="col_heading level0 col3" data-quarto-table-cell-role="th">garlic</th>
+<th id="T_313ec_level0_col4" class="col_heading level0 col4" data-quarto-table-cell-role="th">in</th>
+<th id="T_313ec_level0_col5" class="col_heading level0 col5" data-quarto-table-cell-role="th">oil</th>
+<th id="T_313ec_level0_col6" class="col_heading level0 col6" data-quarto-table-cell-role="th">olive</th>
+<th id="T_313ec_level0_col7" class="col_heading level0 col7" data-quarto-table-cell-role="th">onion</th>
+<th id="T_313ec_level0_col8" class="col_heading level0 col8" data-quarto-table-cell-role="th">pan</th>
+<th id="T_313ec_level0_col9" class="col_heading level0 col9" data-quarto-table-cell-role="th">sauté</th>
+<th id="T_313ec_level0_col10" class="col_heading level0 col10" data-quarto-table-cell-role="th">the</th>
+<th id="T_313ec_level0_col11" class="col_heading level0 col11" data-quarto-table-cell-role="th">to</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<th id="T_8a20c_level0_row0" class="row_heading level0 row0" data-quarto-table-cell-role="th">Doc 1</th>
-<td id="T_8a20c_row0_col0" class="data row0 col0">0.00</td>
-<td id="T_8a20c_row0_col1" class="data row0 col1">1.51</td>
-<td id="T_8a20c_row0_col2" class="data row0 col2">1.51</td>
-<td id="T_8a20c_row0_col3" class="data row0 col3">1.22</td>
-<td id="T_8a20c_row0_col4" class="data row0 col4">0.00</td>
-<td id="T_8a20c_row0_col5" class="data row0 col5">0.00</td>
-<td id="T_8a20c_row0_col6" class="data row0 col6">0.00</td>
-<td id="T_8a20c_row0_col7" class="data row0 col7">1.51</td>
-<td id="T_8a20c_row0_col8" class="data row0 col8">0.00</td>
-<td id="T_8a20c_row0_col9" class="data row0 col9">0.00</td>
-<td id="T_8a20c_row0_col10" class="data row0 col10">1.00</td>
-<td id="T_8a20c_row0_col11" class="data row0 col11">0.00</td>
+<th id="T_313ec_level0_row0" class="row_heading level0 row0" data-quarto-table-cell-role="th">Doc 1</th>
+<td id="T_313ec_row0_col0" class="data row0 col0">0.00</td>
+<td id="T_313ec_row0_col1" class="data row0 col1">1.51</td>
+<td id="T_313ec_row0_col2" class="data row0 col2">1.51</td>
+<td id="T_313ec_row0_col3" class="data row0 col3">1.22</td>
+<td id="T_313ec_row0_col4" class="data row0 col4">0.00</td>
+<td id="T_313ec_row0_col5" class="data row0 col5">0.00</td>
+<td id="T_313ec_row0_col6" class="data row0 col6">0.00</td>
+<td id="T_313ec_row0_col7" class="data row0 col7">1.51</td>
+<td id="T_313ec_row0_col8" class="data row0 col8">0.00</td>
+<td id="T_313ec_row0_col9" class="data row0 col9">0.00</td>
+<td id="T_313ec_row0_col10" class="data row0 col10">1.00</td>
+<td id="T_313ec_row0_col11" class="data row0 col11">0.00</td>
 </tr>
 <tr class="even">
-<th id="T_8a20c_level0_row1" class="row_heading level0 row1" data-quarto-table-cell-role="th">Doc 2</th>
-<td id="T_8a20c_row1_col0" class="data row1 col0">0.00</td>
-<td id="T_8a20c_row1_col1" class="data row1 col1">0.00</td>
-<td id="T_8a20c_row1_col2" class="data row1 col2">4.53</td>
-<td id="T_8a20c_row1_col3" class="data row1 col3">1.22</td>
-<td id="T_8a20c_row1_col4" class="data row1 col4">0.00</td>
-<td id="T_8a20c_row1_col5" class="data row1 col5">0.00</td>
-<td id="T_8a20c_row1_col6" class="data row1 col6">0.00</td>
-<td id="T_8a20c_row1_col7" class="data row1 col7">0.00</td>
-<td id="T_8a20c_row1_col8" class="data row1 col8">0.00</td>
-<td id="T_8a20c_row1_col9" class="data row1 col9">0.00</td>
-<td id="T_8a20c_row1_col10" class="data row1 col10">1.00</td>
-<td id="T_8a20c_row1_col11" class="data row1 col11">0.00</td>
+<th id="T_313ec_level0_row1" class="row_heading level0 row1" data-quarto-table-cell-role="th">Doc 2</th>
+<td id="T_313ec_row1_col0" class="data row1 col0">0.00</td>
+<td id="T_313ec_row1_col1" class="data row1 col1">0.00</td>
+<td id="T_313ec_row1_col2" class="data row1 col2">4.53</td>
+<td id="T_313ec_row1_col3" class="data row1 col3">1.22</td>
+<td id="T_313ec_row1_col4" class="data row1 col4">0.00</td>
+<td id="T_313ec_row1_col5" class="data row1 col5">0.00</td>
+<td id="T_313ec_row1_col6" class="data row1 col6">0.00</td>
+<td id="T_313ec_row1_col7" class="data row1 col7">0.00</td>
+<td id="T_313ec_row1_col8" class="data row1 col8">0.00</td>
+<td id="T_313ec_row1_col9" class="data row1 col9">0.00</td>
+<td id="T_313ec_row1_col10" class="data row1 col10">1.00</td>
+<td id="T_313ec_row1_col11" class="data row1 col11">0.00</td>
 </tr>
 <tr class="odd">
-<th id="T_8a20c_level0_row2" class="row_heading level0 row2" data-quarto-table-cell-role="th">Doc 3</th>
-<td id="T_8a20c_row2_col0" class="data row2 col0">0.00</td>
-<td id="T_8a20c_row2_col1" class="data row2 col1">0.00</td>
-<td id="T_8a20c_row2_col2" class="data row2 col2">0.00</td>
-<td id="T_8a20c_row2_col3" class="data row2 col3">1.22</td>
-<td id="T_8a20c_row2_col4" class="data row2 col4">1.92</td>
-<td id="T_8a20c_row2_col5" class="data row2 col5">1.51</td>
-<td id="T_8a20c_row2_col6" class="data row2 col6">1.51</td>
-<td id="T_8a20c_row2_col7" class="data row2 col7">0.00</td>
-<td id="T_8a20c_row2_col8" class="data row2 col8">0.00</td>
-<td id="T_8a20c_row2_col9" class="data row2 col9">1.92</td>
-<td id="T_8a20c_row2_col10" class="data row2 col10">1.00</td>
-<td id="T_8a20c_row2_col11" class="data row2 col11">0.00</td>
+<th id="T_313ec_level0_row2" class="row_heading level0 row2" data-quarto-table-cell-role="th">Doc 3</th>
+<td id="T_313ec_row2_col0" class="data row2 col0">0.00</td>
+<td id="T_313ec_row2_col1" class="data row2 col1">0.00</td>
+<td id="T_313ec_row2_col2" class="data row2 col2">0.00</td>
+<td id="T_313ec_row2_col3" class="data row2 col3">1.22</td>
+<td id="T_313ec_row2_col4" class="data row2 col4">1.92</td>
+<td id="T_313ec_row2_col5" class="data row2 col5">1.51</td>
+<td id="T_313ec_row2_col6" class="data row2 col6">1.51</td>
+<td id="T_313ec_row2_col7" class="data row2 col7">0.00</td>
+<td id="T_313ec_row2_col8" class="data row2 col8">0.00</td>
+<td id="T_313ec_row2_col9" class="data row2 col9">1.92</td>
+<td id="T_313ec_row2_col10" class="data row2 col10">1.00</td>
+<td id="T_313ec_row2_col11" class="data row2 col11">0.00</td>
 </tr>
 <tr class="even">
-<th id="T_8a20c_level0_row3" class="row_heading level0 row3" data-quarto-table-cell-role="th">Doc 4</th>
-<td id="T_8a20c_row3_col0" class="data row3 col0">1.92</td>
-<td id="T_8a20c_row3_col1" class="data row3 col1">1.51</td>
-<td id="T_8a20c_row3_col2" class="data row3 col2">0.00</td>
-<td id="T_8a20c_row3_col3" class="data row3 col3">0.00</td>
-<td id="T_8a20c_row3_col4" class="data row3 col4">0.00</td>
-<td id="T_8a20c_row3_col5" class="data row3 col5">1.51</td>
-<td id="T_8a20c_row3_col6" class="data row3 col6">1.51</td>
-<td id="T_8a20c_row3_col7" class="data row3 col7">1.51</td>
-<td id="T_8a20c_row3_col8" class="data row3 col8">1.92</td>
-<td id="T_8a20c_row3_col9" class="data row3 col9">0.00</td>
-<td id="T_8a20c_row3_col10" class="data row3 col10">2.00</td>
-<td id="T_8a20c_row3_col11" class="data row3 col11">1.92</td>
+<th id="T_313ec_level0_row3" class="row_heading level0 row3" data-quarto-table-cell-role="th">Doc 4</th>
+<td id="T_313ec_row3_col0" class="data row3 col0">1.92</td>
+<td id="T_313ec_row3_col1" class="data row3 col1">1.51</td>
+<td id="T_313ec_row3_col2" class="data row3 col2">0.00</td>
+<td id="T_313ec_row3_col3" class="data row3 col3">0.00</td>
+<td id="T_313ec_row3_col4" class="data row3 col4">0.00</td>
+<td id="T_313ec_row3_col5" class="data row3 col5">1.51</td>
+<td id="T_313ec_row3_col6" class="data row3 col6">1.51</td>
+<td id="T_313ec_row3_col7" class="data row3 col7">1.51</td>
+<td id="T_313ec_row3_col8" class="data row3 col8">1.92</td>
+<td id="T_313ec_row3_col9" class="data row3 col9">0.00</td>
+<td id="T_313ec_row3_col10" class="data row3 col10">2.00</td>
+<td id="T_313ec_row3_col11" class="data row3 col11">1.92</td>
 </tr>
 </tbody>
 </table>
@@ -660,9 +660,9 @@ Table&nbsp;15.2: TF-IDF Matrix
 <span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    .with_columns(tfidf <span class="op">=</span> c.tf_norm <span class="op">*</span> c.idf)</span>
 <span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The first <code>group_by</code> counts how often each lemma appears in each document, and the window expression <code>c.tf.sum().over(c.doc_id)</code> converts those counts into within-document proportions. This means the <em>tf</em> in the formula above is a proportion rather than a raw count; the small matrices shown earlier used raw counts only to keep the numbers readable. A second window expression counts how many distinct documents contain each lemma, giving the <em>df</em> term. The <code>filter</code> step in the middle implements the two arguments <code>min_df</code> and <code>max_df</code>, which are proportions between zero and one: setting <code>max_df=0.5</code>, for instance, drops every lemma appearing in more than half of the documents, and <code>min_df=0.01</code> drops lemmas appearing in fewer than 1% of them. The <code>max_df</code> cutoff acts as an automatic stop word list tailored to the corpus, removing whatever vocabulary is common to most of the pages instead of relying on a fixed list.</p>
-<p>Rather than producing the wide matrix described in the small examples above, the chain leaves the output in long format (see <a href="09_restructure.html" class="quarto-xref"><span>Chapter 9</span></a> for a review of wide versus long), with one non-zero combination of term and document in each row. We run it here on the annotations, removing only the rarest terms.</p>
-<div id="90e51d63" class="cell" data-execution_count="5">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>tfidf <span class="op">=</span> DSText.compute_tfidf(anno, min_df<span class="op">=</span><span class="fl">0.01</span>, max_df<span class="op">=</span><span class="fl">1.0</span>)</span>
+<p>Rather than producing the wide matrix described in the small examples above, the chain leaves the output in long format (see <a href="09_restructure.html" class="quarto-xref"><span>Chapter 9</span></a> for a review of wide versus long), with one non-zero combination of term and document in each row. We run it here on the annotations, dropping every lemma that appears in more than half of the documents. With only 75 documents, the smallest possible document frequency is 1/75, so the <code>min_df=0.01</code> filter removes nothing here; it is a guard that earns its keep on larger corpora.</p>
+<div id="c2192918" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>tfidf <span class="op">=</span> DSText.compute_tfidf(anno, min_df<span class="op">=</span><span class="fl">0.01</span>, max_df<span class="op">=</span><span class="fl">0.5</span>)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>tfidf</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
 <div><style>
@@ -672,7 +672,7 @@ Table&nbsp;15.2: TF-IDF Matrix
   white-space: pre-wrap;
 }
 </style>
-<small>shape: (106_352, 7)</small>
+<small>shape: (79_658, 7)</small>
 <table class="dataframe caption-top table table-sm table-striped small" data-border="1">
 <thead>
 <tr class="header">
@@ -696,103 +696,103 @@ Table&nbsp;15.2: TF-IDF Matrix
 </thead>
 <tbody>
 <tr class="odd">
-<td>"Charlotte Brontë"</td>
-<td>"express"</td>
+<td>"William Blake"</td>
+<td>"climate"</td>
 <td>1</td>
-<td>0.000298</td>
-<td>51</td>
-<td>1.37949</td>
-<td>0.000411</td>
-</tr>
-<tr class="even">
-<td>"Matthew Arnold"</td>
-<td>"writing"</td>
-<td>5</td>
-<td>0.001489</td>
-<td>68</td>
-<td>1.096627</td>
-<td>0.001633</td>
-</tr>
-<tr class="odd">
-<td>"George Bernard Shaw"</td>
-<td>"particular"</td>
-<td>2</td>
-<td>0.000173</td>
-<td>35</td>
-<td>1.747214</td>
-<td>0.000303</td>
-</tr>
-<tr class="even">
-<td>"George Herbert"</td>
-<td>"and"</td>
-<td>93</td>
-<td>0.034179</td>
-<td>75</td>
-<td>1.0</td>
-<td>0.034179</td>
-</tr>
-<tr class="odd">
-<td>"Samuel Pepys"</td>
-<td>"mother"</td>
-<td>1</td>
-<td>0.000155</td>
-<td>58</td>
-<td>1.253196</td>
-<td>0.000195</td>
-</tr>
-<tr class="even">
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-</tr>
-<tr class="odd">
-<td>"D. H. Lawrence"</td>
-<td>"will"</td>
-<td>2</td>
-<td>0.000364</td>
-<td>59</td>
-<td>1.236389</td>
-<td>0.000451</td>
-</tr>
-<tr class="even">
-<td>"Thomas More"</td>
-<td>"after"</td>
-<td>20</td>
-<td>0.002452</td>
-<td>74</td>
-<td>1.013245</td>
-<td>0.002484</td>
-</tr>
-<tr class="odd">
-<td>"Alfred, Lord Tennyson"</td>
-<td>"hero"</td>
-<td>1</td>
-<td>0.000342</td>
-<td>21</td>
-<td>2.239691</td>
-<td>0.000767</td>
-</tr>
-<tr class="even">
-<td>"T. S. Eliot"</td>
-<td>"seat"</td>
-<td>1</td>
-<td>0.000175</td>
+<td>0.00013</td>
 <td>13</td>
 <td>2.691676</td>
-<td>0.000471</td>
+<td>0.000349</td>
+</tr>
+<tr class="even">
+<td>"Beatrix Potter"</td>
+<td>"stamp"</td>
+<td>1</td>
+<td>0.000201</td>
+<td>12</td>
+<td>2.765784</td>
+<td>0.000555</td>
 </tr>
 <tr class="odd">
+<td>"George Orwell"</td>
+<td>"Manchester"</td>
+<td>4</td>
+<td>0.000245</td>
+<td>7</td>
+<td>3.251292</td>
+<td>0.000796</td>
+</tr>
+<tr class="even">
+<td>"Beatrix Potter"</td>
+<td>"Lynn"</td>
+<td>1</td>
+<td>0.000201</td>
+<td>3</td>
+<td>3.944439</td>
+<td>0.000791</td>
+</tr>
+<tr class="odd">
+<td>"Charles Dickens"</td>
+<td>"Clack"</td>
+<td>1</td>
+<td>0.000088</td>
+<td>1</td>
+<td>4.637586</td>
+<td>0.000409</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"Charlotte Brontë"</td>
+<td>"plume"</td>
+<td>2</td>
+<td>0.000595</td>
+<td>3</td>
+<td>3.944439</td>
+<td>0.002348</td>
+</tr>
+<tr class="even">
 <td>"William Shakespeare"</td>
-<td>"extreme"</td>
+<td>"Bradley"</td>
 <td>1</td>
 <td>0.000153</td>
-<td>22</td>
-<td>2.195239</td>
-<td>0.000336</td>
+<td>3</td>
+<td>3.944439</td>
+<td>0.000604</td>
+</tr>
+<tr class="odd">
+<td>"John Locke"</td>
+<td>"application"</td>
+<td>1</td>
+<td>0.000191</td>
+<td>5</td>
+<td>3.538974</td>
+<td>0.000675</td>
+</tr>
+<tr class="even">
+<td>"D. H. Lawrence"</td>
+<td>"Birthplace"</td>
+<td>1</td>
+<td>0.000182</td>
+<td>4</td>
+<td>3.721295</td>
+<td>0.000678</td>
+</tr>
+<tr class="odd">
+<td>"Lord Byron"</td>
+<td>"Frontera"</td>
+<td>1</td>
+<td>0.000105</td>
+<td>1</td>
+<td>4.637586</td>
+<td>0.000488</td>
 </tr>
 </tbody>
 </table>
@@ -800,7 +800,7 @@ Table&nbsp;15.2: TF-IDF Matrix
 </div>
 </div>
 <p>Once we have this table, we can combine the top terms from each document to characterize their themes.</p>
-<div id="8f702791" class="cell" data-execution_count="6">
+<div id="c53d3712" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    tfidf</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    .sort([c.doc_id, c.tfidf], descending<span class="op">=</span>[<span class="va">False</span>, <span class="va">True</span>])</span>
@@ -831,63 +831,63 @@ Table&nbsp;15.2: TF-IDF Matrix
 </thead>
 <tbody>
 <tr class="odd">
-<td>"Louis MacNeice"</td>
-<td>"MacNeice; the; and; in; be; of…</td>
+<td>"Rudyard Kipling"</td>
+<td>"Kipling; Kiplings; India; Rudy…</td>
 </tr>
 <tr class="even">
-<td>"George Bernard Shaw"</td>
-<td>"the; Shaw; in; and; of; be; a;…</td>
+<td>"Virginia Woolf"</td>
+<td>"Woolf; Virginia; Woolfs; Vanes…</td>
 </tr>
 <tr class="odd">
-<td>"John Stuart Mill"</td>
-<td>"the; of; be; Mill; to; and; in…</td>
+<td>"Christopher Marlowe"</td>
+<td>"Marlowe; Marlowes; Privy; Tamb…</td>
 </tr>
 <tr class="even">
+<td>"Emilia Lanier"</td>
+<td>"Lanier; Laniers; Emilia; Bassa…</td>
+</tr>
+<tr class="odd">
+<td>"Mary Robinson"</td>
+<td>"Robinson; Robinsons; Perdita; …</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"Charles Dickens"</td>
+<td>"Dickens; Dickenss; Twist; Pick…</td>
+</tr>
+<tr class="even">
+<td>"Bram Stoker"</td>
+<td>"Stoker; Dracula; Irving; Bram;…</td>
+</tr>
+<tr class="odd">
+<td>"John Locke"</td>
+<td>"Locke; Lockes; locke; theory; …</td>
+</tr>
+<tr class="even">
+<td>"Cecil Day-Lewis"</td>
+<td>"Day; Lewis; Jill; detective; B…</td>
+</tr>
+<tr class="odd">
 <td>"Samuel Johnson"</td>
-<td>"Johnson; the; of; and; to; be;…</td>
-</tr>
-<tr class="odd">
-<td>"Seamus Heaney"</td>
-<td>"Heaney; the; of; in; be; and; …</td>
-</tr>
-<tr class="even">
-<td>…</td>
-<td>…</td>
-</tr>
-<tr class="odd">
-<td>"Margery Kempe"</td>
-<td>"Kempe; the; of; be; and; to; h…</td>
-</tr>
-<tr class="even">
-<td>"Felicia Hemans"</td>
-<td>"the; Hemans; of; and; be; in; …</td>
-</tr>
-<tr class="odd">
-<td>"Jonathan Swift"</td>
-<td>"Swift; the; of; in; be; and; t…</td>
-</tr>
-<tr class="even">
-<td>"Robert Burns"</td>
-<td>"Burns; the; of; in; be; and; t…</td>
-</tr>
-<tr class="odd">
-<td>"James Boswell"</td>
-<td>"Boswell; the; of; and; be; in;…</td>
+<td>"Johnson; Johnsons; Boswell; jo…</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
 </div>
-<p>The top TF-IDF terms for each document tend to be proper nouns and domain-specific vocabulary that distinguish one article from another. Compare these to the simple frequency counts from the previous chapter: TF-IDF downweights generic terms like “year” and “work” that appear across all of the biographies, and what remains are the names, places, and titles that actually identify each author.</p>
+<p>The top TF-IDF terms for each document tend to be proper nouns and domain-specific vocabulary that distinguish one article from another. Compare these to the simple frequency counts from the previous chapter: the <code>max_df</code> cutoff removes generic terms like “year” and “work” that appear across nearly all of the biographies, and what remains are the names, places, and titles that actually identify each author.</p>
 </section>
 <section id="documents-as-vectors" class="level2" data-number="15.4">
 <h2 data-number="15.4" class="anchored" data-anchor-id="documents-as-vectors"><span class="header-section-number">15.4</span> Documents as Vectors</h2>
 <p>The TF-IDF matrix introduced above contains a row for each document and a column for each term, with the TF-IDF weight in each cell. There is a productive way to think about this structure: each row of the matrix is a list of numbers that describes a document. We can interpret this list of numbers as a set of coordinates, turning each document into a <em>point in space</em>. This geometric perspective connects textual analysis to the statistical modeling and dimensionality reduction tools that we have developed throughout this book.</p>
-<p>To build intuition for this idea, let’s start with just two terms. Suppose we look at the TF-IDF scores for the lemmas “poem” and “novel” across our collection of author pages. Each document has a TF-IDF score for “poem” and a TF-IDF score for “novel”, giving us two numbers per document. We can plot these as coordinates on a standard scatter plot, with one axis for each term. Because the wrapper returns its results in long format, we first pivot the two terms into columns and fill the missing combinations with zero.</p>
-<div id="91a994c7" class="cell" data-execution_count="7">
+<p>To build intuition for this idea, let’s start with just two terms. Suppose we look at the TF-IDF scores for the lemmas “poem” and “novel” across our collection of author pages. Each document has a TF-IDF score for “poem” and a TF-IDF score for “novel”, giving us two numbers per document. We can plot these as coordinates on a standard scatter plot, with one axis for each term. Both lemmas are common enough in this corpus that the <code>max_df=0.5</code> cutoff removed them from the <code>tfidf</code> table above, so for this illustration we recompute the scores without the cap. Because the wrapper returns its results in long format, we then pivot the two terms into columns and fill the missing combinations with zero.</p>
+<div id="3dbb51c2" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    tfidf</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    DSText.compute_tfidf(anno, min_df<span class="op">=</span><span class="fl">0.01</span>)</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.lemma.is_in([<span class="st">"poem"</span>, <span class="st">"novel"</span>]))</span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    .pivot(on<span class="op">=</span><span class="st">"lemma"</span>, index<span class="op">=</span><span class="st">"doc_id"</span>, values<span class="op">=</span><span class="st">"tfidf"</span>)</span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    .fill_null(<span class="dv">0</span>)</span>
@@ -902,7 +902,7 @@ Table&nbsp;15.2: TF-IDF Matrix
 </div>
 </div>
 </div>
-<p>In this two-dimensional view, the position of each document tells us something meaningful. Authors whose Wikipedia pages discuss poetry extensively appear far to the right. Those whose pages focus on novels appear near the top. Authors associated with both forms sit in the upper-right region, while those associated with neither sit near the origin. Documents that are close together in this space have similar usage patterns for these two terms.</p>
+<p>In this two-dimensional view, the position of each document tells us something meaningful. Authors whose Wikipedia pages discuss poetry extensively appear far to the right. Those whose pages focus on novels appear near the top. Authors associated with both forms sit in the upper-right region. Documents with a zero weight for both terms do not appear at all: the long table has no rows for them, so the pivot drops them rather than placing them at the origin. Documents that are close together in this space have similar usage patterns for these two terms.</p>
 <p>Now imagine extending this idea beyond two terms. Rather than plotting documents along axes for just “poem” and “novel”, we could add a third axis for “play”, creating a three-dimensional space where each document is a point. We could keep going: add axes for “war”, “london”, “publish”, “child”, and every other term in our vocabulary. If the vocabulary contains <span class="math inline">\(V\)</span> terms, each document becomes a point in <span class="math inline">\(V\)</span>-dimensional space. Mathematically, we represent document <span class="math inline">\(d\)</span> as a vector of TF-IDF scores:</p>
 <p><span class="math display">\[
 \mathbf{x}_d = \begin{bmatrix} \text{tfidf}(t_1, d) \\ \text{tfidf}(t_2, d) \\ \vdots \\ \text{tfidf}(t_V, d) \end{bmatrix}
@@ -911,7 +911,7 @@ Table&nbsp;15.2: TF-IDF Matrix
 <p>Once documents are points in a numeric space, the rest of the book’s toolkit applies. Dimensionality reduction methods such as PCA or UMAP can project the points down to two dimensions for plotting. Prediction models can classify documents based on their positions, and clustering algorithms can discover groups of similar pages without being told what to look for.</p>
 <p>One important feature of these document vectors is that most of their entries are zero. Any given document uses only a small fraction of the total vocabulary, so most TF-IDF scores are zero. A vector with mostly zero entries is called <em>sparse</em>, and this representation is sometimes called a <em>sparse embedding</em>. Despite the large number of dimensions, the actual information content of each vector is modest, which matters for computational efficiency but does not change how we think about the geometry.</p>
 <p>The code below puts this idea into practice using the wrapper function <code>umap_text</code>. The wrapper builds the document-term matrix from the long annotation table, using the column passed as <code>doc_id</code> to identify the rows and the column passed as <code>term_id</code> to define the vocabulary, and applies the <code>min_df</code> and <code>max_df</code> filters before fitting the UMAP model. As with the other model wrappers in this book, calling <code>.predict(full=True)</code> returns a table with one row per document, and the two projected coordinates arrive in the columns <code>dr0</code> and <code>dr1</code>. Documents that use similar vocabulary will appear near each other in the resulting plot.</p>
-<div id="446dac30" class="cell" data-execution_count="8">
+<div id="42529f51" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    anno</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    .pipe(</span>
@@ -934,12 +934,12 @@ Table&nbsp;15.2: TF-IDF Matrix
 </div>
 </div>
 </div>
-<p>The <code>min_df</code> and <code>max_df</code> parameters filter the vocabulary before constructing the document vectors: terms appearing in fewer than 1% of documents or more than 50% of documents are excluded. This removes both rare terms, which add noise, and ubiquitous terms, which add no discriminative power, so the representation is built on the most informative vocabulary. The UMAP algorithm then finds a two-dimensional arrangement that preserves, as much as possible, the distances between documents in the original high-dimensional space. The result is a map of the corpus where proximity reflects similarity in language use.</p>
+<p>The <code>min_df</code> and <code>max_df</code> parameters filter the vocabulary before constructing the document vectors: terms appearing in more than 50% of documents are excluded, and terms appearing in fewer than 1% would be as well, though with only 75 documents that floor removes nothing. Dropping the ubiquitous terms, which add no discriminative power, builds the representation on the most informative vocabulary; the rare-term filter does its work on larger corpora, where it removes noise. The UMAP algorithm then finds a two-dimensional arrangement that preserves, as much as possible, the distances between documents in the original high-dimensional space. The result is a map of the corpus where proximity reflects similarity in language use.</p>
 </section>
 <section id="document-distances" class="level2" data-number="15.5">
 <h2 data-number="15.5" class="anchored" data-anchor-id="document-distances"><span class="header-section-number">15.5</span> Document Distances</h2>
 <p>The UMAP plot gives a visual impression of which documents are similar, but for many applications we need the similarities themselves as numbers. Which page is the single closest match to the Jane Austen page? Which pairs of pages are so similar that we might link them together? Questions like these call for an explicit <em>distance</em> defined between every pair of document vectors.</p>
-<p>The most familiar notion of distance, the straight-line Euclidean distance between two points, turns out to be a poor choice for document vectors. The reason is document length. A long Wikipedia page and a short one about the same subject use similar vocabulary in similar <em>proportions</em>, but the long page has systematically larger TF-IDF values simply because its counts are larger. In Euclidean terms, the long document sits much farther from the origin, and length differences swamp the vocabulary differences we actually care about.</p>
+<p>The most familiar notion of distance, the straight-line Euclidean distance between two points, turns out to be a poor choice for document vectors. What we care about is the <em>mix</em> of vocabulary a document uses, and Euclidean distance responds to the overall magnitude of the vectors as much as to that mix. The problem is at its worst when term frequencies are raw counts, as they are in many TF-IDF implementations: a long Wikipedia page and a short one about the same subject use similar vocabulary in similar <em>proportions</em>, but the long page then has systematically larger values, sits much farther from the origin, and length differences swamp the vocabulary differences we actually care about. Our wrapper’s within-document proportions soften this, but documents still differ in overall magnitude, and that magnitude is not something we want a distance to measure.</p>
 <p>The standard fix is to measure the <em>angle</em> between the two vectors rather than the straight-line distance between their endpoints. Two documents that use vocabulary in the same proportions point in the same direction from the origin, regardless of their lengths, so the angle between them is small. Mathematically, the angle distance between documents <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span> is computed from the normalized inner product of their vectors:</p>
 <p><span class="math display">\[
 d(\mathbf{x}_a, \mathbf{x}_b) = \arccos\left( \frac{\mathbf{x}_a \cdot \mathbf{x}_b}{\lVert\mathbf{x}_a\rVert \, \lVert\mathbf{x}_b\rVert} \right)
@@ -956,7 +956,7 @@ d(\mathbf{x}_a, \mathbf{x}_b) = \arccos\left( \frac{\mathbf{x}_a \cdot \mathbf{x
 <span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> X <span class="op">/</span> np.linalg.norm(X, axis<span class="op">=</span><span class="dv">1</span>, keepdims<span class="op">=</span><span class="va">True</span>)   <span class="co"># unit-length rows</span></span>
 <span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>angles <span class="op">=</span> np.arccos(np.clip(X <span class="op">@</span> X.T, <span class="dv">0</span>, <span class="dv">1</span>))          <span class="co"># pairwise angles</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>After the rows are rescaled to unit length, the matrix product <code>X @ X.T</code> contains every pairwise inner product at once, which is exactly the quantity inside the arccosine of the formula above. The <code>clip</code> guards against floating-point values that land a hair outside the valid range of the arccosine. The wrapper then unpivots the resulting square array back into a long table with one row per pair of documents. Each unordered pair appears exactly once, with <code>doc_id</code> alphabetically before <code>doc_id2</code>.</p>
-<div id="0924baa5" class="cell" data-execution_count="9">
+<div id="87cd430b" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>text_dist <span class="op">=</span> DSText.compute_distances(anno, min_df<span class="op">=</span><span class="fl">0.01</span>, max_df<span class="op">=</span><span class="fl">0.5</span>)</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>text_dist</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="9">
@@ -1043,14 +1043,14 @@ d(\mathbf{x}_a, \mathbf{x}_b) = \arccos\left( \frac{\mathbf{x}_a \cdot \mathbf{x
 </div>
 </div>
 <p>With the distances in a table, ordinary Polars operations answer similarity questions directly. Because each pair is stored only once, we first stack the table with a copy of itself with the columns reversed, so that every document appears in the <code>doc_id</code> column.</p>
-<div id="0f6e5954" class="cell" data-execution_count="10">
+<div id="9f361841" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>text_dist_both <span class="op">=</span> pl.concat([</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    text_dist,</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    text_dist.select(doc_id<span class="op">=</span>c.doc_id2, doc_id2<span class="op">=</span>c.doc_id, distance<span class="op">=</span>c.distance)</span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We can now answer the question posed at the start of this section: which pages are the closest matches to the Jane Austen page?</p>
-<div id="9929bb81" class="cell" data-execution_count="11">
+<div id="1cf63c55" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    text_dist_both</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.doc_id <span class="op">==</span> <span class="st">"Jane Austen"</span>)</span>
@@ -1111,7 +1111,7 @@ d(\mathbf{x}_a, \mathbf{x}_b) = \arccos\left( \frac{\mathbf{x}_a \cdot \mathbf{x
 </div>
 </div>
 <p>And sorting within groups extends the same idea to every document at once, finding the single nearest neighbor of each page.</p>
-<div id="1ca12d1e" class="cell" data-execution_count="12">
+<div id="35e70fd9" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    text_dist_both</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    .sort(c.doc_id, c.distance)</span>
@@ -1202,21 +1202,21 @@ d(\mathbf{x}_a, \mathbf{x}_b) = \arccos\left( \frac{\mathbf{x}_a \cdot \mathbf{x
 </div>
 </div>
 <p>The nearest-neighbor table is worth reading against literary history. We would expect contemporaries to match with contemporaries and poets with poets, and the rows that depart from that expectation are often the most interesting ones to follow up on. The distances themselves also give a sense of scale: some documents have a very close nearest neighbor, while others sit relatively far from everything else in the collection, an observation we could not make from the UMAP plot alone.</p>
-<p>Finally, since we will reuse these distances in the next chapter, we save the table to disk.</p>
-<div id="b90b1413" class="cell" data-execution_count="13">
+<p>Finally, we save the table to disk so that it can be reused later without redoing the annotation and distance computations.</p>
+<div id="b9b138ec" class="cell" data-execution_count="13">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>text_dist.write_csv(<span class="st">"data/wiki_uk_text_dist.csv"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>In <a href="16_network_data.html" class="quarto-xref"><span>Chapter 16</span></a>, this table of pairwise distances becomes an ingredient for building networks: by connecting documents whose distance falls below a threshold, or by linking each document to its nearest neighbors, we can convert the geometry of the corpus into an explicit relational structure and analyze it with network tools.</p>
+<p>In <a href="16_network_data.html" class="quarto-xref"><span>Chapter 16</span></a>, we will see how a table of pairwise distances like this one becomes an ingredient for building networks: by connecting documents whose distance falls below a threshold, or by linking each document to its nearest neighbors, the geometry of a corpus can be converted into an explicit relational structure and analyzed with network tools.</p>
 </section>
 <section id="across-languages" class="level2" data-number="15.6">
 <h2 data-number="15.6" class="anchored" data-anchor-id="across-languages"><span class="header-section-number">15.6</span> Across Languages</h2>
 <p>One of the reasons that we enjoy using the content of Wikipedia pages as example datasets for textual analysis is that it is possible to get the page text in a large number of different languages. This lets us study how differences across languages and cultures affect the way that knowledge is created and distributed.</p>
-<p>Let’s see how our text analysis pipeline can be modified to work with Wikipedia pages from the French version of the site. SpaCy provides models for many different languages; as with the English model, the French one may need to be downloaded once with <code>python -m spacy download fr_core_news_sm</code> before it can be loaded.</p>
-<div id="9f72e97f" class="cell" data-execution_count="14">
+<p>Let’s see how our text analysis pipeline can be modified to work with Wikipedia pages from the French version of the site. Two of the 75 authors have no page in the French edition, so the French corpus holds 73 documents rather than 75. SpaCy provides models for many different languages; as with the English model, the French one may need to be downloaded once with <code>python -m spacy download fr_core_news_sm</code> before it can be loaded.</p>
+<div id="4245c488" class="cell" data-execution_count="14">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>nlp_fr <span class="op">=</span> spacy.load(<span class="st">"fr_core_news_sm"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>And now, we can annotate the text as follows.</p>
-<div id="701a06c5" class="cell" data-execution_count="15">
+<div id="076dd9d8" class="cell" data-execution_count="15">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>anno_fr <span class="op">=</span> DSText.process(docs_fr, nlp_fr)</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>anno_fr</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="14">
@@ -1459,7 +1459,7 @@ d(\mathbf{x}_a, \mathbf{x}_b) = \arccos\left( \frac{\mathbf{x}_a \cdot \mathbf{x
 </div>
 </div>
 <p>French and English have different grammatical structures, and we might expect these to show up in the part-of-speech frequencies. French tends to use determiners (articles) more often, for instance, since nearly every French noun requires one. Rather than taking claims like this on faith, we can check them directly by stacking the two annotation tables and comparing the proportion of each part of speech within each language.</p>
-<div id="c4a12134" class="cell" data-execution_count="16">
+<div id="e505ba63" class="cell" data-execution_count="16">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    pl.concat([</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>        anno.with_columns(lang <span class="op">=</span> pl.lit(<span class="st">"en"</span>)),</span>
@@ -1482,9 +1482,9 @@ d(\mathbf{x}_a, \mathbf{x}_b) = \arccos\left( \frac{\mathbf{x}_a \cdot \mathbf{x
 </div>
 <p>Differences at this level are linguistic rather than content-based, but they matter when interpreting comparative analyses. A gap in determiner frequency between an English corpus and a French one tells us about grammar, not about editorial choices, and any comparison of the two editions has to look past it.</p>
 <p>The vector representation developed in this chapter applies to the French annotations exactly as it did to the English ones. Running <code>DSText.compute_tfidf</code> on <code>anno_fr</code> produces a TF-IDF table over French lemmas, and the top-scoring terms for each page summarize how the French edition characterizes each author.</p>
-<div id="e7a00200" class="cell" data-execution_count="17">
+<div id="1b78c14d" class="cell" data-execution_count="17">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    DSText.compute_tfidf(anno_fr, min_df<span class="op">=</span><span class="fl">0.01</span>, max_df<span class="op">=</span><span class="fl">1.0</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    DSText.compute_tfidf(anno_fr, min_df<span class="op">=</span><span class="fl">0.01</span>, max_df<span class="op">=</span><span class="fl">0.5</span>)</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    .sort([c.doc_id, c.tfidf], descending<span class="op">=</span>[<span class="va">False</span>, <span class="va">True</span>])</span>
 <span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    .group_by(c.doc_id)</span>
 <span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">10</span>)</span>
@@ -1513,48 +1513,48 @@ d(\mathbf{x}_a, \mathbf{x}_b) = \arccos\left( \frac{\mathbf{x}_a \cdot \mathbf{x
 </thead>
 <tbody>
 <tr class="odd">
-<td>"James Joyce"</td>
-<td>"de; le; Joyce; à; son; un; et;…</td>
+<td>"Daphne du Maurier"</td>
+<td>"Maurier; Daphné; Rebecca; Daph…</td>
 </tr>
 <tr class="even">
-<td>"Christopher Marlowe"</td>
-<td>"de; Marlowe; le; à; Frizer; êt…</td>
+<td>"Edmund Spenser"</td>
+<td>"spenser; bucolique; Spenser; f…</td>
 </tr>
 <tr class="odd">
-<td>"Seamus Heaney"</td>
-<td>"de; le; Heaney; et; à; heaney;…</td>
+<td>"Samuel Pepys"</td>
+<td>"pepy; Pepys; naval; journal; M…</td>
 </tr>
 <tr class="even">
-<td>"Marie de France"</td>
-<td>"de; le; marie; un; à; être; et…</td>
+<td>"John Clare"</td>
+<td>"externe; ouvrier; lien; northa…</td>
 </tr>
 <tr class="odd">
-<td>"Thomas More"</td>
-<td>"de; le; More; à; être; en; et;…</td>
+<td>"Katherine Philipps"</td>
+<td>"Fowler; Philips; Anne; poétess…</td>
 </tr>
 <tr class="even">
 <td>…</td>
 <td>…</td>
 </tr>
 <tr class="odd">
+<td>"Geoffrey Chaucer"</td>
+<td>"Chaucer; vraisemblablement; du…</td>
+</tr>
+<tr class="even">
 <td>"Henry Vaughan"</td>
-<td>"Vaughan; de; le; son; et; dans…</td>
-</tr>
-<tr class="even">
-<td>"Christopher Isherwood"</td>
-<td>"le; de; à; il; son; en; et; Is…</td>
+<td>"Vaughan; Olor; Henry; cependan…</td>
 </tr>
 <tr class="odd">
-<td>"Samuel Taylor Coleridge"</td>
-<td>"de; le; il; à; et; Coleridge; …</td>
+<td>"William Wordsworth"</td>
+<td>"Wordsworth; Coleridge; plaisir…</td>
 </tr>
 <tr class="even">
-<td>"John Locke"</td>
-<td>"le; de; Locke; être; un; à; et…</td>
+<td>"Charlotte Brontë"</td>
+<td>"Charlotte; Brontë; Emily; sœur…</td>
 </tr>
 <tr class="odd">
-<td>"W. H. Auden"</td>
-<td>"de; le; Auden; et; en; à; son;…</td>
+<td>"John Dryden"</td>
+<td>"Dryden; lauréat; composer; tra…</td>
 </tr>
 </tbody>
 </table>
@@ -1562,7 +1562,7 @@ d(\mathbf{x}_a, \mathbf{x}_b) = \arccos\left( \frac{\mathbf{x}_a \cdot \mathbf{x
 </div>
 </div>
 <p>Because the two editions have different vocabularies, the English and French vectors live in different spaces and cannot be compared directly. The <em>structure</em> of each collection, however, can be. We can build a UMAP projection of the French pages with exactly the same code we used for the English ones.</p>
-<div id="09b4bb11" class="cell" data-execution_count="18">
+<div id="4146ff98" class="cell" data-execution_count="18">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    anno_fr</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    .pipe(</span>

@@ -3,12 +3,12 @@
 ```{python}
 #| include: false
 import warnings
-warnings.filterwarnings('ignore')
+warnings.filterwarnings("ignore")
 ```
 
 ## Setup
 
-Load all of the modules and datasets needed for the chapter. In addition to the standard tools, we will use OpenCV (cv2) for image processing and PIL for image display.
+Load all of the modules and datasets needed for the chapter. In addition to the standard tools, we will use OpenCV (cv2) for image processing.
 
 ```{python}
 #| output: false
@@ -18,7 +18,6 @@ from polars import col as c
 
 import funs
 from funs import DSImage, ViTEmbedder, SigLIPEmbedder, umap, dot_product
-from PIL import Image
 import cv2
 
 birds = pl.read_parquet("data/birds10.parquet")
@@ -42,7 +41,7 @@ We will work with the birds image dataset, which contains photographs of ten spe
 birds
 ```
 
-The dataset contains a `filepath` column pointing to each image file and a `label` column identifying the species. It also contains two columns of precomputed numbers, `vit` and `siglip`, which we will set aside until the second half of the chapter. This structure, with metadata in a table and actual image files stored separately, is a common pattern for working with image datasets. It allows us to use familiar tabular data tools for filtering, grouping, and summarizing while keeping the image files in their native format.
+The dataset contains a `filepath` column pointing to each image file, a `label` column identifying the species, and an `index` column giving a row number that can be used to link results back to individual files. It also contains two columns of precomputed numbers, `vit` and `siglip`, which we will set aside until the second half of the chapter. This structure, with metadata in a table and actual image files stored separately, is a common pattern for working with image datasets. It allows us to use familiar tabular data tools for filtering, grouping, and summarizing while keeping the image files in their native format.
 
 Before turning to the pixel data, let's look at one example of each of the ten species. Examining the data visually gives us intuition about which categories might be easy or difficult to distinguish from one another.
 
@@ -198,15 +197,15 @@ The resulting array has the same shape as the original, but now the three channe
 
 With images represented in HSV color space, we can classify pixels by their dominant color. The hue value tells us where each pixel falls on the color wheel, allowing us to count how many pixels are predominantly red, orange, yellow, green, and so on.
 
-Our helper method `DSImage.compute_colors` takes an HSV image and returns a dictionary with the proportion of pixels falling into each color category. It bins the hue values into segments corresponding to common color names and also accounts for the saturation and value (very dark or desaturated pixels are classified separately as black, white, or gray).
+Our helper method `DSImage.compute_colors` takes an HSV image and returns a dictionary with the percentage of pixels falling into each color category. It bins the hue values into segments corresponding to common color names and also accounts for the saturation and value (very dark or desaturated pixels are grouped together into a single `neutral` category).
 
 ```{python}
 DSImage.compute_colors(img_hsv)
 ```
 
-The output shows what fraction of pixels in this image fall into each color category. The proportions sum to 1, giving us a complete description of the color distribution.
+The output shows what percentage of pixels in this image fall into each color category. The percentages sum to 100, giving us a complete description of the color distribution.
 
-We will cycle through the entire DataFrame and compute these color proportions for all images.
+We will cycle through the entire DataFrame and compute these color percentages for all images.
 
 ```{python}
 results = []
@@ -275,7 +274,7 @@ Training such a network from scratch requires millions of labeled images and wee
 
 ## Image Embeddings
 
-Python is the de facto language for machine learning and AI research, which is one of the reasons we use it in this text. As a result, there are excellent ready-to-use libraries for loading and running pre-trained deep learning models. We have wrapped one of these models in a function called `ViTEmbedder` (the code to create it uses **pytorch** and is given in full in the practice notebooks). It implements Google's [Vision Transformer (ViT) model](https://huggingface.co/google/vit-base-patch16-224), which was trained on a dataset of 14 million images labeled with 21,843 classes. Here is all we need to load (and, if not already grabbed, download) the model:
+Python is the de facto language for machine learning and AI research, which is one of the reasons we use it in this text. As a result, there are excellent ready-to-use libraries for loading and running pre-trained deep learning models. We have wrapped one of these models in a function called `ViTEmbedder` (the code to create it uses **pytorch** and is given in full in the book's `funs.py` module). It implements Google's [Vision Transformer (ViT) model](https://huggingface.co/google/vit-base-patch16-224), which was trained on a dataset of 14 million images labeled with 21,843 classes. Here is all we need to load (and, if not already grabbed, download) the model:
 
 ```{python}
 vit = ViTEmbedder()
@@ -329,7 +328,7 @@ The UMAP plot shows that the embeddings separate the species, but it does not, o
 
 Zero-shot learning became practical with the development of multimodal models that learn to connect images and text in a shared embedding space. These models are trained on massive datasets of image-caption pairs scraped from the internet. By learning to match images with their textual descriptions, the models develop an understanding of concepts that can be expressed in natural language. To classify a new image, we simply compare its embedding to the embeddings of text descriptions of each possible category.
 
-We will use a model called SigLIP (Sigmoid Language-Image Pre-training), which represents the current state of the art in this type of approach. Like ViT, we have wrapped the model in a convenient interface that handles loading and embedding. The image embeddings from SigLIP are also precomputed for us, in the `siglip` column of our dataset.
+We will use a model called SigLIP (Sigmoid Language-Image Pre-training), a recent and capable model of this type. Like ViT, we have wrapped the model in a convenient interface that handles loading and embedding. The image embeddings from SigLIP are also precomputed for us, in the `siglip` column of our dataset.
 
 ```{python}
 siglip = SigLIPEmbedder()

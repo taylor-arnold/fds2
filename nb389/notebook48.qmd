@@ -15,6 +15,12 @@ Run all of the following before starting the notebook.
 
 ```{python}
 #| tags: [noclear]
+#| eval: false
+! pip install umap-learn --quiet
+```
+
+```{python}
+#| tags: [noclear]
 import polars as pl
 from plotnine import ggplot, aes
 from polars import col as c
@@ -83,10 +89,11 @@ anything else here. This is the fine-grained challenge the dataset was built
 around, and it is worth writing down a guess now to check against the model's
 actual mistakes later.
 
-2. Look at the embedding itself. Print `filepath`, `label`, and `vit` for the
-first three rows, then confirm every `vit` vector has the same length and count
-how many of its entries are exactly zero (explode the column so each number
-becomes its own row).
+2. Look at the embedding itself. In the first block, print `filepath`, `label`,
+and `vit` for the first three rows. In the second, confirm every `vit` vector has
+the same length by taking the unique list length. In the third, explode the
+column so each number becomes its own row, then count the total number of
+entries, how many are exactly zero, and the fraction that are zero.
 
 ```{python}
 woof.select(c.filepath, c.label, c.vit).head(3)
@@ -214,10 +221,11 @@ ranking; the zero-shot classifier below trips on the same breeds.
 
 6. The UMAP plot shows the breeds separate, but it does not say which cluster is
 which. For that we turn to SigLIP, whose embeddings live in a space shared with
-text. Load it with `SigLIPEmbedder()`, embed the phrase "a photo of a golden
-retriever", and score every image by the dot product of its `siglip` embedding
-with that text embedding. Print the highest-scoring images' breeds, and draw the
-score distribution by breed.
+text. In the first block, load it with `SigLIPEmbedder()` and embed the phrase
+"a photo of a golden retriever". In the second, score every image by the dot
+product of its `siglip` embedding with that text embedding, and show the eight
+highest-scoring images in a grid labeled by breed. In the third, draw the score
+distribution by breed as a strip plot, with the breeds sorted by mean score.
 
 ```{python}
 siglip = SigLIPEmbedder()
@@ -267,10 +275,11 @@ than trusting the numbers is the check that matters here, since a high similarit
 score is only meaningful if the images it picks really are the breed we asked
 for.
 
-7. Now do the whole thing at once. Build a text embedding for each of the ten
-breed names (clean the underscores out of the slug first, so the prompt reads "a
-photo of a border terrier"), assign every image to the breed whose text
-embedding it sits closest to, and report the overall classification rate.
+7. Now do the whole thing at once. In the first block, build a text embedding for
+each of the ten breed names (clean the underscores out of the slug first, so the
+prompt reads "a photo of a border terrier"). In the second, assign every image to
+the breed whose text embedding it sits closest to, and report the overall
+classification rate.
 
 ```{python}
 embed = (
