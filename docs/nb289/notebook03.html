@@ -1,0 +1,2810 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.36">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Notebook03 – Foundations of Data Science: Notebooks</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-77a666a5542a07a54dbe0a7f6e3b86cd.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+</head>
+
+<body class="nav-sidebar docked fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./notebook03.html">Notebook03</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Foundations of Data Science: Notebooks</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook01.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook01</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook02.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook02</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook03.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Notebook03</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook04.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook04</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook05.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook05</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook06.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook06</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook07.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook07</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook08.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook08</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook09.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook09</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook10.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook10</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook11.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook11</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook12.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook12</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook13.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook13</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook14.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook14</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook15.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook15</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook17.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook17</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook18.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook18</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook19.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook19</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook20.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook20</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Notebook03</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="setup" class="level3">
+<h3 class="anchored" data-anchor-id="setup">Setup</h3>
+<p>Run all of the following before starting the notebook.</p>
+<div id="b1384bcf" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="1">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span> wget <span class="op">-</span>q <span class="op">-</span>nc https:<span class="op">//</span>raw.githubusercontent.com<span class="op">/</span>taylor<span class="op">-</span>arnold<span class="op">/</span>fds2<span class="op">/</span>refs<span class="op">/</span>heads<span class="op">/</span>main<span class="op">/</span>funs.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div id="7d7af967" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="2">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine <span class="im">import</span> ggplot, aes</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> polars <span class="im">import</span> col <span class="im">as</span> c</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> funs</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>ub <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div id="edbc6037" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="4">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>film <span class="op">=</span> (</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    pl.read_csv(ub <span class="op">+</span> <span class="st">"data/criterion.csv"</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    .select(</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        c.title, c.year, c.director, c.country, c.language, c.genre,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>        c.runtime_raw, c.imdb_votes, c.rating_imdb, c.rating_rt, c.rating_mc</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    .drop_nulls(subset<span class="op">=</span>[<span class="st">"runtime_raw"</span>, <span class="st">"imdb_votes"</span>, <span class="st">"rating_imdb"</span>])</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+<section id="questions" class="level3">
+<h3 class="anchored" data-anchor-id="questions">Questions</h3>
+<p>The <code>film</code> dataset describes the films released by the Criterion Collection, a distribution company that publishes restored editions of films it considers important. Each row is one film, with its <code>title</code>, <code>year</code> of release, <code>director</code>, <code>country</code> of production, <code>language</code>, and <code>genre</code>, along with its <code>runtime_raw</code> (in minutes) and three critical scores: <code>rating_imdb</code> (0-10), <code>rating_rt</code> (Rotten Tomatoes, 0-100), and <code>rating_mc</code> (Metacritic, 0-100). The column <code>imdb_votes</code> records how many IMDb users rated the film, which is a rough measure of how widely seen it is.</p>
+<p>Unless a question says otherwise, just print the result of each block; do not save it to a variable.</p>
+<ol type="1">
+<li>Start by sorting the films by year, with the oldest films at the top.</li>
+</ol>
+<div id="4a35495c" class="cell" data-execution_count="5">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    film</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    .sort(c.year)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="4">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (1_407, 11)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">title</th>
+<th data-quarto-table-cell-role="th">year</th>
+<th data-quarto-table-cell-role="th">director</th>
+<th data-quarto-table-cell-role="th">country</th>
+<th data-quarto-table-cell-role="th">language</th>
+<th data-quarto-table-cell-role="th">genre</th>
+<th data-quarto-table-cell-role="th">runtime_raw</th>
+<th data-quarto-table-cell-role="th">imdb_votes</th>
+<th data-quarto-table-cell-role="th">rating_imdb</th>
+<th data-quarto-table-cell-role="th">rating_rt</th>
+<th data-quarto-table-cell-role="th">rating_mc</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>i64</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>i64</td>
+<td>i64</td>
+<td>f64</td>
+<td>i64</td>
+<td>i64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"The Kid"</td>
+<td>1921</td>
+<td>"Charles Chaplin"</td>
+<td>"United States"</td>
+<td>"None|English"</td>
+<td>"Comedy|Drama|Family"</td>
+<td>68</td>
+<td>142797</td>
+<td>8.2</td>
+<td>100</td>
+<td>null</td>
+</tr>
+<tr class="even">
+<td>"The Phantom Carriage"</td>
+<td>1921</td>
+<td>"Victor Sjöström"</td>
+<td>"Sweden"</td>
+<td>"None|Swedish"</td>
+<td>"Drama|Fantasy|Horror"</td>
+<td>106</td>
+<td>15311</td>
+<td>8.0</td>
+<td>100</td>
+<td>null</td>
+</tr>
+<tr class="odd">
+<td>"Häxan"</td>
+<td>1922</td>
+<td>"Benjamin Christensen"</td>
+<td>"Sweden|Denmark"</td>
+<td>"Swedish|Danish"</td>
+<td>"Documentary|Fantasy|Horror"</td>
+<td>107</td>
+<td>18391</td>
+<td>7.6</td>
+<td>93</td>
+<td>null</td>
+</tr>
+<tr class="even">
+<td>"Safety Last!"</td>
+<td>1923</td>
+<td>"Fred C. Newmeyer|Sam Taylor"</td>
+<td>"United States"</td>
+<td>"English"</td>
+<td>"Action|Comedy|Thriller"</td>
+<td>73</td>
+<td>23503</td>
+<td>8.1</td>
+<td>97</td>
+<td>null</td>
+</tr>
+<tr class="odd">
+<td>"A Woman of Paris: A Drama of F…</td>
+<td>1923</td>
+<td>"Charles Chaplin"</td>
+<td>"United States"</td>
+<td>"English"</td>
+<td>"Drama|Romance"</td>
+<td>84</td>
+<td>6548</td>
+<td>6.9</td>
+<td>94</td>
+<td>76</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"Caught by the Tides"</td>
+<td>2024</td>
+<td>"Jia Zhang-ke"</td>
+<td>"China|France|Japan"</td>
+<td>"Mandarin|English"</td>
+<td>"Drama"</td>
+<td>111</td>
+<td>2097</td>
+<td>6.7</td>
+<td>99</td>
+<td>87</td>
+</tr>
+<tr class="even">
+<td>"Anora"</td>
+<td>2024</td>
+<td>"Sean Baker"</td>
+<td>"United States"</td>
+<td>"English|Russian|Armenian"</td>
+<td>"Comedy|Drama|Romance"</td>
+<td>139</td>
+<td>235046</td>
+<td>7.4</td>
+<td>93</td>
+<td>91</td>
+</tr>
+<tr class="odd">
+<td>"Vermiglio"</td>
+<td>2024</td>
+<td>"Maura Delpero"</td>
+<td>"Italy|France|Belgium"</td>
+<td>"Italian|Latin"</td>
+<td>"Drama|History"</td>
+<td>119</td>
+<td>4838</td>
+<td>6.9</td>
+<td>93</td>
+<td>85</td>
+</tr>
+<tr class="even">
+<td>"Misericordia"</td>
+<td>2024</td>
+<td>"Alain Guiraudie"</td>
+<td>"France|Spain|Portugal"</td>
+<td>"French"</td>
+<td>"Comedy|Crime|Drama"</td>
+<td>103</td>
+<td>2537</td>
+<td>7.1</td>
+<td>94</td>
+<td>83</td>
+</tr>
+<tr class="odd">
+<td>"All We Imagine as Light"</td>
+<td>2024</td>
+<td>"Payal Kapadia"</td>
+<td>"France|India|Netherlands|Luxem…</td>
+<td>"Malayalam|Hindi|Marathi|Englis…</td>
+<td>"Drama|Romance"</td>
+<td>118</td>
+<td>10253</td>
+<td>7.1</td>
+<td>100</td>
+<td>93</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<ol start="2" type="1">
+<li>Now sort the films by their IMDb rating, with the highest rated films at the top.</li>
+</ol>
+<div id="1854eb8a" class="cell" data-execution_count="6">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    film</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    .sort(c.rating_imdb, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="5">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (1_407, 11)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">title</th>
+<th data-quarto-table-cell-role="th">year</th>
+<th data-quarto-table-cell-role="th">director</th>
+<th data-quarto-table-cell-role="th">country</th>
+<th data-quarto-table-cell-role="th">language</th>
+<th data-quarto-table-cell-role="th">genre</th>
+<th data-quarto-table-cell-role="th">runtime_raw</th>
+<th data-quarto-table-cell-role="th">imdb_votes</th>
+<th data-quarto-table-cell-role="th">rating_imdb</th>
+<th data-quarto-table-cell-role="th">rating_rt</th>
+<th data-quarto-table-cell-role="th">rating_mc</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>i64</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>i64</td>
+<td>i64</td>
+<td>f64</td>
+<td>i64</td>
+<td>i64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"12 Angry Men"</td>
+<td>1957</td>
+<td>"Sidney Lumet"</td>
+<td>"United States"</td>
+<td>"English"</td>
+<td>"Crime|Drama"</td>
+<td>95</td>
+<td>957726</td>
+<td>9.0</td>
+<td>100</td>
+<td>97</td>
+</tr>
+<tr class="even">
+<td>"Shoah"</td>
+<td>1985</td>
+<td>"Claude Lanzmann"</td>
+<td>"France"</td>
+<td>"German|Hebrew|Polish|Yiddish|F…</td>
+<td>"Documentary|History|War"</td>
+<td>540</td>
+<td>11202</td>
+<td>8.7</td>
+<td>100</td>
+<td>99</td>
+</tr>
+<tr class="odd">
+<td>"Seven Samurai"</td>
+<td>1954</td>
+<td>"Akira Kurosawa"</td>
+<td>"Japan"</td>
+<td>"Japanese"</td>
+<td>"Action|Drama"</td>
+<td>207</td>
+<td>391392</td>
+<td>8.6</td>
+<td>100</td>
+<td>98</td>
+</tr>
+<tr class="even">
+<td>"Night and Fog"</td>
+<td>1956</td>
+<td>"Alain Resnais"</td>
+<td>"France"</td>
+<td>"French"</td>
+<td>"Documentary|Short|History"</td>
+<td>32</td>
+<td>22148</td>
+<td>8.6</td>
+<td>null</td>
+<td>null</td>
+</tr>
+<tr class="odd">
+<td>"Harakiri"</td>
+<td>1962</td>
+<td>"Masaki Kobayashi"</td>
+<td>"Japan"</td>
+<td>"Japanese"</td>
+<td>"Drama|Mystery"</td>
+<td>135</td>
+<td>87601</td>
+<td>8.6</td>
+<td>100</td>
+<td>85</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"Godzilla vs. Megalon"</td>
+<td>1973</td>
+<td>"Jun Fukuda|Yoshimitsu Banno|Is…</td>
+<td>"Japan"</td>
+<td>"Japanese"</td>
+<td>"Action|Adventure|Family"</td>
+<td>82</td>
+<td>7219</td>
+<td>4.8</td>
+<td>38</td>
+<td>null</td>
+</tr>
+<tr class="even">
+<td>"Genocide"</td>
+<td>1968</td>
+<td>"Kazui Nihonmatsu"</td>
+<td>"Japan"</td>
+<td>"Japanese"</td>
+<td>"Horror|Sci-Fi"</td>
+<td>84</td>
+<td>802</td>
+<td>4.7</td>
+<td>null</td>
+<td>null</td>
+</tr>
+<tr class="odd">
+<td>"Jellyfish Eyes"</td>
+<td>2013</td>
+<td>"Takashi Murakami"</td>
+<td>"Japan"</td>
+<td>"Japanese"</td>
+<td>"Comedy|Fantasy"</td>
+<td>101</td>
+<td>574</td>
+<td>4.7</td>
+<td>29</td>
+<td>34</td>
+</tr>
+<tr class="even">
+<td>"All Monsters Attack"</td>
+<td>1969</td>
+<td>"Ishirô Honda|Jun Fukuda|Kengo …</td>
+<td>"Japan|United States"</td>
+<td>"Japanese"</td>
+<td>"Adventure|Family|Fantasy"</td>
+<td>69</td>
+<td>5763</td>
+<td>3.9</td>
+<td>38</td>
+<td>null</td>
+</tr>
+<tr class="odd">
+<td>"Wild 90"</td>
+<td>1968</td>
+<td>"Norman Mailer"</td>
+<td>"United States"</td>
+<td>"English"</td>
+<td>"Comedy|Crime|Drama"</td>
+<td>90</td>
+<td>139</td>
+<td>3.5</td>
+<td>null</td>
+<td>null</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<ol start="3" type="1">
+<li>Sort the films by country (alphabetically) and then, within each country, by year. Note: when we say “sort” without qualification, we mean ascending order.</li>
+</ol>
+<div id="6bac84dc" class="cell" data-execution_count="7">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    film</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    .sort(c.country, c.year)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="6">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (1_407, 11)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">title</th>
+<th data-quarto-table-cell-role="th">year</th>
+<th data-quarto-table-cell-role="th">director</th>
+<th data-quarto-table-cell-role="th">country</th>
+<th data-quarto-table-cell-role="th">language</th>
+<th data-quarto-table-cell-role="th">genre</th>
+<th data-quarto-table-cell-role="th">runtime_raw</th>
+<th data-quarto-table-cell-role="th">imdb_votes</th>
+<th data-quarto-table-cell-role="th">rating_imdb</th>
+<th data-quarto-table-cell-role="th">rating_rt</th>
+<th data-quarto-table-cell-role="th">rating_mc</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>i64</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>i64</td>
+<td>i64</td>
+<td>f64</td>
+<td>i64</td>
+<td>i64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"Chronicle of the Years of Fire"</td>
+<td>1975</td>
+<td>"Mohammed Lakhdar-Hamina"</td>
+<td>"Algeria"</td>
+<td>"Arabic"</td>
+<td>"Drama|History"</td>
+<td>177</td>
+<td>654</td>
+<td>7.4</td>
+<td>null</td>
+<td>null</td>
+</tr>
+<tr class="even">
+<td>"Sambizanga"</td>
+<td>1972</td>
+<td>"Sarah Maldoror"</td>
+<td>"Angola|France"</td>
+<td>"Lingala|Portuguese"</td>
+<td>"Drama"</td>
+<td>102</td>
+<td>821</td>
+<td>7.0</td>
+<td>100</td>
+<td>null</td>
+</tr>
+<tr class="odd">
+<td>"Prisioneros de la tierra"</td>
+<td>1939</td>
+<td>"Mario Soffici"</td>
+<td>"Argentina"</td>
+<td>"Guarani|Spanish|Portuguese"</td>
+<td>"Drama"</td>
+<td>85</td>
+<td>343</td>
+<td>7.1</td>
+<td>null</td>
+<td>null</td>
+</tr>
+<tr class="even">
+<td>"The Swamp"</td>
+<td>2001</td>
+<td>"Lucrecia Martel"</td>
+<td>"Argentina|France|Spain|Japan"</td>
+<td>"Spanish"</td>
+<td>"Comedy|Drama"</td>
+<td>102</td>
+<td>8581</td>
+<td>7.0</td>
+<td>88</td>
+<td>78</td>
+</tr>
+<tr class="odd">
+<td>"Picnic at Hanging Rock"</td>
+<td>1975</td>
+<td>"Peter Weir"</td>
+<td>"Australia"</td>
+<td>"English|French"</td>
+<td>"Drama|Mystery"</td>
+<td>118</td>
+<td>43997</td>
+<td>7.4</td>
+<td>92</td>
+<td>81</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"Down by Law"</td>
+<td>1986</td>
+<td>"Jim Jarmusch"</td>
+<td>"West Germany|United States"</td>
+<td>"English|Italian|French"</td>
+<td>"Comedy|Crime|Drama"</td>
+<td>107</td>
+<td>56279</td>
+<td>7.7</td>
+<td>88</td>
+<td>75</td>
+</tr>
+<tr class="even">
+<td>"Man Is Not a Bird"</td>
+<td>1965</td>
+<td>"Dusan Makavejev"</td>
+<td>"Yugoslavia"</td>
+<td>"Serbo-Croatian"</td>
+<td>"Comedy|Drama|Romance"</td>
+<td>81</td>
+<td>1379</td>
+<td>7.1</td>
+<td>100</td>
+<td>null</td>
+</tr>
+<tr class="odd">
+<td>"Love Affair, or The Case of th…</td>
+<td>1967</td>
+<td>"Dusan Makavejev"</td>
+<td>"Yugoslavia"</td>
+<td>"Serbo-Croatian|German"</td>
+<td>"Comedy|Drama|Romance"</td>
+<td>70</td>
+<td>1944</td>
+<td>7.3</td>
+<td>100</td>
+<td>null</td>
+</tr>
+<tr class="even">
+<td>"Innocence Unprotected"</td>
+<td>1968</td>
+<td>"Dusan Makavejev"</td>
+<td>"Yugoslavia"</td>
+<td>"Serbian|German"</td>
+<td>"Documentary|Comedy|Drama"</td>
+<td>75</td>
+<td>946</td>
+<td>7.1</td>
+<td>100</td>
+<td>null</td>
+</tr>
+<tr class="odd">
+<td>"WR: Mysteries of the Organism"</td>
+<td>1971</td>
+<td>"Dusan Makavejev"</td>
+<td>"Yugoslavia|West Germany"</td>
+<td>"Serbo-Croatian|English|Russian…</td>
+<td>"Comedy|Drama|Fantasy"</td>
+<td>84</td>
+<td>5524</td>
+<td>6.7</td>
+<td>87</td>
+<td>null</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<ol start="4" type="1">
+<li>The dataset has more columns than we can comfortably read at once. Take just the title, director, and year columns. Notice how similar this code is to the code in the previous question.</li>
+</ol>
+<div id="461a58b9" class="cell" data-execution_count="8">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    film</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    .select(c.title, c.director, c.year)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="7">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (1_407, 3)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">title</th>
+<th data-quarto-table-cell-role="th">director</th>
+<th data-quarto-table-cell-role="th">year</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>str</td>
+<td>i64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"The Kid"</td>
+<td>"Charles Chaplin"</td>
+<td>1921</td>
+</tr>
+<tr class="even">
+<td>"The Phantom Carriage"</td>
+<td>"Victor Sjöström"</td>
+<td>1921</td>
+</tr>
+<tr class="odd">
+<td>"Häxan"</td>
+<td>"Benjamin Christensen"</td>
+<td>1922</td>
+</tr>
+<tr class="even">
+<td>"Safety Last!"</td>
+<td>"Fred C. Newmeyer|Sam Taylor"</td>
+<td>1923</td>
+</tr>
+<tr class="odd">
+<td>"A Woman of Paris: A Drama of F…</td>
+<td>"Charles Chaplin"</td>
+<td>1923</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"Caught by the Tides"</td>
+<td>"Jia Zhang-ke"</td>
+<td>2024</td>
+</tr>
+<tr class="even">
+<td>"Anora"</td>
+<td>"Sean Baker"</td>
+<td>2024</td>
+</tr>
+<tr class="odd">
+<td>"Vermiglio"</td>
+<td>"Maura Delpero"</td>
+<td>2024</td>
+</tr>
+<tr class="even">
+<td>"Misericordia"</td>
+<td>"Alain Guiraudie"</td>
+<td>2024</td>
+</tr>
+<tr class="odd">
+<td>"All We Imagine as Light"</td>
+<td>"Payal Kapadia"</td>
+<td>2024</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<ol start="5" type="1">
+<li>Let’s chain several methods together. Print the ten films with the most IMDb votes, showing only the title and the number of votes.</li>
+</ol>
+<div id="67e7bbb3" class="cell" data-execution_count="9">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    film</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    .sort(c.imdb_votes, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    .head(n<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    .select(c.title, c.imdb_votes)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="8">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (10, 2)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">title</th>
+<th data-quarto-table-cell-role="th">imdb_votes</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>i64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"The Silence of the Lambs"</td>
+<td>1667162</td>
+</tr>
+<tr class="even">
+<td>"WALL·E"</td>
+<td>1290616</td>
+</tr>
+<tr class="odd">
+<td>"No Country for Old Men"</td>
+<td>1152338</td>
+</tr>
+<tr class="even">
+<td>"12 Angry Men"</td>
+<td>957726</td>
+</tr>
+<tr class="odd">
+<td>"The Grand Budapest Hotel"</td>
+<td>947445</td>
+</tr>
+<tr class="even">
+<td>"Trainspotting"</td>
+<td>758254</td>
+</tr>
+<tr class="odd">
+<td>"Pan's Labyrinth"</td>
+<td>735103</td>
+</tr>
+<tr class="even">
+<td>"Dr. Strangelove or: How I Lear…</td>
+<td>543930</td>
+</tr>
+<tr class="odd">
+<td>"Citizen Kane"</td>
+<td>488798</td>
+</tr>
+<tr class="even">
+<td>"The Princess Bride"</td>
+<td>475996</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<ol start="6" type="1">
+<li>Now select just those films that run longer than 200 minutes.</li>
+</ol>
+<div id="b564fe2a" class="cell" data-execution_count="10">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    film</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.runtime_raw <span class="op">&gt;</span> <span class="dv">200</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="9">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (11, 11)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">title</th>
+<th data-quarto-table-cell-role="th">year</th>
+<th data-quarto-table-cell-role="th">director</th>
+<th data-quarto-table-cell-role="th">country</th>
+<th data-quarto-table-cell-role="th">language</th>
+<th data-quarto-table-cell-role="th">genre</th>
+<th data-quarto-table-cell-role="th">runtime_raw</th>
+<th data-quarto-table-cell-role="th">imdb_votes</th>
+<th data-quarto-table-cell-role="th">rating_imdb</th>
+<th data-quarto-table-cell-role="th">rating_rt</th>
+<th data-quarto-table-cell-role="th">rating_mc</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>i64</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>i64</td>
+<td>i64</td>
+<td>f64</td>
+<td>i64</td>
+<td>i64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"Les Misérables"</td>
+<td>1934</td>
+<td>"Raymond Bernard"</td>
+<td>"France"</td>
+<td>"French"</td>
+<td>"Drama"</td>
+<td>281</td>
+<td>2084</td>
+<td>8.3</td>
+<td>null</td>
+<td>null</td>
+</tr>
+<tr class="even">
+<td>"Seven Samurai"</td>
+<td>1954</td>
+<td>"Akira Kurosawa"</td>
+<td>"Japan"</td>
+<td>"Japanese"</td>
+<td>"Action|Drama"</td>
+<td>207</td>
+<td>391392</td>
+<td>8.6</td>
+<td>100</td>
+<td>98</td>
+</tr>
+<tr class="odd">
+<td>"War and Peace"</td>
+<td>1965</td>
+<td>"Sergey Bondarchuk"</td>
+<td>"Soviet Union"</td>
+<td>"Russian|German|French"</td>
+<td>"Drama|Romance|War"</td>
+<td>432</td>
+<td>8619</td>
+<td>8.3</td>
+<td>100</td>
+<td>null</td>
+</tr>
+<tr class="even">
+<td>"The New Land"</td>
+<td>1972</td>
+<td>"Jan Troell"</td>
+<td>"Sweden"</td>
+<td>"Swedish|English"</td>
+<td>"Drama|Western"</td>
+<td>204</td>
+<td>5451</td>
+<td>8.0</td>
+<td>100</td>
+<td>null</td>
+</tr>
+<tr class="odd">
+<td>"The Mother and the Whore"</td>
+<td>1973</td>
+<td>"Jean Eustache"</td>
+<td>"France"</td>
+<td>"French"</td>
+<td>"Drama|Romance"</td>
+<td>217</td>
+<td>7217</td>
+<td>7.7</td>
+<td>94</td>
+<td>89</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"Shoah"</td>
+<td>1985</td>
+<td>"Claude Lanzmann"</td>
+<td>"France"</td>
+<td>"German|Hebrew|Polish|Yiddish|F…</td>
+<td>"Documentary|History|War"</td>
+<td>540</td>
+<td>11202</td>
+<td>8.7</td>
+<td>100</td>
+<td>99</td>
+</tr>
+<tr class="even">
+<td>"A Brighter Summer Day"</td>
+<td>1991</td>
+<td>"Edward Yang"</td>
+<td>"Taiwan"</td>
+<td>"Mandarin|Min Nan|Shanghainese|…</td>
+<td>"Crime|Drama|Romance"</td>
+<td>237</td>
+<td>14580</td>
+<td>8.2</td>
+<td>100</td>
+<td>91</td>
+</tr>
+<tr class="odd">
+<td>"Malcolm X"</td>
+<td>1992</td>
+<td>"Spike Lee"</td>
+<td>"United States|Japan"</td>
+<td>"English|Arabic"</td>
+<td>"Biography|Drama|History"</td>
+<td>201</td>
+<td>107958</td>
+<td>7.7</td>
+<td>89</td>
+<td>73</td>
+</tr>
+<tr class="even">
+<td>"The Irishman"</td>
+<td>2019</td>
+<td>"Martin Scorsese"</td>
+<td>"United States"</td>
+<td>"English|Italian|Latin|Spanish|…</td>
+<td>"Biography|Crime|Drama"</td>
+<td>209</td>
+<td>462667</td>
+<td>7.8</td>
+<td>95</td>
+<td>94</td>
+</tr>
+<tr class="odd">
+<td>"Killers of the Flower Moon"</td>
+<td>2023</td>
+<td>"Martin Scorsese"</td>
+<td>"United States"</td>
+<td>"English|Osage|Latin|French"</td>
+<td>"Crime|Drama|History"</td>
+<td>206</td>
+<td>295931</td>
+<td>7.5</td>
+<td>93</td>
+<td>89</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<ol start="7" type="1">
+<li>Select the films whose country is Japan. There should be 172 of them.</li>
+</ol>
+<div id="4976247a" class="cell" data-execution_count="11">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    film</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.country <span class="op">==</span> <span class="st">"Japan"</span>)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="10">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (172, 11)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">title</th>
+<th data-quarto-table-cell-role="th">year</th>
+<th data-quarto-table-cell-role="th">director</th>
+<th data-quarto-table-cell-role="th">country</th>
+<th data-quarto-table-cell-role="th">language</th>
+<th data-quarto-table-cell-role="th">genre</th>
+<th data-quarto-table-cell-role="th">runtime_raw</th>
+<th data-quarto-table-cell-role="th">imdb_votes</th>
+<th data-quarto-table-cell-role="th">rating_imdb</th>
+<th data-quarto-table-cell-role="th">rating_rt</th>
+<th data-quarto-table-cell-role="th">rating_mc</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>i64</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>i64</td>
+<td>i64</td>
+<td>f64</td>
+<td>i64</td>
+<td>i64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"Walk Cheerfully"</td>
+<td>1930</td>
+<td>"Yasujirô Ozu"</td>
+<td>"Japan"</td>
+<td>"None"</td>
+<td>"Crime|Drama|Romance"</td>
+<td>95</td>
+<td>776</td>
+<td>6.4</td>
+<td>null</td>
+<td>null</td>
+</tr>
+<tr class="even">
+<td>"That Night's Wife"</td>
+<td>1930</td>
+<td>"Yasujirô Ozu"</td>
+<td>"Japan"</td>
+<td>"None"</td>
+<td>"Crime|Drama"</td>
+<td>65</td>
+<td>963</td>
+<td>6.9</td>
+<td>null</td>
+<td>null</td>
+</tr>
+<tr class="odd">
+<td>"Flunky, Work Hard!"</td>
+<td>1931</td>
+<td>"Mikio Naruse"</td>
+<td>"Japan"</td>
+<td>"None|Japanese"</td>
+<td>"Short|Comedy|Drama"</td>
+<td>29</td>
+<td>531</td>
+<td>6.7</td>
+<td>null</td>
+<td>null</td>
+</tr>
+<tr class="even">
+<td>"Tokyo Chorus"</td>
+<td>1931</td>
+<td>"Yasujirô Ozu"</td>
+<td>"Japan"</td>
+<td>"None|Japanese"</td>
+<td>"Comedy|Drama"</td>
+<td>90</td>
+<td>1608</td>
+<td>7.1</td>
+<td>null</td>
+<td>null</td>
+</tr>
+<tr class="odd">
+<td>"I Was Born, But..."</td>
+<td>1932</td>
+<td>"Yasujirô Ozu"</td>
+<td>"Japan"</td>
+<td>"None|Japanese"</td>
+<td>"Comedy|Drama"</td>
+<td>91</td>
+<td>6611</td>
+<td>7.9</td>
+<td>100</td>
+<td>91</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"Still Walking"</td>
+<td>2008</td>
+<td>"Hirokazu Koreeda"</td>
+<td>"Japan"</td>
+<td>"Japanese"</td>
+<td>"Drama"</td>
+<td>114</td>
+<td>20145</td>
+<td>7.9</td>
+<td>100</td>
+<td>89</td>
+</tr>
+<tr class="even">
+<td>"Jellyfish Eyes"</td>
+<td>2013</td>
+<td>"Takashi Murakami"</td>
+<td>"Japan"</td>
+<td>"Japanese"</td>
+<td>"Comedy|Fantasy"</td>
+<td>101</td>
+<td>574</td>
+<td>4.7</td>
+<td>29</td>
+<td>34</td>
+</tr>
+<tr class="odd">
+<td>"Drive My Car"</td>
+<td>2021</td>
+<td>"Ryûsuke Hamaguchi"</td>
+<td>"Japan"</td>
+<td>"Japanese|English|Korean Sign |…</td>
+<td>"Drama"</td>
+<td>179</td>
+<td>74349</td>
+<td>7.5</td>
+<td>97</td>
+<td>91</td>
+</tr>
+<tr class="even">
+<td>"Evil Does Not Exist"</td>
+<td>2023</td>
+<td>"Ryûsuke Hamaguchi"</td>
+<td>"Japan"</td>
+<td>"Japanese"</td>
+<td>"Drama"</td>
+<td>106</td>
+<td>12539</td>
+<td>7.0</td>
+<td>91</td>
+<td>83</td>
+</tr>
+<tr class="odd">
+<td>"Ryuichi Sakamoto: Opus"</td>
+<td>2023</td>
+<td>"Neo Sora"</td>
+<td>"Japan"</td>
+<td>"Japanese"</td>
+<td>"Documentary|Music"</td>
+<td>103</td>
+<td>970</td>
+<td>8.0</td>
+<td>100</td>
+<td>91</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<ol start="8" type="1">
+<li>Our dataset actually contains 198 films that Japan had a hand in producing, but the previous question found only 172. Look closely at the values in the <code>country</code> column. Why does our filter miss the other 26 films?</li>
+</ol>
+<p><strong>Answer</strong>: Films with more than one production country store all of them in a single value, separated by a vertical bar: <code>"Japan|France"</code>, <code>"Japan|United States"</code>, and so on. The test <code>c.country == "Japan"</code> asks whether the whole value is exactly the four letters <code>Japan</code>, so a co-production like <code>"Japan|France"</code> answers <code>False</code> and is dropped. Data stored this way is annoying to work with, and we will see how to split it apart later in the semester.</p>
+<ol start="9" type="1">
+<li>Select the Japanese films released before 1960, sorted from the highest IMDb rating to the lowest. Use a single call to <code>.filter</code> with the <code>&amp;</code> (and) operator.</li>
+</ol>
+<div id="ddc0fad4" class="cell" data-execution_count="12">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    film</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>((c.country <span class="op">==</span> <span class="st">"Japan"</span>) <span class="op">&amp;</span> (c.year <span class="op">&lt;</span> <span class="dv">1960</span>))</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    .sort(c.rating_imdb, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="11">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (66, 11)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">title</th>
+<th data-quarto-table-cell-role="th">year</th>
+<th data-quarto-table-cell-role="th">director</th>
+<th data-quarto-table-cell-role="th">country</th>
+<th data-quarto-table-cell-role="th">language</th>
+<th data-quarto-table-cell-role="th">genre</th>
+<th data-quarto-table-cell-role="th">runtime_raw</th>
+<th data-quarto-table-cell-role="th">imdb_votes</th>
+<th data-quarto-table-cell-role="th">rating_imdb</th>
+<th data-quarto-table-cell-role="th">rating_rt</th>
+<th data-quarto-table-cell-role="th">rating_mc</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>i64</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>i64</td>
+<td>i64</td>
+<td>f64</td>
+<td>i64</td>
+<td>i64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"Seven Samurai"</td>
+<td>1954</td>
+<td>"Akira Kurosawa"</td>
+<td>"Japan"</td>
+<td>"Japanese"</td>
+<td>"Action|Drama"</td>
+<td>207</td>
+<td>391392</td>
+<td>8.6</td>
+<td>100</td>
+<td>98</td>
+</tr>
+<tr class="even">
+<td>"Sansho the Bailiff"</td>
+<td>1954</td>
+<td>"Kenji Mizoguchi"</td>
+<td>"Japan"</td>
+<td>"Japanese"</td>
+<td>"Drama"</td>
+<td>120</td>
+<td>18809</td>
+<td>8.4</td>
+<td>100</td>
+<td>96</td>
+</tr>
+<tr class="odd">
+<td>"Ikiru"</td>
+<td>1952</td>
+<td>"Akira Kurosawa"</td>
+<td>"Japan"</td>
+<td>"Japanese|Latin|English|French"</td>
+<td>"Drama"</td>
+<td>143</td>
+<td>99167</td>
+<td>8.3</td>
+<td>98</td>
+<td>92</td>
+</tr>
+<tr class="even">
+<td>"Late Spring"</td>
+<td>1949</td>
+<td>"Yasujirô Ozu"</td>
+<td>"Japan"</td>
+<td>"Japanese"</td>
+<td>"Comedy|Drama"</td>
+<td>108</td>
+<td>20798</td>
+<td>8.2</td>
+<td>100</td>
+<td>93</td>
+</tr>
+<tr class="odd">
+<td>"Rashomon"</td>
+<td>1950</td>
+<td>"Akira Kurosawa"</td>
+<td>"Japan"</td>
+<td>"Japanese"</td>
+<td>"Crime|Drama|Mystery"</td>
+<td>88</td>
+<td>193416</td>
+<td>8.1</td>
+<td>98</td>
+<td>98</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"Walk Cheerfully"</td>
+<td>1930</td>
+<td>"Yasujirô Ozu"</td>
+<td>"Japan"</td>
+<td>"None"</td>
+<td>"Crime|Drama|Romance"</td>
+<td>95</td>
+<td>776</td>
+<td>6.4</td>
+<td>null</td>
+<td>null</td>
+</tr>
+<tr class="even">
+<td>"Jubilation Street"</td>
+<td>1944</td>
+<td>"Keisuke Kinoshita"</td>
+<td>"Japan"</td>
+<td>"Japanese"</td>
+<td>"Drama|War"</td>
+<td>73</td>
+<td>194</td>
+<td>6.2</td>
+<td>null</td>
+<td>null</td>
+</tr>
+<tr class="odd">
+<td>"Sanshiro Sugata, Part Two"</td>
+<td>1945</td>
+<td>"Akira Kurosawa"</td>
+<td>"Japan"</td>
+<td>"Japanese"</td>
+<td>"Action|Adventure|Drama"</td>
+<td>83</td>
+<td>2900</td>
+<td>6.0</td>
+<td>null</td>
+<td>null</td>
+</tr>
+<tr class="even">
+<td>"Godzilla Raids Again"</td>
+<td>1955</td>
+<td>"Motoyoshi Oda|Ishirô Honda"</td>
+<td>"Japan"</td>
+<td>"Japanese"</td>
+<td>"Action|Horror|Sci-Fi"</td>
+<td>82</td>
+<td>9173</td>
+<td>5.7</td>
+<td>64</td>
+<td>null</td>
+</tr>
+<tr class="odd">
+<td>"The Most Beautiful"</td>
+<td>1944</td>
+<td>"Akira Kurosawa"</td>
+<td>"Japan"</td>
+<td>"Japanese"</td>
+<td>"Drama"</td>
+<td>85</td>
+<td>2488</td>
+<td>5.6</td>
+<td>null</td>
+<td>null</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<ol start="10" type="1">
+<li>Now select the films made in one of the three Scandinavian countries (Sweden, Denmark, or Norway) and sort them by year. Use the <code>.is_in</code> method rather than the <code>|</code> (or) operator.</li>
+</ol>
+<div id="3b8ff059" class="cell" data-execution_count="13">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    film</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.country.is_in([<span class="st">"Sweden"</span>, <span class="st">"Denmark"</span>, <span class="st">"Norway"</span>]))</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    .sort(c.year)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="12">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (58, 11)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">title</th>
+<th data-quarto-table-cell-role="th">year</th>
+<th data-quarto-table-cell-role="th">director</th>
+<th data-quarto-table-cell-role="th">country</th>
+<th data-quarto-table-cell-role="th">language</th>
+<th data-quarto-table-cell-role="th">genre</th>
+<th data-quarto-table-cell-role="th">runtime_raw</th>
+<th data-quarto-table-cell-role="th">imdb_votes</th>
+<th data-quarto-table-cell-role="th">rating_imdb</th>
+<th data-quarto-table-cell-role="th">rating_rt</th>
+<th data-quarto-table-cell-role="th">rating_mc</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>i64</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>i64</td>
+<td>i64</td>
+<td>f64</td>
+<td>i64</td>
+<td>i64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"The Phantom Carriage"</td>
+<td>1921</td>
+<td>"Victor Sjöström"</td>
+<td>"Sweden"</td>
+<td>"None|Swedish"</td>
+<td>"Drama|Fantasy|Horror"</td>
+<td>106</td>
+<td>15311</td>
+<td>8.0</td>
+<td>100</td>
+<td>null</td>
+</tr>
+<tr class="even">
+<td>"Master of the House"</td>
+<td>1925</td>
+<td>"Carl Theodor Dreyer"</td>
+<td>"Denmark"</td>
+<td>"Danish"</td>
+<td>"Comedy|Drama"</td>
+<td>107</td>
+<td>2506</td>
+<td>7.0</td>
+<td>100</td>
+<td>null</td>
+</tr>
+<tr class="odd">
+<td>"The Count of the Old Town"</td>
+<td>1935</td>
+<td>"Edvin Adolphson|Sigurd Wallén"</td>
+<td>"Sweden"</td>
+<td>"Swedish"</td>
+<td>"Comedy|Romance"</td>
+<td>83</td>
+<td>427</td>
+<td>6.0</td>
+<td>null</td>
+<td>null</td>
+</tr>
+<tr class="even">
+<td>"Walpurgis Night"</td>
+<td>1935</td>
+<td>"Gustaf Edgren"</td>
+<td>"Sweden"</td>
+<td>"Swedish"</td>
+<td>"Drama|Romance"</td>
+<td>75</td>
+<td>497</td>
+<td>6.0</td>
+<td>null</td>
+<td>null</td>
+</tr>
+<tr class="odd">
+<td>"Intermezzo"</td>
+<td>1936</td>
+<td>"Gustaf Molander"</td>
+<td>"Sweden"</td>
+<td>"Swedish|German"</td>
+<td>"Drama|Music|Romance"</td>
+<td>93</td>
+<td>1414</td>
+<td>6.5</td>
+<td>null</td>
+<td>null</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"The Making of Fanny and Alexan…</td>
+<td>1984</td>
+<td>"Ingmar Bergman"</td>
+<td>"Sweden"</td>
+<td>"Swedish"</td>
+<td>"Documentary"</td>
+<td>110</td>
+<td>1043</td>
+<td>7.5</td>
+<td>null</td>
+<td>null</td>
+</tr>
+<tr class="even">
+<td>"My Life as a Dog"</td>
+<td>1985</td>
+<td>"Lasse Hallström"</td>
+<td>"Sweden"</td>
+<td>"Swedish"</td>
+<td>"Drama|Comedy"</td>
+<td>101</td>
+<td>23725</td>
+<td>7.6</td>
+<td>100</td>
+<td>82</td>
+</tr>
+<tr class="odd">
+<td>"Babette's Feast"</td>
+<td>1987</td>
+<td>"Gabriel Axel"</td>
+<td>"Denmark"</td>
+<td>"Danish|French|Swedish|Italian|…</td>
+<td>"Drama"</td>
+<td>103</td>
+<td>22974</td>
+<td>7.8</td>
+<td>97</td>
+<td>78</td>
+</tr>
+<tr class="even">
+<td>"Epidemic"</td>
+<td>1987</td>
+<td>"Lars von Trier"</td>
+<td>"Denmark"</td>
+<td>"Danish|English|Latin|German"</td>
+<td>"Drama|Horror"</td>
+<td>106</td>
+<td>6271</td>
+<td>6.0</td>
+<td>25</td>
+<td>66</td>
+</tr>
+<tr class="odd">
+<td>"Insomnia"</td>
+<td>1997</td>
+<td>"Erik Skjoldbjærg"</td>
+<td>"Norway"</td>
+<td>"Norwegian|Swedish"</td>
+<td>"Crime|Mystery|Thriller"</td>
+<td>96</td>
+<td>16676</td>
+<td>7.2</td>
+<td>95</td>
+<td>null</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<ol start="11" type="1">
+<li>Among the twenty longest films in the collection, which one has the highest IMDb rating? Print only that single row. Hint: you will need to sort the data twice.</li>
+</ol>
+<div id="e1ca7fa4" class="cell" data-execution_count="14">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    film</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    .sort(c.runtime_raw, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    .head(n<span class="op">=</span><span class="dv">20</span>)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    .sort(c.rating_imdb, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    .head(n<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="13">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (1, 11)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">title</th>
+<th data-quarto-table-cell-role="th">year</th>
+<th data-quarto-table-cell-role="th">director</th>
+<th data-quarto-table-cell-role="th">country</th>
+<th data-quarto-table-cell-role="th">language</th>
+<th data-quarto-table-cell-role="th">genre</th>
+<th data-quarto-table-cell-role="th">runtime_raw</th>
+<th data-quarto-table-cell-role="th">imdb_votes</th>
+<th data-quarto-table-cell-role="th">rating_imdb</th>
+<th data-quarto-table-cell-role="th">rating_rt</th>
+<th data-quarto-table-cell-role="th">rating_mc</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>i64</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>i64</td>
+<td>i64</td>
+<td>f64</td>
+<td>i64</td>
+<td>i64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"Shoah"</td>
+<td>1985</td>
+<td>"Claude Lanzmann"</td>
+<td>"France"</td>
+<td>"German|Hebrew|Polish|Yiddish|F…</td>
+<td>"Documentary|History|War"</td>
+<td>540</td>
+<td>11202</td>
+<td>8.7</td>
+<td>100</td>
+<td>99</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<ol start="12" type="1">
+<li>Finally, print the five films with the highest Metacritic score, showing only the title, year, and score. Start by doing the obvious thing: sort by <code>rating_mc</code> in descending order and take the first five rows.</li>
+</ol>
+<div id="bbc19a7c" class="cell" data-execution_count="15">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    film</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    .sort(c.rating_mc, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    .head(n<span class="op">=</span><span class="dv">5</span>)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    .select(c.title, c.year, c.rating_mc)</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="14">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (5, 3)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">title</th>
+<th data-quarto-table-cell-role="th">year</th>
+<th data-quarto-table-cell-role="th">rating_mc</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>i64</td>
+<td>i64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"The Kid"</td>
+<td>1921</td>
+<td>null</td>
+</tr>
+<tr class="even">
+<td>"The Phantom Carriage"</td>
+<td>1921</td>
+<td>null</td>
+</tr>
+<tr class="odd">
+<td>"Häxan"</td>
+<td>1922</td>
+<td>null</td>
+</tr>
+<tr class="even">
+<td>"Safety Last!"</td>
+<td>1923</td>
+<td>null</td>
+</tr>
+<tr class="odd">
+<td>"Body and Soul"</td>
+<td>1925</td>
+<td>null</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<ol start="13" type="1">
+<li>That did not work. More than half of the films have no Metacritic score, and a missing value is not smaller than 100; it is unknown, so Polars sets those rows aside at the top of a descending sort rather than guessing where they belong. Fix the previous answer by selecting the three columns and then calling <code>.drop_nulls()</code> to remove the films with no score before sorting.</li>
+</ol>
+<div id="2137b4f7" class="cell" data-execution_count="16">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    film</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    .select(c.title, c.year, c.rating_mc)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    .drop_nulls()</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    .sort(c.rating_mc, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    .head(n<span class="op">=</span><span class="dv">5</span>)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="15">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (5, 3)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">title</th>
+<th data-quarto-table-cell-role="th">year</th>
+<th data-quarto-table-cell-role="th">rating_mc</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>i64</td>
+<td>i64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"Citizen Kane"</td>
+<td>1941</td>
+<td>100</td>
+</tr>
+<tr class="even">
+<td>"Notorious"</td>
+<td>1946</td>
+<td>100</td>
+</tr>
+<tr class="odd">
+<td>"Tokyo Story"</td>
+<td>1953</td>
+<td>100</td>
+</tr>
+<tr class="even">
+<td>"Journey to Italy"</td>
+<td>1954</td>
+<td>100</td>
+</tr>
+<tr class="odd">
+<td>"Sweet Smell of Success"</td>
+<td>1957</td>
+<td>100</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>The order of the first two methods matters here. <code>.drop_nulls()</code> looks at every column it is given, so calling it on the whole dataset would also throw away films that are missing only a Rotten Tomatoes score, even though we never asked about Rotten Tomatoes. Narrowing to the three columns we care about first keeps the method from removing more than we intended.</p>
+
+
+<!-- -->
+
+</section>
+
+</main> <!-- /main -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details .sourceCode");
+      for (let i = 0; i < detailsSrc.length; i++) {
+        const details = detailsSrc[i].closest('details');
+        if (details) {
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+      }
+      return false;
+    };
+  }
+  // Replace buttons to strip the broken listeners Quarto attached, then re-add fixed ones
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    const fresh = hideAllCode.cloneNode(true);
+    hideAllCode.parentNode.replaceChild(fresh, hideAllCode);
+    fresh.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    const fresh = showAllCode.cloneNode(true);
+    showAllCode.parentNode.replaceChild(fresh, showAllCode);
+    fresh.addEventListener("click", toggleCodeHandler(true));
+  }
+});
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Notebook03"</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="an">solutions-release-date:</span><span class="co"> "2026-09-02"</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="fu">### Setup</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>Run all of the following before starting the notebook.</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [noclear]</span></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a><span class="op">!</span> wget <span class="op">-</span>q <span class="op">-</span>nc https:<span class="op">//</span>raw.githubusercontent.com<span class="op">/</span>taylor<span class="op">-</span>arnold<span class="op">/</span>fds2<span class="op">/</span>refs<span class="op">/</span>heads<span class="op">/</span>main<span class="op">/</span>funs.py</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [noclear]</span></span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine <span class="im">import</span> ggplot, aes</span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> polars <span class="im">import</span> col <span class="im">as</span> c</span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> funs</span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a>ub <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"</span></span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [remove]</span></span>
+<span id="cb16-35"><a href="#cb16-35" aria-hidden="true" tabindex="-1"></a><span class="co">#| include: false</span></span>
+<span id="cb16-36"><a href="#cb16-36" aria-hidden="true" tabindex="-1"></a>ub <span class="op">=</span> <span class="st">""</span></span>
+<span id="cb16-37"><a href="#cb16-37" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-38"><a href="#cb16-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-41"><a href="#cb16-41" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb16-42"><a href="#cb16-42" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [noclear]</span></span>
+<span id="cb16-43"><a href="#cb16-43" aria-hidden="true" tabindex="-1"></a>film <span class="op">=</span> (</span>
+<span id="cb16-44"><a href="#cb16-44" aria-hidden="true" tabindex="-1"></a>    pl.read_csv(ub <span class="op">+</span> <span class="st">"data/criterion.csv"</span>)</span>
+<span id="cb16-45"><a href="#cb16-45" aria-hidden="true" tabindex="-1"></a>    .select(</span>
+<span id="cb16-46"><a href="#cb16-46" aria-hidden="true" tabindex="-1"></a>        c.title, c.year, c.director, c.country, c.language, c.genre,</span>
+<span id="cb16-47"><a href="#cb16-47" aria-hidden="true" tabindex="-1"></a>        c.runtime_raw, c.imdb_votes, c.rating_imdb, c.rating_rt, c.rating_mc</span>
+<span id="cb16-48"><a href="#cb16-48" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb16-49"><a href="#cb16-49" aria-hidden="true" tabindex="-1"></a>    .drop_nulls(subset<span class="op">=</span>[<span class="st">"runtime_raw"</span>, <span class="st">"imdb_votes"</span>, <span class="st">"rating_imdb"</span>])</span>
+<span id="cb16-50"><a href="#cb16-50" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-51"><a href="#cb16-51" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-52"><a href="#cb16-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-53"><a href="#cb16-53" aria-hidden="true" tabindex="-1"></a><span class="fu">### Questions</span></span>
+<span id="cb16-54"><a href="#cb16-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-55"><a href="#cb16-55" aria-hidden="true" tabindex="-1"></a>The <span class="in">`film`</span> dataset describes the films released by the Criterion Collection, a</span>
+<span id="cb16-56"><a href="#cb16-56" aria-hidden="true" tabindex="-1"></a>distribution company that publishes restored editions of films it considers</span>
+<span id="cb16-57"><a href="#cb16-57" aria-hidden="true" tabindex="-1"></a>important. Each row is one film, with its <span class="in">`title`</span>, <span class="in">`year`</span> of release,</span>
+<span id="cb16-58"><a href="#cb16-58" aria-hidden="true" tabindex="-1"></a><span class="in">`director`</span>, <span class="in">`country`</span> of production, <span class="in">`language`</span>, and <span class="in">`genre`</span>, along with its</span>
+<span id="cb16-59"><a href="#cb16-59" aria-hidden="true" tabindex="-1"></a><span class="in">`runtime_raw`</span> (in minutes) and three critical scores: <span class="in">`rating_imdb`</span> (0-10),</span>
+<span id="cb16-60"><a href="#cb16-60" aria-hidden="true" tabindex="-1"></a><span class="in">`rating_rt`</span> (Rotten Tomatoes, 0-100), and <span class="in">`rating_mc`</span> (Metacritic, 0-100). The</span>
+<span id="cb16-61"><a href="#cb16-61" aria-hidden="true" tabindex="-1"></a>column <span class="in">`imdb_votes`</span> records how many IMDb users rated the film, which is a</span>
+<span id="cb16-62"><a href="#cb16-62" aria-hidden="true" tabindex="-1"></a>rough measure of how widely seen it is.</span>
+<span id="cb16-63"><a href="#cb16-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-64"><a href="#cb16-64" aria-hidden="true" tabindex="-1"></a>Unless a question says otherwise, just print the result of each block; do not</span>
+<span id="cb16-65"><a href="#cb16-65" aria-hidden="true" tabindex="-1"></a>save it to a variable.</span>
+<span id="cb16-66"><a href="#cb16-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-67"><a href="#cb16-67" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Start by sorting the films by year, with the oldest films at the top.</span>
+<span id="cb16-68"><a href="#cb16-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-71"><a href="#cb16-71" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb16-72"><a href="#cb16-72" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb16-73"><a href="#cb16-73" aria-hidden="true" tabindex="-1"></a>    film</span>
+<span id="cb16-74"><a href="#cb16-74" aria-hidden="true" tabindex="-1"></a>    .sort(c.year)</span>
+<span id="cb16-75"><a href="#cb16-75" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-76"><a href="#cb16-76" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-77"><a href="#cb16-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-78"><a href="#cb16-78" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Now sort the films by their IMDb rating, with the highest rated films at the</span>
+<span id="cb16-79"><a href="#cb16-79" aria-hidden="true" tabindex="-1"></a>top.</span>
+<span id="cb16-80"><a href="#cb16-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-83"><a href="#cb16-83" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb16-84"><a href="#cb16-84" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb16-85"><a href="#cb16-85" aria-hidden="true" tabindex="-1"></a>    film</span>
+<span id="cb16-86"><a href="#cb16-86" aria-hidden="true" tabindex="-1"></a>    .sort(c.rating_imdb, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb16-87"><a href="#cb16-87" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-88"><a href="#cb16-88" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-89"><a href="#cb16-89" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-90"><a href="#cb16-90" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Sort the films by country (alphabetically) and then, within each country, by</span>
+<span id="cb16-91"><a href="#cb16-91" aria-hidden="true" tabindex="-1"></a>year. Note: when we say "sort" without qualification, we mean ascending order.</span>
+<span id="cb16-92"><a href="#cb16-92" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-95"><a href="#cb16-95" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb16-96"><a href="#cb16-96" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb16-97"><a href="#cb16-97" aria-hidden="true" tabindex="-1"></a>    film</span>
+<span id="cb16-98"><a href="#cb16-98" aria-hidden="true" tabindex="-1"></a>    .sort(c.country, c.year)</span>
+<span id="cb16-99"><a href="#cb16-99" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-100"><a href="#cb16-100" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-101"><a href="#cb16-101" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-102"><a href="#cb16-102" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>The dataset has more columns than we can comfortably read at once. Take just</span>
+<span id="cb16-103"><a href="#cb16-103" aria-hidden="true" tabindex="-1"></a>the title, director, and year columns. Notice how similar this code is to the</span>
+<span id="cb16-104"><a href="#cb16-104" aria-hidden="true" tabindex="-1"></a>code in the previous question.</span>
+<span id="cb16-105"><a href="#cb16-105" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-108"><a href="#cb16-108" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb16-109"><a href="#cb16-109" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb16-110"><a href="#cb16-110" aria-hidden="true" tabindex="-1"></a>    film</span>
+<span id="cb16-111"><a href="#cb16-111" aria-hidden="true" tabindex="-1"></a>    .select(c.title, c.director, c.year)</span>
+<span id="cb16-112"><a href="#cb16-112" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-113"><a href="#cb16-113" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-114"><a href="#cb16-114" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-115"><a href="#cb16-115" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>Let's chain several methods together. Print the ten films with the most IMDb</span>
+<span id="cb16-116"><a href="#cb16-116" aria-hidden="true" tabindex="-1"></a>votes, showing only the title and the number of votes.</span>
+<span id="cb16-117"><a href="#cb16-117" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-120"><a href="#cb16-120" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb16-121"><a href="#cb16-121" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb16-122"><a href="#cb16-122" aria-hidden="true" tabindex="-1"></a>    film</span>
+<span id="cb16-123"><a href="#cb16-123" aria-hidden="true" tabindex="-1"></a>    .sort(c.imdb_votes, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb16-124"><a href="#cb16-124" aria-hidden="true" tabindex="-1"></a>    .head(n<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb16-125"><a href="#cb16-125" aria-hidden="true" tabindex="-1"></a>    .select(c.title, c.imdb_votes)</span>
+<span id="cb16-126"><a href="#cb16-126" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-127"><a href="#cb16-127" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-128"><a href="#cb16-128" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-129"><a href="#cb16-129" aria-hidden="true" tabindex="-1"></a><span class="ss">6. </span>Now select just those films that run longer than 200 minutes.</span>
+<span id="cb16-130"><a href="#cb16-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-133"><a href="#cb16-133" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb16-134"><a href="#cb16-134" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb16-135"><a href="#cb16-135" aria-hidden="true" tabindex="-1"></a>    film</span>
+<span id="cb16-136"><a href="#cb16-136" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.runtime_raw <span class="op">&gt;</span> <span class="dv">200</span>)</span>
+<span id="cb16-137"><a href="#cb16-137" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-138"><a href="#cb16-138" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-139"><a href="#cb16-139" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-140"><a href="#cb16-140" aria-hidden="true" tabindex="-1"></a><span class="ss">7. </span>Select the films whose country is Japan. There should be 172 of them.</span>
+<span id="cb16-141"><a href="#cb16-141" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-144"><a href="#cb16-144" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb16-145"><a href="#cb16-145" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb16-146"><a href="#cb16-146" aria-hidden="true" tabindex="-1"></a>    film</span>
+<span id="cb16-147"><a href="#cb16-147" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.country <span class="op">==</span> <span class="st">"Japan"</span>)</span>
+<span id="cb16-148"><a href="#cb16-148" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-149"><a href="#cb16-149" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-150"><a href="#cb16-150" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-151"><a href="#cb16-151" aria-hidden="true" tabindex="-1"></a><span class="ss">8. </span>Our dataset actually contains 198 films that Japan had a hand in producing,</span>
+<span id="cb16-152"><a href="#cb16-152" aria-hidden="true" tabindex="-1"></a>but the previous question found only 172. Look closely at the values in the</span>
+<span id="cb16-153"><a href="#cb16-153" aria-hidden="true" tabindex="-1"></a><span class="in">`country`</span> column. Why does our filter miss the other 26 films?</span>
+<span id="cb16-154"><a href="#cb16-154" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-155"><a href="#cb16-155" aria-hidden="true" tabindex="-1"></a>**Answer**: Films with more than one production country store all of them in a</span>
+<span id="cb16-156"><a href="#cb16-156" aria-hidden="true" tabindex="-1"></a>single value, separated by a vertical bar: <span class="in">`"Japan|France"`</span>, `"Japan|United</span>
+<span id="cb16-157"><a href="#cb16-157" aria-hidden="true" tabindex="-1"></a>States"<span class="in">`, and so on. The test `</span>c.country == "Japan"` asks whether the whole</span>
+<span id="cb16-158"><a href="#cb16-158" aria-hidden="true" tabindex="-1"></a>value is exactly the four letters <span class="in">`Japan`</span>, so a co-production like</span>
+<span id="cb16-159"><a href="#cb16-159" aria-hidden="true" tabindex="-1"></a><span class="in">`"Japan|France"`</span> answers <span class="in">`False`</span> and is dropped. Data stored this way is</span>
+<span id="cb16-160"><a href="#cb16-160" aria-hidden="true" tabindex="-1"></a>annoying to work with, and we will see how to split it apart later in the</span>
+<span id="cb16-161"><a href="#cb16-161" aria-hidden="true" tabindex="-1"></a>semester.</span>
+<span id="cb16-162"><a href="#cb16-162" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-163"><a href="#cb16-163" aria-hidden="true" tabindex="-1"></a><span class="ss">9. </span>Select the Japanese films released before 1960, sorted from the highest IMDb</span>
+<span id="cb16-164"><a href="#cb16-164" aria-hidden="true" tabindex="-1"></a>rating to the lowest. Use a single call to <span class="in">`.filter`</span> with the <span class="in">`&amp;`</span> (and)</span>
+<span id="cb16-165"><a href="#cb16-165" aria-hidden="true" tabindex="-1"></a>operator.</span>
+<span id="cb16-166"><a href="#cb16-166" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-169"><a href="#cb16-169" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb16-170"><a href="#cb16-170" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb16-171"><a href="#cb16-171" aria-hidden="true" tabindex="-1"></a>    film</span>
+<span id="cb16-172"><a href="#cb16-172" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>((c.country <span class="op">==</span> <span class="st">"Japan"</span>) <span class="op">&amp;</span> (c.year <span class="op">&lt;</span> <span class="dv">1960</span>))</span>
+<span id="cb16-173"><a href="#cb16-173" aria-hidden="true" tabindex="-1"></a>    .sort(c.rating_imdb, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb16-174"><a href="#cb16-174" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-175"><a href="#cb16-175" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-176"><a href="#cb16-176" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-177"><a href="#cb16-177" aria-hidden="true" tabindex="-1"></a><span class="ss">10. </span>Now select the films made in one of the three Scandinavian countries</span>
+<span id="cb16-178"><a href="#cb16-178" aria-hidden="true" tabindex="-1"></a>(Sweden, Denmark, or Norway) and sort them by year. Use the <span class="in">`.is_in`</span> method</span>
+<span id="cb16-179"><a href="#cb16-179" aria-hidden="true" tabindex="-1"></a>rather than the <span class="in">`|`</span> (or) operator.</span>
+<span id="cb16-180"><a href="#cb16-180" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-183"><a href="#cb16-183" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb16-184"><a href="#cb16-184" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb16-185"><a href="#cb16-185" aria-hidden="true" tabindex="-1"></a>    film</span>
+<span id="cb16-186"><a href="#cb16-186" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.country.is_in([<span class="st">"Sweden"</span>, <span class="st">"Denmark"</span>, <span class="st">"Norway"</span>]))</span>
+<span id="cb16-187"><a href="#cb16-187" aria-hidden="true" tabindex="-1"></a>    .sort(c.year)</span>
+<span id="cb16-188"><a href="#cb16-188" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-189"><a href="#cb16-189" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-190"><a href="#cb16-190" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-191"><a href="#cb16-191" aria-hidden="true" tabindex="-1"></a><span class="ss">11. </span>Among the twenty longest films in the collection, which one has the highest</span>
+<span id="cb16-192"><a href="#cb16-192" aria-hidden="true" tabindex="-1"></a>IMDb rating? Print only that single row. Hint: you will need to sort the data</span>
+<span id="cb16-193"><a href="#cb16-193" aria-hidden="true" tabindex="-1"></a>twice.</span>
+<span id="cb16-194"><a href="#cb16-194" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-197"><a href="#cb16-197" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb16-198"><a href="#cb16-198" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb16-199"><a href="#cb16-199" aria-hidden="true" tabindex="-1"></a>    film</span>
+<span id="cb16-200"><a href="#cb16-200" aria-hidden="true" tabindex="-1"></a>    .sort(c.runtime_raw, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb16-201"><a href="#cb16-201" aria-hidden="true" tabindex="-1"></a>    .head(n<span class="op">=</span><span class="dv">20</span>)</span>
+<span id="cb16-202"><a href="#cb16-202" aria-hidden="true" tabindex="-1"></a>    .sort(c.rating_imdb, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb16-203"><a href="#cb16-203" aria-hidden="true" tabindex="-1"></a>    .head(n<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb16-204"><a href="#cb16-204" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-205"><a href="#cb16-205" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-206"><a href="#cb16-206" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-207"><a href="#cb16-207" aria-hidden="true" tabindex="-1"></a><span class="ss">12. </span>Finally, print the five films with the highest Metacritic score, showing</span>
+<span id="cb16-208"><a href="#cb16-208" aria-hidden="true" tabindex="-1"></a>only the title, year, and score. Start by doing the obvious thing: sort by</span>
+<span id="cb16-209"><a href="#cb16-209" aria-hidden="true" tabindex="-1"></a><span class="in">`rating_mc`</span> in descending order and take the first five rows.</span>
+<span id="cb16-210"><a href="#cb16-210" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-213"><a href="#cb16-213" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb16-214"><a href="#cb16-214" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb16-215"><a href="#cb16-215" aria-hidden="true" tabindex="-1"></a>    film</span>
+<span id="cb16-216"><a href="#cb16-216" aria-hidden="true" tabindex="-1"></a>    .sort(c.rating_mc, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb16-217"><a href="#cb16-217" aria-hidden="true" tabindex="-1"></a>    .head(n<span class="op">=</span><span class="dv">5</span>)</span>
+<span id="cb16-218"><a href="#cb16-218" aria-hidden="true" tabindex="-1"></a>    .select(c.title, c.year, c.rating_mc)</span>
+<span id="cb16-219"><a href="#cb16-219" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-220"><a href="#cb16-220" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-221"><a href="#cb16-221" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-222"><a href="#cb16-222" aria-hidden="true" tabindex="-1"></a><span class="ss">13. </span>That did not work. More than half of the films have no Metacritic score, and</span>
+<span id="cb16-223"><a href="#cb16-223" aria-hidden="true" tabindex="-1"></a>a missing value is not smaller than 100; it is unknown, so Polars sets those</span>
+<span id="cb16-224"><a href="#cb16-224" aria-hidden="true" tabindex="-1"></a>rows aside at the top of a descending sort rather than guessing where they</span>
+<span id="cb16-225"><a href="#cb16-225" aria-hidden="true" tabindex="-1"></a>belong. Fix the previous answer by selecting the three columns and then calling</span>
+<span id="cb16-226"><a href="#cb16-226" aria-hidden="true" tabindex="-1"></a><span class="in">`.drop_nulls()`</span> to remove the films with no score before sorting.</span>
+<span id="cb16-227"><a href="#cb16-227" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-230"><a href="#cb16-230" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb16-231"><a href="#cb16-231" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb16-232"><a href="#cb16-232" aria-hidden="true" tabindex="-1"></a>    film</span>
+<span id="cb16-233"><a href="#cb16-233" aria-hidden="true" tabindex="-1"></a>    .select(c.title, c.year, c.rating_mc)</span>
+<span id="cb16-234"><a href="#cb16-234" aria-hidden="true" tabindex="-1"></a>    .drop_nulls()</span>
+<span id="cb16-235"><a href="#cb16-235" aria-hidden="true" tabindex="-1"></a>    .sort(c.rating_mc, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb16-236"><a href="#cb16-236" aria-hidden="true" tabindex="-1"></a>    .head(n<span class="op">=</span><span class="dv">5</span>)</span>
+<span id="cb16-237"><a href="#cb16-237" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-238"><a href="#cb16-238" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-239"><a href="#cb16-239" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-240"><a href="#cb16-240" aria-hidden="true" tabindex="-1"></a>The order of the first two methods matters here. <span class="in">`.drop_nulls()`</span> looks at every</span>
+<span id="cb16-241"><a href="#cb16-241" aria-hidden="true" tabindex="-1"></a>column it is given, so calling it on the whole dataset would also throw away</span>
+<span id="cb16-242"><a href="#cb16-242" aria-hidden="true" tabindex="-1"></a>films that are missing only a Rotten Tomatoes score, even though we never asked</span>
+<span id="cb16-243"><a href="#cb16-243" aria-hidden="true" tabindex="-1"></a>about Rotten Tomatoes. Narrowing to the three columns we care about first keeps</span>
+<span id="cb16-244"><a href="#cb16-244" aria-hidden="true" tabindex="-1"></a>the method from removing more than we intended.</span>
+</code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

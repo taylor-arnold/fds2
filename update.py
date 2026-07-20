@@ -19,7 +19,7 @@ import datetime
 # CONFIGURATION
 # ==========================================
 # Set to True to forcefully release all notebooks (ignore dates)
-MAKE_ALL = False 
+MAKE_ALL = True 
 
 # --- ANSI Colors for CLI -----------------------------------------------------
 class Colors:

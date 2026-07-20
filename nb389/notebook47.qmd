@@ -1,0 +1,333 @@
+---
+title: "Notebook47"
+solutions-release-date: "2026-11-09"
+---
+
+### Setup
+
+Run all of the following before starting the notebook.
+
+```{python}
+#| tags: [noclear]
+#| eval: false
+! wget -q -nc https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/funs.py
+```
+
+```{python}
+#| tags: [noclear]
+import polars as pl
+from plotnine import ggplot, aes
+from polars import col as c
+
+import funs
+from funs import DSImage
+from PIL import Image
+import cv2
+
+ub = "https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"
+```
+
+```{python}
+#| tags: [remove]
+#| include: false
+ub = ""
+```
+
+```{python}
+#| tags: [noclear]
+fsac = pl.read_csv(ub + "data/fsac.csv")
+```
+
+Unlike the CSV files in earlier notebooks, an image dataset needs the image
+files themselves on disk before `cv2.imread` can open them. This cell
+downloads the photographs referenced in `fsac` the first time you run it and
+does nothing on later runs (or if you already have them).
+
+```{python}
+#| tags: [noclear]
+import os
+import urllib.request
+
+for row in fsac.iter_rows(named=True):
+    if not os.path.exists(row["filepath"]):
+        os.makedirs(os.path.dirname(row["filepath"]), exist_ok=True)
+        urllib.request.urlretrieve(ub + row["filepath"], row["filepath"])
+```
+
+### Questions
+
+This notebook works with `fsac`, a sample of 500 color photographs from the
+Farm Security Administration / Office of War Information (FSA-OWI) collection
+held by the Library of Congress. The project began by documenting rural
+poverty during the Great Depression and later turned to the American war
+effort; these are its less-famous color frames, shot on early Kodachrome
+film. Each row is one photograph. `filepath` points to a `.jpg` file on disk,
+and `photographer`, `caption`, `year`, `month`, `state`, `city`, `county`,
+and `longitude`/`latitude` describe it. `call_number` is the Library's own
+identifier. Two things are worth knowing before we start: these images are
+*not* resized to a common shape the way a benchmark dataset would be, and
+OpenCV reads pixels in blue-green-red (BGR) order rather than RGB. Print all
+results unless a question says otherwise.
+
+1. Read the first image in `fsac` into a NumPy array with `cv2.imread`, and
+print the array's `.shape`.
+
+```{python}
+img = cv2.imread(fsac.select(c.filepath).row(0)[0])
+img.shape
+```
+
+The three numbers are the height (rows of pixels), the width (columns), and
+the three color channels. This particular frame is 513 by 640 pixels.
+
+2. These photographs were never resized to a standard size. Loop over every
+row, read each image, and collect its height and width into a table. Then, in
+one `.select()`, count how many distinct (height, width) pairs occur and how
+many images are landscape (wider than tall) versus portrait.
+
+```{python}
+sizes = []
+
+for row in fsac.iter_rows(named=True):
+    img = cv2.imread(row["filepath"])
+    sizes.append({"height": img.shape[0], "width": img.shape[1]})
+
+sizes = pl.DataFrame(sizes)
+(
+    sizes
+    .select(
+        n_distinct = pl.struct("height", "width").n_unique(),
+        n_landscape = (c.width > c.height).sum(),
+        n_portrait = (c.width < c.height).sum()
+    )
+)
+```
+
+The 500 images come in 105 different sizes, mostly landscape. Every image
+here has 640 pixels on its long side but a different short side, so any
+analysis has to be size-independent: a mean over all pixels is fine, but a
+rule that reached for a fixed pixel location would mean a different thing in
+each frame.
+
+3. Re-read the first image. Print the 2×2 block of pixels in its upper-left
+corner (`img[:2, :2, :]`), then its overall mean, and finally the mean of
+each of the three channels separately (loop `ch` over `range(3)`).
+
+```{python}
+img = cv2.imread(fsac.select(c.filepath).row(0)[0])
+img[:2, :2, :]
+```
+
+```{python}
+img.mean()
+```
+
+```{python}
+[float(img[:, :, ch].mean()) for ch in range(3)]
+```
+
+Each pixel is three numbers from 0 to 255. The overall mean, about 59.6,
+summarizes the whole frame's brightness. The per-channel means are the giveaway
+for BGR ordering: channel 0 (blue) is 56.1 and channel 2 (red) is 63.8, so a
+student who assumed channel 0 was red would report this warm, reddish frame as
+if its blue were strongest.
+
+4. Compute the mean brightness of every image. Loop over the rows, read each
+one, append its `.mean()`, and add the result back as a `brightness` column.
+Print `filepath`, `photographer`, and `brightness` for the first five rows.
+
+```{python}
+brightness = []
+
+for row in fsac.iter_rows(named=True):
+    img = cv2.imread(row["filepath"])
+    brightness.append(img.mean())
+
+fsac = fsac.with_columns(brightness = pl.Series(brightness))
+fsac.select(c.filepath, c.photographer, c.brightness).head(5)
+```
+
+5. Show the twelve darkest images in a grid with `DSImage.plot_image_grid`
+(sort by `brightness`, take the head, and label the tiles by `photographer`).
+Then print the brightness, photographer, and caption for the six darkest, and
+say what these frames have in common.
+
+```{python}
+(
+    fsac
+    .sort(c.brightness)
+    .head(12)
+    .pipe(DSImage.plot_image_grid, label_name="photographer", ncol=4)
+)
+```
+
+```{python}
+(
+    fsac
+    .sort(c.brightness)
+    .select(c.brightness, c.photographer, c.caption)
+    .head(6)
+)
+```
+
+The darkest images are night and interior shots: Jack Delano's photographs
+of a Chicago railroad yard working around the clock, and Alfred Palmer's
+frame taken inside a tank at Fort Knox. The brightness score is being driven
+by the dark background, not by the subject. A brightly lit tank photographed
+against a black night would score lower than a dull object in a sunlit field.
+
+6. Draw a boxplot of `brightness` by `photographer`, but only for the
+photographers who contributed at least 20 images (filter on
+`pl.len().over(c.photographer) >= 20`). Order the photographers by their mean
+brightness, and use `coord_flip()` so the names stay readable. What pattern
+do you see?
+
+```{python}
+(
+    fsac
+    .filter(pl.len().over(c.photographer) >= 20)
+    .sort(c.brightness.mean().over(c.photographer), descending=True)
+    .pipe(ggplot, aes(c.photographer, c.brightness))
+    .geom_boxplot()
+    .coord_flip()
+)
+```
+
+Alfred Palmer and Howard Hollem are the darkest on average (both around 60),
+and both spent the war shooting inside aircraft factories and defense plants,
+where the light is artificial and controlled. John Collier and Jack Delano
+are the brightest, with more outdoor and daylight frames. As with the birds
+in the chapter, brightness is tracking each photographer's assignment and
+setting, not anything about the photographs' merit.
+
+7. Convert the first image from BGR to HSV color space with `cv2.cvtColor`
+and `cv2.COLOR_BGR2HSV`, and print the shape of the result.
+
+```{python}
+img = cv2.imread(fsac.select(c.filepath).row(0)[0])
+img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+img_hsv.shape
+```
+
+The shape is unchanged; the three channels now hold hue, saturation, and
+value instead of blue, green, and red. OpenCV packs hue into the range
+[0, 179] rather than the full 0–360° so that it still fits in one byte.
+
+8. Run `DSImage.compute_colors` on that HSV image. Look at the output and
+check the numbers against what the chapter's text claims about them.
+
+```{python}
+DSImage.compute_colors(img_hsv)
+```
+
+The helper returns the share of pixels falling into each hue bucket, plus a
+`neutral` bucket for pixels too dark or too washed out to have a clear color.
+The chapter's prose says these "proportions sum to 1," but the actual helper
+returns percentages that sum to 100 — a small gap between the description and
+the code that only shows up if you add the numbers yourself. This frame is
+86% neutral, with what little color there is leaning orange.
+
+9. Compute the color breakdown for every image, collect the results into a
+DataFrame, and concatenate it onto `fsac` horizontally (the chapter's own
+pattern). Then print the mean of each color column across the whole
+collection.
+
+```{python}
+results = []
+
+for row in fsac.iter_rows(named=True):
+    img = cv2.imread(row["filepath"])
+    img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    results.append(DSImage.compute_colors(img_hsv))
+
+results = pl.DataFrame(results)
+fsac = pl.concat([fsac, results], how="horizontal")
+fsac.select(results.columns).mean()
+```
+
+Two-thirds of the average frame is neutral, which fits the muted look of aged
+Kodachrome. Among the actual hues, orange dominates at about 16% — the color
+of skin, wood, brick, and dirt in these documentary scenes — while blue
+(sky) is a distant second and red is under 3%. This is a collection with a
+strong warm cast.
+
+10. OpenCV's BGR ordering is easy to forget, and forgetting it corrupts every
+color count silently. Take the reddest image in the collection and convert it
+to HSV two ways: correctly with `cv2.COLOR_BGR2HSV`, and incorrectly with
+`cv2.COLOR_RGB2HSV` (which treats the blue channel as if it were red). Compare
+the color breakdowns.
+
+```{python}
+red_row = fsac.sort(c.red, descending=True).row(0, named=True)
+img = cv2.imread(red_row["filepath"])
+DSImage.compute_colors(cv2.cvtColor(img, cv2.COLOR_BGR2HSV))
+```
+
+```{python}
+DSImage.compute_colors(cv2.cvtColor(img, cv2.COLOR_RGB2HSV))
+```
+
+Read the correct way, this image is 33% red and 5% blue. Read as if it were
+RGB, red collapses to 5% and blue jumps to 49%: the two colors swap places.
+Neither call raises an error, and both return a tidy dictionary that sums to
+100, so nothing flags the mistake except knowing the image is red to begin
+with.
+
+11. Show the twelve reddest images in a grid, and print the caption of the six
+reddest. Does "red" find red *subjects*?
+
+```{python}
+(
+    fsac
+    .sort(c.red, descending=True)
+    .head(12)
+    .pipe(DSImage.plot_image_grid, label_name="state", ncol=4)
+)
+```
+
+```{python}
+(
+    fsac
+    .sort(c.red, descending=True)
+    .select(c.red, c.state, c.caption)
+    .head(6)
+)
+```
+
+Red finds red *things*, but not a single subject: schoolchildren's clothing,
+a crowded courthouse square, a scrap-and-salvage depot, a tractor in a field.
+Like brightness, the color proportion describes whatever fills the frame —
+clothes, machinery, a painted wall — rather than the photograph's ostensible
+topic.
+
+12. Close with a short pipeline that pulls brightness and color together.
+Group `fsac` by `photographer`, keeping only those with at least 20 images,
+and compute each one's mean brightness, mean orange, mean blue, and image
+count. Sort by brightness. Then explain what these pixel features can and
+cannot tell us.
+
+```{python}
+(
+    fsac
+    .filter(pl.len().over(c.photographer) >= 20)
+    .group_by(c.photographer, maintain_order=True)
+    .agg(
+        brightness = c.brightness.mean(),
+        orange = c.orange.mean(),
+        blue = c.blue.mean(),
+        n = pl.len()
+    )
+    .sort(c.brightness)
+)
+```
+
+Every number here is a real, stable difference between photographers: Marion
+Post Wolcott's rural frames are the most orange and almost never blue, while
+Palmer's and Hollem's factory work carries more blue and less orange. But
+notice what these features cannot do. They separate a sunlit wheat field from
+a dim factory floor easily, because those differ in light and color, yet they
+have no way to tell two differently-lit photographs of the *same* subject
+apart, or to recognize that two frames both show a tractor. Brightness and
+hue describe the whole frame — its lighting, its background, its film stock —
+and never the subject as such. Closing that gap is exactly what the image
+embeddings in the next sections are for.

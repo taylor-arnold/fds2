@@ -1,0 +1,2555 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.36">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Notebook05 – Foundations of Data Science: Notebooks</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-77a666a5542a07a54dbe0a7f6e3b86cd.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+</head>
+
+<body class="nav-sidebar docked fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./notebook05.html">Notebook05</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Foundations of Data Science: Notebooks</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook01.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook01</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook02.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook02</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook03.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook03</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook04.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook04</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook05.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Notebook05</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook06.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook06</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook07.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook07</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook08.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook08</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook09.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook09</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook10.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook10</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook11.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook11</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook12.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook12</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook13.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook13</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook14.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook14</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook15.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook15</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook17.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook17</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook18.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook18</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook19.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook19</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook20.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook20</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Notebook05</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="setup" class="level3">
+<h3 class="anchored" data-anchor-id="setup">Setup</h3>
+<p>Run all of the following before starting the notebook.</p>
+<div id="247e58ce" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="1">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span> wget <span class="op">-</span>q <span class="op">-</span>nc https:<span class="op">//</span>raw.githubusercontent.com<span class="op">/</span>taylor<span class="op">-</span>arnold<span class="op">/</span>fds2<span class="op">/</span>refs<span class="op">/</span>heads<span class="op">/</span>main<span class="op">/</span>funs.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div id="71523ccd" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="2">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine <span class="im">import</span> ggplot, aes</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> polars <span class="im">import</span> col <span class="im">as</span> c</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> funs</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>ub <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div id="dd8d78be" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="4">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>covid <span class="op">=</span> pl.read_csv(ub <span class="op">+</span> <span class="st">"data/france_departement_covid.csv"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+<section id="questions" class="level3">
+<h3 class="anchored" data-anchor-id="questions">Questions</h3>
+<p>This notebook uses a record of the first months of the COVID-19 pandemic in France. Each row reports the situation in one <em>département</em> (the administrative region France is divided into, of which there are 101) on one date between March and October of 2020. The columns <code>deceased</code> and <code>recovered</code> are running totals, while <code>hospitalised</code> and <code>reanimation</code> are snapshots of how many patients were in the hospital and in intensive care on that day. The two columns ending in <code>_new</code> count new admissions that day.</p>
+<p>This is real data, downloaded as it was published, and it has all the type problems the chapter warns about.</p>
+<ol type="1">
+<li>Start by printing the schema of the dataset. Three of the columns have a type that is not what you would expect from the description above. Which ones?</li>
+</ol>
+<div id="1633ee61" class="cell" data-execution_count="5">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>covid.schema</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="4">
+<pre><code>Schema([('date', String),
+        ('departement', String),
+        ('departement_name', String),
+        ('deceased', Int64),
+        ('hospitalised', Int64),
+        ('reanimation', Int64),
+        ('recovered', Int64),
+        ('hospitalised_new', String),
+        ('reanimation_new', String)])</code></pre>
+</div>
+</div>
+<p><strong>Answer</strong>: <code>date</code> is a <code>str</code> rather than a date, and both <code>hospitalised_new</code> and <code>reanimation_new</code> are <code>str</code> rather than integers. (The <code>departement</code> column is also a string, but that one is correct, as we will see in question 8.)</p>
+<ol start="2" type="1">
+<li><code>hospitalised_new</code> counts new hospital admissions, so it should be a number. Print the rows where that column is equal to the text <code>"NA"</code>, and explain what those rows have to do with the type Polars chose.</li>
+</ol>
+<div id="5e8d0ee1" class="cell" data-execution_count="6">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    covid</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.hospitalised_new <span class="op">==</span> <span class="st">"NA"</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="5">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (784, 9)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">date</th>
+<th data-quarto-table-cell-role="th">departement</th>
+<th data-quarto-table-cell-role="th">departement_name</th>
+<th data-quarto-table-cell-role="th">deceased</th>
+<th data-quarto-table-cell-role="th">hospitalised</th>
+<th data-quarto-table-cell-role="th">reanimation</th>
+<th data-quarto-table-cell-role="th">recovered</th>
+<th data-quarto-table-cell-role="th">hospitalised_new</th>
+<th data-quarto-table-cell-role="th">reanimation_new</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>i64</td>
+<td>i64</td>
+<td>i64</td>
+<td>i64</td>
+<td>str</td>
+<td>str</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"2020-03-18"</td>
+<td>"01"</td>
+<td>"Ain"</td>
+<td>0</td>
+<td>2</td>
+<td>0</td>
+<td>1</td>
+<td>"NA"</td>
+<td>"NA"</td>
+</tr>
+<tr class="even">
+<td>"2020-03-18"</td>
+<td>"02"</td>
+<td>"Aisne"</td>
+<td>9</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>"NA"</td>
+<td>"NA"</td>
+</tr>
+<tr class="odd">
+<td>"2020-03-18"</td>
+<td>"03"</td>
+<td>"Allier"</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>"NA"</td>
+<td>"NA"</td>
+</tr>
+<tr class="even">
+<td>"2020-03-18"</td>
+<td>"04"</td>
+<td>"Alpes-de-Haute-Provence"</td>
+<td>0</td>
+<td>3</td>
+<td>1</td>
+<td>2</td>
+<td>"NA"</td>
+<td>"NA"</td>
+</tr>
+<tr class="odd">
+<td>"2020-03-18"</td>
+<td>"05"</td>
+<td>"Hautes-Alpes"</td>
+<td>0</td>
+<td>8</td>
+<td>1</td>
+<td>9</td>
+<td>"NA"</td>
+<td>"NA"</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"2020-06-29"</td>
+<td>"971"</td>
+<td>"Guadeloupe"</td>
+<td>15</td>
+<td>8</td>
+<td>2</td>
+<td>80</td>
+<td>"NA"</td>
+<td>"NA"</td>
+</tr>
+<tr class="even">
+<td>"2020-06-29"</td>
+<td>"972"</td>
+<td>"Martinique"</td>
+<td>14</td>
+<td>14</td>
+<td>5</td>
+<td>89</td>
+<td>"NA"</td>
+<td>"NA"</td>
+</tr>
+<tr class="odd">
+<td>"2020-06-29"</td>
+<td>"973"</td>
+<td>"Guyane"</td>
+<td>15</td>
+<td>139</td>
+<td>21</td>
+<td>350</td>
+<td>"NA"</td>
+<td>"NA"</td>
+</tr>
+<tr class="even">
+<td>"2020-06-29"</td>
+<td>"974"</td>
+<td>"La Réunion"</td>
+<td>2</td>
+<td>19</td>
+<td>4</td>
+<td>140</td>
+<td>"NA"</td>
+<td>"NA"</td>
+</tr>
+<tr class="odd">
+<td>"2020-06-29"</td>
+<td>"976"</td>
+<td>"Mayotte"</td>
+<td>28</td>
+<td>33</td>
+<td>5</td>
+<td>357</td>
+<td>"NA"</td>
+<td>"NA"</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p><strong>Answer</strong>: There are 784 rows where the count was not reported and the value <code>"NA"</code> was written into the file instead. A column can only have one type, and <code>"NA"</code> is not a number, so Polars widened the whole column to <code>str</code> to accommodate it. A few hundred unreported values changed the type of all 19,998.</p>
+<ol start="3" type="1">
+<li>Cast <code>hospitalised_new</code> to an integer, printing the date, département, and the repaired column. You will need <code>strict=False</code>, which replaces any value that cannot be converted with a <code>null</code> instead of raising an error. Once your code works, try it without <code>strict=False</code> and read the error message you get.</li>
+</ol>
+<div id="b8f4082a" class="cell" data-execution_count="7">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    covid</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    .select(</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>        c.date,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>        c.departement,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>        hospitalised_new <span class="op">=</span> c.hospitalised_new.cast(pl.Int64, strict<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="6">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (19_998, 3)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">date</th>
+<th data-quarto-table-cell-role="th">departement</th>
+<th data-quarto-table-cell-role="th">hospitalised_new</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>str</td>
+<td>i64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"2020-03-18"</td>
+<td>"01"</td>
+<td>null</td>
+</tr>
+<tr class="even">
+<td>"2020-03-18"</td>
+<td>"02"</td>
+<td>null</td>
+</tr>
+<tr class="odd">
+<td>"2020-03-18"</td>
+<td>"03"</td>
+<td>null</td>
+</tr>
+<tr class="even">
+<td>"2020-03-18"</td>
+<td>"04"</td>
+<td>null</td>
+</tr>
+<tr class="odd">
+<td>"2020-03-18"</td>
+<td>"05"</td>
+<td>null</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"2020-10-01"</td>
+<td>"971"</td>
+<td>8</td>
+</tr>
+<tr class="even">
+<td>"2020-10-01"</td>
+<td>"972"</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td>"2020-10-01"</td>
+<td>"973"</td>
+<td>12</td>
+</tr>
+<tr class="even">
+<td>"2020-10-01"</td>
+<td>"974"</td>
+<td>3</td>
+</tr>
+<tr class="odd">
+<td>"2020-10-01"</td>
+<td>"976"</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<ol start="4" type="1">
+<li>How many rows ended up with a missing value? Repeat the cast and then filter down to the rows where the result <code>.is_null()</code>. You do not need to count the rows yourself; Polars prints the shape of the table above the output.</li>
+</ol>
+<div id="597b42af" class="cell" data-execution_count="8">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    covid</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    .select(</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>        c.date,</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>        c.departement,</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>        hospitalised_new <span class="op">=</span> c.hospitalised_new.cast(pl.Int64, strict<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.hospitalised_new.is_null())</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="7">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (784, 3)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">date</th>
+<th data-quarto-table-cell-role="th">departement</th>
+<th data-quarto-table-cell-role="th">hospitalised_new</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>str</td>
+<td>i64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"2020-03-18"</td>
+<td>"01"</td>
+<td>null</td>
+</tr>
+<tr class="even">
+<td>"2020-03-18"</td>
+<td>"02"</td>
+<td>null</td>
+</tr>
+<tr class="odd">
+<td>"2020-03-18"</td>
+<td>"03"</td>
+<td>null</td>
+</tr>
+<tr class="even">
+<td>"2020-03-18"</td>
+<td>"04"</td>
+<td>null</td>
+</tr>
+<tr class="odd">
+<td>"2020-03-18"</td>
+<td>"05"</td>
+<td>null</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"2020-06-29"</td>
+<td>"971"</td>
+<td>null</td>
+</tr>
+<tr class="even">
+<td>"2020-06-29"</td>
+<td>"972"</td>
+<td>null</td>
+</tr>
+<tr class="odd">
+<td>"2020-06-29"</td>
+<td>"973"</td>
+<td>null</td>
+</tr>
+<tr class="even">
+<td>"2020-06-29"</td>
+<td>"974"</td>
+<td>null</td>
+</tr>
+<tr class="odd">
+<td>"2020-06-29"</td>
+<td>"976"</td>
+<td>null</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>The 784 rows are exactly the ones we found in question 2.</p>
+<ol start="5" type="1">
+<li>Now repeat the cast, but chain <code>.fill_null(0)</code> onto the end of the expression to replace the missing values with zero.</li>
+</ol>
+<div id="4d9e04df" class="cell" data-execution_count="9">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    covid</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    .select(</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>        c.date,</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>        c.departement,</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>        hospitalised_new <span class="op">=</span> c.hospitalised_new.cast(pl.Int64, strict<span class="op">=</span><span class="va">False</span>).fill_null(<span class="dv">0</span>)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="8">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (19_998, 3)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">date</th>
+<th data-quarto-table-cell-role="th">departement</th>
+<th data-quarto-table-cell-role="th">hospitalised_new</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>str</td>
+<td>i64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"2020-03-18"</td>
+<td>"01"</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td>"2020-03-18"</td>
+<td>"02"</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td>"2020-03-18"</td>
+<td>"03"</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td>"2020-03-18"</td>
+<td>"04"</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td>"2020-03-18"</td>
+<td>"05"</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"2020-10-01"</td>
+<td>"971"</td>
+<td>8</td>
+</tr>
+<tr class="even">
+<td>"2020-10-01"</td>
+<td>"972"</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td>"2020-10-01"</td>
+<td>"973"</td>
+<td>12</td>
+</tr>
+<tr class="even">
+<td>"2020-10-01"</td>
+<td>"974"</td>
+<td>3</td>
+</tr>
+<tr class="odd">
+<td>"2020-10-01"</td>
+<td>"976"</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Be careful with this one. Filling with zero says that no patients were admitted that day, when what the data actually says is that nobody reported a number. If you go on to add up admissions, the two are indistinguishable in the total.</p>
+<ol start="6" type="1">
+<li>Print the date, département, and <code>reanimation</code> columns, along with a new column named <code>icu_busy</code> that records whether more than 20 patients were in intensive care. Look at the type Polars gives the new column.</li>
+</ol>
+<div id="3e851b13" class="cell" data-execution_count="10">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    covid</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    .select(</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>        c.date,</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>        c.departement,</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>        c.reanimation,</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>        icu_busy <span class="op">=</span> c.reanimation <span class="op">&gt;</span> <span class="dv">20</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="9">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (19_998, 4)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">date</th>
+<th data-quarto-table-cell-role="th">departement</th>
+<th data-quarto-table-cell-role="th">reanimation</th>
+<th data-quarto-table-cell-role="th">icu_busy</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>str</td>
+<td>i64</td>
+<td>bool</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"2020-03-18"</td>
+<td>"01"</td>
+<td>0</td>
+<td>false</td>
+</tr>
+<tr class="even">
+<td>"2020-03-18"</td>
+<td>"02"</td>
+<td>0</td>
+<td>false</td>
+</tr>
+<tr class="odd">
+<td>"2020-03-18"</td>
+<td>"03"</td>
+<td>0</td>
+<td>false</td>
+</tr>
+<tr class="even">
+<td>"2020-03-18"</td>
+<td>"04"</td>
+<td>1</td>
+<td>false</td>
+</tr>
+<tr class="odd">
+<td>"2020-03-18"</td>
+<td>"05"</td>
+<td>1</td>
+<td>false</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"2020-10-01"</td>
+<td>"971"</td>
+<td>25</td>
+<td>true</td>
+</tr>
+<tr class="even">
+<td>"2020-10-01"</td>
+<td>"972"</td>
+<td>16</td>
+<td>false</td>
+</tr>
+<tr class="odd">
+<td>"2020-10-01"</td>
+<td>"973"</td>
+<td>4</td>
+<td>false</td>
+</tr>
+<tr class="even">
+<td>"2020-10-01"</td>
+<td>"974"</td>
+<td>15</td>
+<td>false</td>
+</tr>
+<tr class="odd">
+<td>"2020-10-01"</td>
+<td>"976"</td>
+<td>3</td>
+<td>false</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<ol start="7" type="1">
+<li>That comparison is an object in its own right. Type it alone in a cell, with no DataFrame in sight, and see what Polars prints.</li>
+</ol>
+<div id="ca3b8d0a" class="cell" data-execution_count="11">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>c.reanimation <span class="op">&gt;</span> <span class="dv">20</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="10">
+[(col("reanimation")) &gt; (dyn int: 20)]
+</div>
+</div>
+<p>Because it is an ordinary Python object, we can give it a name and hand the same name to two different methods. Save the comparison as <code>icu_busy</code>, then use it once inside <code>.select()</code> to build a column and once inside <code>.filter()</code> to keep only the busy days.</p>
+<div id="a33df6de" class="cell" data-execution_count="12">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>icu_busy <span class="op">=</span> c.reanimation <span class="op">&gt;</span> <span class="dv">20</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    covid</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    .select(c.date, c.departement, c.reanimation, is_busy <span class="op">=</span> icu_busy)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="11">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (19_998, 4)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">date</th>
+<th data-quarto-table-cell-role="th">departement</th>
+<th data-quarto-table-cell-role="th">reanimation</th>
+<th data-quarto-table-cell-role="th">is_busy</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>str</td>
+<td>i64</td>
+<td>bool</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"2020-03-18"</td>
+<td>"01"</td>
+<td>0</td>
+<td>false</td>
+</tr>
+<tr class="even">
+<td>"2020-03-18"</td>
+<td>"02"</td>
+<td>0</td>
+<td>false</td>
+</tr>
+<tr class="odd">
+<td>"2020-03-18"</td>
+<td>"03"</td>
+<td>0</td>
+<td>false</td>
+</tr>
+<tr class="even">
+<td>"2020-03-18"</td>
+<td>"04"</td>
+<td>1</td>
+<td>false</td>
+</tr>
+<tr class="odd">
+<td>"2020-03-18"</td>
+<td>"05"</td>
+<td>1</td>
+<td>false</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"2020-10-01"</td>
+<td>"971"</td>
+<td>25</td>
+<td>true</td>
+</tr>
+<tr class="even">
+<td>"2020-10-01"</td>
+<td>"972"</td>
+<td>16</td>
+<td>false</td>
+</tr>
+<tr class="odd">
+<td>"2020-10-01"</td>
+<td>"973"</td>
+<td>4</td>
+<td>false</td>
+</tr>
+<tr class="even">
+<td>"2020-10-01"</td>
+<td>"974"</td>
+<td>15</td>
+<td>false</td>
+</tr>
+<tr class="odd">
+<td>"2020-10-01"</td>
+<td>"976"</td>
+<td>3</td>
+<td>false</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="abdde9d5" class="cell" data-execution_count="13">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    covid</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(icu_busy)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="12">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (3_712, 9)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">date</th>
+<th data-quarto-table-cell-role="th">departement</th>
+<th data-quarto-table-cell-role="th">departement_name</th>
+<th data-quarto-table-cell-role="th">deceased</th>
+<th data-quarto-table-cell-role="th">hospitalised</th>
+<th data-quarto-table-cell-role="th">reanimation</th>
+<th data-quarto-table-cell-role="th">recovered</th>
+<th data-quarto-table-cell-role="th">hospitalised_new</th>
+<th data-quarto-table-cell-role="th">reanimation_new</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>i64</td>
+<td>i64</td>
+<td>i64</td>
+<td>i64</td>
+<td>str</td>
+<td>str</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"2020-03-18"</td>
+<td>"57"</td>
+<td>"Moselle"</td>
+<td>16</td>
+<td>169</td>
+<td>34</td>
+<td>11</td>
+<td>"NA"</td>
+<td>"NA"</td>
+</tr>
+<tr class="even">
+<td>"2020-03-18"</td>
+<td>"60"</td>
+<td>"Oise"</td>
+<td>6</td>
+<td>94</td>
+<td>22</td>
+<td>18</td>
+<td>"NA"</td>
+<td>"NA"</td>
+</tr>
+<tr class="odd">
+<td>"2020-03-18"</td>
+<td>"67"</td>
+<td>"Bas-Rhin"</td>
+<td>15</td>
+<td>210</td>
+<td>58</td>
+<td>4</td>
+<td>"NA"</td>
+<td>"NA"</td>
+</tr>
+<tr class="even">
+<td>"2020-03-18"</td>
+<td>"68"</td>
+<td>"Haut-Rhin"</td>
+<td>74</td>
+<td>371</td>
+<td>77</td>
+<td>116</td>
+<td>"NA"</td>
+<td>"NA"</td>
+</tr>
+<tr class="odd">
+<td>"2020-03-18"</td>
+<td>"75"</td>
+<td>"Paris"</td>
+<td>14</td>
+<td>359</td>
+<td>105</td>
+<td>40</td>
+<td>"NA"</td>
+<td>"NA"</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"2020-10-01"</td>
+<td>"92"</td>
+<td>"Hauts-de-Seine"</td>
+<td>1149</td>
+<td>306</td>
+<td>68</td>
+<td>5532</td>
+<td>"36"</td>
+<td>"7"</td>
+</tr>
+<tr class="even">
+<td>"2020-10-01"</td>
+<td>"93"</td>
+<td>"Seine-Saint-Denis"</td>
+<td>1070</td>
+<td>413</td>
+<td>56</td>
+<td>4738</td>
+<td>"43"</td>
+<td>"7"</td>
+</tr>
+<tr class="odd">
+<td>"2020-10-01"</td>
+<td>"94"</td>
+<td>"Val-de-Marne"</td>
+<td>1273</td>
+<td>334</td>
+<td>42</td>
+<td>5081</td>
+<td>"23"</td>
+<td>"8"</td>
+</tr>
+<tr class="even">
+<td>"2020-10-01"</td>
+<td>"95"</td>
+<td>"Val-d'Oise"</td>
+<td>773</td>
+<td>168</td>
+<td>28</td>
+<td>3200</td>
+<td>"17"</td>
+<td>"2"</td>
+</tr>
+<tr class="odd">
+<td>"2020-10-01"</td>
+<td>"971"</td>
+<td>"Guadeloupe"</td>
+<td>75</td>
+<td>162</td>
+<td>25</td>
+<td>331</td>
+<td>"8"</td>
+<td>"2"</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>The expression never changes. What changes is the context it is given to: <code>.select()</code> turns it into a column of <code>True</code> and <code>False</code> values, while <code>.filter()</code> uses those same values to decide which rows to keep.</p>
+<ol start="8" type="1">
+<li>The <code>departement</code> column holds codes such as <code>"01"</code> and <code>"75"</code>, which look like numbers. Cast the column to <code>pl.Int64</code> with <code>strict=False</code> and print it next to the original along with the département name. What two things go wrong?</li>
+</ol>
+<div id="2b1c33e4" class="cell" data-execution_count="14">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    covid</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    .select(</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>        c.departement,</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>        c.departement_name,</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>        dep_int <span class="op">=</span> c.departement.cast(pl.Int64, strict<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="13">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (19_998, 3)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">departement</th>
+<th data-quarto-table-cell-role="th">departement_name</th>
+<th data-quarto-table-cell-role="th">dep_int</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>str</td>
+<td>i64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"01"</td>
+<td>"Ain"</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td>"02"</td>
+<td>"Aisne"</td>
+<td>2</td>
+</tr>
+<tr class="odd">
+<td>"03"</td>
+<td>"Allier"</td>
+<td>3</td>
+</tr>
+<tr class="even">
+<td>"04"</td>
+<td>"Alpes-de-Haute-Provence"</td>
+<td>4</td>
+</tr>
+<tr class="odd">
+<td>"05"</td>
+<td>"Hautes-Alpes"</td>
+<td>5</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"971"</td>
+<td>"Guadeloupe"</td>
+<td>971</td>
+</tr>
+<tr class="even">
+<td>"972"</td>
+<td>"Martinique"</td>
+<td>972</td>
+</tr>
+<tr class="odd">
+<td>"973"</td>
+<td>"Guyane"</td>
+<td>973</td>
+</tr>
+<tr class="even">
+<td>"974"</td>
+<td>"La Réunion"</td>
+<td>974</td>
+</tr>
+<tr class="odd">
+<td>"976"</td>
+<td>"Mayotte"</td>
+<td>976</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p><strong>Answer</strong>: The leading zeros disappear, so the code <code>"01"</code> for Ain becomes the number <code>1</code>. Worse, Corsica is divided into two départements whose codes are <code>"2A"</code> and <code>"2B"</code>; those are not numbers at all, so <code>strict=False</code> quietly converts them to <code>null</code> and Corsica drops out of the data entirely. Département codes are labels that happen to be mostly digits, which is exactly why the file stores them as text.</p>
+<ol start="9" type="1">
+<li>Build a column <code>icu_share</code> equal to <code>reanimation</code> divided by <code>hospitalised</code>: the share of hospitalised patients who were in intensive care. Then filter to the rows where the result <code>.is_nan()</code> and look at what those rows have in common.</li>
+</ol>
+<div id="3ae9b58f" class="cell" data-execution_count="15">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    covid</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>        icu_share <span class="op">=</span> c.reanimation <span class="op">/</span> c.hospitalised</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.icu_share.is_nan())</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="14">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (710, 10)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">date</th>
+<th data-quarto-table-cell-role="th">departement</th>
+<th data-quarto-table-cell-role="th">departement_name</th>
+<th data-quarto-table-cell-role="th">deceased</th>
+<th data-quarto-table-cell-role="th">hospitalised</th>
+<th data-quarto-table-cell-role="th">reanimation</th>
+<th data-quarto-table-cell-role="th">recovered</th>
+<th data-quarto-table-cell-role="th">hospitalised_new</th>
+<th data-quarto-table-cell-role="th">reanimation_new</th>
+<th data-quarto-table-cell-role="th">icu_share</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>i64</td>
+<td>i64</td>
+<td>i64</td>
+<td>i64</td>
+<td>str</td>
+<td>str</td>
+<td>f64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"2020-03-18"</td>
+<td>"02"</td>
+<td>"Aisne"</td>
+<td>9</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>"NA"</td>
+<td>"NA"</td>
+<td>NaN</td>
+</tr>
+<tr class="even">
+<td>"2020-03-18"</td>
+<td>"03"</td>
+<td>"Allier"</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>"NA"</td>
+<td>"NA"</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td>"2020-03-18"</td>
+<td>"07"</td>
+<td>"Ardèche"</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>"NA"</td>
+<td>"NA"</td>
+<td>NaN</td>
+</tr>
+<tr class="even">
+<td>"2020-03-18"</td>
+<td>"08"</td>
+<td>"Ardennes"</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>"NA"</td>
+<td>"NA"</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td>"2020-03-18"</td>
+<td>"14"</td>
+<td>"Calvados"</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>"NA"</td>
+<td>"NA"</td>
+<td>NaN</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"2020-09-28"</td>
+<td>"23"</td>
+<td>"Creuse"</td>
+<td>16</td>
+<td>0</td>
+<td>0</td>
+<td>88</td>
+<td>"0"</td>
+<td>"0"</td>
+<td>NaN</td>
+</tr>
+<tr class="even">
+<td>"2020-09-28"</td>
+<td>"46"</td>
+<td>"Lot"</td>
+<td>22</td>
+<td>0</td>
+<td>0</td>
+<td>72</td>
+<td>"0"</td>
+<td>"0"</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td>"2020-09-28"</td>
+<td>"70"</td>
+<td>"Haute-Saône"</td>
+<td>77</td>
+<td>0</td>
+<td>0</td>
+<td>311</td>
+<td>"0"</td>
+<td>"0"</td>
+<td>NaN</td>
+</tr>
+<tr class="even">
+<td>"2020-09-29"</td>
+<td>"46"</td>
+<td>"Lot"</td>
+<td>22</td>
+<td>0</td>
+<td>0</td>
+<td>72</td>
+<td>"0"</td>
+<td>"0"</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td>"2020-09-30"</td>
+<td>"46"</td>
+<td>"Lot"</td>
+<td>22</td>
+<td>0</td>
+<td>0</td>
+<td>72</td>
+<td>"1"</td>
+<td>"0"</td>
+<td>NaN</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Every one of these rows has zero patients in the hospital, mostly in the first days of the pandemic. Zero divided by zero has no answer, so the division produces a <code>NaN</code>. Note that this is not the same thing as the nulls in question 4: nothing is missing from these rows. We asked the data a question that has no answer, and got one back.</p>
+<ol start="10" type="1">
+<li>Removing the invalid rows is the job of <code>.drop_nans()</code>. Add it to the previous answer, in place of the filter, to see how many rows survive.</li>
+</ol>
+<div id="3fd70d81" class="cell" data-execution_count="16">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    covid</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>        icu_share <span class="op">=</span> c.reanimation <span class="op">/</span> c.hospitalised</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    .drop_nans()</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="15">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (19_288, 10)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">date</th>
+<th data-quarto-table-cell-role="th">departement</th>
+<th data-quarto-table-cell-role="th">departement_name</th>
+<th data-quarto-table-cell-role="th">deceased</th>
+<th data-quarto-table-cell-role="th">hospitalised</th>
+<th data-quarto-table-cell-role="th">reanimation</th>
+<th data-quarto-table-cell-role="th">recovered</th>
+<th data-quarto-table-cell-role="th">hospitalised_new</th>
+<th data-quarto-table-cell-role="th">reanimation_new</th>
+<th data-quarto-table-cell-role="th">icu_share</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>i64</td>
+<td>i64</td>
+<td>i64</td>
+<td>i64</td>
+<td>str</td>
+<td>str</td>
+<td>f64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"2020-03-18"</td>
+<td>"01"</td>
+<td>"Ain"</td>
+<td>0</td>
+<td>2</td>
+<td>0</td>
+<td>1</td>
+<td>"NA"</td>
+<td>"NA"</td>
+<td>0.0</td>
+</tr>
+<tr class="even">
+<td>"2020-03-18"</td>
+<td>"04"</td>
+<td>"Alpes-de-Haute-Provence"</td>
+<td>0</td>
+<td>3</td>
+<td>1</td>
+<td>2</td>
+<td>"NA"</td>
+<td>"NA"</td>
+<td>0.333333</td>
+</tr>
+<tr class="odd">
+<td>"2020-03-18"</td>
+<td>"05"</td>
+<td>"Hautes-Alpes"</td>
+<td>0</td>
+<td>8</td>
+<td>1</td>
+<td>9</td>
+<td>"NA"</td>
+<td>"NA"</td>
+<td>0.125</td>
+</tr>
+<tr class="even">
+<td>"2020-03-18"</td>
+<td>"06"</td>
+<td>"Alpes-Maritimes"</td>
+<td>2</td>
+<td>25</td>
+<td>1</td>
+<td>47</td>
+<td>"NA"</td>
+<td>"NA"</td>
+<td>0.04</td>
+</tr>
+<tr class="odd">
+<td>"2020-03-18"</td>
+<td>"09"</td>
+<td>"Ariège"</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>2</td>
+<td>"NA"</td>
+<td>"NA"</td>
+<td>1.0</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"2020-10-01"</td>
+<td>"971"</td>
+<td>"Guadeloupe"</td>
+<td>75</td>
+<td>162</td>
+<td>25</td>
+<td>331</td>
+<td>"8"</td>
+<td>"2"</td>
+<td>0.154321</td>
+</tr>
+<tr class="even">
+<td>"2020-10-01"</td>
+<td>"972"</td>
+<td>"Martinique"</td>
+<td>21</td>
+<td>34</td>
+<td>16</td>
+<td>131</td>
+<td>"0"</td>
+<td>"0"</td>
+<td>0.470588</td>
+</tr>
+<tr class="odd">
+<td>"2020-10-01"</td>
+<td>"973"</td>
+<td>"Guyane"</td>
+<td>63</td>
+<td>23</td>
+<td>4</td>
+<td>1720</td>
+<td>"12"</td>
+<td>"0"</td>
+<td>0.173913</td>
+</tr>
+<tr class="even">
+<td>"2020-10-01"</td>
+<td>"974"</td>
+<td>"La Réunion"</td>
+<td>21</td>
+<td>53</td>
+<td>15</td>
+<td>397</td>
+<td>"3"</td>
+<td>"3"</td>
+<td>0.283019</td>
+</tr>
+<tr class="odd">
+<td>"2020-10-01"</td>
+<td>"976"</td>
+<td>"Mayotte"</td>
+<td>29</td>
+<td>9</td>
+<td>3</td>
+<td>456</td>
+<td>"0"</td>
+<td>"0"</td>
+<td>0.333333</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>The <code>icu_share</code> column also holds fifteen values printed as <code>inf</code>, which <code>.drop_nans()</code> leaves behind: they come from the handful of days that record ICU patients while the hospital count is zero, and dividing a positive number by zero gives infinity rather than <code>NaN</code>. Swap <code>.is_nan()</code> for <code>.is_infinite()</code> in the previous question if you want to see them. Those days are a reporting inconsistency, not a computation that broke.</p>
+<ol start="11" type="1">
+<li>Finally, put the chapter together. Build a table of the pandemic in Paris (département <code>"75"</code>) that has a real date column, parsed from the text with <code>.str.to_date()</code>, alongside the deceased count and the repaired count of new hospital admissions. Sort the result by date and print the first rows.</li>
+</ol>
+<div id="8213f354" class="cell" data-execution_count="17">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    covid</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.departement <span class="op">==</span> <span class="st">"75"</span>)</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    .select(</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>        date <span class="op">=</span> c.date.<span class="bu">str</span>.to_date(),</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>        deceased <span class="op">=</span> c.deceased,</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>        hospitalised_new <span class="op">=</span> c.hospitalised_new.cast(pl.Int64, strict<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    .sort(c.date)</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="16">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (198, 3)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">date</th>
+<th data-quarto-table-cell-role="th">deceased</th>
+<th data-quarto-table-cell-role="th">hospitalised_new</th>
+</tr>
+<tr class="even">
+<td>date</td>
+<td>i64</td>
+<td>i64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2020-03-18</td>
+<td>14</td>
+<td>null</td>
+</tr>
+<tr class="even">
+<td>2020-03-19</td>
+<td>22</td>
+<td>167</td>
+</tr>
+<tr class="odd">
+<td>2020-03-20</td>
+<td>30</td>
+<td>120</td>
+</tr>
+<tr class="even">
+<td>2020-03-21</td>
+<td>36</td>
+<td>138</td>
+</tr>
+<tr class="odd">
+<td>2020-03-22</td>
+<td>40</td>
+<td>147</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>2020-09-27</td>
+<td>1863</td>
+<td>28</td>
+</tr>
+<tr class="even">
+<td>2020-09-28</td>
+<td>1872</td>
+<td>50</td>
+</tr>
+<tr class="odd">
+<td>2020-09-29</td>
+<td>1873</td>
+<td>35</td>
+</tr>
+<tr class="even">
+<td>2020-09-30</td>
+<td>1878</td>
+<td>46</td>
+</tr>
+<tr class="odd">
+<td>2020-10-01</td>
+<td>1882</td>
+<td>42</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Check the type under <code>date</code>: it is now <code>date</code> rather than <code>str</code>. Sorting these particular strings happened to give the right answer even before we parsed them, because a date written year-month-day sorts alphabetically in the same order it sorts chronologically. That is a lucky property of the format, not a fact about dates. Written <code>24/06/1626</code>, the same trick would fail badly, and a real date column would not care.</p>
+
+
+<!-- -->
+
+</section>
+
+</main> <!-- /main -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details .sourceCode");
+      for (let i = 0; i < detailsSrc.length; i++) {
+        const details = detailsSrc[i].closest('details');
+        if (details) {
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+      }
+      return false;
+    };
+  }
+  // Replace buttons to strip the broken listeners Quarto attached, then re-add fixed ones
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    const fresh = hideAllCode.cloneNode(true);
+    hideAllCode.parentNode.replaceChild(fresh, hideAllCode);
+    fresh.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    const fresh = showAllCode.cloneNode(true);
+    showAllCode.parentNode.replaceChild(fresh, showAllCode);
+    fresh.addEventListener("click", toggleCodeHandler(true));
+  }
+});
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Notebook05"</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="an">solutions-release-date:</span><span class="co"> "2026-09-09"</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="fu">### Setup</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>Run all of the following before starting the notebook.</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [noclear]</span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a><span class="op">!</span> wget <span class="op">-</span>q <span class="op">-</span>nc https:<span class="op">//</span>raw.githubusercontent.com<span class="op">/</span>taylor<span class="op">-</span>arnold<span class="op">/</span>fds2<span class="op">/</span>refs<span class="op">/</span>heads<span class="op">/</span>main<span class="op">/</span>funs.py</span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [noclear]</span></span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine <span class="im">import</span> ggplot, aes</span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> polars <span class="im">import</span> col <span class="im">as</span> c</span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> funs</span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a>ub <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"</span></span>
+<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-33"><a href="#cb18-33" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb18-34"><a href="#cb18-34" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [remove]</span></span>
+<span id="cb18-35"><a href="#cb18-35" aria-hidden="true" tabindex="-1"></a><span class="co">#| include: false</span></span>
+<span id="cb18-36"><a href="#cb18-36" aria-hidden="true" tabindex="-1"></a>ub <span class="op">=</span> <span class="st">""</span></span>
+<span id="cb18-37"><a href="#cb18-37" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-38"><a href="#cb18-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-41"><a href="#cb18-41" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb18-42"><a href="#cb18-42" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [noclear]</span></span>
+<span id="cb18-43"><a href="#cb18-43" aria-hidden="true" tabindex="-1"></a>covid <span class="op">=</span> pl.read_csv(ub <span class="op">+</span> <span class="st">"data/france_departement_covid.csv"</span>)</span>
+<span id="cb18-44"><a href="#cb18-44" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-45"><a href="#cb18-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-46"><a href="#cb18-46" aria-hidden="true" tabindex="-1"></a><span class="fu">### Questions</span></span>
+<span id="cb18-47"><a href="#cb18-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-48"><a href="#cb18-48" aria-hidden="true" tabindex="-1"></a>This notebook uses a record of the first months of the COVID-19 pandemic in</span>
+<span id="cb18-49"><a href="#cb18-49" aria-hidden="true" tabindex="-1"></a>France. Each row reports the situation in one *département* (the administrative</span>
+<span id="cb18-50"><a href="#cb18-50" aria-hidden="true" tabindex="-1"></a>region France is divided into, of which there are 101) on one date between March</span>
+<span id="cb18-51"><a href="#cb18-51" aria-hidden="true" tabindex="-1"></a>and October of 2020. The columns <span class="in">`deceased`</span> and <span class="in">`recovered`</span> are running totals,</span>
+<span id="cb18-52"><a href="#cb18-52" aria-hidden="true" tabindex="-1"></a>while <span class="in">`hospitalised`</span> and <span class="in">`reanimation`</span> are snapshots of how many patients were</span>
+<span id="cb18-53"><a href="#cb18-53" aria-hidden="true" tabindex="-1"></a>in the hospital and in intensive care on that day. The two columns ending in</span>
+<span id="cb18-54"><a href="#cb18-54" aria-hidden="true" tabindex="-1"></a><span class="in">`_new`</span> count new admissions that day.</span>
+<span id="cb18-55"><a href="#cb18-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-56"><a href="#cb18-56" aria-hidden="true" tabindex="-1"></a>This is real data, downloaded as it was published, and it has all the type</span>
+<span id="cb18-57"><a href="#cb18-57" aria-hidden="true" tabindex="-1"></a>problems the chapter warns about.</span>
+<span id="cb18-58"><a href="#cb18-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-59"><a href="#cb18-59" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Start by printing the schema of the dataset. Three of the columns have a type</span>
+<span id="cb18-60"><a href="#cb18-60" aria-hidden="true" tabindex="-1"></a>that is not what you would expect from the description above. Which ones?</span>
+<span id="cb18-61"><a href="#cb18-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-64"><a href="#cb18-64" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb18-65"><a href="#cb18-65" aria-hidden="true" tabindex="-1"></a>covid.schema</span>
+<span id="cb18-66"><a href="#cb18-66" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-67"><a href="#cb18-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-68"><a href="#cb18-68" aria-hidden="true" tabindex="-1"></a>**Answer**: <span class="in">`date`</span> is a <span class="in">`str`</span> rather than a date, and both <span class="in">`hospitalised_new`</span></span>
+<span id="cb18-69"><a href="#cb18-69" aria-hidden="true" tabindex="-1"></a>and <span class="in">`reanimation_new`</span> are <span class="in">`str`</span> rather than integers. (The <span class="in">`departement`</span> column</span>
+<span id="cb18-70"><a href="#cb18-70" aria-hidden="true" tabindex="-1"></a>is also a string, but that one is correct, as we will see in question 8.)</span>
+<span id="cb18-71"><a href="#cb18-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-72"><a href="#cb18-72" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span><span class="in">`hospitalised_new`</span> counts new hospital admissions, so it should be a number.</span>
+<span id="cb18-73"><a href="#cb18-73" aria-hidden="true" tabindex="-1"></a>Print the rows where that column is equal to the text <span class="in">`"NA"`</span>, and explain what</span>
+<span id="cb18-74"><a href="#cb18-74" aria-hidden="true" tabindex="-1"></a>those rows have to do with the type Polars chose.</span>
+<span id="cb18-75"><a href="#cb18-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-78"><a href="#cb18-78" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb18-79"><a href="#cb18-79" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb18-80"><a href="#cb18-80" aria-hidden="true" tabindex="-1"></a>    covid</span>
+<span id="cb18-81"><a href="#cb18-81" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.hospitalised_new <span class="op">==</span> <span class="st">"NA"</span>)</span>
+<span id="cb18-82"><a href="#cb18-82" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-83"><a href="#cb18-83" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-84"><a href="#cb18-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-85"><a href="#cb18-85" aria-hidden="true" tabindex="-1"></a>**Answer**: There are 784 rows where the count was not reported and the value</span>
+<span id="cb18-86"><a href="#cb18-86" aria-hidden="true" tabindex="-1"></a><span class="in">`"NA"`</span> was written into the file instead. A column can only have one type, and</span>
+<span id="cb18-87"><a href="#cb18-87" aria-hidden="true" tabindex="-1"></a><span class="in">`"NA"`</span> is not a number, so Polars widened the whole column to <span class="in">`str`</span> to</span>
+<span id="cb18-88"><a href="#cb18-88" aria-hidden="true" tabindex="-1"></a>accommodate it. A few hundred unreported values changed the type of all 19,998.</span>
+<span id="cb18-89"><a href="#cb18-89" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-90"><a href="#cb18-90" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Cast <span class="in">`hospitalised_new`</span> to an integer, printing the date, département, and</span>
+<span id="cb18-91"><a href="#cb18-91" aria-hidden="true" tabindex="-1"></a>the repaired column. You will need <span class="in">`strict=False`</span>, which replaces any value that</span>
+<span id="cb18-92"><a href="#cb18-92" aria-hidden="true" tabindex="-1"></a>cannot be converted with a <span class="in">`null`</span> instead of raising an error. Once your code</span>
+<span id="cb18-93"><a href="#cb18-93" aria-hidden="true" tabindex="-1"></a>works, try it without <span class="in">`strict=False`</span> and read the error message you get.</span>
+<span id="cb18-94"><a href="#cb18-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-97"><a href="#cb18-97" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb18-98"><a href="#cb18-98" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb18-99"><a href="#cb18-99" aria-hidden="true" tabindex="-1"></a>    covid</span>
+<span id="cb18-100"><a href="#cb18-100" aria-hidden="true" tabindex="-1"></a>    .select(</span>
+<span id="cb18-101"><a href="#cb18-101" aria-hidden="true" tabindex="-1"></a>        c.date,</span>
+<span id="cb18-102"><a href="#cb18-102" aria-hidden="true" tabindex="-1"></a>        c.departement,</span>
+<span id="cb18-103"><a href="#cb18-103" aria-hidden="true" tabindex="-1"></a>        hospitalised_new <span class="op">=</span> c.hospitalised_new.cast(pl.Int64, strict<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb18-104"><a href="#cb18-104" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb18-105"><a href="#cb18-105" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-106"><a href="#cb18-106" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-107"><a href="#cb18-107" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-108"><a href="#cb18-108" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>How many rows ended up with a missing value? Repeat the cast and then filter</span>
+<span id="cb18-109"><a href="#cb18-109" aria-hidden="true" tabindex="-1"></a>down to the rows where the result <span class="in">`.is_null()`</span>. You do not need to count the</span>
+<span id="cb18-110"><a href="#cb18-110" aria-hidden="true" tabindex="-1"></a>rows yourself; Polars prints the shape of the table above the output.</span>
+<span id="cb18-111"><a href="#cb18-111" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-114"><a href="#cb18-114" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb18-115"><a href="#cb18-115" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb18-116"><a href="#cb18-116" aria-hidden="true" tabindex="-1"></a>    covid</span>
+<span id="cb18-117"><a href="#cb18-117" aria-hidden="true" tabindex="-1"></a>    .select(</span>
+<span id="cb18-118"><a href="#cb18-118" aria-hidden="true" tabindex="-1"></a>        c.date,</span>
+<span id="cb18-119"><a href="#cb18-119" aria-hidden="true" tabindex="-1"></a>        c.departement,</span>
+<span id="cb18-120"><a href="#cb18-120" aria-hidden="true" tabindex="-1"></a>        hospitalised_new <span class="op">=</span> c.hospitalised_new.cast(pl.Int64, strict<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb18-121"><a href="#cb18-121" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb18-122"><a href="#cb18-122" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.hospitalised_new.is_null())</span>
+<span id="cb18-123"><a href="#cb18-123" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-124"><a href="#cb18-124" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-125"><a href="#cb18-125" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-126"><a href="#cb18-126" aria-hidden="true" tabindex="-1"></a>The 784 rows are exactly the ones we found in question 2.</span>
+<span id="cb18-127"><a href="#cb18-127" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-128"><a href="#cb18-128" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>Now repeat the cast, but chain <span class="in">`.fill_null(0)`</span> onto the end of the expression</span>
+<span id="cb18-129"><a href="#cb18-129" aria-hidden="true" tabindex="-1"></a>to replace the missing values with zero.</span>
+<span id="cb18-130"><a href="#cb18-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-133"><a href="#cb18-133" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb18-134"><a href="#cb18-134" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb18-135"><a href="#cb18-135" aria-hidden="true" tabindex="-1"></a>    covid</span>
+<span id="cb18-136"><a href="#cb18-136" aria-hidden="true" tabindex="-1"></a>    .select(</span>
+<span id="cb18-137"><a href="#cb18-137" aria-hidden="true" tabindex="-1"></a>        c.date,</span>
+<span id="cb18-138"><a href="#cb18-138" aria-hidden="true" tabindex="-1"></a>        c.departement,</span>
+<span id="cb18-139"><a href="#cb18-139" aria-hidden="true" tabindex="-1"></a>        hospitalised_new <span class="op">=</span> c.hospitalised_new.cast(pl.Int64, strict<span class="op">=</span><span class="va">False</span>).fill_null(<span class="dv">0</span>)</span>
+<span id="cb18-140"><a href="#cb18-140" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb18-141"><a href="#cb18-141" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-142"><a href="#cb18-142" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-143"><a href="#cb18-143" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-144"><a href="#cb18-144" aria-hidden="true" tabindex="-1"></a>Be careful with this one. Filling with zero says that no patients were admitted</span>
+<span id="cb18-145"><a href="#cb18-145" aria-hidden="true" tabindex="-1"></a>that day, when what the data actually says is that nobody reported a number. If</span>
+<span id="cb18-146"><a href="#cb18-146" aria-hidden="true" tabindex="-1"></a>you go on to add up admissions, the two are indistinguishable in the total.</span>
+<span id="cb18-147"><a href="#cb18-147" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-148"><a href="#cb18-148" aria-hidden="true" tabindex="-1"></a><span class="ss">6. </span>Print the date, département, and <span class="in">`reanimation`</span> columns, along with a new</span>
+<span id="cb18-149"><a href="#cb18-149" aria-hidden="true" tabindex="-1"></a>column named <span class="in">`icu_busy`</span> that records whether more than 20 patients were in</span>
+<span id="cb18-150"><a href="#cb18-150" aria-hidden="true" tabindex="-1"></a>intensive care. Look at the type Polars gives the new column.</span>
+<span id="cb18-151"><a href="#cb18-151" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-154"><a href="#cb18-154" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb18-155"><a href="#cb18-155" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb18-156"><a href="#cb18-156" aria-hidden="true" tabindex="-1"></a>    covid</span>
+<span id="cb18-157"><a href="#cb18-157" aria-hidden="true" tabindex="-1"></a>    .select(</span>
+<span id="cb18-158"><a href="#cb18-158" aria-hidden="true" tabindex="-1"></a>        c.date,</span>
+<span id="cb18-159"><a href="#cb18-159" aria-hidden="true" tabindex="-1"></a>        c.departement,</span>
+<span id="cb18-160"><a href="#cb18-160" aria-hidden="true" tabindex="-1"></a>        c.reanimation,</span>
+<span id="cb18-161"><a href="#cb18-161" aria-hidden="true" tabindex="-1"></a>        icu_busy <span class="op">=</span> c.reanimation <span class="op">&gt;</span> <span class="dv">20</span></span>
+<span id="cb18-162"><a href="#cb18-162" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb18-163"><a href="#cb18-163" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-164"><a href="#cb18-164" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-165"><a href="#cb18-165" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-166"><a href="#cb18-166" aria-hidden="true" tabindex="-1"></a><span class="ss">7. </span>That comparison is an object in its own right. Type it alone in a cell, with</span>
+<span id="cb18-167"><a href="#cb18-167" aria-hidden="true" tabindex="-1"></a>no DataFrame in sight, and see what Polars prints.</span>
+<span id="cb18-168"><a href="#cb18-168" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-171"><a href="#cb18-171" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb18-172"><a href="#cb18-172" aria-hidden="true" tabindex="-1"></a>c.reanimation <span class="op">&gt;</span> <span class="dv">20</span></span>
+<span id="cb18-173"><a href="#cb18-173" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-174"><a href="#cb18-174" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-175"><a href="#cb18-175" aria-hidden="true" tabindex="-1"></a>Because it is an ordinary Python object, we can give it a name and hand the same</span>
+<span id="cb18-176"><a href="#cb18-176" aria-hidden="true" tabindex="-1"></a>name to two different methods. Save the comparison as <span class="in">`icu_busy`</span>, then use it</span>
+<span id="cb18-177"><a href="#cb18-177" aria-hidden="true" tabindex="-1"></a>once inside <span class="in">`.select()`</span> to build a column and once inside <span class="in">`.filter()`</span> to keep</span>
+<span id="cb18-178"><a href="#cb18-178" aria-hidden="true" tabindex="-1"></a>only the busy days.</span>
+<span id="cb18-179"><a href="#cb18-179" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-182"><a href="#cb18-182" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb18-183"><a href="#cb18-183" aria-hidden="true" tabindex="-1"></a>icu_busy <span class="op">=</span> c.reanimation <span class="op">&gt;</span> <span class="dv">20</span></span>
+<span id="cb18-184"><a href="#cb18-184" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-185"><a href="#cb18-185" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb18-186"><a href="#cb18-186" aria-hidden="true" tabindex="-1"></a>    covid</span>
+<span id="cb18-187"><a href="#cb18-187" aria-hidden="true" tabindex="-1"></a>    .select(c.date, c.departement, c.reanimation, is_busy <span class="op">=</span> icu_busy)</span>
+<span id="cb18-188"><a href="#cb18-188" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-189"><a href="#cb18-189" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-190"><a href="#cb18-190" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-193"><a href="#cb18-193" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb18-194"><a href="#cb18-194" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb18-195"><a href="#cb18-195" aria-hidden="true" tabindex="-1"></a>    covid</span>
+<span id="cb18-196"><a href="#cb18-196" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(icu_busy)</span>
+<span id="cb18-197"><a href="#cb18-197" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-198"><a href="#cb18-198" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-199"><a href="#cb18-199" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-200"><a href="#cb18-200" aria-hidden="true" tabindex="-1"></a>The expression never changes. What changes is the context it is given to:</span>
+<span id="cb18-201"><a href="#cb18-201" aria-hidden="true" tabindex="-1"></a><span class="in">`.select()`</span> turns it into a column of <span class="in">`True`</span> and <span class="in">`False`</span> values, while</span>
+<span id="cb18-202"><a href="#cb18-202" aria-hidden="true" tabindex="-1"></a><span class="in">`.filter()`</span> uses those same values to decide which rows to keep.</span>
+<span id="cb18-203"><a href="#cb18-203" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-204"><a href="#cb18-204" aria-hidden="true" tabindex="-1"></a><span class="ss">8. </span>The <span class="in">`departement`</span> column holds codes such as <span class="in">`"01"`</span> and <span class="in">`"75"`</span>, which look</span>
+<span id="cb18-205"><a href="#cb18-205" aria-hidden="true" tabindex="-1"></a>like numbers. Cast the column to <span class="in">`pl.Int64`</span> with <span class="in">`strict=False`</span> and print it</span>
+<span id="cb18-206"><a href="#cb18-206" aria-hidden="true" tabindex="-1"></a>next to the original along with the département name. What two things go wrong?</span>
+<span id="cb18-207"><a href="#cb18-207" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-210"><a href="#cb18-210" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb18-211"><a href="#cb18-211" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb18-212"><a href="#cb18-212" aria-hidden="true" tabindex="-1"></a>    covid</span>
+<span id="cb18-213"><a href="#cb18-213" aria-hidden="true" tabindex="-1"></a>    .select(</span>
+<span id="cb18-214"><a href="#cb18-214" aria-hidden="true" tabindex="-1"></a>        c.departement,</span>
+<span id="cb18-215"><a href="#cb18-215" aria-hidden="true" tabindex="-1"></a>        c.departement_name,</span>
+<span id="cb18-216"><a href="#cb18-216" aria-hidden="true" tabindex="-1"></a>        dep_int <span class="op">=</span> c.departement.cast(pl.Int64, strict<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb18-217"><a href="#cb18-217" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb18-218"><a href="#cb18-218" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-219"><a href="#cb18-219" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-220"><a href="#cb18-220" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-221"><a href="#cb18-221" aria-hidden="true" tabindex="-1"></a>**Answer**: The leading zeros disappear, so the code <span class="in">`"01"`</span> for Ain becomes the</span>
+<span id="cb18-222"><a href="#cb18-222" aria-hidden="true" tabindex="-1"></a>number <span class="in">`1`</span>. Worse, Corsica is divided into two départements whose codes are</span>
+<span id="cb18-223"><a href="#cb18-223" aria-hidden="true" tabindex="-1"></a><span class="in">`"2A"`</span> and <span class="in">`"2B"`</span>; those are not numbers at all, so <span class="in">`strict=False`</span> quietly</span>
+<span id="cb18-224"><a href="#cb18-224" aria-hidden="true" tabindex="-1"></a>converts them to <span class="in">`null`</span> and Corsica drops out of the data entirely. Département</span>
+<span id="cb18-225"><a href="#cb18-225" aria-hidden="true" tabindex="-1"></a>codes are labels that happen to be mostly digits, which is exactly why the file</span>
+<span id="cb18-226"><a href="#cb18-226" aria-hidden="true" tabindex="-1"></a>stores them as text.</span>
+<span id="cb18-227"><a href="#cb18-227" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-228"><a href="#cb18-228" aria-hidden="true" tabindex="-1"></a><span class="ss">9. </span>Build a column <span class="in">`icu_share`</span> equal to <span class="in">`reanimation`</span> divided by <span class="in">`hospitalised`</span>:</span>
+<span id="cb18-229"><a href="#cb18-229" aria-hidden="true" tabindex="-1"></a>the share of hospitalised patients who were in intensive care. Then filter to</span>
+<span id="cb18-230"><a href="#cb18-230" aria-hidden="true" tabindex="-1"></a>the rows where the result <span class="in">`.is_nan()`</span> and look at what those rows have in</span>
+<span id="cb18-231"><a href="#cb18-231" aria-hidden="true" tabindex="-1"></a>common.</span>
+<span id="cb18-232"><a href="#cb18-232" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-235"><a href="#cb18-235" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb18-236"><a href="#cb18-236" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb18-237"><a href="#cb18-237" aria-hidden="true" tabindex="-1"></a>    covid</span>
+<span id="cb18-238"><a href="#cb18-238" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb18-239"><a href="#cb18-239" aria-hidden="true" tabindex="-1"></a>        icu_share <span class="op">=</span> c.reanimation <span class="op">/</span> c.hospitalised</span>
+<span id="cb18-240"><a href="#cb18-240" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb18-241"><a href="#cb18-241" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.icu_share.is_nan())</span>
+<span id="cb18-242"><a href="#cb18-242" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-243"><a href="#cb18-243" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-244"><a href="#cb18-244" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-245"><a href="#cb18-245" aria-hidden="true" tabindex="-1"></a>Every one of these rows has zero patients in the hospital, mostly in the first</span>
+<span id="cb18-246"><a href="#cb18-246" aria-hidden="true" tabindex="-1"></a>days of the pandemic. Zero divided by zero has no answer, so the division</span>
+<span id="cb18-247"><a href="#cb18-247" aria-hidden="true" tabindex="-1"></a>produces a <span class="in">`NaN`</span>. Note that this is not the same thing as the nulls in question</span>
+<span id="cb18-248"><a href="#cb18-248" aria-hidden="true" tabindex="-1"></a>4: nothing is missing from these rows. We asked the data a question that has no</span>
+<span id="cb18-249"><a href="#cb18-249" aria-hidden="true" tabindex="-1"></a>answer, and got one back.</span>
+<span id="cb18-250"><a href="#cb18-250" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-251"><a href="#cb18-251" aria-hidden="true" tabindex="-1"></a><span class="ss">10. </span>Removing the invalid rows is the job of <span class="in">`.drop_nans()`</span>. Add it to the</span>
+<span id="cb18-252"><a href="#cb18-252" aria-hidden="true" tabindex="-1"></a>previous answer, in place of the filter, to see how many rows survive.</span>
+<span id="cb18-253"><a href="#cb18-253" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-256"><a href="#cb18-256" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb18-257"><a href="#cb18-257" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb18-258"><a href="#cb18-258" aria-hidden="true" tabindex="-1"></a>    covid</span>
+<span id="cb18-259"><a href="#cb18-259" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb18-260"><a href="#cb18-260" aria-hidden="true" tabindex="-1"></a>        icu_share <span class="op">=</span> c.reanimation <span class="op">/</span> c.hospitalised</span>
+<span id="cb18-261"><a href="#cb18-261" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb18-262"><a href="#cb18-262" aria-hidden="true" tabindex="-1"></a>    .drop_nans()</span>
+<span id="cb18-263"><a href="#cb18-263" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-264"><a href="#cb18-264" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-265"><a href="#cb18-265" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-266"><a href="#cb18-266" aria-hidden="true" tabindex="-1"></a>The <span class="in">`icu_share`</span> column also holds fifteen values printed as <span class="in">`inf`</span>, which</span>
+<span id="cb18-267"><a href="#cb18-267" aria-hidden="true" tabindex="-1"></a><span class="in">`.drop_nans()`</span> leaves behind: they come from the handful of days that record ICU</span>
+<span id="cb18-268"><a href="#cb18-268" aria-hidden="true" tabindex="-1"></a>patients while the hospital count is zero, and dividing a positive number by</span>
+<span id="cb18-269"><a href="#cb18-269" aria-hidden="true" tabindex="-1"></a>zero gives infinity rather than <span class="in">`NaN`</span>. Swap <span class="in">`.is_nan()`</span> for <span class="in">`.is_infinite()`</span> in</span>
+<span id="cb18-270"><a href="#cb18-270" aria-hidden="true" tabindex="-1"></a>the previous question if you want to see them. Those days are a reporting</span>
+<span id="cb18-271"><a href="#cb18-271" aria-hidden="true" tabindex="-1"></a>inconsistency, not a computation that broke.</span>
+<span id="cb18-272"><a href="#cb18-272" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-273"><a href="#cb18-273" aria-hidden="true" tabindex="-1"></a><span class="ss">11. </span>Finally, put the chapter together. Build a table of the pandemic in Paris</span>
+<span id="cb18-274"><a href="#cb18-274" aria-hidden="true" tabindex="-1"></a>(département <span class="in">`"75"`</span>) that has a real date column, parsed from the text with</span>
+<span id="cb18-275"><a href="#cb18-275" aria-hidden="true" tabindex="-1"></a><span class="in">`.str.to_date()`</span>, alongside the deceased count and the repaired count of new</span>
+<span id="cb18-276"><a href="#cb18-276" aria-hidden="true" tabindex="-1"></a>hospital admissions. Sort the result by date and print the first rows.</span>
+<span id="cb18-277"><a href="#cb18-277" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-280"><a href="#cb18-280" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb18-281"><a href="#cb18-281" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb18-282"><a href="#cb18-282" aria-hidden="true" tabindex="-1"></a>    covid</span>
+<span id="cb18-283"><a href="#cb18-283" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.departement <span class="op">==</span> <span class="st">"75"</span>)</span>
+<span id="cb18-284"><a href="#cb18-284" aria-hidden="true" tabindex="-1"></a>    .select(</span>
+<span id="cb18-285"><a href="#cb18-285" aria-hidden="true" tabindex="-1"></a>        date <span class="op">=</span> c.date.<span class="bu">str</span>.to_date(),</span>
+<span id="cb18-286"><a href="#cb18-286" aria-hidden="true" tabindex="-1"></a>        deceased <span class="op">=</span> c.deceased,</span>
+<span id="cb18-287"><a href="#cb18-287" aria-hidden="true" tabindex="-1"></a>        hospitalised_new <span class="op">=</span> c.hospitalised_new.cast(pl.Int64, strict<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb18-288"><a href="#cb18-288" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb18-289"><a href="#cb18-289" aria-hidden="true" tabindex="-1"></a>    .sort(c.date)</span>
+<span id="cb18-290"><a href="#cb18-290" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-291"><a href="#cb18-291" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-292"><a href="#cb18-292" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-293"><a href="#cb18-293" aria-hidden="true" tabindex="-1"></a>Check the type under <span class="in">`date`</span>: it is now <span class="in">`date`</span> rather than <span class="in">`str`</span>. Sorting these</span>
+<span id="cb18-294"><a href="#cb18-294" aria-hidden="true" tabindex="-1"></a>particular strings happened to give the right answer even before we parsed them,</span>
+<span id="cb18-295"><a href="#cb18-295" aria-hidden="true" tabindex="-1"></a>because a date written year-month-day sorts alphabetically in the same order it</span>
+<span id="cb18-296"><a href="#cb18-296" aria-hidden="true" tabindex="-1"></a>sorts chronologically. That is a lucky property of the format, not a fact about</span>
+<span id="cb18-297"><a href="#cb18-297" aria-hidden="true" tabindex="-1"></a>dates. Written <span class="in">`24/06/1626`</span>, the same trick would fail badly, and a real date</span>
+<span id="cb18-298"><a href="#cb18-298" aria-hidden="true" tabindex="-1"></a>column would not care.</span>
+</code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

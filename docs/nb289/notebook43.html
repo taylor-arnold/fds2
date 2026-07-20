@@ -1,0 +1,2049 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.36">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Notebook43 – Foundations of Data Science: Notebooks</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-77a666a5542a07a54dbe0a7f6e3b86cd.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+</head>
+
+<body class="nav-sidebar docked fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./notebook43.html">Notebook43</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Foundations of Data Science: Notebooks</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook30.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook30</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook31.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook31</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook32.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook32</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook33.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook33</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook34.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook34</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook35.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook35</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook36.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook36</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook37.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook37</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook38.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook38</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook39.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook39</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook40.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook40</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook41.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook41</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook42.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook42</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook43.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Notebook43</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook45.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook45</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook46.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook46</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook47.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook47</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook48.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook48</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Notebook43</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="setup" class="level3">
+<h3 class="anchored" data-anchor-id="setup">Setup</h3>
+<p>Run all of the following before starting the notebook.</p>
+<div id="14faa514" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="1">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span> wget <span class="op">-</span>q <span class="op">-</span>nc https:<span class="op">//</span>raw.githubusercontent.com<span class="op">/</span>taylor<span class="op">-</span>arnold<span class="op">/</span>fds2<span class="op">/</span>refs<span class="op">/</span>heads<span class="op">/</span>main<span class="op">/</span>funs.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div id="677ba2e3" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="2">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine <span class="im">import</span> ggplot, aes</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> polars <span class="im">import</span> col <span class="im">as</span> c</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> funs</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> funs <span class="im">import</span> DSText, umap_text</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> spacy</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>ub <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div id="a446994a" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="4">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>meta <span class="op">=</span> pl.read_csv(ub <span class="op">+</span> <span class="st">"data/wiki_uk_meta.csv.gz"</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>text_en <span class="op">=</span> pl.read_csv(ub <span class="op">+</span> <span class="st">"data/wiki_uk_authors_text.csv"</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>text_fr <span class="op">=</span> pl.read_csv(ub <span class="op">+</span> <span class="st">"data/wiki_uk_authors_text_fr.csv"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div id="1ca0db2c" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="5">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>nlp_en <span class="op">=</span> spacy.load(<span class="st">"en_core_web_sm"</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>nlp_fr <span class="op">=</span> spacy.load(<span class="st">"fr_core_news_sm"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+<section id="questions" class="level3">
+<h3 class="anchored" data-anchor-id="questions">Questions</h3>
+<p><code>meta</code> holds one row per author, with a birth and death year, a literary <code>era</code>, a <code>gender</code>, and the <code>link</code>/<code>short</code> names used elsewhere in the corpus. <code>text_en</code> has one row per author with the full text of their English Wikipedia page; <code>text_fr</code> is the same idea for the French edition. This is the same 75-author corpus the chapter itself builds its cross-language section on, because it is the only French-paired text in the whole catalogue — there is no second bilingual corpus to swap in instead. The first question below investigates a real narrowing this notebook has to make before doing anything else: <code>text_fr</code> does not have 75 rows. Print results unless a question says otherwise.</p>
+<ol type="1">
+<li>How many of the 75 authors in <code>text_en</code> also have a row in <code>text_fr</code>? Anti-join to find the author(s) missing a French page, and join the result to <code>meta</code> for their era and gender.</li>
+</ol>
+<div id="2ebb4f6d" class="cell" data-execution_count="6">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>n_common <span class="op">=</span> (</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    text_en</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    .join(text_fr.select(c.doc_id), on<span class="op">=</span><span class="st">"doc_id"</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    .height</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(n_common, <span class="st">"of"</span>, text_en.height, <span class="st">"authors have a French page"</span>)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>missing <span class="op">=</span> text_en.join(text_fr.select(c.doc_id), on<span class="op">=</span><span class="st">"doc_id"</span>, how<span class="op">=</span><span class="st">"anti"</span>)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    missing</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    .join(meta, on<span class="op">=</span><span class="st">"doc_id"</span>)</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    .select(c.doc_id, c.era, c.gender)</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>73 of 75 authors have a French page</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="5">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (2, 3)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">doc_id</th>
+<th data-quarto-table-cell-role="th">era</th>
+<th data-quarto-table-cell-role="th">gender</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>str</td>
+<td>str</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"Edward Upward"</td>
+<td>"Twentieth C"</td>
+<td>"male"</td>
+</tr>
+<tr class="even">
+<td>"Rex Warner"</td>
+<td>"Twentieth C"</td>
+<td>"male"</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Now rank all 75 authors by the character length of their English page, and report where the two missing authors fall in that ranking.</p>
+<div id="bca5a74f" class="cell" data-execution_count="7">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    text_en</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    .with_columns(n_chars <span class="op">=</span> c.text.<span class="bu">str</span>.len_chars())</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    .with_columns(rank <span class="op">=</span> c.n_chars.rank())</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.doc_id.is_in(missing.select(c.doc_id).to_series()))</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    .select(c.doc_id, c.n_chars, c.rank)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>/var/folders/5w/rxshd8hd6vv8mxsbj211mr_m0000gn/T/ipykernel_34070/408388340.py:5: DeprecationWarning: `is_in` with a collection of the same datatype is ambiguous and deprecated.
+Please use `implode` to return to previous behavior.
+
+See https://github.com/pola-rs/polars/issues/22149 for more information.</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="6">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (2, 3)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">doc_id</th>
+<th data-quarto-table-cell-role="th">n_chars</th>
+<th data-quarto-table-cell-role="th">rank</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>u32</td>
+<td>f64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"Edward Upward"</td>
+<td>6574</td>
+<td>3.0</td>
+</tr>
+<tr class="even">
+<td>"Rex Warner"</td>
+<td>4560</td>
+<td>1.0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Only 73 of the 75 authors have a French Wikipedia page. Both authors missing one, Rex Warner and Edward Upward, are Twentieth Century writers, but era alone does not explain the gap: plenty of other Twentieth Century authors in this corpus do have a French page. Page length does explain it. Rex Warner has the single shortest English page in the entire 75-author corpus, and Edward Upward has the third shortest. The two authors with no French Wikipedia page at all are also, independently, two of the three least-covered figures on the English side. Missing translation coverage here tracks obscurity, not a random gap or a cutoff by time period.</p>
+<ol start="2" type="1">
+<li>Restrict <code>text_en</code> and <code>text_fr</code> to the 73 shared authors, sort both by <code>doc_id</code>, and confirm the two tables now cover the exact same set of authors. Then run each language’s text through its own spaCy pipeline with <code>DSText.process</code>, and print the resulting shapes.</li>
+</ol>
+<div id="0dacd5ec" class="cell" data-execution_count="8">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>docs_en <span class="op">=</span> (</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    text_en</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    .join(text_fr.select(c.doc_id), on<span class="op">=</span><span class="st">"doc_id"</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    .sort(c.doc_id)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>docs_fr <span class="op">=</span> text_fr.sort(c.doc_id)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(docs_en.select(c.doc_id).equals(docs_fr.select(c.doc_id)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>True</code></pre>
+</div>
+</div>
+<div id="c560627e" class="cell" data-execution_count="9">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>anno_en <span class="op">=</span> DSText.process(docs_en, nlp_en)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>anno_fr <span class="op">=</span> DSText.process(docs_fr, nlp_fr)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(anno_en.shape)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(anno_fr.shape)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>(406735, 15)
+(203785, 15)</code></pre>
+</div>
+</div>
+<ol start="3" type="1">
+<li>For each language, compute the average number of alphabetic tokens per document and the average number of distinct lemmas per document.</li>
+</ol>
+<div id="cfd67958" class="cell" data-execution_count="10">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    anno_en</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.is_alpha)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    .group_by(c.doc_id)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    .agg(n_tokens <span class="op">=</span> pl.<span class="bu">len</span>(), n_lemmas <span class="op">=</span> c.lemma.n_unique())</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    .select(c.n_tokens.mean(), c.n_lemmas.mean())</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="9">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (1, 2)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">n_tokens</th>
+<th data-quarto-table-cell-role="th">n_lemmas</th>
+</tr>
+<tr class="even">
+<td>f64</td>
+<td>f64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>5184.287671</td>
+<td>1445.520548</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="6ba115d4" class="cell" data-execution_count="11">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    anno_fr</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.is_alpha)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    .group_by(c.doc_id)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    .agg(n_tokens <span class="op">=</span> pl.<span class="bu">len</span>(), n_lemmas <span class="op">=</span> c.lemma.n_unique())</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    .select(c.n_tokens.mean(), c.n_lemmas.mean())</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="10">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (1, 2)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">n_tokens</th>
+<th data-quarto-table-cell-role="th">n_lemmas</th>
+</tr>
+<tr class="even">
+<td>f64</td>
+<td>f64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2578.972603</td>
+<td>822.369863</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>An English page runs about 5,184 alphabetic tokens on average, drawn from about 1,446 distinct lemmas; a French page for the very same author runs about 2,579 tokens from about 822 distinct lemmas. Both halve at roughly the same rate, which matches the character-length gap between the two text columns: French Wikipedia’s coverage of these authors is real, but consistently shorter than English Wikipedia’s.</p>
+<ol start="4" type="1">
+<li>Compute the TF-IDF table for each language with <code>DSText.compute_tfidf(..., min_df=0.01, max_df=1.0)</code>, the exact call the chapter itself uses for <code>anno_fr</code>. Print the top 10 terms for <code>"Jane Austen"</code> in both languages. Do these lists match the chapter’s own description of what a top-TF-IDF list should look like?</li>
+</ol>
+<div id="50bcf796" class="cell" data-execution_count="12">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> author <span class="kw">in</span> [<span class="st">"Jane Austen"</span>]:</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"EN"</span>, author, DSText.compute_tfidf(anno_en, min_df<span class="op">=</span><span class="fl">0.01</span>, max_df<span class="op">=</span><span class="fl">1.0</span>).<span class="bu">filter</span>(c.doc_id <span class="op">==</span> author).sort(c.tfidf, descending<span class="op">=</span><span class="va">True</span>).head(<span class="dv">10</span>).select(c.lemma).to_series().to_list())</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"FR"</span>, author, DSText.compute_tfidf(anno_fr, min_df<span class="op">=</span><span class="fl">0.01</span>, max_df<span class="op">=</span><span class="fl">1.0</span>).<span class="bu">filter</span>(c.doc_id <span class="op">==</span> author).sort(c.tfidf, descending<span class="op">=</span><span class="va">True</span>).head(<span class="dv">10</span>).select(c.lemma).to_series().to_list())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>EN Jane Austen ['Austen', 'the', 'and', 'of', 'be', 'in', 'Austens', 'to', 'a', 'her']
+FR Jane Austen ['de', 'le', 'Austen', 'Jane', 'son', 'à', 'et', 'un', 'être', 'en']</code></pre>
+</div>
+</div>
+<p>No.&nbsp;The chapter’s own text claims that TF-IDF “downweights generic terms… and what remains are the names, places, and titles that actually identify each author,” but with <code>max_df=1.0</code> nothing actually gets downweighted enough to matter: <code>the</code>, <code>of</code>, <code>and</code>, <code>in</code>, <code>to</code>, and <code>her</code> fill six of Austen’s ten English slots, and <code>de</code>, <code>le</code>, <code>à</code>, <code>et</code>, <code>un</code>, <code>être</code>, and <code>en</code> fill seven of her ten French ones. This is not an artifact of the 73-author subset — the book’s own rendered table for the full 75-author English corpus shows exactly the same pattern (<code>"Louis MacNeice" → "MacNeice; the; and; in; be; of…"</code>, <code>"George Bernard Shaw" → "the; Shaw; in; and; of; be; a;…"</code>), so this is the chapter’s own documented behavior, not something this notebook introduced. Without a <code>max_df</code> cutoff, a word appearing in every single document (<code>the</code> sits at <code>df_docs = 73</code> here) still keeps an <code>idf</code> of exactly 1, and a common English or French function word’s raw in-document count is large enough that it still outranks a genuinely rare, document- specific proper noun.</p>
+<ol start="5" type="1">
+<li>Recompute the TF-IDF tables with the stricter <code>max_df=0.5</code> the chapter’s own UMAP and distance sections use elsewhere in this same chapter, for both languages, and re-check <code>"Jane Austen"</code>, <code>"A. A. Milne"</code>, and <code>"T. S. Eliot"</code>. Does this cutoff produce the clean lists the chapter’s prose described? Does anything still look out of place?</li>
+</ol>
+<div id="ce7d49ad" class="cell" data-execution_count="13">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>tfidf_en <span class="op">=</span> DSText.compute_tfidf(anno_en, min_df<span class="op">=</span><span class="fl">0.01</span>, max_df<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>tfidf_fr <span class="op">=</span> DSText.compute_tfidf(anno_fr, min_df<span class="op">=</span><span class="fl">0.01</span>, max_df<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> author <span class="kw">in</span> [<span class="st">"Jane Austen"</span>, <span class="st">"A. A. Milne"</span>, <span class="st">"T. S. Eliot"</span>]:</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"EN"</span>, author, tfidf_en.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> author).sort(c.tfidf, descending<span class="op">=</span><span class="va">True</span>).head(<span class="dv">10</span>).select(c.lemma).to_series().to_list())</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"FR"</span>, author, tfidf_fr.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> author).sort(c.tfidf, descending<span class="op">=</span><span class="va">True</span>).head(<span class="dv">10</span>).select(c.lemma).to_series().to_list())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>EN Jane Austen ['Austen', 'Austens', 'Cassandra', 'Jane', 'Sensibility', 'Lefroy', 'Prejudice', 'Pride', 'Sense', 'austen']
+FR Jane Austen ['Austen', 'Jane', 'Cassandra', 'Henry', 'Abbey', 'Mansfield', 'Park', 'Northanger', 'Pride', 'quel']
+EN A. A. Milne ['Milne', 'Pooh', 'Winnie', 'Milnes', 'Robin', 'Christopher', 'Ashdown', 'parser', 'Shepard', 'Forest']
+FR A. A. Milne ['Milne', 'Honour', 'Hartfield', 'with', 'mondial', 'saule', 'kenneth', 'mare', 'Warwickshire', 'Alan']
+EN T. S. Eliot ['Eliot', 'Eliots', 'Waste', 'parser', 'Land', 'output', 'Harvard', 'Vivienne', 'Prufrock', 'Quartets']
+FR T. S. Eliot ['Eliot', 'Waste', 'Land', 'Harvard', 'deliot', 'Prufrock', 'Quatre', 'je', 'Washington', 'quatuor']</code></pre>
+</div>
+</div>
+<p>Mostly yes. Dropping every lemma that appears in more than half the corpus clears out the function words from all three lists, and what is left for Austen is her own name, her sister Cassandra, and her novels — the clean result question 4 promised but did not deliver. Milne’s and Eliot’s English lists are almost as clean, but both still contain <code>"parser"</code>, a word with no obvious connection to either a children’s author or a modernist poet. Neither French list has anything like it. The next question tracks that down.</p>
+<ol start="6" type="1">
+<li>Search both raw text columns for the substring <code>"mw-parser-output"</code>, count how many characters match it per document, and compare the two languages. Then filter <code>anno_en</code> to the token <code>"parser"</code> and check its <code>upos</code> tag and <code>is_alpha</code> flag.</li>
+</ol>
+<div id="786d309c" class="cell" data-execution_count="14">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(text_en.with_columns(n <span class="op">=</span> c.text.<span class="bu">str</span>.count_matches(<span class="st">"mw-parser-output"</span>)).select(c.n.<span class="bu">sum</span>()).item(), <span class="st">"matches in English text"</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(text_fr.with_columns(n <span class="op">=</span> c.text.<span class="bu">str</span>.count_matches(<span class="st">"mw-parser-output"</span>)).select(c.n.<span class="bu">sum</span>()).item(), <span class="st">"matches in French text"</span>)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    text_en</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    .with_columns(n <span class="op">=</span> c.text.<span class="bu">str</span>.count_matches(<span class="st">"mw-parser-output"</span>))</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.n <span class="op">&gt;</span> <span class="dv">0</span>)</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    .select(c.doc_id, c.n)</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>    .sort(c.n, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>33 matches in English text
+0 matches in French text</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="13">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (4, 2)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">doc_id</th>
+<th data-quarto-table-cell-role="th">n</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>u32</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"T. S. Eliot"</td>
+<td>22</td>
+</tr>
+<tr class="even">
+<td>"A. A. Milne"</td>
+<td>8</td>
+</tr>
+<tr class="odd">
+<td>"John Milton"</td>
+<td>2</td>
+</tr>
+<tr class="even">
+<td>"Thomas More"</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="91d66651" class="cell" data-execution_count="15">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>anno_en.<span class="bu">filter</span>(c.token <span class="op">==</span> <span class="st">"parser"</span>).select(c.doc_id, c.token, c.upos, c.is_alpha).unique()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="14">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (4, 4)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">doc_id</th>
+<th data-quarto-table-cell-role="th">token</th>
+<th data-quarto-table-cell-role="th">upos</th>
+<th data-quarto-table-cell-role="th">is_alpha</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>str</td>
+<td>str</td>
+<td>bool</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"T. S. Eliot"</td>
+<td>"parser"</td>
+<td>"NOUN"</td>
+<td>true</td>
+</tr>
+<tr class="even">
+<td>"John Milton"</td>
+<td>"parser"</td>
+<td>"NOUN"</td>
+<td>true</td>
+</tr>
+<tr class="odd">
+<td>"A. A. Milne"</td>
+<td>"parser"</td>
+<td>"NOUN"</td>
+<td>true</td>
+</tr>
+<tr class="even">
+<td>"Thomas More"</td>
+<td>"parser"</td>
+<td>"NOUN"</td>
+<td>true</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="e3109fca" class="cell" data-execution_count="16">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>idx <span class="op">=</span> docs_en.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> <span class="st">"A. A. Milne"</span>).item(<span class="dv">0</span>, <span class="st">"text"</span>).find(<span class="st">"parser"</span>)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>docs_en.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> <span class="st">"A. A. Milne"</span>).item(<span class="dv">0</span>, <span class="st">"text"</span>)[idx <span class="op">-</span> <span class="dv">120</span> : idx <span class="op">+</span> <span class="dv">120</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="15">
+<pre><code>'outh East England where the Pooh stories were set. Milne lived on the northern edge of the forest at Cotchford Farm .mw-parser-output .geo-default.mw-parser-output .geo-dms.mw-parser-output .geo-decdisplayinline.mw-parser-output .geo-nondef'</code></pre>
+</div>
+</div>
+<p><code>"mw-parser-output"</code> is leaked CSS from a Wikipedia coordinate template, scraped straight into the article body along with the rest of the page text — 33 occurrences across four English pages, concentrated in Milne’s and Eliot’s, and zero anywhere in the French text. Printing the raw context around it confirms the source: a run of repeated <code>.mw-parser-output .geo-...</code> class names from a hidden geo-coordinate box, copy-pasted into the extracted text eight times in a single sentence on Milne’s page alone. spaCy tags the token <code>parser</code> itself as an ordinary alphabetic <code>NOUN</code>, exactly the way it would tag a real word, so nothing about <code>is_alpha</code> catches it the way notebook41’s backslash artifact was caught. It sails straight through <code>compute_tfidf</code> and inflates two authors’ top-term lists with a scraping artifact that has nothing to do with either of them.</p>
+<ol start="7" type="1">
+<li>Reproduce the chapter’s part-of-speech comparison — stack <code>anno_en</code> and <code>anno_fr</code> with a <code>lang</code> column, group by <code>lang</code> and <code>upos</code>, and compute the proportion of each part of speech within each language — but now on the matched 73-author subset both tables share. Report the determiner (<code>DET</code>) proportion for each language.</li>
+</ol>
+<div id="1188425a" class="cell" data-execution_count="17">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    pl.concat([</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>        anno_en.with_columns(lang <span class="op">=</span> pl.lit(<span class="st">"en"</span>)),</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>        anno_fr.with_columns(lang <span class="op">=</span> pl.lit(<span class="st">"fr"</span>))</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    ])</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    .group_by([c.lang, c.upos])</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>    .agg(count <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>    .with_columns(prop <span class="op">=</span> c.count <span class="op">/</span> c.count.<span class="bu">sum</span>().over(c.lang))</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.upos <span class="op">==</span> <span class="st">"DET"</span>)</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="16">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (2, 4)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">lang</th>
+<th data-quarto-table-cell-role="th">upos</th>
+<th data-quarto-table-cell-role="th">count</th>
+<th data-quarto-table-cell-role="th">prop</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>str</td>
+<td>u32</td>
+<td>f64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"fr"</td>
+<td>"DET"</td>
+<td>24909</td>
+<td>0.122232</td>
+</tr>
+<tr class="even">
+<td>"en"</td>
+<td>"DET"</td>
+<td>36147</td>
+<td>0.088871</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>8.9% of English tokens are determiners against 12.2% of French ones, the same gap the chapter describes, and this time it is not confounded by the population mismatch built into the chapter’s own version of this comparison: the chapter stacks all 75 English pages against only 73 French ones, quietly comparing two different populations, while <code>anno_en</code> and <code>anno_fr</code> here cover the identical 73 authors on both sides.</p>
+<ol start="8" type="1">
+<li>Compute the pairwise angle distance for each language separately with <code>DSText.compute_distances(..., min_df=0.01, max_df=0.5)</code>. For each language, stack the result with a copy of itself with the ID columns swapped, and find every author’s single nearest neighbor.</li>
+</ol>
+<div id="9ac9d793" class="cell" data-execution_count="18">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>dist_en <span class="op">=</span> DSText.compute_distances(anno_en, min_df<span class="op">=</span><span class="fl">0.01</span>, max_df<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>dist_fr <span class="op">=</span> DSText.compute_distances(anno_fr, min_df<span class="op">=</span><span class="fl">0.01</span>, max_df<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>nn_en <span class="op">=</span> (</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>    pl.concat([</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>        dist_en,</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>        dist_en.select(doc_id<span class="op">=</span>c.doc_id2, doc_id2<span class="op">=</span>c.doc_id, distance<span class="op">=</span>c.distance)</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>    ])</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>    .sort(c.doc_id, c.distance)</span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>    .group_by(c.doc_id, maintain_order<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">1</span>)</span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>    .rename({<span class="st">"doc_id2"</span>: <span class="st">"nn_en"</span>})</span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>    .drop(<span class="st">"distance"</span>)</span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>nn_fr <span class="op">=</span> (</span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a>    pl.concat([</span>
+<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a>        dist_fr,</span>
+<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a>        dist_fr.select(doc_id<span class="op">=</span>c.doc_id2, doc_id2<span class="op">=</span>c.doc_id, distance<span class="op">=</span>c.distance)</span>
+<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a>    ])</span>
+<span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a>    .sort(c.doc_id, c.distance)</span>
+<span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a>    .group_by(c.doc_id, maintain_order<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb25-23"><a href="#cb25-23" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">1</span>)</span>
+<span id="cb25-24"><a href="#cb25-24" aria-hidden="true" tabindex="-1"></a>    .rename({<span class="st">"doc_id2"</span>: <span class="st">"nn_fr"</span>})</span>
+<span id="cb25-25"><a href="#cb25-25" aria-hidden="true" tabindex="-1"></a>    .drop(<span class="st">"distance"</span>)</span>
+<span id="cb25-26"><a href="#cb25-26" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb25-27"><a href="#cb25-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-28"><a href="#cb25-28" aria-hidden="true" tabindex="-1"></a>nn_compare <span class="op">=</span> nn_en.join(nn_fr, on<span class="op">=</span><span class="st">"doc_id"</span>)</span>
+<span id="cb25-29"><a href="#cb25-29" aria-hidden="true" tabindex="-1"></a>nn_compare</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="17">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (73, 3)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">doc_id</th>
+<th data-quarto-table-cell-role="th">nn_en</th>
+<th data-quarto-table-cell-role="th">nn_fr</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>str</td>
+<td>str</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"A. A. Milne"</td>
+<td>"T. S. Eliot"</td>
+<td>"George Orwell"</td>
+</tr>
+<tr class="even">
+<td>"Alexander Pope"</td>
+<td>"John Dryden"</td>
+<td>"Jonathan Swift"</td>
+</tr>
+<tr class="odd">
+<td>"Alfred, Lord Tennyson"</td>
+<td>"Elizabeth Barrett Browning"</td>
+<td>"Samuel Taylor Coleridge"</td>
+</tr>
+<tr class="even">
+<td>"Ann Radcliffe"</td>
+<td>"Jane Austen"</td>
+<td>"Jane Austen"</td>
+</tr>
+<tr class="odd">
+<td>"Beatrix Potter"</td>
+<td>"C. S. Lewis"</td>
+<td>"William Blake"</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"Walter Raleigh"</td>
+<td>"Edmund Spenser"</td>
+<td>"Philip Sidney"</td>
+</tr>
+<tr class="even">
+<td>"William Blake"</td>
+<td>"Cecil Day-Lewis"</td>
+<td>"Samuel Beckett"</td>
+</tr>
+<tr class="odd">
+<td>"William Langland"</td>
+<td>"John Gower"</td>
+<td>"Geoffrey Chaucer"</td>
+</tr>
+<tr class="even">
+<td>"William Shakespeare"</td>
+<td>"Ben Jonson"</td>
+<td>"Samuel Beckett"</td>
+</tr>
+<tr class="odd">
+<td>"William Wordsworth"</td>
+<td>"Samuel Taylor Coleridge"</td>
+<td>"Samuel Taylor Coleridge"</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<ol start="9" type="1">
+<li>What proportion of authors have the exact same nearest neighbor under both languages? Compare this to the chance rate of matching by accident among 72 other authors.</li>
+</ol>
+<div id="bec8d5ac" class="cell" data-execution_count="19">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>agree_rate <span class="op">=</span> nn_compare.select((c.nn_en <span class="op">==</span> c.nn_fr).mean()).item()</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">round</span>(agree_rate, <span class="dv">3</span>), <span class="st">"agreement rate"</span>)</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">round</span>(<span class="dv">1</span> <span class="op">/</span> <span class="dv">72</span>, <span class="dv">3</span>), <span class="st">"chance rate"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>0.479 agreement rate
+0.014 chance rate</code></pre>
+</div>
+</div>
+<p>Almost 48% of authors (35 of 73) have the identical nearest neighbor whether the distance is computed from their English page or their French one, over thirty times the roughly 1.4% we would expect from two independent random guesses among 72 other authors. The two languages are far from producing identical geometry, but the structure that TF-IDF and the angle distance recover is not arbitrary either: it survives translation for close to half the corpus.</p>
+<ol start="10" type="1">
+<li>Look at one agreement and one disagreement from <code>nn_compare</code> by eye. Ann Radcliffe’s nearest neighbor is Jane Austen in both languages; A. A. Milne’s is T. S. Eliot in English but George Orwell in French. Print each pair’s top 5 TF-IDF terms in both languages, then check whether question 6’s <code>parser</code> artifact is actually what is pulling Milne toward Eliot by recomputing the English distance between them with <code>parser</code> removed from <code>anno_en</code>.</li>
+</ol>
+<div id="f9f75a51" class="cell" data-execution_count="20">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> author <span class="kw">in</span> [<span class="st">"Ann Radcliffe"</span>, <span class="st">"Jane Austen"</span>]:</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"EN"</span>, author, tfidf_en.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> author).sort(c.tfidf, descending<span class="op">=</span><span class="va">True</span>).head(<span class="dv">5</span>).select(c.lemma).to_series().to_list())</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"FR"</span>, author, tfidf_fr.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> author).sort(c.tfidf, descending<span class="op">=</span><span class="va">True</span>).head(<span class="dv">5</span>).select(c.lemma).to_series().to_list())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>EN Ann Radcliffe ['Radcliffe', 'Radcliffes', 'Ann', 'Udolpho', 'Gothic']
+FR Ann Radcliffe ['Ann', 'radcliffe', 'Radcliffe', 'gothique', 'Oates']
+EN Jane Austen ['Austen', 'Austens', 'Cassandra', 'Jane', 'Sensibility']
+FR Jane Austen ['Austen', 'Jane', 'Cassandra', 'Henry', 'Abbey']</code></pre>
+</div>
+</div>
+<div id="ffb815ea" class="cell" data-execution_count="21">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> author <span class="kw">in</span> [<span class="st">"A. A. Milne"</span>, <span class="st">"T. S. Eliot"</span>, <span class="st">"George Orwell"</span>]:</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"EN"</span>, author, tfidf_en.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> author).sort(c.tfidf, descending<span class="op">=</span><span class="va">True</span>).head(<span class="dv">5</span>).select(c.lemma).to_series().to_list())</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"FR"</span>, author, tfidf_fr.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> author).sort(c.tfidf, descending<span class="op">=</span><span class="va">True</span>).head(<span class="dv">5</span>).select(c.lemma).to_series().to_list())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>EN A. A. Milne ['Milne', 'Pooh', 'Winnie', 'Milnes', 'Robin']
+FR A. A. Milne ['Milne', 'Honour', 'Hartfield', 'with', 'mondial']
+EN T. S. Eliot ['Eliot', 'Eliots', 'Waste', 'parser', 'Land']
+FR T. S. Eliot ['Eliot', 'Waste', 'Land', 'Harvard', 'deliot']
+EN George Orwell ['Orwell', 'Orwells', 'Blair', 'Animal', 'Eighty']
+FR George Orwell ['Orwell', 'orwell', 'Blair', 'Eric', 'travailliste']</code></pre>
+</div>
+</div>
+<div id="a7be1800" class="cell" data-execution_count="22">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>milne_eliot <span class="op">=</span> dist_en.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> <span class="st">"A. A. Milne"</span>, c.doc_id2 <span class="op">==</span> <span class="st">"T. S. Eliot"</span>).item(<span class="dv">0</span>, <span class="st">"distance"</span>)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>dist_en_no_parser <span class="op">=</span> DSText.compute_distances(anno_en.<span class="bu">filter</span>(c.lemma <span class="op">!=</span> <span class="st">"parser"</span>), min_df<span class="op">=</span><span class="fl">0.01</span>, max_df<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>milne_eliot_no_parser <span class="op">=</span> dist_en_no_parser.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> <span class="st">"A. A. Milne"</span>, c.doc_id2 <span class="op">==</span> <span class="st">"T. S. Eliot"</span>).item(<span class="dv">0</span>, <span class="st">"distance"</span>)</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">round</span>(milne_eliot, <span class="dv">3</span>), <span class="st">"with parser"</span>)</span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">round</span>(milne_eliot_no_parser, <span class="dv">3</span>), <span class="st">"without parser"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>1.528 with parser
+1.548 without parser</code></pre>
+</div>
+</div>
+<p>Radcliffe and Austen both write Gothic-adjacent fiction, and Radcliffe’s own top terms (<code>Udolpho</code> in English, <code>gothique</code> in French) confirm the genre connection directly, so the agreement is easy to believe in both languages. Milne’s disagreement is harder to read off the term lists alone — neither Eliot’s nor Orwell’s top terms share anything obvious with Milne’s beyond ordinary biographical scaffolding. The <code>parser</code> artifact turns out not to be the explanation either: dropping it from <code>anno_en</code> entirely and recomputing barely moves the Milne–Eliot distance (1.528 to 1.548) and does not change who Milne’s nearest neighbor is. Whatever pulls Milne toward Eliot in English and toward Orwell in French runs through the geometry of the full term-weighted vector, not through any single term visible in a short printed list — a caution worth carrying forward: a top-5 or top-10 list is a convenient summary for a human reader, but it is not the same object the distance calculation actually compares.</p>
+<ol start="11" type="1">
+<li>Build a 2D UMAP projection for each language with <code>umap_text(..., min_df=0.01, max_df=0.5, random_state=42)</code>, join each author’s short name and <code>era</code> from <code>meta</code>, and plot both, colored by <code>era</code>. A plot is an impression, not a measurement, so also compute each projection’s own same-era nearest-neighbor rate directly from the <code>dr0</code>/<code>dr1</code> coordinates, the same check the last chapter’s notebook ran on <code>label</code>.</li>
+</ol>
+<div id="ca5e7719" class="cell" data-execution_count="23">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>umap_en <span class="op">=</span> (</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>    anno_en</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>    .pipe(umap_text, doc_id<span class="op">=</span>c.doc_id, term_id<span class="op">=</span>c.lemma, n_components<span class="op">=</span><span class="dv">2</span>, min_df<span class="op">=</span><span class="fl">0.01</span>, max_df<span class="op">=</span><span class="fl">0.5</span>, random_state<span class="op">=</span><span class="dv">42</span>)</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>    .predict(full<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>    .join(meta.select(c.doc_id, c.short, c.era), on<span class="op">=</span><span class="st">"doc_id"</span>)</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>    umap_en</span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>    .pipe(ggplot, aes(c.dr0, c.dr1))</span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>    .geom_text(aes(label<span class="op">=</span>c.short, color<span class="op">=</span>c.era), size<span class="op">=</span><span class="dv">6</span>)</span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>/Users/admin/gh/fds2/.venv/lib/python3.13/site-packages/tqdm/auto.py:21: TqdmWarning: IProgress not found. Please update jupyter and ipywidgets. See https://ipywidgets.readthedocs.io/en/stable/user_install.html
+/Users/admin/gh/fds2/.venv/lib/python3.13/site-packages/umap/umap_.py:1952: UserWarning: n_jobs value 1 overridden to 1 by setting random_state. Use no seed for parallelism.</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="22">
+<div>
+<figure class="figure">
+<p><a href="notebook43_files/figure-html/cell-24-output-2.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="notebook43_files/figure-html/cell-24-output-2.png" width="672" height="480" class="figure-img"></a></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="3818186b" class="cell" data-execution_count="24">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>umap_fr <span class="op">=</span> (</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>    anno_fr</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>    .pipe(umap_text, doc_id<span class="op">=</span>c.doc_id, term_id<span class="op">=</span>c.lemma, n_components<span class="op">=</span><span class="dv">2</span>, min_df<span class="op">=</span><span class="fl">0.01</span>, max_df<span class="op">=</span><span class="fl">0.5</span>, random_state<span class="op">=</span><span class="dv">42</span>)</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>    .predict(full<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>    .join(meta.select(c.doc_id, c.short, c.era), on<span class="op">=</span><span class="st">"doc_id"</span>)</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>    umap_fr</span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>    .pipe(ggplot, aes(c.dr0, c.dr1))</span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>    .geom_text(aes(label<span class="op">=</span>c.short, color<span class="op">=</span>c.era), size<span class="op">=</span><span class="dv">6</span>)</span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>/Users/admin/gh/fds2/.venv/lib/python3.13/site-packages/umap/umap_.py:1952: UserWarning: n_jobs value 1 overridden to 1 by setting random_state. Use no seed for parallelism.</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="23">
+<div>
+<figure class="figure">
+<p><a href="notebook43_files/figure-html/cell-25-output-2.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img src="notebook43_files/figure-html/cell-25-output-2.png" width="672" height="480" class="figure-img"></a></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="af57d5e3" class="cell" data-execution_count="25">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> era_nn_rate(umap_df):</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>    coords <span class="op">=</span> umap_df.select(c.dr0, c.dr1).to_numpy()</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>    dist_sq <span class="op">=</span> ((coords[:, <span class="va">None</span>, :] <span class="op">-</span> coords[<span class="va">None</span>, :, :]) <span class="op">**</span> <span class="dv">2</span>).<span class="bu">sum</span>(axis<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>    np.fill_diagonal(dist_sq, np.inf)</span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>    nn_idx <span class="op">=</span> dist_sq.argmin(axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>    eras <span class="op">=</span> umap_df.select(c.era).to_series().to_numpy()</span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (eras <span class="op">==</span> eras[nn_idx]).mean()</span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">round</span>(era_nn_rate(umap_en), <span class="dv">3</span>), <span class="st">"EN same-era nearest-neighbor rate"</span>)</span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">round</span>(era_nn_rate(umap_fr), <span class="dv">3</span>), <span class="st">"FR same-era nearest-neighbor rate"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>0.205 EN same-era nearest-neighbor rate
+0.26 FR same-era nearest-neighbor rate</code></pre>
+</div>
+</div>
+<ol start="12" type="1">
+<li>With seven <code>era</code> categories of uneven size, matching by chance alone runs around 17%. Both projections clear that bar but not by much — 20.5% for English and 26.0% for French — confirming what the plots suggest by eye: a weak, genuine pull toward grouping by era, not the tight separation notebook42’s own same-label check found for AG News’s four disjoint topic categories, and not nothing either. Looking back across this notebook: what carried over unchanged between English and French, and what genuinely differed?</li>
+</ol>
+<p>The machinery carried over without a single change: the same <code>DSText.process</code>, <code>compute_tfidf</code>, <code>compute_distances</code>, and <code>umap_text</code> calls ran on French tokens exactly as they did on English ones, because none of that code has any language-specific logic built in. What differed was the input each pipeline was handed and what came out the other end. Two authors have no French page at all, and coverage tracks obscurity rather than era. French pages run about half the length and half the vocabulary of their English counterparts on the very same subject. French uses determiners more often, a grammatical fact with nothing to do with editorial choice. And the two languages’ own document geometries agree on a given author’s closest match less than half the time, even though that rate is far above chance. None of this is a flaw in the pipeline; it is exactly the kind of genuine cross-lingual difference the chapter’s own closing paragraph says this machinery makes possible to study systematically rather than assert from a hunch.</p>
+
+
+<!-- -->
+
+</section>
+
+</main> <!-- /main -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details .sourceCode");
+      for (let i = 0; i < detailsSrc.length; i++) {
+        const details = detailsSrc[i].closest('details');
+        if (details) {
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+      }
+      return false;
+    };
+  }
+  // Replace buttons to strip the broken listeners Quarto attached, then re-add fixed ones
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    const fresh = hideAllCode.cloneNode(true);
+    hideAllCode.parentNode.replaceChild(fresh, hideAllCode);
+    fresh.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    const fresh = showAllCode.cloneNode(true);
+    showAllCode.parentNode.replaceChild(fresh, showAllCode);
+    fresh.addEventListener("click", toggleCodeHandler(true));
+  }
+});
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Notebook43"</span></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a><span class="an">solutions-release-date:</span><span class="co"> "2026-10-21"</span></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a><span class="fu">### Setup</span></span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>Run all of the following before starting the notebook.</span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [noclear]</span></span>
+<span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
+<span id="cb40-15"><a href="#cb40-15" aria-hidden="true" tabindex="-1"></a><span class="op">!</span> wget <span class="op">-</span>q <span class="op">-</span>nc https:<span class="op">//</span>raw.githubusercontent.com<span class="op">/</span>taylor<span class="op">-</span>arnold<span class="op">/</span>fds2<span class="op">/</span>refs<span class="op">/</span>heads<span class="op">/</span>main<span class="op">/</span>funs.py</span>
+<span id="cb40-16"><a href="#cb40-16" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-17"><a href="#cb40-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-20"><a href="#cb40-20" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb40-21"><a href="#cb40-21" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [noclear]</span></span>
+<span id="cb40-22"><a href="#cb40-22" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb40-23"><a href="#cb40-23" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine <span class="im">import</span> ggplot, aes</span>
+<span id="cb40-24"><a href="#cb40-24" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> polars <span class="im">import</span> col <span class="im">as</span> c</span>
+<span id="cb40-25"><a href="#cb40-25" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb40-26"><a href="#cb40-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-27"><a href="#cb40-27" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> funs</span>
+<span id="cb40-28"><a href="#cb40-28" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> funs <span class="im">import</span> DSText, umap_text</span>
+<span id="cb40-29"><a href="#cb40-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-30"><a href="#cb40-30" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> spacy</span>
+<span id="cb40-31"><a href="#cb40-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-32"><a href="#cb40-32" aria-hidden="true" tabindex="-1"></a>ub <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"</span></span>
+<span id="cb40-33"><a href="#cb40-33" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-34"><a href="#cb40-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-37"><a href="#cb40-37" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb40-38"><a href="#cb40-38" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [remove]</span></span>
+<span id="cb40-39"><a href="#cb40-39" aria-hidden="true" tabindex="-1"></a><span class="co">#| include: false</span></span>
+<span id="cb40-40"><a href="#cb40-40" aria-hidden="true" tabindex="-1"></a>ub <span class="op">=</span> <span class="st">""</span></span>
+<span id="cb40-41"><a href="#cb40-41" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-42"><a href="#cb40-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-45"><a href="#cb40-45" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb40-46"><a href="#cb40-46" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [noclear]</span></span>
+<span id="cb40-47"><a href="#cb40-47" aria-hidden="true" tabindex="-1"></a>meta <span class="op">=</span> pl.read_csv(ub <span class="op">+</span> <span class="st">"data/wiki_uk_meta.csv.gz"</span>)</span>
+<span id="cb40-48"><a href="#cb40-48" aria-hidden="true" tabindex="-1"></a>text_en <span class="op">=</span> pl.read_csv(ub <span class="op">+</span> <span class="st">"data/wiki_uk_authors_text.csv"</span>)</span>
+<span id="cb40-49"><a href="#cb40-49" aria-hidden="true" tabindex="-1"></a>text_fr <span class="op">=</span> pl.read_csv(ub <span class="op">+</span> <span class="st">"data/wiki_uk_authors_text_fr.csv"</span>)</span>
+<span id="cb40-50"><a href="#cb40-50" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-51"><a href="#cb40-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-54"><a href="#cb40-54" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb40-55"><a href="#cb40-55" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [noclear]</span></span>
+<span id="cb40-56"><a href="#cb40-56" aria-hidden="true" tabindex="-1"></a>nlp_en <span class="op">=</span> spacy.load(<span class="st">"en_core_web_sm"</span>)</span>
+<span id="cb40-57"><a href="#cb40-57" aria-hidden="true" tabindex="-1"></a>nlp_fr <span class="op">=</span> spacy.load(<span class="st">"fr_core_news_sm"</span>)</span>
+<span id="cb40-58"><a href="#cb40-58" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-59"><a href="#cb40-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-60"><a href="#cb40-60" aria-hidden="true" tabindex="-1"></a><span class="fu">### Questions</span></span>
+<span id="cb40-61"><a href="#cb40-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-62"><a href="#cb40-62" aria-hidden="true" tabindex="-1"></a><span class="in">`meta`</span> holds one row per author, with a birth and death year, a literary</span>
+<span id="cb40-63"><a href="#cb40-63" aria-hidden="true" tabindex="-1"></a><span class="in">`era`</span>, a <span class="in">`gender`</span>, and the <span class="in">`link`</span>/<span class="in">`short`</span> names used elsewhere in the corpus.</span>
+<span id="cb40-64"><a href="#cb40-64" aria-hidden="true" tabindex="-1"></a><span class="in">`text_en`</span> has one row per author with the full text of their English</span>
+<span id="cb40-65"><a href="#cb40-65" aria-hidden="true" tabindex="-1"></a>Wikipedia page; <span class="in">`text_fr`</span> is the same idea for the French edition. This is</span>
+<span id="cb40-66"><a href="#cb40-66" aria-hidden="true" tabindex="-1"></a>the same 75-author corpus the chapter itself builds its cross-language</span>
+<span id="cb40-67"><a href="#cb40-67" aria-hidden="true" tabindex="-1"></a>section on, because it is the only French-paired text in the whole</span>
+<span id="cb40-68"><a href="#cb40-68" aria-hidden="true" tabindex="-1"></a>catalogue — there is no second bilingual corpus to swap in instead. The</span>
+<span id="cb40-69"><a href="#cb40-69" aria-hidden="true" tabindex="-1"></a>first question below investigates a real narrowing this notebook has to</span>
+<span id="cb40-70"><a href="#cb40-70" aria-hidden="true" tabindex="-1"></a>make before doing anything else: <span class="in">`text_fr`</span> does not have 75 rows. Print</span>
+<span id="cb40-71"><a href="#cb40-71" aria-hidden="true" tabindex="-1"></a>results unless a question says otherwise.</span>
+<span id="cb40-72"><a href="#cb40-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-73"><a href="#cb40-73" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>How many of the 75 authors in <span class="in">`text_en`</span> also have a row in <span class="in">`text_fr`</span>?</span>
+<span id="cb40-74"><a href="#cb40-74" aria-hidden="true" tabindex="-1"></a>Anti-join to find the author(s) missing a French page, and join the result</span>
+<span id="cb40-75"><a href="#cb40-75" aria-hidden="true" tabindex="-1"></a>to <span class="in">`meta`</span> for their era and gender.</span>
+<span id="cb40-76"><a href="#cb40-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-79"><a href="#cb40-79" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb40-80"><a href="#cb40-80" aria-hidden="true" tabindex="-1"></a>n_common <span class="op">=</span> (</span>
+<span id="cb40-81"><a href="#cb40-81" aria-hidden="true" tabindex="-1"></a>    text_en</span>
+<span id="cb40-82"><a href="#cb40-82" aria-hidden="true" tabindex="-1"></a>    .join(text_fr.select(c.doc_id), on<span class="op">=</span><span class="st">"doc_id"</span>)</span>
+<span id="cb40-83"><a href="#cb40-83" aria-hidden="true" tabindex="-1"></a>    .height</span>
+<span id="cb40-84"><a href="#cb40-84" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb40-85"><a href="#cb40-85" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(n_common, <span class="st">"of"</span>, text_en.height, <span class="st">"authors have a French page"</span>)</span>
+<span id="cb40-86"><a href="#cb40-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-87"><a href="#cb40-87" aria-hidden="true" tabindex="-1"></a>missing <span class="op">=</span> text_en.join(text_fr.select(c.doc_id), on<span class="op">=</span><span class="st">"doc_id"</span>, how<span class="op">=</span><span class="st">"anti"</span>)</span>
+<span id="cb40-88"><a href="#cb40-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-89"><a href="#cb40-89" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb40-90"><a href="#cb40-90" aria-hidden="true" tabindex="-1"></a>    missing</span>
+<span id="cb40-91"><a href="#cb40-91" aria-hidden="true" tabindex="-1"></a>    .join(meta, on<span class="op">=</span><span class="st">"doc_id"</span>)</span>
+<span id="cb40-92"><a href="#cb40-92" aria-hidden="true" tabindex="-1"></a>    .select(c.doc_id, c.era, c.gender)</span>
+<span id="cb40-93"><a href="#cb40-93" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb40-94"><a href="#cb40-94" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-95"><a href="#cb40-95" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-96"><a href="#cb40-96" aria-hidden="true" tabindex="-1"></a>Now rank all 75 authors by the character length of their English page, and</span>
+<span id="cb40-97"><a href="#cb40-97" aria-hidden="true" tabindex="-1"></a>report where the two missing authors fall in that ranking.</span>
+<span id="cb40-98"><a href="#cb40-98" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-101"><a href="#cb40-101" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb40-102"><a href="#cb40-102" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb40-103"><a href="#cb40-103" aria-hidden="true" tabindex="-1"></a>    text_en</span>
+<span id="cb40-104"><a href="#cb40-104" aria-hidden="true" tabindex="-1"></a>    .with_columns(n_chars <span class="op">=</span> c.text.<span class="bu">str</span>.len_chars())</span>
+<span id="cb40-105"><a href="#cb40-105" aria-hidden="true" tabindex="-1"></a>    .with_columns(rank <span class="op">=</span> c.n_chars.rank())</span>
+<span id="cb40-106"><a href="#cb40-106" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.doc_id.is_in(missing.select(c.doc_id).to_series()))</span>
+<span id="cb40-107"><a href="#cb40-107" aria-hidden="true" tabindex="-1"></a>    .select(c.doc_id, c.n_chars, c.rank)</span>
+<span id="cb40-108"><a href="#cb40-108" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb40-109"><a href="#cb40-109" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-110"><a href="#cb40-110" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-111"><a href="#cb40-111" aria-hidden="true" tabindex="-1"></a>Only 73 of the 75 authors have a French Wikipedia page. Both authors missing</span>
+<span id="cb40-112"><a href="#cb40-112" aria-hidden="true" tabindex="-1"></a>one, Rex Warner and Edward Upward, are Twentieth Century writers, but era</span>
+<span id="cb40-113"><a href="#cb40-113" aria-hidden="true" tabindex="-1"></a>alone does not explain the gap: plenty of other Twentieth Century authors in</span>
+<span id="cb40-114"><a href="#cb40-114" aria-hidden="true" tabindex="-1"></a>this corpus do have a French page. Page length does explain it. Rex Warner</span>
+<span id="cb40-115"><a href="#cb40-115" aria-hidden="true" tabindex="-1"></a>has the single shortest English page in the entire 75-author corpus, and</span>
+<span id="cb40-116"><a href="#cb40-116" aria-hidden="true" tabindex="-1"></a>Edward Upward has the third shortest. The two authors with no French</span>
+<span id="cb40-117"><a href="#cb40-117" aria-hidden="true" tabindex="-1"></a>Wikipedia page at all are also, independently, two of the three</span>
+<span id="cb40-118"><a href="#cb40-118" aria-hidden="true" tabindex="-1"></a>least-covered figures on the English side. Missing translation coverage</span>
+<span id="cb40-119"><a href="#cb40-119" aria-hidden="true" tabindex="-1"></a>here tracks obscurity, not a random gap or a cutoff by time period.</span>
+<span id="cb40-120"><a href="#cb40-120" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-121"><a href="#cb40-121" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Restrict <span class="in">`text_en`</span> and <span class="in">`text_fr`</span> to the 73 shared authors, sort both by</span>
+<span id="cb40-122"><a href="#cb40-122" aria-hidden="true" tabindex="-1"></a><span class="in">`doc_id`</span>, and confirm the two tables now cover the exact same set of</span>
+<span id="cb40-123"><a href="#cb40-123" aria-hidden="true" tabindex="-1"></a>authors. Then run each language's text through its own spaCy pipeline with</span>
+<span id="cb40-124"><a href="#cb40-124" aria-hidden="true" tabindex="-1"></a><span class="in">`DSText.process`</span>, and print the resulting shapes.</span>
+<span id="cb40-125"><a href="#cb40-125" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-128"><a href="#cb40-128" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb40-129"><a href="#cb40-129" aria-hidden="true" tabindex="-1"></a>docs_en <span class="op">=</span> (</span>
+<span id="cb40-130"><a href="#cb40-130" aria-hidden="true" tabindex="-1"></a>    text_en</span>
+<span id="cb40-131"><a href="#cb40-131" aria-hidden="true" tabindex="-1"></a>    .join(text_fr.select(c.doc_id), on<span class="op">=</span><span class="st">"doc_id"</span>)</span>
+<span id="cb40-132"><a href="#cb40-132" aria-hidden="true" tabindex="-1"></a>    .sort(c.doc_id)</span>
+<span id="cb40-133"><a href="#cb40-133" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb40-134"><a href="#cb40-134" aria-hidden="true" tabindex="-1"></a>docs_fr <span class="op">=</span> text_fr.sort(c.doc_id)</span>
+<span id="cb40-135"><a href="#cb40-135" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-136"><a href="#cb40-136" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(docs_en.select(c.doc_id).equals(docs_fr.select(c.doc_id)))</span>
+<span id="cb40-137"><a href="#cb40-137" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-138"><a href="#cb40-138" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-141"><a href="#cb40-141" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb40-142"><a href="#cb40-142" aria-hidden="true" tabindex="-1"></a>anno_en <span class="op">=</span> DSText.process(docs_en, nlp_en)</span>
+<span id="cb40-143"><a href="#cb40-143" aria-hidden="true" tabindex="-1"></a>anno_fr <span class="op">=</span> DSText.process(docs_fr, nlp_fr)</span>
+<span id="cb40-144"><a href="#cb40-144" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-145"><a href="#cb40-145" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(anno_en.shape)</span>
+<span id="cb40-146"><a href="#cb40-146" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(anno_fr.shape)</span>
+<span id="cb40-147"><a href="#cb40-147" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-148"><a href="#cb40-148" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-149"><a href="#cb40-149" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>For each language, compute the average number of alphabetic tokens per</span>
+<span id="cb40-150"><a href="#cb40-150" aria-hidden="true" tabindex="-1"></a>document and the average number of distinct lemmas per document.</span>
+<span id="cb40-151"><a href="#cb40-151" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-154"><a href="#cb40-154" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb40-155"><a href="#cb40-155" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb40-156"><a href="#cb40-156" aria-hidden="true" tabindex="-1"></a>    anno_en</span>
+<span id="cb40-157"><a href="#cb40-157" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.is_alpha)</span>
+<span id="cb40-158"><a href="#cb40-158" aria-hidden="true" tabindex="-1"></a>    .group_by(c.doc_id)</span>
+<span id="cb40-159"><a href="#cb40-159" aria-hidden="true" tabindex="-1"></a>    .agg(n_tokens <span class="op">=</span> pl.<span class="bu">len</span>(), n_lemmas <span class="op">=</span> c.lemma.n_unique())</span>
+<span id="cb40-160"><a href="#cb40-160" aria-hidden="true" tabindex="-1"></a>    .select(c.n_tokens.mean(), c.n_lemmas.mean())</span>
+<span id="cb40-161"><a href="#cb40-161" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb40-162"><a href="#cb40-162" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-163"><a href="#cb40-163" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-166"><a href="#cb40-166" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb40-167"><a href="#cb40-167" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb40-168"><a href="#cb40-168" aria-hidden="true" tabindex="-1"></a>    anno_fr</span>
+<span id="cb40-169"><a href="#cb40-169" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.is_alpha)</span>
+<span id="cb40-170"><a href="#cb40-170" aria-hidden="true" tabindex="-1"></a>    .group_by(c.doc_id)</span>
+<span id="cb40-171"><a href="#cb40-171" aria-hidden="true" tabindex="-1"></a>    .agg(n_tokens <span class="op">=</span> pl.<span class="bu">len</span>(), n_lemmas <span class="op">=</span> c.lemma.n_unique())</span>
+<span id="cb40-172"><a href="#cb40-172" aria-hidden="true" tabindex="-1"></a>    .select(c.n_tokens.mean(), c.n_lemmas.mean())</span>
+<span id="cb40-173"><a href="#cb40-173" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb40-174"><a href="#cb40-174" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-175"><a href="#cb40-175" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-176"><a href="#cb40-176" aria-hidden="true" tabindex="-1"></a>An English page runs about 5,184 alphabetic tokens on average, drawn from</span>
+<span id="cb40-177"><a href="#cb40-177" aria-hidden="true" tabindex="-1"></a>about 1,446 distinct lemmas; a French page for the very same author runs</span>
+<span id="cb40-178"><a href="#cb40-178" aria-hidden="true" tabindex="-1"></a>about 2,579 tokens from about 822 distinct lemmas. Both halve at roughly the</span>
+<span id="cb40-179"><a href="#cb40-179" aria-hidden="true" tabindex="-1"></a>same rate, which matches the character-length gap between the two text</span>
+<span id="cb40-180"><a href="#cb40-180" aria-hidden="true" tabindex="-1"></a>columns: French Wikipedia's coverage of these authors is real, but</span>
+<span id="cb40-181"><a href="#cb40-181" aria-hidden="true" tabindex="-1"></a>consistently shorter than English Wikipedia's.</span>
+<span id="cb40-182"><a href="#cb40-182" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-183"><a href="#cb40-183" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>Compute the TF-IDF table for each language with `DSText.compute_tfidf(...,</span>
+<span id="cb40-184"><a href="#cb40-184" aria-hidden="true" tabindex="-1"></a>min_df=0.01, max_df=1.0)`, the exact call the chapter itself uses for</span>
+<span id="cb40-185"><a href="#cb40-185" aria-hidden="true" tabindex="-1"></a><span class="in">`anno_fr`</span>. Print the top 10 terms for <span class="in">`"Jane Austen"`</span> in both languages. Do</span>
+<span id="cb40-186"><a href="#cb40-186" aria-hidden="true" tabindex="-1"></a>these lists match the chapter's own description of what a top-TF-IDF list</span>
+<span id="cb40-187"><a href="#cb40-187" aria-hidden="true" tabindex="-1"></a>should look like?</span>
+<span id="cb40-188"><a href="#cb40-188" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-191"><a href="#cb40-191" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb40-192"><a href="#cb40-192" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> author <span class="kw">in</span> [<span class="st">"Jane Austen"</span>]:</span>
+<span id="cb40-193"><a href="#cb40-193" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"EN"</span>, author, DSText.compute_tfidf(anno_en, min_df<span class="op">=</span><span class="fl">0.01</span>, max_df<span class="op">=</span><span class="fl">1.0</span>).<span class="bu">filter</span>(c.doc_id <span class="op">==</span> author).sort(c.tfidf, descending<span class="op">=</span><span class="va">True</span>).head(<span class="dv">10</span>).select(c.lemma).to_series().to_list())</span>
+<span id="cb40-194"><a href="#cb40-194" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"FR"</span>, author, DSText.compute_tfidf(anno_fr, min_df<span class="op">=</span><span class="fl">0.01</span>, max_df<span class="op">=</span><span class="fl">1.0</span>).<span class="bu">filter</span>(c.doc_id <span class="op">==</span> author).sort(c.tfidf, descending<span class="op">=</span><span class="va">True</span>).head(<span class="dv">10</span>).select(c.lemma).to_series().to_list())</span>
+<span id="cb40-195"><a href="#cb40-195" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-196"><a href="#cb40-196" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-197"><a href="#cb40-197" aria-hidden="true" tabindex="-1"></a>No. The chapter's own text claims that TF-IDF "downweights generic terms...</span>
+<span id="cb40-198"><a href="#cb40-198" aria-hidden="true" tabindex="-1"></a>and what remains are the names, places, and titles that actually identify</span>
+<span id="cb40-199"><a href="#cb40-199" aria-hidden="true" tabindex="-1"></a>each author," but with <span class="in">`max_df=1.0`</span> nothing actually gets downweighted</span>
+<span id="cb40-200"><a href="#cb40-200" aria-hidden="true" tabindex="-1"></a>enough to matter: <span class="in">`the`</span>, <span class="in">`of`</span>, <span class="in">`and`</span>, <span class="in">`in`</span>, <span class="in">`to`</span>, and <span class="in">`her`</span> fill six of</span>
+<span id="cb40-201"><a href="#cb40-201" aria-hidden="true" tabindex="-1"></a>Austen's ten English slots, and <span class="in">`de`</span>, <span class="in">`le`</span>, <span class="in">`à`</span>, <span class="in">`et`</span>, <span class="in">`un`</span>, <span class="in">`être`</span>, and <span class="in">`en`</span></span>
+<span id="cb40-202"><a href="#cb40-202" aria-hidden="true" tabindex="-1"></a>fill seven of her ten French ones. This is not an artifact of the 73-author</span>
+<span id="cb40-203"><a href="#cb40-203" aria-hidden="true" tabindex="-1"></a>subset — the book's own rendered table for the full 75-author English corpus</span>
+<span id="cb40-204"><a href="#cb40-204" aria-hidden="true" tabindex="-1"></a>shows exactly the same pattern (`"Louis MacNeice" → "MacNeice; the; and; in;</span>
+<span id="cb40-205"><a href="#cb40-205" aria-hidden="true" tabindex="-1"></a>be; of…"<span class="in">`, `</span>"George Bernard Shaw" → "the; Shaw; in; and; of; be; a;…"`), so</span>
+<span id="cb40-206"><a href="#cb40-206" aria-hidden="true" tabindex="-1"></a>this is the chapter's own documented behavior, not something this notebook</span>
+<span id="cb40-207"><a href="#cb40-207" aria-hidden="true" tabindex="-1"></a>introduced. Without a <span class="in">`max_df`</span> cutoff, a word appearing in every single</span>
+<span id="cb40-208"><a href="#cb40-208" aria-hidden="true" tabindex="-1"></a>document (<span class="in">`the`</span> sits at <span class="in">`df_docs = 73`</span> here) still keeps an <span class="in">`idf`</span> of</span>
+<span id="cb40-209"><a href="#cb40-209" aria-hidden="true" tabindex="-1"></a>exactly 1, and a common English or French function word's raw in-document</span>
+<span id="cb40-210"><a href="#cb40-210" aria-hidden="true" tabindex="-1"></a>count is large enough that it still outranks a genuinely rare, document-</span>
+<span id="cb40-211"><a href="#cb40-211" aria-hidden="true" tabindex="-1"></a>specific proper noun.</span>
+<span id="cb40-212"><a href="#cb40-212" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-213"><a href="#cb40-213" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>Recompute the TF-IDF tables with the stricter <span class="in">`max_df=0.5`</span> the chapter's</span>
+<span id="cb40-214"><a href="#cb40-214" aria-hidden="true" tabindex="-1"></a>own UMAP and distance sections use elsewhere in this same chapter, for both</span>
+<span id="cb40-215"><a href="#cb40-215" aria-hidden="true" tabindex="-1"></a>languages, and re-check <span class="in">`"Jane Austen"`</span>, <span class="in">`"A. A. Milne"`</span>, and `"T. S.</span>
+<span id="cb40-216"><a href="#cb40-216" aria-hidden="true" tabindex="-1"></a>Eliot"`. Does this cutoff produce the clean lists the chapter's prose</span>
+<span id="cb40-217"><a href="#cb40-217" aria-hidden="true" tabindex="-1"></a>described? Does anything still look out of place?</span>
+<span id="cb40-218"><a href="#cb40-218" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-221"><a href="#cb40-221" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb40-222"><a href="#cb40-222" aria-hidden="true" tabindex="-1"></a>tfidf_en <span class="op">=</span> DSText.compute_tfidf(anno_en, min_df<span class="op">=</span><span class="fl">0.01</span>, max_df<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb40-223"><a href="#cb40-223" aria-hidden="true" tabindex="-1"></a>tfidf_fr <span class="op">=</span> DSText.compute_tfidf(anno_fr, min_df<span class="op">=</span><span class="fl">0.01</span>, max_df<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb40-224"><a href="#cb40-224" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-225"><a href="#cb40-225" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> author <span class="kw">in</span> [<span class="st">"Jane Austen"</span>, <span class="st">"A. A. Milne"</span>, <span class="st">"T. S. Eliot"</span>]:</span>
+<span id="cb40-226"><a href="#cb40-226" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"EN"</span>, author, tfidf_en.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> author).sort(c.tfidf, descending<span class="op">=</span><span class="va">True</span>).head(<span class="dv">10</span>).select(c.lemma).to_series().to_list())</span>
+<span id="cb40-227"><a href="#cb40-227" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"FR"</span>, author, tfidf_fr.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> author).sort(c.tfidf, descending<span class="op">=</span><span class="va">True</span>).head(<span class="dv">10</span>).select(c.lemma).to_series().to_list())</span>
+<span id="cb40-228"><a href="#cb40-228" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-229"><a href="#cb40-229" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-230"><a href="#cb40-230" aria-hidden="true" tabindex="-1"></a>Mostly yes. Dropping every lemma that appears in more than half the corpus</span>
+<span id="cb40-231"><a href="#cb40-231" aria-hidden="true" tabindex="-1"></a>clears out the function words from all three lists, and what is left for</span>
+<span id="cb40-232"><a href="#cb40-232" aria-hidden="true" tabindex="-1"></a>Austen is her own name, her sister Cassandra, and her novels — the clean</span>
+<span id="cb40-233"><a href="#cb40-233" aria-hidden="true" tabindex="-1"></a>result question 4 promised but did not deliver. Milne's and Eliot's English</span>
+<span id="cb40-234"><a href="#cb40-234" aria-hidden="true" tabindex="-1"></a>lists are almost as clean, but both still contain <span class="in">`"parser"`</span>, a word with no</span>
+<span id="cb40-235"><a href="#cb40-235" aria-hidden="true" tabindex="-1"></a>obvious connection to either a children's author or a modernist poet.</span>
+<span id="cb40-236"><a href="#cb40-236" aria-hidden="true" tabindex="-1"></a>Neither French list has anything like it. The next question tracks that</span>
+<span id="cb40-237"><a href="#cb40-237" aria-hidden="true" tabindex="-1"></a>down.</span>
+<span id="cb40-238"><a href="#cb40-238" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-239"><a href="#cb40-239" aria-hidden="true" tabindex="-1"></a><span class="ss">6. </span>Search both raw text columns for the substring <span class="in">`"mw-parser-output"`</span>,</span>
+<span id="cb40-240"><a href="#cb40-240" aria-hidden="true" tabindex="-1"></a>count how many characters match it per document, and compare the two</span>
+<span id="cb40-241"><a href="#cb40-241" aria-hidden="true" tabindex="-1"></a>languages. Then filter <span class="in">`anno_en`</span> to the token <span class="in">`"parser"`</span> and check its</span>
+<span id="cb40-242"><a href="#cb40-242" aria-hidden="true" tabindex="-1"></a><span class="in">`upos`</span> tag and <span class="in">`is_alpha`</span> flag.</span>
+<span id="cb40-243"><a href="#cb40-243" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-246"><a href="#cb40-246" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb40-247"><a href="#cb40-247" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(text_en.with_columns(n <span class="op">=</span> c.text.<span class="bu">str</span>.count_matches(<span class="st">"mw-parser-output"</span>)).select(c.n.<span class="bu">sum</span>()).item(), <span class="st">"matches in English text"</span>)</span>
+<span id="cb40-248"><a href="#cb40-248" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(text_fr.with_columns(n <span class="op">=</span> c.text.<span class="bu">str</span>.count_matches(<span class="st">"mw-parser-output"</span>)).select(c.n.<span class="bu">sum</span>()).item(), <span class="st">"matches in French text"</span>)</span>
+<span id="cb40-249"><a href="#cb40-249" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-250"><a href="#cb40-250" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb40-251"><a href="#cb40-251" aria-hidden="true" tabindex="-1"></a>    text_en</span>
+<span id="cb40-252"><a href="#cb40-252" aria-hidden="true" tabindex="-1"></a>    .with_columns(n <span class="op">=</span> c.text.<span class="bu">str</span>.count_matches(<span class="st">"mw-parser-output"</span>))</span>
+<span id="cb40-253"><a href="#cb40-253" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.n <span class="op">&gt;</span> <span class="dv">0</span>)</span>
+<span id="cb40-254"><a href="#cb40-254" aria-hidden="true" tabindex="-1"></a>    .select(c.doc_id, c.n)</span>
+<span id="cb40-255"><a href="#cb40-255" aria-hidden="true" tabindex="-1"></a>    .sort(c.n, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb40-256"><a href="#cb40-256" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb40-257"><a href="#cb40-257" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-258"><a href="#cb40-258" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-261"><a href="#cb40-261" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb40-262"><a href="#cb40-262" aria-hidden="true" tabindex="-1"></a>anno_en.<span class="bu">filter</span>(c.token <span class="op">==</span> <span class="st">"parser"</span>).select(c.doc_id, c.token, c.upos, c.is_alpha).unique()</span>
+<span id="cb40-263"><a href="#cb40-263" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-264"><a href="#cb40-264" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-267"><a href="#cb40-267" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb40-268"><a href="#cb40-268" aria-hidden="true" tabindex="-1"></a>idx <span class="op">=</span> docs_en.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> <span class="st">"A. A. Milne"</span>).item(<span class="dv">0</span>, <span class="st">"text"</span>).find(<span class="st">"parser"</span>)</span>
+<span id="cb40-269"><a href="#cb40-269" aria-hidden="true" tabindex="-1"></a>docs_en.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> <span class="st">"A. A. Milne"</span>).item(<span class="dv">0</span>, <span class="st">"text"</span>)[idx <span class="op">-</span> <span class="dv">120</span> : idx <span class="op">+</span> <span class="dv">120</span>]</span>
+<span id="cb40-270"><a href="#cb40-270" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-271"><a href="#cb40-271" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-272"><a href="#cb40-272" aria-hidden="true" tabindex="-1"></a><span class="in">`"mw-parser-output"`</span> is leaked CSS from a Wikipedia coordinate template,</span>
+<span id="cb40-273"><a href="#cb40-273" aria-hidden="true" tabindex="-1"></a>scraped straight into the article body along with the rest of the page text</span>
+<span id="cb40-274"><a href="#cb40-274" aria-hidden="true" tabindex="-1"></a>— 33 occurrences across four English pages, concentrated in Milne's and</span>
+<span id="cb40-275"><a href="#cb40-275" aria-hidden="true" tabindex="-1"></a>Eliot's, and zero anywhere in the French text. Printing the raw context</span>
+<span id="cb40-276"><a href="#cb40-276" aria-hidden="true" tabindex="-1"></a>around it confirms the source: a run of repeated `.mw-parser-output</span>
+<span id="cb40-277"><a href="#cb40-277" aria-hidden="true" tabindex="-1"></a>.geo-...` class names from a hidden geo-coordinate box, copy-pasted into the</span>
+<span id="cb40-278"><a href="#cb40-278" aria-hidden="true" tabindex="-1"></a>extracted text eight times in a single sentence on Milne's page alone. spaCy</span>
+<span id="cb40-279"><a href="#cb40-279" aria-hidden="true" tabindex="-1"></a>tags the token <span class="in">`parser`</span> itself as an ordinary alphabetic <span class="in">`NOUN`</span>, exactly the</span>
+<span id="cb40-280"><a href="#cb40-280" aria-hidden="true" tabindex="-1"></a>way it would tag a real word, so nothing about <span class="in">`is_alpha`</span> catches it the way</span>
+<span id="cb40-281"><a href="#cb40-281" aria-hidden="true" tabindex="-1"></a>notebook41's backslash artifact was caught. It sails straight through</span>
+<span id="cb40-282"><a href="#cb40-282" aria-hidden="true" tabindex="-1"></a><span class="in">`compute_tfidf`</span> and inflates two authors' top-term lists with a scraping</span>
+<span id="cb40-283"><a href="#cb40-283" aria-hidden="true" tabindex="-1"></a>artifact that has nothing to do with either of them.</span>
+<span id="cb40-284"><a href="#cb40-284" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-285"><a href="#cb40-285" aria-hidden="true" tabindex="-1"></a><span class="ss">7. </span>Reproduce the chapter's part-of-speech comparison — stack <span class="in">`anno_en`</span> and</span>
+<span id="cb40-286"><a href="#cb40-286" aria-hidden="true" tabindex="-1"></a><span class="in">`anno_fr`</span> with a <span class="in">`lang`</span> column, group by <span class="in">`lang`</span> and <span class="in">`upos`</span>, and compute the</span>
+<span id="cb40-287"><a href="#cb40-287" aria-hidden="true" tabindex="-1"></a>proportion of each part of speech within each language — but now on the</span>
+<span id="cb40-288"><a href="#cb40-288" aria-hidden="true" tabindex="-1"></a>matched 73-author subset both tables share. Report the determiner (<span class="in">`DET`</span>)</span>
+<span id="cb40-289"><a href="#cb40-289" aria-hidden="true" tabindex="-1"></a>proportion for each language.</span>
+<span id="cb40-290"><a href="#cb40-290" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-293"><a href="#cb40-293" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb40-294"><a href="#cb40-294" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb40-295"><a href="#cb40-295" aria-hidden="true" tabindex="-1"></a>    pl.concat([</span>
+<span id="cb40-296"><a href="#cb40-296" aria-hidden="true" tabindex="-1"></a>        anno_en.with_columns(lang <span class="op">=</span> pl.lit(<span class="st">"en"</span>)),</span>
+<span id="cb40-297"><a href="#cb40-297" aria-hidden="true" tabindex="-1"></a>        anno_fr.with_columns(lang <span class="op">=</span> pl.lit(<span class="st">"fr"</span>))</span>
+<span id="cb40-298"><a href="#cb40-298" aria-hidden="true" tabindex="-1"></a>    ])</span>
+<span id="cb40-299"><a href="#cb40-299" aria-hidden="true" tabindex="-1"></a>    .group_by([c.lang, c.upos])</span>
+<span id="cb40-300"><a href="#cb40-300" aria-hidden="true" tabindex="-1"></a>    .agg(count <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb40-301"><a href="#cb40-301" aria-hidden="true" tabindex="-1"></a>    .with_columns(prop <span class="op">=</span> c.count <span class="op">/</span> c.count.<span class="bu">sum</span>().over(c.lang))</span>
+<span id="cb40-302"><a href="#cb40-302" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.upos <span class="op">==</span> <span class="st">"DET"</span>)</span>
+<span id="cb40-303"><a href="#cb40-303" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb40-304"><a href="#cb40-304" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-305"><a href="#cb40-305" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-306"><a href="#cb40-306" aria-hidden="true" tabindex="-1"></a>8.9% of English tokens are determiners against 12.2% of French ones, the</span>
+<span id="cb40-307"><a href="#cb40-307" aria-hidden="true" tabindex="-1"></a>same gap the chapter describes, and this time it is not confounded by the</span>
+<span id="cb40-308"><a href="#cb40-308" aria-hidden="true" tabindex="-1"></a>population mismatch built into the chapter's own version of this</span>
+<span id="cb40-309"><a href="#cb40-309" aria-hidden="true" tabindex="-1"></a>comparison: the chapter stacks all 75 English pages against only 73 French</span>
+<span id="cb40-310"><a href="#cb40-310" aria-hidden="true" tabindex="-1"></a>ones, quietly comparing two different populations, while <span class="in">`anno_en`</span> and</span>
+<span id="cb40-311"><a href="#cb40-311" aria-hidden="true" tabindex="-1"></a><span class="in">`anno_fr`</span> here cover the identical 73 authors on both sides.</span>
+<span id="cb40-312"><a href="#cb40-312" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-313"><a href="#cb40-313" aria-hidden="true" tabindex="-1"></a><span class="ss">8. </span>Compute the pairwise angle distance for each language separately with</span>
+<span id="cb40-314"><a href="#cb40-314" aria-hidden="true" tabindex="-1"></a><span class="in">`DSText.compute_distances(..., min_df=0.01, max_df=0.5)`</span>. For each language,</span>
+<span id="cb40-315"><a href="#cb40-315" aria-hidden="true" tabindex="-1"></a>stack the result with a copy of itself with the ID columns swapped, and find</span>
+<span id="cb40-316"><a href="#cb40-316" aria-hidden="true" tabindex="-1"></a>every author's single nearest neighbor.</span>
+<span id="cb40-317"><a href="#cb40-317" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-320"><a href="#cb40-320" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb40-321"><a href="#cb40-321" aria-hidden="true" tabindex="-1"></a>dist_en <span class="op">=</span> DSText.compute_distances(anno_en, min_df<span class="op">=</span><span class="fl">0.01</span>, max_df<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb40-322"><a href="#cb40-322" aria-hidden="true" tabindex="-1"></a>dist_fr <span class="op">=</span> DSText.compute_distances(anno_fr, min_df<span class="op">=</span><span class="fl">0.01</span>, max_df<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb40-323"><a href="#cb40-323" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-324"><a href="#cb40-324" aria-hidden="true" tabindex="-1"></a>nn_en <span class="op">=</span> (</span>
+<span id="cb40-325"><a href="#cb40-325" aria-hidden="true" tabindex="-1"></a>    pl.concat([</span>
+<span id="cb40-326"><a href="#cb40-326" aria-hidden="true" tabindex="-1"></a>        dist_en,</span>
+<span id="cb40-327"><a href="#cb40-327" aria-hidden="true" tabindex="-1"></a>        dist_en.select(doc_id<span class="op">=</span>c.doc_id2, doc_id2<span class="op">=</span>c.doc_id, distance<span class="op">=</span>c.distance)</span>
+<span id="cb40-328"><a href="#cb40-328" aria-hidden="true" tabindex="-1"></a>    ])</span>
+<span id="cb40-329"><a href="#cb40-329" aria-hidden="true" tabindex="-1"></a>    .sort(c.doc_id, c.distance)</span>
+<span id="cb40-330"><a href="#cb40-330" aria-hidden="true" tabindex="-1"></a>    .group_by(c.doc_id, maintain_order<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb40-331"><a href="#cb40-331" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">1</span>)</span>
+<span id="cb40-332"><a href="#cb40-332" aria-hidden="true" tabindex="-1"></a>    .rename({<span class="st">"doc_id2"</span>: <span class="st">"nn_en"</span>})</span>
+<span id="cb40-333"><a href="#cb40-333" aria-hidden="true" tabindex="-1"></a>    .drop(<span class="st">"distance"</span>)</span>
+<span id="cb40-334"><a href="#cb40-334" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb40-335"><a href="#cb40-335" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-336"><a href="#cb40-336" aria-hidden="true" tabindex="-1"></a>nn_fr <span class="op">=</span> (</span>
+<span id="cb40-337"><a href="#cb40-337" aria-hidden="true" tabindex="-1"></a>    pl.concat([</span>
+<span id="cb40-338"><a href="#cb40-338" aria-hidden="true" tabindex="-1"></a>        dist_fr,</span>
+<span id="cb40-339"><a href="#cb40-339" aria-hidden="true" tabindex="-1"></a>        dist_fr.select(doc_id<span class="op">=</span>c.doc_id2, doc_id2<span class="op">=</span>c.doc_id, distance<span class="op">=</span>c.distance)</span>
+<span id="cb40-340"><a href="#cb40-340" aria-hidden="true" tabindex="-1"></a>    ])</span>
+<span id="cb40-341"><a href="#cb40-341" aria-hidden="true" tabindex="-1"></a>    .sort(c.doc_id, c.distance)</span>
+<span id="cb40-342"><a href="#cb40-342" aria-hidden="true" tabindex="-1"></a>    .group_by(c.doc_id, maintain_order<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb40-343"><a href="#cb40-343" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">1</span>)</span>
+<span id="cb40-344"><a href="#cb40-344" aria-hidden="true" tabindex="-1"></a>    .rename({<span class="st">"doc_id2"</span>: <span class="st">"nn_fr"</span>})</span>
+<span id="cb40-345"><a href="#cb40-345" aria-hidden="true" tabindex="-1"></a>    .drop(<span class="st">"distance"</span>)</span>
+<span id="cb40-346"><a href="#cb40-346" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb40-347"><a href="#cb40-347" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-348"><a href="#cb40-348" aria-hidden="true" tabindex="-1"></a>nn_compare <span class="op">=</span> nn_en.join(nn_fr, on<span class="op">=</span><span class="st">"doc_id"</span>)</span>
+<span id="cb40-349"><a href="#cb40-349" aria-hidden="true" tabindex="-1"></a>nn_compare</span>
+<span id="cb40-350"><a href="#cb40-350" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-351"><a href="#cb40-351" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-352"><a href="#cb40-352" aria-hidden="true" tabindex="-1"></a><span class="ss">9. </span>What proportion of authors have the exact same nearest neighbor under</span>
+<span id="cb40-353"><a href="#cb40-353" aria-hidden="true" tabindex="-1"></a>both languages? Compare this to the chance rate of matching by accident</span>
+<span id="cb40-354"><a href="#cb40-354" aria-hidden="true" tabindex="-1"></a>among 72 other authors.</span>
+<span id="cb40-355"><a href="#cb40-355" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-358"><a href="#cb40-358" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb40-359"><a href="#cb40-359" aria-hidden="true" tabindex="-1"></a>agree_rate <span class="op">=</span> nn_compare.select((c.nn_en <span class="op">==</span> c.nn_fr).mean()).item()</span>
+<span id="cb40-360"><a href="#cb40-360" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">round</span>(agree_rate, <span class="dv">3</span>), <span class="st">"agreement rate"</span>)</span>
+<span id="cb40-361"><a href="#cb40-361" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">round</span>(<span class="dv">1</span> <span class="op">/</span> <span class="dv">72</span>, <span class="dv">3</span>), <span class="st">"chance rate"</span>)</span>
+<span id="cb40-362"><a href="#cb40-362" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-363"><a href="#cb40-363" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-364"><a href="#cb40-364" aria-hidden="true" tabindex="-1"></a>Almost 48% of authors (35 of 73) have the identical nearest neighbor whether</span>
+<span id="cb40-365"><a href="#cb40-365" aria-hidden="true" tabindex="-1"></a>the distance is computed from their English page or their French one, over</span>
+<span id="cb40-366"><a href="#cb40-366" aria-hidden="true" tabindex="-1"></a>thirty times the roughly 1.4% we would expect from two independent random</span>
+<span id="cb40-367"><a href="#cb40-367" aria-hidden="true" tabindex="-1"></a>guesses among 72 other authors. The two languages are far from producing</span>
+<span id="cb40-368"><a href="#cb40-368" aria-hidden="true" tabindex="-1"></a>identical geometry, but the structure that TF-IDF and the angle distance</span>
+<span id="cb40-369"><a href="#cb40-369" aria-hidden="true" tabindex="-1"></a>recover is not arbitrary either: it survives translation for close to half</span>
+<span id="cb40-370"><a href="#cb40-370" aria-hidden="true" tabindex="-1"></a>the corpus.</span>
+<span id="cb40-371"><a href="#cb40-371" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-372"><a href="#cb40-372" aria-hidden="true" tabindex="-1"></a><span class="ss">10. </span>Look at one agreement and one disagreement from <span class="in">`nn_compare`</span> by eye. Ann</span>
+<span id="cb40-373"><a href="#cb40-373" aria-hidden="true" tabindex="-1"></a>Radcliffe's nearest neighbor is Jane Austen in both languages; A. A. Milne's</span>
+<span id="cb40-374"><a href="#cb40-374" aria-hidden="true" tabindex="-1"></a>is T. S. Eliot in English but George Orwell in French. Print each pair's top</span>
+<span id="cb40-375"><a href="#cb40-375" aria-hidden="true" tabindex="-1"></a>5 TF-IDF terms in both languages, then check whether question 6's <span class="in">`parser`</span></span>
+<span id="cb40-376"><a href="#cb40-376" aria-hidden="true" tabindex="-1"></a>artifact is actually what is pulling Milne toward Eliot by recomputing the</span>
+<span id="cb40-377"><a href="#cb40-377" aria-hidden="true" tabindex="-1"></a>English distance between them with <span class="in">`parser`</span> removed from <span class="in">`anno_en`</span>.</span>
+<span id="cb40-378"><a href="#cb40-378" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-381"><a href="#cb40-381" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb40-382"><a href="#cb40-382" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> author <span class="kw">in</span> [<span class="st">"Ann Radcliffe"</span>, <span class="st">"Jane Austen"</span>]:</span>
+<span id="cb40-383"><a href="#cb40-383" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"EN"</span>, author, tfidf_en.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> author).sort(c.tfidf, descending<span class="op">=</span><span class="va">True</span>).head(<span class="dv">5</span>).select(c.lemma).to_series().to_list())</span>
+<span id="cb40-384"><a href="#cb40-384" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"FR"</span>, author, tfidf_fr.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> author).sort(c.tfidf, descending<span class="op">=</span><span class="va">True</span>).head(<span class="dv">5</span>).select(c.lemma).to_series().to_list())</span>
+<span id="cb40-385"><a href="#cb40-385" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-386"><a href="#cb40-386" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-389"><a href="#cb40-389" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb40-390"><a href="#cb40-390" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> author <span class="kw">in</span> [<span class="st">"A. A. Milne"</span>, <span class="st">"T. S. Eliot"</span>, <span class="st">"George Orwell"</span>]:</span>
+<span id="cb40-391"><a href="#cb40-391" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"EN"</span>, author, tfidf_en.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> author).sort(c.tfidf, descending<span class="op">=</span><span class="va">True</span>).head(<span class="dv">5</span>).select(c.lemma).to_series().to_list())</span>
+<span id="cb40-392"><a href="#cb40-392" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"FR"</span>, author, tfidf_fr.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> author).sort(c.tfidf, descending<span class="op">=</span><span class="va">True</span>).head(<span class="dv">5</span>).select(c.lemma).to_series().to_list())</span>
+<span id="cb40-393"><a href="#cb40-393" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-394"><a href="#cb40-394" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-397"><a href="#cb40-397" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb40-398"><a href="#cb40-398" aria-hidden="true" tabindex="-1"></a>milne_eliot <span class="op">=</span> dist_en.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> <span class="st">"A. A. Milne"</span>, c.doc_id2 <span class="op">==</span> <span class="st">"T. S. Eliot"</span>).item(<span class="dv">0</span>, <span class="st">"distance"</span>)</span>
+<span id="cb40-399"><a href="#cb40-399" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-400"><a href="#cb40-400" aria-hidden="true" tabindex="-1"></a>dist_en_no_parser <span class="op">=</span> DSText.compute_distances(anno_en.<span class="bu">filter</span>(c.lemma <span class="op">!=</span> <span class="st">"parser"</span>), min_df<span class="op">=</span><span class="fl">0.01</span>, max_df<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb40-401"><a href="#cb40-401" aria-hidden="true" tabindex="-1"></a>milne_eliot_no_parser <span class="op">=</span> dist_en_no_parser.<span class="bu">filter</span>(c.doc_id <span class="op">==</span> <span class="st">"A. A. Milne"</span>, c.doc_id2 <span class="op">==</span> <span class="st">"T. S. Eliot"</span>).item(<span class="dv">0</span>, <span class="st">"distance"</span>)</span>
+<span id="cb40-402"><a href="#cb40-402" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-403"><a href="#cb40-403" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">round</span>(milne_eliot, <span class="dv">3</span>), <span class="st">"with parser"</span>)</span>
+<span id="cb40-404"><a href="#cb40-404" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">round</span>(milne_eliot_no_parser, <span class="dv">3</span>), <span class="st">"without parser"</span>)</span>
+<span id="cb40-405"><a href="#cb40-405" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-406"><a href="#cb40-406" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-407"><a href="#cb40-407" aria-hidden="true" tabindex="-1"></a>Radcliffe and Austen both write Gothic-adjacent fiction, and Radcliffe's own</span>
+<span id="cb40-408"><a href="#cb40-408" aria-hidden="true" tabindex="-1"></a>top terms (<span class="in">`Udolpho`</span> in English, <span class="in">`gothique`</span> in French) confirm the genre</span>
+<span id="cb40-409"><a href="#cb40-409" aria-hidden="true" tabindex="-1"></a>connection directly, so the agreement is easy to believe in both languages.</span>
+<span id="cb40-410"><a href="#cb40-410" aria-hidden="true" tabindex="-1"></a>Milne's disagreement is harder to read off the term lists alone — neither</span>
+<span id="cb40-411"><a href="#cb40-411" aria-hidden="true" tabindex="-1"></a>Eliot's nor Orwell's top terms share anything obvious with Milne's beyond</span>
+<span id="cb40-412"><a href="#cb40-412" aria-hidden="true" tabindex="-1"></a>ordinary biographical scaffolding. The <span class="in">`parser`</span> artifact turns out not to be</span>
+<span id="cb40-413"><a href="#cb40-413" aria-hidden="true" tabindex="-1"></a>the explanation either: dropping it from <span class="in">`anno_en`</span> entirely and</span>
+<span id="cb40-414"><a href="#cb40-414" aria-hidden="true" tabindex="-1"></a>recomputing barely moves the Milne–Eliot distance (1.528 to 1.548) and does</span>
+<span id="cb40-415"><a href="#cb40-415" aria-hidden="true" tabindex="-1"></a>not change who Milne's nearest neighbor is. Whatever pulls Milne toward</span>
+<span id="cb40-416"><a href="#cb40-416" aria-hidden="true" tabindex="-1"></a>Eliot in English and toward Orwell in French</span>
+<span id="cb40-417"><a href="#cb40-417" aria-hidden="true" tabindex="-1"></a>runs through the geometry of the full term-weighted vector, not through any</span>
+<span id="cb40-418"><a href="#cb40-418" aria-hidden="true" tabindex="-1"></a>single term visible in a short printed list — a caution worth carrying</span>
+<span id="cb40-419"><a href="#cb40-419" aria-hidden="true" tabindex="-1"></a>forward: a top-5 or top-10 list is a convenient summary for a human reader,</span>
+<span id="cb40-420"><a href="#cb40-420" aria-hidden="true" tabindex="-1"></a>but it is not the same object the distance calculation actually compares.</span>
+<span id="cb40-421"><a href="#cb40-421" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-422"><a href="#cb40-422" aria-hidden="true" tabindex="-1"></a><span class="ss">11. </span>Build a 2D UMAP projection for each language with `umap_text(...,</span>
+<span id="cb40-423"><a href="#cb40-423" aria-hidden="true" tabindex="-1"></a>min_df=0.01, max_df=0.5, random_state=42)`, join each author's short name</span>
+<span id="cb40-424"><a href="#cb40-424" aria-hidden="true" tabindex="-1"></a>and <span class="in">`era`</span> from <span class="in">`meta`</span>, and plot both, colored by <span class="in">`era`</span>. A plot is an</span>
+<span id="cb40-425"><a href="#cb40-425" aria-hidden="true" tabindex="-1"></a>impression, not a measurement, so also compute each projection's own</span>
+<span id="cb40-426"><a href="#cb40-426" aria-hidden="true" tabindex="-1"></a>same-era nearest-neighbor rate directly from the <span class="in">`dr0`</span>/<span class="in">`dr1`</span> coordinates,</span>
+<span id="cb40-427"><a href="#cb40-427" aria-hidden="true" tabindex="-1"></a>the same check the last chapter's notebook ran on <span class="in">`label`</span>.</span>
+<span id="cb40-428"><a href="#cb40-428" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-431"><a href="#cb40-431" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb40-432"><a href="#cb40-432" aria-hidden="true" tabindex="-1"></a>umap_en <span class="op">=</span> (</span>
+<span id="cb40-433"><a href="#cb40-433" aria-hidden="true" tabindex="-1"></a>    anno_en</span>
+<span id="cb40-434"><a href="#cb40-434" aria-hidden="true" tabindex="-1"></a>    .pipe(umap_text, doc_id<span class="op">=</span>c.doc_id, term_id<span class="op">=</span>c.lemma, n_components<span class="op">=</span><span class="dv">2</span>, min_df<span class="op">=</span><span class="fl">0.01</span>, max_df<span class="op">=</span><span class="fl">0.5</span>, random_state<span class="op">=</span><span class="dv">42</span>)</span>
+<span id="cb40-435"><a href="#cb40-435" aria-hidden="true" tabindex="-1"></a>    .predict(full<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb40-436"><a href="#cb40-436" aria-hidden="true" tabindex="-1"></a>    .join(meta.select(c.doc_id, c.short, c.era), on<span class="op">=</span><span class="st">"doc_id"</span>)</span>
+<span id="cb40-437"><a href="#cb40-437" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb40-438"><a href="#cb40-438" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-439"><a href="#cb40-439" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb40-440"><a href="#cb40-440" aria-hidden="true" tabindex="-1"></a>    umap_en</span>
+<span id="cb40-441"><a href="#cb40-441" aria-hidden="true" tabindex="-1"></a>    .pipe(ggplot, aes(c.dr0, c.dr1))</span>
+<span id="cb40-442"><a href="#cb40-442" aria-hidden="true" tabindex="-1"></a>    .geom_text(aes(label<span class="op">=</span>c.short, color<span class="op">=</span>c.era), size<span class="op">=</span><span class="dv">6</span>)</span>
+<span id="cb40-443"><a href="#cb40-443" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb40-444"><a href="#cb40-444" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-445"><a href="#cb40-445" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-448"><a href="#cb40-448" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb40-449"><a href="#cb40-449" aria-hidden="true" tabindex="-1"></a>umap_fr <span class="op">=</span> (</span>
+<span id="cb40-450"><a href="#cb40-450" aria-hidden="true" tabindex="-1"></a>    anno_fr</span>
+<span id="cb40-451"><a href="#cb40-451" aria-hidden="true" tabindex="-1"></a>    .pipe(umap_text, doc_id<span class="op">=</span>c.doc_id, term_id<span class="op">=</span>c.lemma, n_components<span class="op">=</span><span class="dv">2</span>, min_df<span class="op">=</span><span class="fl">0.01</span>, max_df<span class="op">=</span><span class="fl">0.5</span>, random_state<span class="op">=</span><span class="dv">42</span>)</span>
+<span id="cb40-452"><a href="#cb40-452" aria-hidden="true" tabindex="-1"></a>    .predict(full<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb40-453"><a href="#cb40-453" aria-hidden="true" tabindex="-1"></a>    .join(meta.select(c.doc_id, c.short, c.era), on<span class="op">=</span><span class="st">"doc_id"</span>)</span>
+<span id="cb40-454"><a href="#cb40-454" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb40-455"><a href="#cb40-455" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-456"><a href="#cb40-456" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb40-457"><a href="#cb40-457" aria-hidden="true" tabindex="-1"></a>    umap_fr</span>
+<span id="cb40-458"><a href="#cb40-458" aria-hidden="true" tabindex="-1"></a>    .pipe(ggplot, aes(c.dr0, c.dr1))</span>
+<span id="cb40-459"><a href="#cb40-459" aria-hidden="true" tabindex="-1"></a>    .geom_text(aes(label<span class="op">=</span>c.short, color<span class="op">=</span>c.era), size<span class="op">=</span><span class="dv">6</span>)</span>
+<span id="cb40-460"><a href="#cb40-460" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb40-461"><a href="#cb40-461" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-462"><a href="#cb40-462" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-465"><a href="#cb40-465" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb40-466"><a href="#cb40-466" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> era_nn_rate(umap_df):</span>
+<span id="cb40-467"><a href="#cb40-467" aria-hidden="true" tabindex="-1"></a>    coords <span class="op">=</span> umap_df.select(c.dr0, c.dr1).to_numpy()</span>
+<span id="cb40-468"><a href="#cb40-468" aria-hidden="true" tabindex="-1"></a>    dist_sq <span class="op">=</span> ((coords[:, <span class="va">None</span>, :] <span class="op">-</span> coords[<span class="va">None</span>, :, :]) <span class="op">**</span> <span class="dv">2</span>).<span class="bu">sum</span>(axis<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb40-469"><a href="#cb40-469" aria-hidden="true" tabindex="-1"></a>    np.fill_diagonal(dist_sq, np.inf)</span>
+<span id="cb40-470"><a href="#cb40-470" aria-hidden="true" tabindex="-1"></a>    nn_idx <span class="op">=</span> dist_sq.argmin(axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb40-471"><a href="#cb40-471" aria-hidden="true" tabindex="-1"></a>    eras <span class="op">=</span> umap_df.select(c.era).to_series().to_numpy()</span>
+<span id="cb40-472"><a href="#cb40-472" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (eras <span class="op">==</span> eras[nn_idx]).mean()</span>
+<span id="cb40-473"><a href="#cb40-473" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-474"><a href="#cb40-474" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">round</span>(era_nn_rate(umap_en), <span class="dv">3</span>), <span class="st">"EN same-era nearest-neighbor rate"</span>)</span>
+<span id="cb40-475"><a href="#cb40-475" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">round</span>(era_nn_rate(umap_fr), <span class="dv">3</span>), <span class="st">"FR same-era nearest-neighbor rate"</span>)</span>
+<span id="cb40-476"><a href="#cb40-476" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-477"><a href="#cb40-477" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-478"><a href="#cb40-478" aria-hidden="true" tabindex="-1"></a><span class="ss">12. </span>With seven <span class="in">`era`</span> categories of uneven size, matching by chance alone</span>
+<span id="cb40-479"><a href="#cb40-479" aria-hidden="true" tabindex="-1"></a>runs around 17%. Both projections clear that bar but not by much — 20.5% for</span>
+<span id="cb40-480"><a href="#cb40-480" aria-hidden="true" tabindex="-1"></a>English and 26.0% for French — confirming what the plots suggest by eye: a</span>
+<span id="cb40-481"><a href="#cb40-481" aria-hidden="true" tabindex="-1"></a>weak, genuine pull toward grouping by era, not the tight separation</span>
+<span id="cb40-482"><a href="#cb40-482" aria-hidden="true" tabindex="-1"></a>notebook42's own same-label check found for AG News's four disjoint topic</span>
+<span id="cb40-483"><a href="#cb40-483" aria-hidden="true" tabindex="-1"></a>categories, and not nothing either. Looking back across this notebook: what</span>
+<span id="cb40-484"><a href="#cb40-484" aria-hidden="true" tabindex="-1"></a>carried over unchanged between English and French, and what genuinely</span>
+<span id="cb40-485"><a href="#cb40-485" aria-hidden="true" tabindex="-1"></a>differed?</span>
+<span id="cb40-486"><a href="#cb40-486" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-487"><a href="#cb40-487" aria-hidden="true" tabindex="-1"></a>The machinery carried over without a single change: the same</span>
+<span id="cb40-488"><a href="#cb40-488" aria-hidden="true" tabindex="-1"></a><span class="in">`DSText.process`</span>, <span class="in">`compute_tfidf`</span>, <span class="in">`compute_distances`</span>, and <span class="in">`umap_text`</span></span>
+<span id="cb40-489"><a href="#cb40-489" aria-hidden="true" tabindex="-1"></a>calls ran on French tokens exactly as they did on English ones, because none</span>
+<span id="cb40-490"><a href="#cb40-490" aria-hidden="true" tabindex="-1"></a>of that code has any language-specific logic built in. What differed was</span>
+<span id="cb40-491"><a href="#cb40-491" aria-hidden="true" tabindex="-1"></a>the input each pipeline was handed and what came out the other end. Two</span>
+<span id="cb40-492"><a href="#cb40-492" aria-hidden="true" tabindex="-1"></a>authors have no French page at all, and coverage tracks obscurity rather</span>
+<span id="cb40-493"><a href="#cb40-493" aria-hidden="true" tabindex="-1"></a>than era. French pages run about half the length and half the vocabulary of</span>
+<span id="cb40-494"><a href="#cb40-494" aria-hidden="true" tabindex="-1"></a>their English counterparts on the very same subject. French uses</span>
+<span id="cb40-495"><a href="#cb40-495" aria-hidden="true" tabindex="-1"></a>determiners more often, a grammatical fact with nothing to do with editorial</span>
+<span id="cb40-496"><a href="#cb40-496" aria-hidden="true" tabindex="-1"></a>choice. And the two languages' own document geometries agree on a given</span>
+<span id="cb40-497"><a href="#cb40-497" aria-hidden="true" tabindex="-1"></a>author's closest match less than half the time, even though that rate is</span>
+<span id="cb40-498"><a href="#cb40-498" aria-hidden="true" tabindex="-1"></a>far above chance. None of this is a flaw in the pipeline; it is exactly the</span>
+<span id="cb40-499"><a href="#cb40-499" aria-hidden="true" tabindex="-1"></a>kind of genuine cross-lingual difference the chapter's own closing paragraph</span>
+<span id="cb40-500"><a href="#cb40-500" aria-hidden="true" tabindex="-1"></a>says this machinery makes possible to study systematically rather than</span>
+<span id="cb40-501"><a href="#cb40-501" aria-hidden="true" tabindex="-1"></a>assert from a hunch.</span>
+</code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
+
+
+
+
+</body></html>

@@ -1,0 +1,453 @@
+---
+title: "Notebook48"
+solutions-release-date: "2026-11-11"
+---
+
+### Setup
+
+Run all of the following before starting the notebook.
+
+```{python}
+#| tags: [noclear]
+#| eval: false
+! wget -q -nc https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/funs.py
+```
+
+```{python}
+#| tags: [noclear]
+import polars as pl
+from plotnine import ggplot, aes
+from polars import col as c
+import numpy as np
+
+import funs
+from funs import DSImage, ViTEmbedder, SigLIPEmbedder, umap, dot_product
+
+ub = "https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"
+```
+
+```{python}
+#| tags: [remove]
+#| include: false
+ub = ""
+```
+
+```{python}
+#| tags: [noclear]
+woof = pl.read_parquet(ub + "data/imagewoof_1000.parquet")
+```
+
+The embeddings we need are stored inside the Parquet file, but the picture grids
+still need the image files themselves on disk. This cell downloads them the first
+time you run it and does nothing on later runs (or if you already have them).
+
+```{python}
+#| tags: [noclear]
+import os
+import urllib.request
+
+for row in woof.iter_rows(named=True):
+    if not os.path.exists(row["filepath"]):
+        os.makedirs(os.path.dirname(row["filepath"]), exist_ok=True)
+        urllib.request.urlretrieve(ub + row["filepath"], row["filepath"])
+```
+
+### Questions
+
+This notebook works with `woof`, a 1,000-image sample of Imagewoof. Imagewoof is
+the deliberately hard sibling of Imagenette: instead of ten easily separated
+objects (a church, a gas pump, a garbage truck), it is ten breeds of dog, chosen
+so that telling them apart takes fine detail rather than gross shape. Each row is
+one photograph. `filepath` points to a `.png` file on disk, `label` is the breed,
+and `index` marks the benchmark's own train/test split. The two columns that
+matter most here are `vit` and `siglip`: each is a precomputed 768-number
+embedding of the image, the first from Google's Vision Transformer and the second
+from the SigLIP image-and-text model. These are the dense vector representations
+the chapter builds its second half around. Print all results unless a question
+says otherwise.
+
+1. Show one example of each of the ten breeds with `DSImage.plot_image_grid`
+(group by `label` and take the first image of each). Looking at the ten, which
+breeds do you expect a model to confuse?
+
+```{python}
+DSImage.plot_image_grid(woof.group_by(c.label).first(), ncol=5)
+```
+
+The beagle and the English foxhound are both tricolor scent hounds and look
+nearly identical at a glance; the Australian and border terriers are two small,
+scruffy terriers; and the Shih Tzu is another small shaggy dog not far from
+them. The easy ones stand out too: the Samoyed is a white fluffball and the
+Old English sheepdog a shaggy grey-and-white one, both hard to mistake for
+anything else here. This is the fine-grained challenge the dataset was built
+around, and it is worth writing down a guess now to check against the model's
+actual mistakes later.
+
+2. Look at the embedding itself. Print `filepath`, `label`, and `vit` for the
+first three rows, then confirm every `vit` vector has the same length and count
+how many of its entries are exactly zero (explode the column so each number
+becomes its own row).
+
+```{python}
+woof.select(c.filepath, c.label, c.vit).head(3)
+```
+
+```{python}
+(
+    woof
+    .select(dim = c.vit.list.len().unique())
+)
+```
+
+```{python}
+(
+    woof
+    .select(c.vit)
+    .explode(c.vit)
+    .select(
+        n_values = pl.len(),
+        n_zero = (c.vit == 0).sum(),
+        frac_zero = (c.vit == 0).mean()
+    )
+)
+```
+
+Every image is now a point in a fixed 768-dimensional space. Unlike the TF-IDF
+vectors of the text chapter, which were mostly zeros (about 97% of every row),
+these embeddings are *dense*: not one of the 768,000 numbers across the whole
+collection is exactly zero, and no single dimension has a name we could give it.
+Only the geometry means anything — two images are similar when their vectors sit
+close together.
+
+3. The `vit` column was precomputed for us, which is convenient but also
+something to trust only after checking. Load the model with `ViTEmbedder()`, run
+it on the first three images, and compare each freshly computed embedding to the
+stored one with a dot product. (Both are unit length, so a dot product near 1
+means the vectors point the same way.)
+
+```{python}
+vit = ViTEmbedder()
+
+(
+    woof
+    .head(3)
+    .with_columns(
+        vit_live = c.filepath.map_elements(
+            vit, return_dtype=pl.List(pl.Float32)
+        )
+    )
+    .with_columns(
+        agree = dot_product(c.vit, c.vit_live)
+    )
+    .select(c.label, c.agree)
+)
+```
+
+The dot products come back at essentially 1.0, so the stored column really is
+the output of this exact model and nothing was lost in saving it. This is also
+transfer learning made concrete: we did not train anything: `ViTEmbedder` just
+loads a network someone else fit on 14 million images and reuses its internal
+description of each picture. The reason the column ships precomputed is time, not
+mystery. Running the model on all 1,000 images is slow; running it on three to
+confirm the column is honest is fast.
+
+4. Project the 768-dimensional `vit` embeddings down to two dimensions with
+`umap` (pass `features=[c.vit]` and `random_state=42` so the plot is
+reproducible), and draw a scatter colored by breed. Do the ten breeds fall into
+ten clean, separated clusters?
+
+```{python}
+um = (
+    woof
+    .pipe(
+        umap,
+        features=[c.vit],
+        n_components=2,
+        random_state=42
+    )
+    .predict(full=True)
+)
+
+(
+    um
+    .pipe(ggplot, aes(c.dr0, c.dr1))
+    .geom_point(aes(color=c.label))
+)
+```
+
+Mostly, but not perfectly. The Samoyed and Old English sheepdog break off into
+tight, isolated islands, and the golden retriever holds together well. Toward the
+middle, though, the two hounds and the terriers bleed into one another rather
+than forming clean, separate blobs. This is a real step up from the pixel
+statistics of the previous notebook, where the breeds would have overlapped
+almost completely, but it is not the near-perfect separation the chapter's
+ten bird *species* produced. Fine-grained breeds are genuinely harder, and the
+embedding does not paper over that.
+
+5. Measuring beats eyeballing. Using the two projected coordinates, find each
+image's nearest neighbor and report how often that neighbor shares its breed,
+overall and per breed. Ten breeds means random guessing would land at about 10%.
+
+```{python}
+coords = um.select(c.dr0, c.dr1).to_numpy()
+labels_arr = um.select(c.label).to_numpy().ravel()
+
+dist_sq = ((coords[:, None, :] - coords[None, :, :]) ** 2).sum(axis=2)
+np.fill_diagonal(dist_sq, np.inf)
+nn_idx = dist_sq.argmin(axis=1)
+same_label = labels_arr == labels_arr[nn_idx]
+
+print(round(same_label.mean(), 3), "overall same-breed nearest-neighbor rate")
+for lbl in sorted(set(labels_arr)):
+    mask = labels_arr == lbl
+    print(lbl, round(same_label[mask].mean(), 2))
+```
+
+A point's nearest neighbor shares its breed 93% of the time, nine times the
+chance rate, which confirms the impression that the embedding separates the
+breeds well. But the per-breed numbers name exactly where it struggles: the
+English foxhound sits lowest at 0.81 (and it is the smallest class, only 62
+images), the beagle and Australian terrier are next, while the Samoyed and Old
+English sheepdog top out near 0.98. The confusable breeds we picked out by eye in
+question 1 are the same ones the geometry cannot cleanly pull apart. Keep this
+ranking; the zero-shot classifier below trips on the same breeds.
+
+6. The UMAP plot shows the breeds separate, but it does not say which cluster is
+which. For that we turn to SigLIP, whose embeddings live in a space shared with
+text. Load it with `SigLIPEmbedder()`, embed the phrase "a photo of a golden
+retriever", and score every image by the dot product of its `siglip` embedding
+with that text embedding. Print the highest-scoring images' breeds, and draw the
+score distribution by breed.
+
+```{python}
+siglip = SigLIPEmbedder()
+
+embed = (
+    pl.DataFrame({"text": ["a photo of a golden retriever"]})
+    .with_columns(
+        siglip_txt = c.text.map_elements(
+            siglip.embed_text, return_dtype=pl.List(pl.Float32)
+        )
+    )
+)
+```
+
+```{python}
+(
+    woof
+    .join(embed, how="cross")
+    .with_columns(
+        sim_score = dot_product(c.siglip, c.siglip_txt)
+    )
+    .sort(c.sim_score, descending=True)
+    .head(8)
+    .pipe(DSImage.plot_image_grid, label_name="label", ncol=4)
+)
+```
+
+```{python}
+(
+    woof
+    .join(embed, how="cross")
+    .with_columns(
+        sim_score = dot_product(c.siglip, c.siglip_txt)
+    )
+    .sort(c.sim_score.mean().over(c.label))
+    .pipe(ggplot, aes(c.sim_score, c.label))
+    .geom_point()
+)
+```
+
+The eight images most similar to the words "a photo of a golden retriever" are
+all, in fact, golden retrievers, and the golden retriever's scores sit clearly
+above every other breed's in the strip plot. No labeled examples went into this:
+the model simply learned, from image-caption pairs on the internet, that this
+patch of visual appearance goes with those words. Plotting the top images rather
+than trusting the numbers is the check that matters here, since a high similarity
+score is only meaningful if the images it picks really are the breed we asked
+for.
+
+7. Now do the whole thing at once. Build a text embedding for each of the ten
+breed names (clean the underscores out of the slug first, so the prompt reads "a
+photo of a border terrier"), assign every image to the breed whose text
+embedding it sits closest to, and report the overall classification rate.
+
+```{python}
+embed = (
+    woof
+    .select(text = c.label.unique())
+    .with_columns(
+        prompt = pl.lit("a photo of a ") + c.text.str.replace_all("_", " ")
+    )
+    .with_columns(
+        siglip_txt = c.prompt.map_elements(
+            siglip.embed_text, return_dtype=pl.List(pl.Float32)
+        )
+    )
+)
+```
+
+```{python}
+(
+    woof
+    .join(embed, how="cross")
+    .with_columns(
+        sim_score = dot_product(c.siglip, c.siglip_txt)
+    )
+    .sort(c.sim_score, descending=True)
+    .group_by(c.filepath)
+    .head(1)
+    .select(class_rate = (c.label == c.text).mean())
+)
+```
+
+Nearly 92% correct, on ten fine-grained dog breeds, with no training and no
+labeled examples of our own. That is a striking result for a harder dataset than
+the chapter's birds, and it comes entirely from SigLIP having placed images and
+their captions in one shared space during its original pre-training.
+
+8. The entire method rests on `siglip` and `siglip_txt` living in the *same*
+space. To see how load-bearing that is, rerun the classification with one change:
+score each image by the dot product of the text embedding with its `vit` column
+instead of its `siglip` column. Report the classification rate and the range of
+the similarity scores.
+
+```{python}
+(
+    woof
+    .join(embed, how="cross")
+    .with_columns(
+        sim_score = dot_product(c.vit, c.siglip_txt)
+    )
+    .sort(c.sim_score, descending=True)
+    .group_by(c.filepath)
+    .head(1)
+    .select(
+        class_rate = (c.label == c.text).mean(),
+        min_score = c.sim_score.min(),
+        max_score = c.sim_score.max()
+    )
+)
+```
+
+The rate collapses to about 0.13, barely above the 10% we would get from
+guessing, and the similarity scores sit in a narrow band around zero: the ViT
+image vectors and the SigLIP text vectors are effectively orthogonal, because
+they were never trained to share a space. Nothing here raises an error. The dot
+product runs, the sort runs, every image gets a tidy prediction, and the numbers
+are all real floating-point values. The only way to catch the mistake is to know
+that `vit` and `siglip` are different models' outputs and that only SigLIP's were
+built to be compared against text.
+
+9. Look at the mistakes the correct classifier (from question 7) makes. Rebuild
+its per-image predictions, keep only the images it got wrong, label each with
+"true breed => predicted breed", and show them in a grid. Do the errors match the
+confusions you predicted in question 1?
+
+```{python}
+(
+    woof
+    .join(embed, how="cross")
+    .with_columns(
+        sim_score = dot_product(c.siglip, c.siglip_txt)
+    )
+    .sort(c.sim_score, descending=True)
+    .group_by(c.filepath)
+    .head(1)
+    .filter(c.label != c.text)
+    .with_columns(
+        desc = pl.concat_str("label", "text", separator=" => ")
+    )
+    .pipe(DSImage.plot_image_grid, label_name="desc", ncol=3)
+)
+```
+
+Most of the errors are exactly the ones the pictures predicted. Beagles get
+called English foxhounds and foxhounds get called beagles, over and over, because
+the two tricolor hounds really do look the same; Australian terriers get read as
+Shih Tzus or the other small breeds. A second, different kind of error shows up
+too: frames where the dog is cropped, turned away, or sharing the picture with a
+person or a crowd, so the breed's defining features are not visible for any model
+to read. The misclassifications are not random noise; they are the genuinely hard
+cases.
+
+10. Confirm the pattern instead of asserting it. Rebuild the predictions once
+more and report the classification rate broken down by true breed, sorted from
+worst to best.
+
+```{python}
+(
+    woof
+    .join(embed, how="cross")
+    .with_columns(
+        sim_score = dot_product(c.siglip, c.siglip_txt)
+    )
+    .sort(c.sim_score, descending=True)
+    .group_by(c.filepath)
+    .head(1)
+    .group_by(c.label)
+    .agg(
+        class_rate = (c.label == c.text).mean(),
+        n = pl.len()
+    )
+    .sort(c.class_rate)
+)
+```
+
+The beagle (0.79), the English foxhound (0.82), and the Australian terrier (0.85)
+are hardest, while the Old English sheepdog and Samoyed are near-perfect. This is
+the same ordering the UMAP nearest-neighbor rates gave in question 5, produced by
+a completely different method: one is an unsupervised projection of the ViT
+embeddings, the other a text-driven classifier on the SigLIP embeddings, and they
+agree on which breeds are easy and which are hard. When two unrelated tools point
+at the same breeds, the difficulty is in the breeds, not in the method.
+
+11. Zero-shot classification uses no training data at all, which means the
+benchmark's train/test split should be irrelevant to it. Check this directly:
+compute the classification rate separately for the `train` rows and the `test`
+rows.
+
+```{python}
+(
+    woof
+    .join(embed, how="cross")
+    .with_columns(
+        sim_score = dot_product(c.siglip, c.siglip_txt)
+    )
+    .sort(c.sim_score, descending=True)
+    .group_by(c.filepath)
+    .head(1)
+    .group_by(c.index)
+    .agg(
+        class_rate = (c.label == c.text).mean(),
+        n = pl.len()
+    )
+)
+```
+
+The two rates are close, and if anything the `test` rate is the higher of the
+two, the opposite of what a trained model usually shows. That is the point: no
+model was fit here, so there is nothing to overfit to a training set and no reason
+for held-out data to score worse. The `train`/`test` label is a leftover from the
+benchmark's supervised use; for a zero-shot classifier it just splits the same
+1,000 images two ways, and the small gap between the rates is sampling noise, not
+learning.
+
+12. Written question. Across this notebook, two different tools — an unsupervised
+UMAP projection of the ViT embeddings and a zero-shot SigLIP classifier — landed
+on the same short list of hard breeds (the two hounds, the small terriers). Why
+should we expect an unsupervised projection and a text-based classifier to fail
+on the same categories, and what does that agreement tell us about *where* the
+difficulty actually lives?
+
+Both tools read the image only through an embedding, and an embedding encodes
+visual appearance and nothing else. A beagle and an English foxhound produce
+nearby vectors because the dogs genuinely look alike, so any method that works
+from those vectors — clustering them, projecting them, or matching them to a
+word — inherits the same overlap. The agreement tells us the difficulty is not an
+artifact of one algorithm or one prompt; it is in the data. Two breeds that look
+the same to a person look the same to the model, and no amount of switching
+methods will separate categories that are not visually separable in the first
+place. This is the flip side of the chapter's optimism about embeddings: they
+carry real visual meaning, which is exactly why they cannot invent a distinction
+the pixels do not contain.

@@ -1,0 +1,536 @@
+---
+title: "Notebook46"
+solutions-release-date: "2026-11-04"
+---
+
+### Setup
+
+Run all of the following before starting the notebook.
+
+```{python}
+#| tags: [noclear]
+#| eval: false
+! wget -q -nc https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/funs.py
+```
+
+```{python}
+#| tags: [noclear]
+import numpy as np
+import polars as pl
+from plotnine import ggplot, aes, arrow
+from polars import col as c
+
+import funs
+from funs import DSNetwork
+
+ub = "https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"
+```
+
+```{python}
+#| tags: [remove]
+#| include: false
+ub = ""
+```
+
+```{python}
+#| tags: [noclear]
+case = pl.read_csv(ub + "data/scotus_case.csv")
+cite = pl.read_csv(ub + "data/scotus_citation.csv")
+```
+
+### Questions
+
+This notebook continues with the U.S. Supreme Court citation network from the
+previous notebook. A row of `case` is one decided case, keyed by its reporter
+`citation` (`"384 U.S. 436"` is *Miranda v. Arizona*), with a `case_name`, the
+`term` it was argued, and the coded `issue_description` and `lean`. A row of
+`cite` is one precedent link: `citing_case` refers to the earlier `cited_case`
+somewhere in its opinion. Last time we built one network, the direct-citation
+network of the 80 most-cited cases, and measured its centrality. This time we
+build three *other* kinds of network from the same edge list — a co-citation
+network, a directed network, and a nearest-neighbor network — and see what each
+one shows that the direct network could not. The book's own examples for these
+sections use a Wikipedia author corpus, which it warns is too small and too
+temporally scrambled to bring out the differences; a court is neither. Print
+your results unless a question says to save them.
+
+We start, as before, by fixing the 80 most-cited cases so every network below
+is built on the same set of nodes.
+
+```{python}
+top = (
+    cite
+    .group_by(c.cited_case)
+    .agg(n_in = pl.len())
+    .sort([c.n_in, c.cited_case], descending=[True, False])
+    .head(80)
+    .get_column("cited_case")
+    .to_list()
+)
+```
+
+1. The direct-citation network joins two cases when one cites the other. A
+*co-citation* network joins two cases when some third case cites *both* of them:
+the idea is that a later court reaching for two precedents in the same opinion
+is treating them as related. Build the co-citation edge list from `cite` by
+joining the citation table to itself on `citing_case`, keeping only the rows
+where both cited cases are in the top 80. Keep each unordered pair once with
+`c.cited_case < c.cited_case_right`, count how many third cases cite both, and
+print the 10 pairs cited together most often. Join the names in so the pairs are
+readable.
+
+```{python}
+cc = cite.filter(c.cited_case.is_in(top))
+
+cocite = (
+    cc
+    .join(cc, on="citing_case")
+    .filter(c.cited_case < c.cited_case_right)
+    .group_by([c.cited_case, c.cited_case_right])
+    .agg(count = pl.len())
+    .sort(c.count, descending=True)
+)
+
+(
+    cocite
+    .head(10)
+    .join(
+        case.select(c.citation, name_a=c.case_name),
+        left_on="cited_case",
+        right_on="citation",
+        how="left"
+    )
+    .join(
+        case.select(c.citation, name_b=c.case_name),
+        left_on="cited_case_right",
+        right_on="citation",
+        how="left"
+    )
+    .select(c.name_a, c.name_b, c.count)
+)
+```
+
+The top pair is *Schneider v. State* and *Cantwell v. Connecticut*, cited
+together 84 times, two 1939 decisions at the root of modern free-speech and
+free-exercise doctrine. The rest of the list is the same kind of thing: the
+leafleting and speech cases (*Lovell*, *Thornhill*) that later First Amendment
+opinions reach for as a block, and the death-penalty pair *Furman* and *Gregg*.
+This is a self-join on a shared value, the join-chapter pattern, used here to
+turn "who cites whom" into "who gets cited alongside whom." The chapter notes
+that on
+Wikipedia the citation and co-citation networks look nearly the same, because
+its pages are edited continually and link freely in both directions; on a court
+record, where an opinion can only cite backward and never forward, the two are
+genuinely different objects.
+
+2. Build an undirected network from the co-citation edges. As with any weighted
+edge list, weak links are mostly noise, so first keep only the pairs cited
+together at least 15 times, and rename the columns to the `doc_id`/`doc_id2`
+names `DSNetwork.process` expects. Build the network, join the case names onto
+the nodes, and then count the nodes in each component before trusting the
+drawing.
+
+```{python}
+cocite_edges = (
+    cocite
+    .filter(c.count >= 15)
+    .rename({"cited_case": "doc_id", "cited_case_right": "doc_id2"})
+)
+
+co_node, co_edge, co_G = DSNetwork.process(cocite_edges, directed=False)
+
+co_node = co_node.join(
+    case.select(c.citation, c.case_name, c.term, c.issue_description),
+    left_on="id",
+    right_on="citation",
+    how="left"
+)
+
+(
+    co_node
+    .group_by(c.component)
+    .agg(n = pl.len(), size = c.component_size.first())
+    .sort(c.component)
+)
+```
+
+Unlike the direct-citation network, which came back as one connected piece, the
+co-citation network splits into three components: a core of 68 cases and two
+tiny islands of two cases each. Filtering to `count >= 15` is what separates
+them — a pair of cases only reaches the core if it shares a citer with the rest
+of the set that often. The two islands are worth reading: one is *Furman v.
+Georgia* and *Gregg v. Georgia*, the pair that struck down and then restored the
+death penalty, and the other is *Standard Oil* and *Socony-Vacuum*, two
+antitrust decisions. Both pairs are heavily co-cited *with each other* and
+almost never co-cited with the constitutional-rights core, so they float off on
+their own. The component check is the same discipline from last notebook: a
+network can quietly fall apart, and you want to know that before you read a
+centrality score off it.
+
+3. Compute eigenvalue centrality on the core. Because centrality is only defined
+within a component, filter to `component == 1` first, then print the 10 cases
+with the highest `eigen`, showing `degree` alongside. Compare the top of this
+list to what the direct-citation network ranked highest last notebook (degree
+crowned *Palko v. Connecticut* and the criminal-procedure cases).
+
+```{python}
+(
+    co_node
+    .filter(c.component == 1)
+    .sort(c.eigen, descending=True)
+    .head(10)
+    .select(c.case_name, c.term, c.eigen, c.degree)
+)
+```
+
+The co-citation core is a different neighborhood of law entirely. Its center is
+*Cantwell v. Connecticut*, then *Schneider v. State*, *Whitney v. California*,
+*New York Times v. Sullivan*, *Thornhill v. Alabama* — the free-speech and
+First Amendment cases, not the criminal-procedure cases the direct network put
+in the middle. The reason is what co-citation measures: these cases keep getting
+cited *together* because later free-speech opinions reach for a whole line of
+precedent at once. Direct citation rewarded *Palko* for being pointed at often;
+co-citation rewards a case for being pointed at in company. They are two honest
+answers to "which case is central," and they disagree because they are asking
+different questions.
+
+4. Now change the other axis: instead of a different *definition* of an edge,
+keep the direct-citation edges but respect their *direction*. Rebuild the
+top-80 induced edge list from `cite` and pass it to `DSNetwork.process` with
+`directed=True`. Print the node table. Notice which columns are different from
+the undirected version.
+
+```{python}
+edges = (
+    cite
+    .filter(c.citing_case.is_in(top) & c.cited_case.is_in(top))
+    .rename({"citing_case": "doc_id", "cited_case": "doc_id2"})
+)
+
+di_node, di_edge, di_G = DSNetwork.process(edges, directed=True)
+
+di_node = di_node.join(
+    case.select(c.citation, c.case_name, c.term),
+    left_on="id",
+    right_on="citation",
+    how="left"
+)
+di_node
+```
+
+A directed network reports a different set of measurements. Closeness centrality
+is gone (it is not well defined once edges point one way), and in place of the
+single `degree` column there are now three: `degree_out`, the number of
+landmark cases this case cites; `degree_in`, the number of landmark cases that
+cite it; and `degree_total`, their sum. On an undirected network these two
+directions were blurred together into one number.
+
+5. Plot in-degree against out-degree, following the chapter's own directed
+example. Highlight a handful of well-known cases so the plot has some labels, and
+add a diagonal line where in-degree equals out-degree. Save the plot and look at
+it before reading the description.
+
+```{python}
+highlight = [
+    "384 U.S. 436",   # Miranda v. Arizona
+    "372 U.S. 335",   # Gideon v. Wainwright
+    "17 U.S. 316",    # McCulloch v. Maryland
+    "302 U.S. 319",   # Palko v. Connecticut
+    "347 U.S. 483",   # Brown v. Board of Education
+    "424 U.S. 1"      # Buckley v. Valeo
+]
+
+di_highlight = di_node.filter(c.id.is_in(highlight))
+
+(
+    di_node
+    .pipe(ggplot, aes(c.degree_out, c.degree_in))
+    .geom_point()
+    .geom_text(
+        aes(label=c.case_name),
+        data=di_highlight,
+        size=7,
+        nudge_y=0.6
+    )
+    .geom_abline(slope=1, intercept=0, linetype="dashed")
+    .labs(
+        title="In-degree vs Out-degree in the SCOTUS Landmark Network",
+        x="Out-degree (landmarks this case cites)",
+        y="In-degree (landmarks that cite this case)"
+    )
+)
+```
+
+The middle of the cloud is balanced, but the corners are pulled apart by era.
+The oldest foundational cases sit at the top-left, cited by many later landmarks
+but citing almost none: *McCulloch* (1819) cites none of the others while eight
+cite it, and *Palko* (1937) cites five while eighteen cite it. The most recent
+cases sit at the bottom-right: *Buckley v. Valeo* (1976) cites twelve other
+landmarks and is cited by none. A citation can only point backward in time, so
+on a set of cases spanning 150 years a case's drift off the diagonal tracks when
+it was decided. The chapter's Wikipedia version showed no such tilt, because its
+pages carry no fixed order to cite in.
+
+6. Put a number on that. Compute the correlation between a case's `term` and
+its out-degree, and between its `term` and its in-degree. Then count how many
+cases have an out-degree of exactly zero.
+
+```{python}
+di_node.select(
+    corr_term_out = pl.corr(c.term, c.degree_out),
+    corr_term_in = pl.corr(c.term, c.degree_in),
+    n_zero_out = (c.degree_out == 0).sum()
+)
+```
+
+Term and out-degree correlate at 0.63: the later a case, the more earlier
+landmarks it can and does cite. Term and in-degree correlate at −0.25, the
+opposite sign, for the same reason in reverse — an old case has had a century to
+accumulate citations from the rest of the set. Ten cases cite none of the other
+79, and reading them back they are the oldest in the corpus, decided before
+there was a landmark canon to cite. This is the property the chapter says its
+Wikipedia network cannot show, because "there is no clear temporal ordering of
+the pages." A court has nothing *but* temporal ordering, and it falls straight
+out of the degree counts.
+
+7. The last two networks come from *distances* rather than citations. We have no
+text for these cases, so we build a distance from the citation structure itself:
+represent each case by the set of later cases that cite it, and call two cases
+close when those sets of citers overlap. Concretely, build a matrix with one row
+per landmark and one column per citing case, holding 1 where the citation
+exists, and compute the angle distance between every pair of rows — the same
+`to_numpy`/normalize/`arccos` construction the text chapter used for its own
+distances. Print the six closest pairs.
+
+```{python}
+profile = (
+    cite
+    .filter(c.cited_case.is_in(top))
+    .select(c.cited_case, c.citing_case)
+    .with_columns(present = pl.lit(1))
+    .pivot(on="citing_case", index="cited_case", values="present", aggregate_function="first")
+    .fill_null(0)
+    .sort("cited_case")
+)
+
+ids = profile.get_column("cited_case").to_list()
+X = profile.drop("cited_case").to_numpy().astype(float)
+X = X / np.linalg.norm(X, axis=1, keepdims=True)
+angles = np.arccos(np.clip(X @ X.T, 0, 1))
+
+dist = (
+    pl.DataFrame(angles, schema=[str(i) for i in ids])
+    .with_columns(doc_id = pl.Series(ids))
+    .unpivot(index="doc_id", variable_name="doc_id2", value_name="distance")
+    .filter(c.doc_id < c.doc_id2)
+)
+
+(
+    dist
+    .sort(c.distance)
+    .head(6)
+    .join(case.select(c.citation, name_a=c.case_name), left_on="doc_id", right_on="citation", how="left")
+    .join(case.select(c.citation, name_b=c.case_name), left_on="doc_id2", right_on="citation", how="left")
+    .select(c.name_a, c.name_b, c.distance)
+)
+```
+
+The closest pairs are ones a reader can check by eye. *Furman* and *Gregg*, the
+death-penalty pair again, are nearest of all at 0.85. Next are *Meyer v.
+Nebraska* and *Pierce v. Society of Sisters*, the two 1920s substantive-due-
+process cases about parents' control over their children's schooling, and then
+a run of the free-speech leafleting cases (*Lovell*, *Schneider*, *Cantwell*).
+The distance found real doctrinal pairs without ever being told what any case is
+about, only who cites it — which is exactly the spot-check-against-something-you-
+know the chapter asks for before trusting an embedding or a distance.
+
+8. Before building a distance network, look at the distances themselves. Print
+the smallest and mean distance, and count how many of the pairs sit exactly at
+the maximum possible angle distance of π/2. Then, following the chapter, build a
+distance network by keeping every pair closer than a cutoff, and check how many
+components it lands in.
+
+```{python}
+print(
+    dist.select(
+        smallest = c.distance.min(),
+        mean = c.distance.mean(),
+        n_orthogonal = (c.distance > 1.5707).sum(),
+        n_pairs = pl.len()
+    )
+)
+
+dist_edges = (
+    dist
+    .filter(c.distance < 1.4)
+    .select(c.doc_id, c.doc_id2)
+)
+
+dn_node, dn_edge, dn_G = DSNetwork.process(dist_edges, directed=False)
+
+dn_node.group_by(c.component).agg(n = pl.len()).sort(c.n, descending=True).head()
+```
+
+The mean distance is 1.53, almost the π/2 maximum, and 829 of the 3,160 pairs —
+better than a quarter — sit *exactly* at π/2, meaning they share no citer at
+all. This is the same crowding-against-the-maximum we saw with sparse text
+vectors: when each case has hundreds of citers spread across thousands of
+possible citing cases, almost any two of them are nearly orthogonal. A fixed
+distance cutoff is a blunt instrument here. Set it at 1.4 and the network
+shatters into a dozen disconnected pieces; nudge it to 1.5 and nearly every pair
+becomes an edge at once. There is no cutoff that gives a single readable network,
+because the distances are all bunched at one end. The next section fixes this by
+ranking neighbors instead of thresholding them.
+
+9. A *symmetric nearest-neighbor* network sidesteps the cutoff problem. For each
+case, take its k closest neighbors, and keep an edge only when two cases are
+*mutually* in each other's top k. Because the rule is per-case, a popular case
+cannot collect more than k edges, and the network can never have a degree above
+k. Build it with `k = 5`. Since your `dist` table has each pair once, first
+stack it with a copy of itself with the two columns swapped so every case sees
+all of its neighbors, take the 5 nearest per case, and keep only the pairs that
+appear from both directions.
+
+```{python}
+k = 5
+
+both = pl.concat([
+    dist.select(c.doc_id, c.doc_id2, c.distance),
+    dist.select(doc_id=c.doc_id2, doc_id2=c.doc_id, distance=c.distance)
+])
+
+knn = (
+    both
+    .sort([c.doc_id, c.distance])
+    .group_by(c.doc_id, maintain_order=True)
+    .head(k)
+    .select(c.doc_id, c.doc_id2)
+)
+
+nn_edges = (
+    knn
+    .with_columns(
+        a = pl.min_horizontal(c.doc_id, c.doc_id2),
+        b = pl.max_horizontal(c.doc_id, c.doc_id2)
+    )
+    .group_by([c.a, c.b])
+    .agg(mutual = pl.len())
+    .filter(c.mutual == 2)
+    .select(doc_id=c.a, doc_id2=c.b)
+)
+
+nn_node, nn_edge, nn_G = DSNetwork.process(nn_edges, directed=False)
+
+nn_node = nn_node.join(
+    case.select(c.citation, c.case_name, c.term),
+    left_on="id",
+    right_on="citation",
+    how="left"
+)
+
+nn_node.select(
+    n_nodes = pl.len(),
+    n_components = c.component.max(),
+    max_degree = c.degree.max(),
+    mean_degree = c.degree.mean().round(2)
+)
+```
+
+Where the fixed cutoff either fragmented or overconnected the network, the
+nearest-neighbor rule lands on a single connected component of all 77 cases with
+a maximum degree of exactly 5 — no case, however heavily cited, is allowed more
+than its five mutual neighbors. The `mutual == 2` filter is the "each direction
+counts once" trick: a pair survives only if it turned up when we took *A*'s
+neighbors and again when we took *B*'s.
+
+10. The chapter's central claim about nearest-neighbor networks is that
+eigenvalue and betweenness centrality, usually tightly correlated, come apart in
+this network type. Test it. Compute the correlation between `eigen` and `between`
+for the nearest-neighbor network, and for comparison, do the same on the
+direct-citation network from question 4's edges (rebuilt undirected). Then print
+the nearest-neighbor network's top cases by betweenness, with their eigenvalue
+alongside.
+
+```{python}
+un_node, un_edge, un_G = DSNetwork.process(edges, directed=False)
+
+print("direct-citation:", un_node.filter(c.component == 1).select(pl.corr(c.eigen, c.between)).item())
+print("nearest-neighbor:", nn_node.filter(c.component == 1).select(pl.corr(c.eigen, c.between)).item())
+
+(
+    nn_node
+    .sort(c.between, descending=True)
+    .head(6)
+    .select(c.case_name, c.term, c.between, c.eigen, c.degree)
+)
+```
+
+On the direct-citation network the two measures correlate at 0.37; on the
+nearest-neighbor network they correlate at −0.14, effectively unrelated. The top
+of the betweenness list shows why. *Brown v. Board of Education* has the highest
+betweenness in the whole network but an eigenvalue near zero — it has only four
+neighbors, and none of them is central, yet it sits on the shortest path between
+whole regions of the network. These are the gatekeeper nodes the chapter
+describes: cases that bridge otherwise separate lines of doctrine without being
+deeply embedded in any one of them. The direct-citation network could not show
+this because its most-bridging cases were also its most-cited; balancing the
+degree pulls the two apart.
+
+11. Finally, read the communities the nearest-neighbor network found. Color the
+network by `cluster`, and print each cluster's members. Check whether the groups
+correspond to recognizable areas of law rather than falling out arbitrarily.
+
+```{python}
+(
+    nn_node
+    .pipe(ggplot, aes(c.x, c.y))
+    .geom_segment(
+        aes(x=c.x, y=c.y, xend=c.xend, yend=c.yend),
+        data=nn_edge,
+        alpha=0.2
+    )
+    .geom_point(aes(color=c.cluster), size=3)
+    .theme_void()
+    .labs(title="Nearest-Neighbor Network by Cluster", color="Cluster")
+)
+```
+
+```{python}
+(
+    nn_node
+    .group_by(c.cluster)
+    .agg(members = c.case_name.str.join("; "))
+    .sort(c.cluster)
+)
+```
+
+The clusters are cleaner and more even in size than the direct network's, which
+is the payoff the chapter promises for balancing the degree. One cluster is the
+Fourth Amendment search-and-seizure line (*Weeks*, *Carroll*, *Olmstead*,
+*Katz*, *Mapp*); another is the incorporation cases that asked which parts of
+the Bill of Rights bind the states (*Hurtado*, *Palko*, *Malloy*, *Duncan*);
+another the free-speech leafleting cases; the antitrust pair and the death-
+penalty pair each hold together as their own small groups. None of this was
+labeled — the network was handed nothing but who cites whom — yet the walktrap
+communities recover the syllabus of a constitutional-law course.
+
+12. **Written question.** This notebook built four different networks from one
+edge list: last notebook's direct-citation network and this notebook's
+co-citation, directed, and nearest-neighbor networks. In two or three sentences,
+say which network you would reach for to answer each of these questions, and
+why: (a) which case is the single most influential precedent; (b) which two
+doctrines a court treats as related; (c) which case quietly bridges otherwise
+separate lines of law. Note that the same 80 cases gave a different answer under
+each network, which is the chapter's real point: the network you build is a
+choice, and it decides what you are able to see.
+
+The direct-citation network answers (a): raw and eigenvalue centrality on who
+cites whom is the natural measure of a precedent's pull. The co-citation network
+answers (b), since its whole construction is "cited together," and its
+components landed exactly on doctrinal families like the death-penalty and
+antitrust pairs. The nearest-neighbor network answers (c): only after balancing
+the degree did betweenness separate from eigenvalue and surface bridge cases like
+*Brown v. Board* that every other network buried among the hubs. The directed
+network, meanwhile, added the one thing none of the undirected versions could —
+the arrow of time, which on a court record is legible in the degree counts
+alone.

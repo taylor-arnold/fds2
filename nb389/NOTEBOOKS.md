@@ -94,6 +94,12 @@ here — this ledger only needs to track what DSST389 itself introduces.
 
 | Notebook | Sections | Tools and ideas introduced |
 |---|---|---|
+| 48 | 17.7–17.9 | reading a precomputed dense embedding column (`vit`, `siglip`) as a Polars `List` and checking it is 768-long and genuinely dense — `explode`ing the list so every scalar becomes a row and finding *zero* exact zeros in 768,000 values, the concrete contrast with notebook42's ~97%-zero TF-IDF matrix that turns the chapter's "dense, not sparse" prose into a number; `ViTEmbedder()` loading a pretrained network and `c.filepath.map_elements(vit, ...)` embedding an image live, with transfer learning made concrete by re-embedding three images and confirming `dot_product(c.vit, c.vit_live)` ≈ 1.0 against the stored column (the "don't trust a precomputed column blindly" spot-check, done on three rows because the full 1,000 is slow — which is *why* the column ships precomputed); `umap(features=[c.vit], n_components=2, random_state=42).predict(full=True)` projecting the 768-dim embeddings and a `geom_point(aes(color=c.label))` scatter that separates the ten breeds well but *not* cleanly (Samoyed/sheepdog islands, hounds and terriers bleeding together), the honest fine-grained contrast with the chapter's near-perfect bird *species* separation; the notebook42 2D same-label nearest-neighbor rate reused on image coordinates (0.93 overall against a 10% chance rate, English foxhound lowest at 0.81 and also the smallest class at 62 images, Samoyed/sheepdog ~0.98), measuring the projection instead of eyeballing it; `SigLIPEmbedder()` and `embed_text` embedding a natural-language prompt into the *same* space as the image column, a single `"a photo of a golden retriever"` prompt scored by `dot_product(c.siglip, c.siglip_txt)` over a `join(embed, how="cross")` and spot-checked by plotting the top-8 images (all golden retrievers) rather than trusting the score; full zero-shot classification by embedding all ten cleaned breed names (`pl.lit("a photo of a ") + c.text.str.replace_all("_", " ")`), `group_by(c.filepath).head(1)` to take each image's best label, and `(c.label == c.text).mean()` for a 0.92 class rate on ten fine-grained breeds with no training; a deliberate wrong-space failure that swaps `c.siglip` for `c.vit` in the dot product and collapses the rate to 0.13 (barely above chance) with similarity scores in a narrow band around zero — no error raised, every image still gets a tidy prediction, catchable only by knowing ViT image vectors and SigLIP text vectors were never trained to share a space; the chapter's own misclassification grid (`label => predicted`) reused on breeds, with errors falling into two verifiable-by-eye kinds — genuinely look-alike breeds (beagle↔foxhound, terrier→small shaggy dog) and cropped/turned-away/multi-subject frames where the breed's features are not visible; a per-breed zero-shot accuracy (beagle 0.79, foxhound 0.82, aussie terrier 0.85 hardest; sheepdog/Samoyed near-perfect) shown to reproduce the *same* hard-breed ordering the unsupervised UMAP NN rate gave, two unrelated methods (one on ViT, one on SigLIP) agreeing that the difficulty is in the breeds, not the method; a `group_by(c.index)` check that the benchmark's train/test split is irrelevant to a zero-shot classifier (rates near-equal, `test` if anything *higher*, because nothing was fit and so nothing can overfit), the split reframed as a supervised-era leftover; and a closing written question on why an unsupervised projection and a text-driven classifier fail on the same categories — because both read the image only through an embedding of visual appearance, so two breeds that look alike to a person look alike to every method built on the vectors, the flip side of the chapter's embedding optimism |
+| 47 | 17.1–17.6 | `cv2.imread` returning an image as a NumPy `height × width × 3` array of 0–255 bytes, `.shape` and `.mean()` on it; that OpenCV stores channels in BGR order, made concrete by per-channel means on a warm frame where channel 0 (blue, 56.1) is *lower* than channel 2 (red, 63.8), so a student assuming channel 0 is red misreads the frame; that a real-world collection is not resized to a common grid the way a benchmark set is (500 FSA-OWI images span 105 distinct `(height, width)` sizes, 394 landscape to 106 portrait, all 640 on the long side), caught by looping `cv2.imread` to build a `pl.struct("height","width").n_unique()` check and pushing the lesson that any per-image statistic must be size-independent (a `.mean()` works, a fixed-pixel index would not); looping `cv2.imread` over `fsac.iter_rows` to append a `brightness` column via `pl.Series`; `DSImage.plot_image_grid(..., label_name=)` to eyeball a sorted head, with the darkest twelve landing on Jack Delano's around-the-clock Chicago rail-yard night shots and Alfred Palmer's inside-a-tank frame, the chapter's "brightness is the background, not the subject" limitation shown rather than asserted; a `brightness` boxplot restricted to photographers with `pl.len().over(c.photographer) >= 20` and ordered by `c.brightness.mean().over(...)`, revealing that the two darkest photographers (Palmer, Hollem, both ~60) are exactly the ones assigned to artificially-lit aircraft and defense plants while the outdoor shooters (Collier, Delano, ~80–87) are brightest — a `.geom_boxplot().coord_flip()` on assignment, not merit; `cv2.cvtColor(img, cv2.COLOR_BGR2HSV)` leaving shape unchanged and packing hue into [0,179]; `DSImage.compute_colors` returning per-hue-bucket *percentages* plus a `neutral` bucket that sum to 100, and catching that the chapter's own prose ("proportions sum to 1") disagrees with its helper's actual output, checkable only by adding the numbers; the corpus's warm cast quantified (`neutral` ~68%, `orange` ~16% the dominant hue — skin, wood, brick, dirt — against `blue` ~8% and `red` <3%) via `pl.concat([fsac, results], how="horizontal")` then `.mean()`; a BGR deliberate failure where the reddest image run through `cv2.COLOR_RGB2HSV` (wrong) instead of `COLOR_BGR2HSV` swaps red and blue (33%/5% → 5%/49%) with no error and a tidy dict that still sums to 100, so only knowing the image is red flags it; that a color proportion, like brightness, finds red *things* (schoolchildren's clothing, a Court-day courthouse square, a scrap-and-salvage depot, a tractor) rather than any single subject; and a closing `group_by(photographer)` pipeline over brightness/orange/blue that reads as real, stable per-photographer differences (Wolcott most orange and almost never blue; Palmer/Hollem more blue, less orange) while making the chapter's central point that pixel features separate a wheat field from a factory floor by light and color but can never tell two differently-lit frames of the same subject apart, the gap the embeddings in 17.7–17.9 exist to close |
+| 46 | 16.6–16.10 | building a co-citation edge list from a raw citation table by self-joining `cite` to itself on `citing_case` (the join-chapter self-join reused to turn "who cites whom" into "who is cited alongside whom"), keeping each unordered pair once with `c.cited_case < c.cited_case_right` and counting shared citers; that a co-citation network of the same 80 cases fragments into three components under a `count >= 15` threshold where the direct-citation network was one connected piece (a 68-case rights core plus two two-case islands, *Furman*/*Gregg* death penalty and *Standard Oil*/*Socony* antitrust, that are heavily co-cited with each other but share no third citer with the core), the component-count discipline from notebook45 recurring; that co-citation eigenvalue centrality crowns an entirely different neighborhood (*Cantwell*, *Schneider*, *Whitney*, *NYT v. Sullivan* — the First Amendment cases) than direct-citation degree did (*Palko* and criminal procedure), because co-citation rewards being cited *in company* rather than being cited *often*, and the SCOTUS record shows the citation/co-citation gap the chapter says Wikipedia is too edit-scrambled to show; `DSNetwork.process(directed=True)` returning `degree_out`/`degree_in`/`degree_total` and dropping closeness, with the directed in-degree-vs-out-degree scatter (chapter's own plot) revealing a temporal structure a court has and Wikipedia does not — oldest cases (`McCulloch` 1819, out-degree 0) top-left, newest (`Buckley` 1976, in-degree 0) bottom-right — quantified as `pl.corr(term, degree_out)` = 0.63 against `pl.corr(term, degree_in)` = −0.25 and a count of the 10 cases citing none of the other 79, the "there is no temporal ordering" caveat the chapter raises for Wikipedia turned into a checkable clock; building a distance between cases with no text at all by treating each case's set of incoming citers as an indicator vector and computing the angle distance by hand (`.pivot().fill_null(0).to_numpy()`, normalize, `arccos(X @ X.T)` — notebook42's from-scratch distance pattern) so two cases are close when their citing audiences overlap, spot-checked against known doctrine (*Furman*/*Gregg* nearest at 0.85, *Meyer*/*Pierce* substantive due process next); the π/2 orthogonality problem from notebook42 recurring on citation profiles (mean distance 1.53 of a 1.5708 max, 829 of 3,160 pairs sharing zero citers) so a fixed distance cutoff either shatters the network (11 components at 1.4) or over-connects it (near-complete at 1.5), motivating ranks over thresholds; the symmetric nearest-neighbor network built in Polars by stacking the pair table with a column-swapped copy, taking each case's `k=5` nearest with `group_by(maintain_order=True).head(k)`, and keeping only mutual pairs via a `min_horizontal`/`max_horizontal` canonicalization filtered to `mutual == 2`, giving a single 77-node component with max degree exactly `k`; the chapter's central claim that eigenvalue and betweenness decouple in a symmetric-NN network made concrete (`pl.corr(eigen, between)` = −0.14 against the direct network's +0.37) with *Brown v. Board* as the highest-betweenness node at near-zero eigenvalue, the gatekeeper the other networks buried among the hubs; walktrap communities on the balanced network recovering recognizable doctrine (Fourth Amendment: *Weeks*/*Carroll*/*Olmstead*/*Katz*/*Mapp*; incorporation: *Hurtado*/*Palko*/*Malloy*/*Duncan*) more evenly than the direct network's; and a closing written question asking which of the four networks (direct-citation, co-citation, directed, nearest-neighbor) answers "most influential precedent" / "which doctrines are treated as related" / "which case bridges separate lines of law", the chapter's real point that the network you build decides what you can see |
+| 45 | 16.1–16.5 | `DSNetwork.process(edge_list, directed=False)` returning the `(node, edge, G)` triple, the node table's centrality columns (`component`/`component_size`/`degree`/`eigen`/`close`/`between`/`cluster`) and the edge table's `x`/`y`/`xend`/`yend` for a `geom_segment` layer; building an induced-subgraph edge list by filtering a raw citation table (`scotus_citation`) to the edges whose two endpoints both fall in a chosen node set and renaming `citing_case`/`cited_case` to `doc_id`/`doc_id2`; a deterministic second sort key (`.sort([c.n_in, c.cited_case], descending=[True, False])`) so a top-80 cut with ties at the boundary reproduces identically run to run, the "numbers that rot" fix applied at selection time rather than caught afterward; the node-count discipline that 80 selected cases yield only 77 network nodes because an edge list silently omits any node in no edge, caught with an anti-join and landing on three heavily-cited but topically-unrelated dropouts (*Chevron*, *Pennoyer v. Neff*, *Mathews v. Eldridge*, all administrative/civil-procedure cases with no citation tie to the constitutional-rights core) rather than an error; raw in-degree (`group_by(c.cited_case).agg(pl.len())`) crowning *McCulloch* as most-cited corpus-wide while network `degree` within the induced set crowns *Palko v. Connecticut* instead, since degree here counts only ties among the 80 landmarks and *Palko* is cited by many of those later rights cases while *McCulloch*'s 255 citations come mostly from ordinary cases outside the set; the four centrality measures colored on a Fruchterman-Reingold layout, with betweenness genuinely separating from eigenvalue on this multi-domain network (*Ashwander* and *McCulloch* scoring near the top on betweenness at degree 8 and eigenvalue ~0.1, as bridges between the federalism cluster and the rights clusters) where the chapter's own single-cluster author network explicitly could not show the difference; `community_walktrap` clusters mapping onto recognizable areas of law, verified by reading members rather than asserted (a clean seven-case Fourth Amendment cluster: *Boyd*, *Weeks*, *Carroll*, *Olmstead*, *Katz*, *Terry*, *Bivens*, plus a two-node antitrust island of *Standard Oil* and *Socony*); a phantom node (`75 U.S. 168`, cited enough to reach the top 80 but absent from the `scotus_case` metadata, so `case_name` is null after a left join) tied to 3,705 distinct cited cases the metadata table never covers, the annotation/embedding spot-check-against-known discipline applied to network nodes; `case_name` failing an `n_unique`-versus-`len` key check (863 rows share a name with another case) so every edge and node is keyed on the reporter `citation` and never the name, the not-a-key lesson in a legal-citation guise; and closing by measuring the eigen/between relationship the chapter only gestures at with `pl.corr` (0.91 for degree-versus-eigenvalue against 0.37 for eigenvalue-versus-betweenness), the bridge cases alone pulling the second pair far below the first, a checkable number in place of eyeballing two nearly identical colored plots |
+| 43 | 15.6–15.7 | anti-joining a bilingual text table against itself to find which authors lack a translation at all, then ranking the full corpus by page length to show the two missing French pages belong to the corpus's shortest and third-shortest English ones — translation coverage tracking obscurity, discovered rather than asserted; running the chapter's own `DSText.process`/`compute_tfidf`/`compute_distances`/`umap_text` pipeline completely unmodified against `fr_core_news_sm` in place of `en_core_web_sm`, since none of the wrapper code has any language-specific logic in it; catching a real gap between the chapter's own prose and its own rendered output — the `max_df=1.0` top-terms call the "Across Languages" section actually uses produces stopword-dominated lists (`the`/`of`/`and` in English, `de`/`le`/`à` in French) in both languages, confirmed against the book's own rendered table for the full 75-author English corpus, and only the stricter `max_df=0.5` used elsewhere in the same chapter delivers the clean, name-dominated lists the prose describes; a leaked-CSS scraping artifact (`mw-parser-output`, from a hidden Wikipedia geo-coordinate template) found via `str.count_matches()` in exactly 4 of 73 English pages and zero French ones, tagged as an ordinary alphabetic `NOUN` by spaCy so `is_alpha` does not catch it the way notebook41's backslash artifact was caught; reproducing the chapter's English/French part-of-speech proportion comparison on the exact matched 73-author subset both tables share, unlike the chapter's own version which silently stacks 75 English pages against 73 French ones; a cross-lingual nearest-neighbor agreement rate (47.9%, 35 of 73 authors) computed by finding each author's angle-distance nearest neighbor separately in each language and checking how often the two languages agree, as a checkable stand-in for the chapter's own hand-wavy "if the projections differ..." framing; testing and rejecting a plausible-looking causal story by recomputing a distance with a suspect term (`parser`) removed and finding the result barely moves (1.528 to 1.548) and the nearest neighbor does not change, a caution against attributing a nearest-neighbor result to whatever term happens to be visible in a short printed list; and a same-era nearest-neighbor rate computed directly on both UMAP projections' `dr0`/`dr1` coordinates (20.5% English, 26.0% French, against a roughly 17% chance rate for seven uneven era categories) as a quantitative check on "loose" era clustering, continuing notebook42's practice of measuring a projection instead of just eyeballing it |
+| 42 | 15.4–15.5 | pivoting a long TF-IDF table into a two-term scatter (`olympic`/`profit`) that lands on a cleaner separation than the book's own `poem`/`novel` example — zero documents nonzero on both axes here, since AG News's topics are disjoint by construction where the book's authors genuinely mix poetry and prose; a matrix-sparsity check (`.pivot().fill_null(0).to_numpy()`, then a plain `(X == 0).sum()`) that turns the chapter's "sparse embedding" description into a number, 97.4% zero cells and about 24 nonzero terms per document out of a 917-word vocabulary; `umap_text(..., random_state=)` for a reproducible 2D projection, paired with a same-label nearest-neighbor rate computed directly on the projected `dr0`/`dr1` coordinates (50% overall, twice chance for four labels but far short of the book's clean author clusters) as a checkable stand-in for eyeballing a plot; `DSText.compute_distances()` with its row count verified against $\binom{200}{2}$; stacking a one-row-per-pair distance table with a column-swapped copy of itself via `pl.concat` to get both directions; the `group_by(doc_id).head(1)` nearest-neighbor pattern applied to the full-dimensional angle distances (70% same-label overall) and shown to rank the four topics in the same order (`Sports` easiest, `Sci/Tech` hardest) as the cruder 2D version; a from-scratch raw Euclidean distance built with the same `to_numpy()` pivot the chapter's own reference code uses for the angle distance, reproducing the chapter's length-distortion warning concretely: two long articles (95 and 137 tokens against a 39-token average) get picked as the Euclidean nearest neighbor for 136 of 200 documents (68%) regardless of topic, while the angle distance on the same corpus correctly matches a `World` article about a Vancouver police case to a different `World` article about a Vancouver police case instead of a `Sci/Tech` virus story; spot-checking the single globally closest pair by reading both articles' full text, landing on a genuine AG News near-duplicate (two independently filed Reuters stories, minutes apart, about the same Medtronic earnings release); and the $\pi/2$ maximum-distance case explained by IDF, where a spaCy tokenizer splitting one rare Dutch surname into three separate tokens is enough to make a 16-term document share no filtered vocabulary with 162 of the other 199 |
 | 40 | 14.5–14.10 | `.shift(-1).over([c.doc_id, c.sid])` on `lemma`/`is_alpha` pairs to build a bigram table without a sentence boundary leaking across rows, and the same shift extended to `-2` for trigrams; PMI computed by joining per-word counts onto per-bigram counts and comparing `p_bigram` to `p_w1 * p_w2` on a log scale, with the `bigram_count >= 5` floor that keeps rare-word noise out of the ranking; that a high-PMI list is not simply "rare proper nouns," since this corpus's top-15 mixes proper nouns with review-voice phrasing ("my opinion", "apart from") and genre vocabulary ("sci fi", "production value") that a biography corpus never produces; the `ent_iob == "B"` cumulative-sum trick (`.cum_sum().over(c.doc_id)`) that turns per-token entity labels into per-entity groups, reused on a corpus where a `PERSON` label means a real director (Josh Kornbluth) as often as a fictional character (John Baird), distinguishable only by reading the surrounding text, not the label; a `dep`/`head_idx` join (the same "share a head" pattern behind the chapter's own subject-verb pairs) used to find negated predicate adjectives (`dep in ["acomp", "attr"]` sharing a head with a `dep == "neg"` token) regardless of how many words separate the negation from what it negates, catching 76 instances where a `shift(-1)` bigram search modeled on question 1 would have caught only the 30 where the negation sits directly next to the adjective; restricting an `amod` adjective-noun join to a specific head noun (`movie`/`film`) to sharpen a sentiment signal notebook39 found only partially in raw counts — it works for `bad` (16 negative "bad movie"/"bad film" uses against 1 positive, versus 86-to-17 for the bare word anywhere in a review) but not for `good`, which stays almost as evenly split as notebook39's own raw count; `DSText.kwic()` run on a corpus where a single keyword's surrounding context ranges across the full sentiment scale within ten printed lines, unlike the more uniform register of a biography page; four complexity metrics (mean sentence length, type-token ratio, mean word length, content-word ratio) computed per document and shown to barely separate `positive` from `negative` reviews, against a plain count of `"!"` tokens, which does (1.21 per negative review versus 0.52 per positive one) — evidence that a genre's sentiment can hide from every metric the chapter introduces and still turn up in a `.filter()` on a single punctuation mark |
 | 38 | 13.7–13.12 | casting elapsed milliseconds to `pl.Datetime("ms")` via `.cast(pl.Int64).cast(pl.Datetime("ms"))`, the same trick a Unix timestamp already relies on, to get a real `Datetime` (and `.dt.truncate()`) out of a column with no calendar behind it, anchored at an arbitrary but shared reference so every session's elapsed time lands on the same clock; `.dt.truncate()` used to bucket one session's keystrokes into 10-second bins, and then, because the anchor is shared across all 823 sessions, to pool everyone's Nth minute together and read a corpus-wide trend (hold time rising 73.7 → 81.7 ms over 15 minutes) off a single `group_by()`; treating an already-supplied column (`dur_after`) as a claim to verify rather than a fact, checked against `c.dur.shift(-1).over(c.id)` before it is trusted; `.shift(1).over(c.id)` reaching across two different columns (`press` minus the previous row's `release`) rather than one, to build a `gap` duration `.diff()` cannot express; a duration column's fragility at the individual level (one 43-minute gap pushing a person to the third-highest average of 823) against its stability in bulk (dropping that person's rows moves the corpus average by 2 ms out of 457.7); `.rolling_mean_by(by=, window_size=)` to smooth an unevenly-spaced series by a span of time; the concrete cost of skipping `.over()` on a pooled rolling window, worse than the chapter's own warning suggests here specifically because the anchor trick makes hundreds of unrelated sessions (393, in one 15-second slice) share the same clock reading, so the ungrouped average is not just wrong but meaningless; `.join_asof(by=, strategy="backward")` matching every keystroke back to the most recent long pause to test a "restart cost" hypothesis, alongside the caution that the result is confounded with an already-known time-in-session trend; `.join_where()` as a self-join on an interval-overlap condition (`press_right < release & release_right > press`) to test for keyboard rollover, returning zero matches, confirmed cheaply at corpus scale with a plain `.min()` on the `gap` column instead of repeating the self-join everywhere |
 | 39 | 14.1–14.4 | `spacy.load("en_core_web_sm")` and the callout warning that the model has to be downloaded once (`python -m spacy download en_core_web_sm`) before it can be loaded; `DSText.process(docs, nlp)` as three nested loops (documents, sentences, tokens) flattened into one token-per-row table, and reading its reference implementation before running it at scale; the `anno` table's columns (`token`, `token_with_ws`, `lemma`, `upos`, `tag`, `is_alpha`/`is_stop`/`is_punct`, plus `dep`/`head_idx`/`ent_type`/`ent_iob` reserved for later sections) and `(doc_id, sid, tid)` as its compound key, checked with the same `.group_by().agg().filter()` idiom chapters 8/9 used for any other table's key; reconstructing a document's original text by sorting on `sid`/`tid` and joining `token_with_ws`, confirming the annotation table is a lossless re-encoding of the input; that `upos == "NOUN"`/`"ADJ"` filtering has no `is_alpha` check built in, so unclean input tokens (an HTML `<br />` fused onto an adjacent word) can be tagged `NOUN` and inflate a frequency count with no error raised, demonstrated first on one document and then measured at corpus scale (`movie` and `film` undercounted by 8 and 6 out of roughly 440 and 346) once the same contamination runs through all 200 reviews uncleaned; grouping token counts by an external label column (joined in from outside `anno`) rather than by `doc_id`, as the general shape of "which words characterize which subset of documents"; that a raw word count can fail to separate two classes even when the words are intuitively diagnostic, because negation (`"not good"`) leaves the positive word in place while flipping the sentence's sense, tying back to the chapter's own "not bad" example from its introduction |
@@ -263,6 +269,212 @@ for a documented reason.
 | 39 | IMDb movie reviews (200-review subsample) | `data/imdb5k_pca.parquet` |
 | 40 | IMDb movie reviews (same 200-review subsample as notebook39) | `data/imdb5k_pca.parquet` |
 | 41 | AG News articles (200-article subsample, 4 categories) | `data/agnews_pca.parquet` |
+| 42 | AG News articles (same 200-article subsample as notebook41) | `data/agnews_pca.parquet` |
+| 43 | Wikipedia authors, English and French, narrowed to the 73 with both | `data/wiki_uk_meta.csv.gz`, `data/wiki_uk_authors_text.csv`, `data/wiki_uk_authors_text_fr.csv` |
+| 45 | U.S. Supreme Court precedent network, restricted to the 80 most-cited cases | `data/scotus_case.csv`, `data/scotus_citation.csv` |
+| 46 | Same SCOTUS 80-case network as notebook45, recut four ways | `data/scotus_case.csv`, `data/scotus_citation.csv` |
+| 47 | FSA-OWI color photographs (500-image Library of Congress sample) | `data/fsac.csv` (+ `media/fsac/*.jpg`) |
+| 48 | Imagewoof (1,000-image ten-dog-breed ImageNet subset, precomputed ViT + SigLIP embeddings) | `data/imagewoof_1000.parquet` (+ `media/imagewoof_1000/*.png`) |
+
+Notebook48 takes Imagewoof over Imagenette (the two ImageNet subsets the
+catalogue flags for exactly this half of the chapter) because 17.7–17.9 is the
+embeddings half — transfer learning, UMAP, and zero-shot classification — and
+its whole lesson is that a dense pretrained vector carries real *visual* meaning,
+which lands harder on a dataset where that meaning is genuinely tested. The
+chapter's own bird *species* separate almost perfectly under both ViT and SigLIP,
+and Imagenette's ten distinct objects (church, gas pump, garbage truck) would
+only repeat that clean result. Imagewoof is the deliberately hard sibling: ten
+fine-grained dog breeds, several of which look alike, so the embeddings separate
+them well but not perfectly, and that gap is the notebook's spine. It shows up
+three times over as a checkable number rather than an assertion — a 0.93
+UMAP nearest-neighbor rate with the English foxhound down at 0.81, a 0.92
+zero-shot rate, and a per-breed accuracy that bottoms out on the beagle (0.79)
+and the two hounds. The dataset earns the notebook on grounds Imagenette could
+not supply: its confusions are ones a student can reason about from the pictures
+(a beagle and an English foxhound are near-identical tricolor hounds, the two
+terriers are both small and scruffy), so the misclassification grid is verifiable
+by eye, and the same short list of hard breeds falls out of two unrelated methods
+— an unsupervised UMAP projection of the ViT vectors and a text-driven SigLIP
+classifier — which is the notebook's real payoff: when both agree, the difficulty
+is in the breeds, not the method. Two features come for free. Both embedding
+columns (`vit`, `siglip`) are precomputed and unit-normalized, so `dot_product`
+is cosine similarity with no extra work, and because `vit` and `siglip` are the
+same shape but from different models, the notebook's deliberate failure writes
+itself: scoring the SigLIP *text* embedding against the ViT *image* column runs
+without error, returns a tidy prediction for every image, and collapses to 0.13
+— catchable only by knowing the two columns do not live in the same space. The
+one honest note is that the underscore-slug-vs-clean-prompt story is *not* a
+strong lesson here (cleaning the labels moves the rate barely 1%), so the
+notebook cleans the prompts quietly and spends its deliberate-failure budget on
+the wrong-space swap instead. Imagewoof is unused anywhere else in either
+course's ledger; notebook47's FSA-OWI carries the pixel-statistics half, and the
+two halves of chapter 17 want fundamentally different material (raw image files
+versus precomputed dense vectors), so splitting them across two datasets costs
+the reader no comparison.
+
+Notebook47 takes the FSA-OWI color photographs over the other vision
+candidates because 17.1–17.6 is the pixel-statistics half of the chapter —
+reading an image as a raw array, then summarizing it by brightness and by
+hue — and that half wants genuine color photography where brightness and
+color *are* the material, not a benchmark of pre-standardized tiles. The
+collection is the less-famous Kodachrome color work from the Library of
+Congress's FSA-OWI project, so a color analysis is meaningful on its face
+(the corpus has a real, checkable warm cast: `neutral` ~68%, `orange` ~16%
+the dominant hue against `blue` ~8% and `red` under 3%, exactly the palette
+of skin, wood, brick, and dirt in Depression-and-wartime documentary
+scenes). The dataset earns the notebook on grounds the chapter's own bird
+set cannot supply. Its natural grouping variable is the *photographer*, and
+that turns the chapter's own "brightness reflects photographic context, not
+the subject" caution into a sharper, checkable result: the two darkest
+photographers on average (Alfred Palmer and Howard Hollem, both ~60) are
+precisely the ones the war effort assigned to artificially-lit aircraft
+factories and defense plants, while the outdoor shooters (John Collier, Jack
+Delano, ~80–87) are brightest — brightness tracking assignment, verifiable
+by reading the captions rather than asserted. The `caption` column gives
+every extreme a spot-check for free (the darkest frames are Delano's
+around-the-clock Chicago rail yard and Palmer's inside-a-tank shot; the
+reddest are children's clothing, a Court-day square, a salvage depot),
+which is the annotation the bird labels never carried. Two further features
+come at no authoring cost: the images are genuinely *not* resized (500 photos
+in 105 distinct sizes) where the chapter's birds were standardized, giving a
+concrete size-independence lesson, and the BGR-ordering trap the chapter only
+warns about becomes a real deliberate failure here, because running the
+reddest frame through `COLOR_RGB2HSV` instead of `COLOR_BGR2HSV` swaps red and
+blue (33%/5% → 5%/49%) with no error raised. The one honest wrinkle is that
+`fsac` has no `vit`/`siglip` embeddings, so it cannot carry notebook48's
+transfer-learning and zero-shot sections (17.7–17.9); those go to Imagenette
+or Imagewoof, whose precomputed embeddings are exactly what that half needs.
+The two halves of chapter 17 want fundamentally different things — raw pixel
+files versus dense vectors — so splitting the dataset costs the reader no
+comparison, unlike the SCOTUS and AG News pairs that genuinely shared one
+table. FSA-OWI was used once in nb289's notebook17, but for reading imperfect
+files, not pixel statistics, so the lesson here does not repeat it.
+
+Notebook46 stays on notebook45's exact 80-most-cited SCOTUS set, the same way
+the chapter's own second half stays on its Wikipedia author corpus: 16.6–16.10
+are four *other* networks (co-citation, directed, distance, nearest-neighbor)
+over the one edge list, so a fresh dataset would only cost the reader the direct
+comparison that is the whole point. The dataset earns the repeat on grounds the
+chapter's own examples explicitly cannot supply. The book warns that its
+Wikipedia network is too small and too edit-scrambled to bring out the
+differences between these network types — "there is no clear temporal ordering
+of the pages," and the citation/co-citation gap is "somewhat muted" — and each
+of those warnings becomes a concrete SCOTUS result. Co-citation on the court
+record fragments into a rights core plus a death-penalty and an antitrust
+island and crowns a different centrality winner (the First Amendment cases)
+than direct citation did, the "striking" difference the chapter says only
+non-Wikipedia data shows. The directed network's in/out degree scatter reveals
+a clean temporal clock (corr of term with out-degree 0.63, with in-degree
+−0.25; ten oldest cases citing none of the others) precisely because a court
+opinion, unlike a Wikipedia page, can only cite backward. And the
+nearest-neighbor network is where the chapter's headline claim — that
+eigenvalue and betweenness centrality decouple in symmetric-NN networks — lands
+as a checkable −0.14 correlation against the direct network's +0.37, with
+*Brown v. Board* surfacing as the top-betweenness gatekeeper at near-zero
+eigenvalue. The one real obstacle is that SCOTUS has no text in the catalogue,
+so the distance and nearest-neighbor sections (built on text angle distances in
+the book) need a distance from somewhere: the notebook builds one from the
+citation structure itself, the angle between cases' incoming-citer indicator
+vectors, which both keeps everything in the citation domain and re-triggers
+notebook42's π/2 orthogonality finding (829 of 3,160 pairs share no citer at
+all), turning "why a fixed cutoff fails and ranks succeed" into the motivation
+for the nearest-neighbor section rather than an aside. SCOTUS remains unused
+anywhere else in either course's ledger.
+
+Notebook45 takes the SCOTUS citation network over the other network candidate,
+the English Wikipedia link graph, because chapter 16's opening sections are
+about building a network object and then plotting every node and edge to see
+degree, eigenvalue, closeness, and betweenness centrality laid out, and that
+needs a network small enough to actually draw. enwiki's 10 million edges are
+the wrong size for the foundational half of the chapter (they belong to
+notebook46's later, table-driven sections if anywhere); SCOTUS is the
+candidate the ledger already flagged as "small enough to look at directly."
+The chapter's own dataset is the `wiki_uk_citations` 75-author graph, so this
+also satisfies the avoid-the-chapter's-dataset rule while staying in the
+citation-network family the chapter is built around. Rather than run
+centrality on all 24,071 cases (which cannot be plotted any more than enwiki
+can), the notebook builds an induced subgraph of the 80 most-cited cases and
+the links among them, which comes back a single connected component of 77
+nodes and 327 edges, almost exactly the 75-node scale the chapter uses for its
+own drawable example. The dataset earns the notebook on grounds the 75-author
+graph could not supply. Its most-cited cases are landmark decisions an American
+undergraduate can reason about (*McCulloch*, *Miranda*, *Gibbons*, *Gideon*),
+so a wrong centrality ranking is visible to a reader without checking a key,
+and the corpus spans several genuinely distinct areas of law rather than one
+subject, which is what finally separates betweenness from the other centrality
+measures: *Ashwander* and *McCulloch* score near the top on betweenness with a
+degree of 8 and an eigenvalue near 0.1, as bridges between the commerce and
+rights clusters, exactly the contrast the chapter says its own dense
+single-cluster network is too small to show. The walktrap communities land on
+recognizable legal domains a reader can verify (a clean seven-case Fourth
+Amendment cluster), and the raw edge list carries its own checkable failures
+for free: three heavily-cited cases (*Chevron* among them) drop silently out of
+the induced network because they share no citation with the constitutional-law
+core, one node (`75 U.S. 168`) is cited into the top 80 yet has no metadata row
+at all, and `case_name` fails a key check on 863 rows, all of which turn the
+chapter's implicit "keep track of what your nodes are" caution into concrete,
+recognizable checks. SCOTUS is unused anywhere in either course's ledger.
+
+Notebook43 does not get to avoid the chapter's own dataset, because
+`wiki_uk_authors_text_fr.csv` is the only French-paired text in the whole
+catalogue and there is no second bilingual corpus to reach for instead —
+exactly the constraint flagged above before any notebook in this range was
+drafted. What the notebook can still do is take the narrowing seriously
+rather than paper over it. `text_fr` turns out to have only 73 of the 75
+authors' pages, and the two missing ones, Rex Warner and Edward Upward, are
+independently the shortest and third-shortest English pages in the entire
+corpus — a genuine, checkable finding (translation coverage tracks
+obscurity, not era) that becomes the notebook's own opening question rather
+than a footnote about data availability. Restricting both languages to
+exactly this 73-author intersection also fixes a real, if minor, flaw in
+the chapter's own cross-language comparison: the book's own part-of-speech
+proportion chart silently stacks all 75 English pages against only 73
+French ones, while this notebook's version compares the identical
+population on both sides. The corpus earns its second half of the notebook
+independently of the population question, too. Running the same
+`compute_tfidf` call the chapter uses for its own top-terms table
+(`max_df=1.0`) turns up a real gap between the chapter's prose and its own
+rendered output — English and French lists alike are dominated by function
+words, not the names and titles the text promises — which only the
+chapter's own stricter `max_df=0.5` (already used elsewhere in the same
+chapter) actually fixes, and cleaning up to that standard is what surfaces
+a genuine scraping artifact, leaked coordinate-template CSS, sitting in
+exactly two English authors' pages and no French ones. The distance and
+UMAP tools the chapter builds for a single language carry over to a
+second one with no code changes at all, and applying them separately to
+`anno_en` and `anno_fr` gives the closing sections of the chapter something
+to measure that the chapter itself only gestures at: a 47.9% cross-lingual
+nearest-neighbor agreement rate, far above chance but far from identical
+geometry, standing in for the chapter's own closing paragraph about
+projections that "differ" between editions.
+
+Notebook42 stays on notebook41's exact 200-article AG News subsample rather
+than drawing a fresh one, following the same logic notebook40 used to stay on
+notebook39's IMDb subsample: 15.4–15.5's new material (document vectors,
+UMAP, and angle distance) is a second pass over the same TF-IDF table
+notebook41 already built, and the four disjoint `label` categories are
+exactly what a chapter about telling documents apart needs. The dataset
+earns the repeat on its own merits, too. The `olympic`/`profit` two-term
+scatter that opens the chapter's own vector intuition lands on a cleaner
+result here than the book's `poem`/`novel` example: zero AG News articles
+score nonzero on both terms, against the book's authors who genuinely write
+in both forms and populate the upper-right corner, because the topics behind
+these two words are disjoint by construction where two literary forms are
+not. The four-category structure also gives the UMAP and distance sections
+something the book's single-subject author corpus cannot: a same-label
+nearest-neighbor rate to measure instead of just eyeballing a plot, which
+lands at 50% in the 2D projection and 70% in the full-dimensional distances,
+both well above the 25% chance rate for four labels but well short of clean
+separation, with `Sci/Tech` the hardest topic to keep together under both
+methods and `Sports` the easiest. AG News also supplies a real instance of
+exactly the failure the chapter warns about when it argues for angle
+distance over Euclidean: two long, otherwise unremarkable articles get
+picked as the raw Euclidean nearest neighbor for 136 of the 200 documents
+(68%) regardless of topic, a concrete number no amount of warning about
+document length could have supplied without a corpus containing both long
+and short documents side by side. Reusing the same 200 articles also means
+`anno` and the TF-IDF table do not need rebuilding from scratch, which was
+notebook40's reason for reuse as well.
 
 Notebook41 takes a 200-article subsample of AG News (50 each from
 `Business`, `Sci/Tech`, `Sports`, and `World`, drawn deterministically from
