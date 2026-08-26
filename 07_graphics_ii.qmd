@@ -49,7 +49,7 @@ The result is a small table: one row per subregion, with a count next to each. N
 ```{python}
 (
     country
-    .pipe(ggplot, aes(c.subregion))
+    .ggplot(aes(c.subregion))
     .geom_bar(fill="white", color="black")
     .coord_flip()
 )
@@ -69,13 +69,13 @@ We can reproduce the plot above by aggregating first and piping the result strai
     .group_by(c.subregion)
     .agg(pl.len().alias("n"))
     .sort(c.n)
-    .pipe(ggplot, aes(c.subregion, c.n))
+    .ggplot(aes(c.subregion, c.n))
     .geom_col(fill="white", color="black")
     .coord_flip()
 )
 ```
 
-The bars are the same as in the plot above, but they arrive in a readable order, and the labor is split differently. Here we counted the countries ourselves and `geom_col` only drew the numbers. Notice that nothing in the plotting code asked for the ordering; it came from the `.sort()` we ran on the table before plotting it. The next section takes that idea apart. This pattern, aggregate and then pipe into a column geometry, is the one you will use most often once your data grows past toy examples, because real summaries usually involve more than a plain count: an average price per category, a total revenue per month, a median score per group. Compute the summary you want with the tools from @sec-group, then plot it with `geom_col`.
+The bars are the same as in the plot above, but they arrive in a readable order, and the labor is split differently. Here we counted the countries ourselves and `geom_col` only drew the numbers. Notice that nothing in the plotting code asked for the ordering; it came from the `.sort()` we ran on the table before plotting it. The next section takes that idea apart. This pattern, aggregate and then draw the result with a column geometry, is the one you will use most often once your data grows past toy examples, because real summaries usually involve more than a plain count: an average price per category, a total revenue per month, a median score per group. Compute the summary you want with the tools from @sec-group, then plot it with `geom_col`.
 
 The two geometries look nearly identical on the page and are a reliable source of confusion, so it is worth stating the difference plainly: it is a question of who does the counting. `geom_bar` takes a single categorical aesthetic and counts the rows in each category for you, so the height of each bar is a tally it computes internally. `geom_col` takes both an `x` and a `y` and draws each `y` value as given, so you supply the height. Reach for `geom_bar` when you want the raw count of how many rows fall into each category and you would rather not compute it yourself, and reach for `geom_col` when the number you want to show is already in the frame. If you ever find yourself computing a count with `group_by` only to feed it to `geom_bar`, you wanted `geom_col`.
 
@@ -91,7 +91,7 @@ The `geom_bar` version is the harder case, and it is harder for an interesting r
 (
     country
     .sort(pl.len().over(c.subregion))
-    .pipe(ggplot, aes(c.subregion))
+    .ggplot(aes(c.subregion))
     .geom_bar(fill="white", color="black")
     .coord_flip()
 )
@@ -107,7 +107,7 @@ Related to ordering is the question of what counts as a category at all. Plotnin
     .filter(c.year.is_in([2003, 2008, 2013, 2018]))
     .sort(c.year)
     .with_columns(c.year.cast(pl.String))
-    .pipe(ggplot, aes(c.year, c.cell))
+    .ggplot(aes(c.year, c.cell))
     .geom_boxplot()
 )
 ```
@@ -121,7 +121,7 @@ Counting works for categories. For a numeric column we first have to decide what
 ```{python}
 (
     country
-    .pipe(ggplot, aes(c.hdi))
+    .ggplot(aes(c.hdi))
     .geom_histogram(fill="white", color="black", binwidth=0.1, boundary=0)
 )
 ```
@@ -139,7 +139,7 @@ A density plot is an alternative that models the distribution rather than tallyi
 ```{python}
 (
     country
-    .pipe(ggplot, aes(c.hdi))
+    .ggplot(aes(c.hdi))
     .geom_density(fill="white", color="black", adjust=0.8)
 )
 ```
@@ -171,7 +171,7 @@ Each row of this table is a box waiting to be drawn: the box spans the 25th to t
 (
     country
     .sort(c.hdi.median().over(c.region))
-    .pipe(ggplot, aes(c.region, c.hdi))
+    .ggplot(aes(c.region, c.hdi))
     .geom_boxplot()
     .coord_flip()
 )
@@ -187,7 +187,7 @@ The last statistical geometry summarizes differently. Rather than grouping rows,
 (
     country
     .filter(c.region == "Europe")
-    .pipe(ggplot, aes(c.hdi, c.happy))
+    .ggplot(aes(c.hdi, c.happy))
     .geom_point()
     .geom_smooth(method="lm", se=False)
 )
@@ -211,7 +211,7 @@ To change the palette, pass a different color map to that same scale, as in `sca
 (
     country
     .filter(c.region == "Europe")
-    .pipe(ggplot, aes(c.hdi, c.happy))
+    .ggplot(aes(c.hdi, c.happy))
     .geom_point(aes(color=c.subregion))
     .scale_color_brewer(type="qual", palette=2)
 )
@@ -228,7 +228,7 @@ The default scale for the x-axis is `scale_x_continuous`, with `scale_y_continuo
 (
     country
     .filter(c.region == "Europe")
-    .pipe(ggplot, aes(c.hdi, c.happy))
+    .ggplot(aes(c.hdi, c.happy))
     .geom_point()
     .scale_x_continuous(breaks=breaks_width(0.05))
     .scale_y_continuous(limits=(0, None))
@@ -242,7 +242,7 @@ Finally, two scale types are useful for working with colors directly. Sometimes 
 (
     country
     .filter(c.region == "Europe")
-    .pipe(ggplot, aes(c.hdi, c.happy))
+    .ggplot(aes(c.hdi, c.happy))
     .geom_point(aes(color=c.subregion))
     .scale_color_manual(values={
         "Eastern Europe": "lightblue",
@@ -262,7 +262,7 @@ Facets are another way to show differences across the levels of a categorical va
 ```{python}
 (
     country
-    .pipe(ggplot, aes(c.hdi, c.happy))
+    .ggplot(aes(c.hdi, c.happy))
     .geom_point(aes(color=c.region), show_legend=False)
     .facet_wrap("region")
 )
@@ -282,7 +282,7 @@ To change the labels, we add a `labs` layer. Inside it, we assign text to the ae
 (
     country
     .filter(c.region == "Europe")
-    .pipe(ggplot, aes(c.hdi, c.happy))
+    .ggplot(aes(c.hdi, c.happy))
     .geom_point(aes(color=c.subregion))
     .labs(
         x="Human Development Index (HDI)",

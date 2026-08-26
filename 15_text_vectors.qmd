@@ -151,7 +151,7 @@ To build intuition for this idea, let's start with just two terms. Suppose we lo
     .filter(c.lemma.is_in(["poem", "novel"]))
     .pivot(on="lemma", index="doc_id", values="tfidf")
     .fill_null(0)
-    .pipe(ggplot, aes(c.poem, c.novel))
+    .ggplot(aes(c.poem, c.novel))
     .geom_text(aes(label=c.doc_id), size=7)
 )
 ```
@@ -184,7 +184,7 @@ The code below puts this idea into practice using the wrapper function `umap_tex
         max_df=0.5
     )
     .predict(full=True)
-    .pipe(ggplot, aes(c.dr0, c.dr1))
+    .ggplot(aes(c.dr0, c.dr1))
     .geom_text(aes(label=c.doc_id), size=8)
 )
 ```
@@ -296,7 +296,7 @@ French and English have different grammatical structures, and we might expect th
     .group_by([c.lang, c.upos])
     .agg(count = pl.len())
     .with_columns(prop = c.count / c.count.sum().over(c.lang))
-    .pipe(ggplot, aes(c.upos, c.prop))
+    .ggplot(aes(c.upos, c.prop))
     .geom_col(aes(fill=c.lang), position="dodge")
     .coord_flip()
 )
@@ -331,7 +331,7 @@ Because the two editions have different vocabularies, the English and French vec
         max_df=0.5
     )
     .predict(full=True)
-    .pipe(ggplot, aes(c.dr0, c.dr1))
+    .ggplot(aes(c.dr0, c.dr1))
     .geom_text(aes(label=c.doc_id), size=8)
 )
 ```

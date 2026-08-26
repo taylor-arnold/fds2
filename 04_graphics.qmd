@@ -28,19 +28,19 @@ In this chapter, we will learn and use the plotnine package for building informa
 
 The core idea of the grammar of graphics is that visualizations are composed of independent *layers*. The term "grammar" is used because the theory builds connections between elements of the dataset and elements of a visualization. It assembles complex elements from smaller ones, much like a grammar relates words to generate larger phrases and sentences. To describe a specific layer, we need to specify several components. First, we must specify the dataset from which data will be taken to construct the plot. Next, we specify a set of mappings called *aesthetics* that describe how elements of the plot relate to columns in the data. For example, we often indicate which column corresponds to the horizontal axis and which corresponds to the vertical axis. We can also describe attributes such as color, shape, and size by associating these quantities with columns in the data. Finally, we need to provide the *geometry* that will be used in the plot. The geometry describes the kinds of objects associated with each row of the data. A common example is the points geometry, which associates a single point with each observation.
 
-Every plot in this chapter is built by piping a dataset into `ggplot`, so this chapter assumes you have already worked through the material on pipes in @sec-organize. What we cover here are geometries that draw the rows of a dataset directly: one point, label, line segment, or bar per row. Some of the most useful plots in practice, among them histograms, boxplots, density curves, and trend lines, compute something from the data before drawing it, such as a count, a percentile, or a fitted line. Those wait until @sec-graphics-ii, once we know how Polars computes group summaries; that chapter also covers facets, scales, and the finer points of labeling and theming a plot.
+Every plot in this chapter is built by opening a plot from a dataset with the `.ggplot` method, in the same chained style we used for data manipulation in @sec-organize. What we cover here are geometries that draw the rows of a dataset directly: one point, label, line segment, or bar per row. Some of the most useful plots in practice, among them histograms, boxplots, density curves, and trend lines, compute something from the data before drawing it, such as a count, a percentile, or a fitted line. Those wait until @sec-graphics-ii, once we know how Polars computes group summaries; that chapter also covers facets, scales, and the finer points of labeling and theming a plot.
 
 ## Points Geometry
 
 We can demonstrate the grammar of graphics by using the countries data, where each row corresponds to a particular country. The first plot we will make is a scatter plot that investigates the relationship between the Human Development Index (HDI)—a "composite index of life expectancy, education (mean years of schooling completed and expected years of schooling upon entering the education system), and per capita income indicators, which is used to rank countries into four tiers of human development"—and perceived happiness. In the language of the grammar of graphics, we begin describing this visualization by specifying the Python variable containing the data (`country`). Next, we associate the horizontal axis (the `x` aesthetic) with the column in the data named `hdi`. The vertical axis (the `y` aesthetic) can similarly be associated with the column named `happy`. We will make a scatter plot, with each point describing one of our countries, which leads us to use a *point geometry*. Our plot will allow us to understand the relationship between human development and happiness.
 
-In Python, we need to use some special functions to indicate all of this information and to instruct the program to produce a plot. We start by specifying the name of the underlying dataset and applying the special method `.pipe` with its first argument set to the function `ggplot`. This indicates that we want to create a data visualization. In the second argument of that function we use the `aes` (short for aesthetics) function to specify the names of the x and y aesthetics corresponding to columns in the dataset. The plot itself is created by chaining on the `geom_point` method, using the same dot syntax we use for Polars methods. (Standard plotnine attaches layers with the plus sign; our `funs.py` file lets us chain them instead, keeping the style consistent with the rest of our code.) This method adds a point geometry (a layer of points) to the plot. Code to do this using the values described above is given below.
+In Python, we need to use some special functions to indicate all of this information and to instruct the program to produce a plot. We start by specifying the name of the underlying dataset and chaining on the `.ggplot` method. This indicates that we want to create a data visualization. Inside that method we use the `aes` (short for aesthetics) function to specify the names of the x and y aesthetics corresponding to columns in the dataset. The plot itself is created by chaining on the `geom_point` method, using the same dot syntax we use for Polars methods. (Standard plotnine attaches layers with the plus sign; our `funs.py` file lets us chain them instead, keeping the style consistent with the rest of our code.) This method adds a point geometry (a layer of points) to the plot. Code to do this using the values described above is given below.
 
 ```{python}
 (
     country
     .filter(c.region == "Europe")
-    .pipe(ggplot, aes(c.hdi, c.happy))
+    .ggplot(aes(c.hdi, c.happy))
     .geom_point()
 )
 ```
@@ -53,7 +53,7 @@ When we have a scatter plot showing the relationship between two columns in a da
 
 Running the code above will show the desired visualization directly below the code block. In this plot, each row of our dataset, a country, is represented as a point. The location of each point is determined by the country's HDI and happiness score. Notice that Python has automatically made several choices for the plot that we did not explicitly indicate in the code. For example, the range of values on the two axes, the axis labels, the grid lines, and the tick marks. Python has also automatically picked the color, size, and shape of the points. While the defaults are a good starting point, it's often useful to modify them; we will see how to change these aspects of the plot in later sections of this chapter.
 
-As shown in the example, we can include data-manipulation code before the call to `.pipe`. This lets us seamlessly combine data manipulation and data visualization.
+As shown in the example, we can include data-manipulation code before the call to `.ggplot`. This lets us seamlessly combine data manipulation and data visualization.
 
 Scatter plots are typically used to examine the relationship between two numeric variables. What does our first plot tell us about the relationship between HDI and happiness? It appears that, at least in Europe, there is a generally positive relationship between investment in human development and the reported happiness of a population.
 
@@ -65,7 +65,7 @@ The point geometry requires `x` and `y` aesthetics. In addition to these require
 (
     country
     .filter(c.region == "Europe")
-    .pipe(ggplot, aes(c.hdi, c.happy))
+    .ggplot(aes(c.hdi, c.happy))
     .geom_point(aes(color=c.subregion))
 )
 ```
@@ -78,7 +78,7 @@ In the previous example, we changed the color aesthetic from the fixed default c
 (
     country
     .filter(c.region == "Europe")
-    .pipe(ggplot, aes(c.hdi, c.happy))
+    .ggplot(aes(c.hdi, c.happy))
     .geom_point(color="#F5276C")
 )
 ```
@@ -112,7 +112,7 @@ Adding the names of the countries can be done by using another type of geometry,
 (
     country
     .filter(c.region == "Europe")
-    .pipe(ggplot, aes(c.hdi, c.happy))
+    .ggplot(aes(c.hdi, c.happy))
     .geom_text(aes(label=c.iso))
 ) 
 ```
@@ -127,7 +127,7 @@ To start addressing these issues, we can add the points back into the plot, with
 (
     country
     .filter(c.region == "Europe")
-    .pipe(ggplot, aes(c.hdi, c.happy))
+    .ggplot(aes(c.hdi, c.happy))
     .geom_point()
     .geom_text(aes(label=c.iso), size=6, nudge_y=0.5)
 ) 
@@ -155,7 +155,7 @@ Consider a visualization showing the change in the number of cellphones over tim
 (
     cellphone
     .filter(c.iso.is_in(["USA", "GBR", "IRL", "CAN"]))
-    .pipe(ggplot, aes(c.year, c.cell))
+    .ggplot(aes(c.year, c.cell))
     .geom_line(aes(color=c.iso))
 )
 ```
@@ -169,7 +169,7 @@ Another common use of visualization is to compare the values of a numeric column
     country
     .filter(c.subregion == "Northern Africa")
     .sort(c.pop)
-    .pipe(ggplot, aes(c.full_name, c.pop))
+    .ggplot(aes(c.full_name, c.pop))
     .geom_col()
     .coord_flip()
 )
@@ -188,7 +188,7 @@ country_ne = country.filter(c.subregion == "Northern Europe")
 (
     country
     .filter(c.region == "Europe")
-    .pipe(ggplot, aes(c.hdi, c.happy))
+    .ggplot(aes(c.hdi, c.happy))
     .geom_point(alpha=0.2)
     .geom_point(color="#F5276C", data=country_ne)
     .geom_text(

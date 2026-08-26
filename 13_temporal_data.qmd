@@ -50,7 +50,7 @@ How could we show the change in page views over time for a single author? One ap
     page_views
     .filter(c.doc_id == "Geoffrey Chaucer")
     .with_row_index("row_number")
-    .pipe(ggplot, aes(c.row_number, c.views))
+    .ggplot(aes(c.row_number, c.views))
     .geom_line(color="red")
     .labs(
         title="Page Views for Geoffrey Chaucer (by Day Number)",
@@ -75,7 +75,7 @@ We subtract one from the month and day so that, for example, 1 July 2020 (halfwa
     .with_columns(
         year_frac = c.year + (c.month - 1) / 12 + (c.day - 1) / (12 * 31)
     )
-    .pipe(ggplot, aes(c.year_frac, c.views))
+    .ggplot(aes(c.year_frac, c.views))
     .geom_line(color="red")
     .labs(
         title="Page Views for Geoffrey Chaucer (Fractional Year)",
@@ -113,7 +113,7 @@ The new column has the data type `Date`. This is the payoff for storing the comp
 ```{python}
 (
     chaucer
-    .pipe(ggplot, aes(c.date, c.views))
+    .ggplot(aes(c.date, c.views))
     .geom_line(color="red")
     .labs(
         title="Page Views for Geoffrey Chaucer",
@@ -128,7 +128,7 @@ Now the spikes have addresses. We can change how often the axis is labeled with 
 ```{python}
 (
     chaucer
-    .pipe(ggplot, aes(c.date, c.views))
+    .ggplot(aes(c.date, c.views))
     .geom_line(color="red")
     .scale_x_date(date_breaks="1 month", date_labels="%Y-%m")
     .theme(axis_text_x=element_text(angle=45, hjust=1))
@@ -212,7 +212,7 @@ selected_authors = ["Geoffrey Chaucer", "Emily Brontë"]
 (
     page_revisions
     .filter(c.doc_id.is_in(selected_authors))
-    .pipe(ggplot, aes(c.timestamp, c.size, color=c.doc_id))
+    .ggplot(aes(c.timestamp, c.size, color=c.doc_id))
     .geom_line()
     .scale_color_manual(values=["red", "blue"])
     .labs(
@@ -232,7 +232,7 @@ We can label the axis with `scale_x_datetime()`, which works like `scale_x_date(
 (
     page_revisions
     .filter(c.doc_id.is_in(selected_authors))
-    .pipe(ggplot, aes(c.timestamp, c.size, color=c.doc_id))
+    .ggplot(aes(c.timestamp, c.size, color=c.doc_id))
     .geom_line()
     .scale_color_manual(values=["red", "blue"])
     .scale_x_datetime(date_breaks="1 year", date_labels="%Y")
@@ -328,7 +328,7 @@ hourly_edits = (
 
 (
     hourly_edits
-    .pipe(ggplot, aes(c.hour_nyc, c.count))
+    .ggplot(aes(c.hour_nyc, c.count))
     .geom_col()
     .labs(
         title="Wikipedia Edits by Hour (New York Time)",
@@ -513,7 +513,7 @@ What we want is a window defined by a span of *time*: average the article size o
     .with_columns(
         size_smooth = c.size.rolling_mean_by(by=c.timestamp, window_size="30d")
     )
-    .pipe(ggplot, aes(c.timestamp, c.size))
+    .ggplot(aes(c.timestamp, c.size))
     .geom_line(color="grey")
     .geom_line(aes(y=c.size_smooth), color="red")
     .labs(

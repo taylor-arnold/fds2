@@ -190,7 +190,7 @@ act_wide = (
     .unpivot(index="play_id", variable_name="act", value_name="n_lines")
     .with_columns(c.act.cast(pl.Int64))
     .sort(c.play_id, c.act)
-    .pipe(ggplot, aes(x=c.act, y=c.n_lines, color=c.play_id))
+    .ggplot(aes(x=c.act, y=c.n_lines, color=c.play_id))
     .geom_line()
     .geom_point()
     .labs(
@@ -283,7 +283,7 @@ and the compound key from last time, and label the bars with the characters' rea
     .head(12)
     .join(char, left_on=[c.speaker, c.play_id], right_on=[c.character_id, c.play_id])
     .sort(c.n_lines)
-    .pipe(ggplot, aes(c.name, c.n_lines))
+    .ggplot(aes(c.name, c.n_lines))
     .geom_col(fill="#F5276C")
     .coord_flip()
     .labs(
@@ -442,7 +442,7 @@ holds, and plot the twelve plays that come off worst.
     .sort(c.share)
     .head(12)
     .sort(c.share, descending=True)
-    .pipe(ggplot, aes(c.short_title, c.share))
+    .ggplot(aes(c.short_title, c.share))
     .geom_col(fill="#F5276C")
     .coord_flip()
     .labs(

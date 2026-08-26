@@ -6,7 +6,9 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "click>=8.4.2",
+    "en-core-web-sm",
     "folium>=0.20.0",
+    "fr-core-news-sm",
     "geopandas>=1.1.4",
     "igraph>=1.0.0",
     "mapclassify>=2.10.0",
@@ -27,6 +29,13 @@ dependencies = [
     "transformers>=5.13.1",
     "umap-learn>=0.5.12",
 ]
+
+[tool.uv.sources]
+# spaCy's trained pipelines are not published to PyPI; they are release assets on
+# the spacy-models repo. Pinning them here keeps `uv sync` from dropping them,
+# which otherwise breaks the render of ch14 (English) and ch15 (French).
+en-core-web-sm = { url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl" }
+fr-core-news-sm = { url = "https://github.com/explosion/spacy-models/releases/download/fr_core_news_sm-3.8.0/fr_core_news_sm-3.8.0-py3-none-any.whl" }
 
 [dependency-groups]
 dev = [

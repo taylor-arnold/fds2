@@ -129,7 +129,7 @@ Despite this limitation, brightness can reveal interesting patterns across categ
 (
     birds
     .sort(c.brightness.mean().over(c.label), descending=True)
-    .pipe(ggplot, aes(c.label, c.brightness))
+    .ggplot(aes(c.label, c.brightness))
     .geom_boxplot()
 )
 ```
@@ -240,7 +240,7 @@ We can compare the yellow content across species systematically.
 (
     birds
     .sort(c.yellow.mean().over(c.label), descending=True)
-    .pipe(ggplot, aes(c.label, c.yellow))
+    .ggplot(aes(c.label, c.yellow))
     .geom_boxplot()
 )
 ```
@@ -253,7 +253,7 @@ Peacocks, known for their brilliant blue-green displays, should show high values
 (
     birds
     .sort(c.cyan.mean().over(c.label), descending=True)
-    .pipe(ggplot, aes(c.label, c.cyan))
+    .ggplot(aes(c.label, c.cyan))
     .geom_boxplot()
 )
 ```
@@ -315,7 +315,7 @@ What can we do with these vectors? Everything we did with document vectors. A na
         features=[c.vit]
     )
     .predict(full=True)
-    .pipe(ggplot, aes(c.dr0, c.dr1))
+    .ggplot(aes(c.dr0, c.dr1))
     .geom_point(aes(color=c.label))
 )
 ```
@@ -373,7 +373,7 @@ Visualizing the similarity scores by bird species shows that canary images indee
         sim_score = dot_product(c.siglip, c.siglip_txt)
     )
     .sort(c.sim_score.mean().over(c.label))
-    .pipe(ggplot, aes(c.sim_score, c.label))
+    .ggplot(aes(c.sim_score, c.label))
     .geom_point()
 )
 ```

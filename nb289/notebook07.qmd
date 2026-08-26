@@ -60,7 +60,7 @@ Remember that every aesthetic other than x and y goes inside a second call to
 (
     storm
     .filter(c.year == 2005)
-    .pipe(ggplot, aes(c.lon, c.lat))
+    .ggplot(aes(c.lon, c.lat))
     .geom_point(aes(color=c.name))
 )
 ```
@@ -76,7 +76,7 @@ came out as a solid black mass. Draw it again with `alpha` fixed at `0.05`.
 ```{python}
 (
     storm
-    .pipe(ggplot, aes(c.lon, c.lat))
+    .ggplot(aes(c.lon, c.lat))
     .geom_point(alpha=0.05)
 )
 ```
@@ -99,7 +99,7 @@ comes out looking quite different from the one in question 1. Why?
 (
     storm
     .filter(c.year == 2005)
-    .pipe(ggplot, aes(c.lon, c.lat))
+    .ggplot(aes(c.lon, c.lat))
     .geom_point(aes(color=c.category))
 )
 ```
@@ -119,7 +119,7 @@ each value as a separate group.
     storm
     .filter(c.year == 2005)
     .with_columns(category = c.category.cast(pl.String))
-    .pipe(ggplot, aes(c.lon, c.lat))
+    .ggplot(aes(c.lon, c.lat))
     .geom_point(aes(color=c.category))
 )
 ```
@@ -157,7 +157,7 @@ needs a third aesthetic, `label`, in addition to x and y.
 ```{python}
 (
     peak
-    .pipe(ggplot, aes(c.lon, c.lat))
+    .ggplot(aes(c.lon, c.lat))
     .geom_text(aes(label=c.name))
 )
 ```
@@ -169,7 +169,7 @@ the labels and nudge them upward so they sit above their points.
 ```{python}
 (
     peak
-    .pipe(ggplot, aes(c.lon, c.lat))
+    .ggplot(aes(c.lon, c.lat))
     .geom_point()
     .geom_text(aes(label=c.name), size=8, nudge_y=1.0)
 )
@@ -195,7 +195,7 @@ next thing to want. Do that now with `geom_line`.
 (
     storm
     .filter((c.name == "Katrina") & (c.year == 2005))
-    .pipe(ggplot, aes(c.doy, c.wind))
+    .ggplot(aes(c.doy, c.wind))
     .geom_line()
 )
 ```
@@ -209,7 +209,7 @@ Katrina, Rita, and Wilma, with one colored line each.
     storm
     .filter(c.year == 2005)
     .filter(c.name.is_in(["Dennis", "Katrina", "Rita", "Wilma"]))
-    .pipe(ggplot, aes(c.doy, c.wind))
+    .ggplot(aes(c.doy, c.wind))
     .geom_line(aes(color=c.name))
 )
 ```
@@ -227,7 +227,7 @@ explain what the geometry has done.
 (
     storm
     .filter((c.name == "Katrina") & (c.year == 2005))
-    .pipe(ggplot, aes(c.lon, c.lat))
+    .ggplot(aes(c.lon, c.lat))
     .geom_line()
 )
 ```
@@ -249,7 +249,7 @@ on the y-axis, then add `.coord_flip()` so the names are readable.
 ```{python}
 (
     peak
-    .pipe(ggplot, aes(c.name, c.wind))
+    .ggplot(aes(c.name, c.wind))
     .geom_col()
     .coord_flip()
 )
@@ -265,7 +265,7 @@ Sort `peak` alphabetically and draw exactly the same plot again.
 (
     peak
     .sort(c.name)
-    .pipe(ggplot, aes(c.name, c.wind))
+    .ggplot(aes(c.name, c.wind))
     .geom_col()
     .coord_flip()
 )
@@ -293,7 +293,7 @@ katrina_peak = peak.filter(c.name == "Katrina")
 (
     storm
     .filter(c.year == 2005)
-    .pipe(ggplot, aes(c.lon, c.lat))
+    .ggplot(aes(c.lon, c.lat))
     .geom_point(alpha=0.2)
     .geom_point(color="#F5276C", data=katrina)
     .geom_text(
@@ -315,7 +315,7 @@ plot a title.
 (
     storm
     .filter(c.year == 2005)
-    .pipe(ggplot, aes(c.lon, c.lat))
+    .ggplot(aes(c.lon, c.lat))
     .geom_point(alpha=0.2)
     .geom_point(color="#F5276C", data=katrina)
     .geom_text(

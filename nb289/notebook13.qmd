@@ -100,7 +100,7 @@ continuous one, and you get a color bar rather than a set of swatches.
 ```{python}
 (
     person
-    .pipe(ggplot, aes(c.grams, c.kcal))
+    .ggplot(aes(c.grams, c.kcal))
     .geom_point(aes(color=c.home_share), alpha=0.4)
 )
 ```
@@ -123,7 +123,7 @@ the chapter recommends, and then set the colors yourself with `scale_color_manua
 (
     person
     .sort(c.where)
-    .pipe(ggplot, aes(c.kcal))
+    .ggplot(aes(c.kcal))
     .geom_density(aes(color=c.where), adjust=0.8)
     .scale_color_cmap_d()
 )
@@ -133,7 +133,7 @@ the chapter recommends, and then set the colors yourself with `scale_color_manua
 (
     person
     .sort(c.where)
-    .pipe(ggplot, aes(c.kcal))
+    .ggplot(aes(c.kcal))
     .geom_density(aes(color=c.where), adjust=0.8)
     .scale_color_manual(values={
         "Mostly at home": "#2C7BB6",
@@ -164,7 +164,7 @@ parties and teams and brands do.
 (
     food
     .filter(c.kcal > 0)
-    .pipe(ggplot, aes(c.grams, c.kcal))
+    .ggplot(aes(c.grams, c.kcal))
     .geom_point(aes(color=c.food_source), size=0.5)
 )
 ```
@@ -186,7 +186,7 @@ There is a scale for exactly this shape of data. Put the x-axis on a log scale i
 ```{python}
 (
     food
-    .pipe(ggplot, aes(c.kcal))
+    .ggplot(aes(c.kcal))
     .geom_histogram(fill="white", color="black", bins=40)
     .scale_x_log10()
 )
@@ -216,7 +216,7 @@ first with `limits`, then again with `coord_cartesian`.
 ```{python}
 (
     person
-    .pipe(ggplot, aes(c.grams, c.kcal))
+    .ggplot(aes(c.grams, c.kcal))
     .geom_point(alpha=0.05)
     .geom_smooth(method="lm", se=False)
     .scale_x_continuous(breaks=[0, 1000, 2000, 3000, 4000, 5000], limits=(0, 5000))
@@ -227,7 +227,7 @@ first with `limits`, then again with `coord_cartesian`.
 ```{python}
 (
     person
-    .pipe(ggplot, aes(c.grams, c.kcal))
+    .ggplot(aes(c.grams, c.kcal))
     .geom_point(alpha=0.05)
     .geom_smooth(method="lm", se=False)
     .scale_x_continuous(breaks=[0, 1000, 2000, 3000, 4000, 5000])
@@ -257,7 +257,7 @@ the four main meals, then give every meal its own panel and its own fitted line.
     .group_by(c.id, c.meal_name)
     .agg(kcal = c.kcal.sum(), grams = c.grams.sum())
     .sort(c.meal_name)
-    .pipe(ggplot, aes(c.grams, c.kcal))
+    .ggplot(aes(c.grams, c.kcal))
     .geom_point(aes(color=c.meal_name), alpha=0.15, show_legend=False)
     .geom_smooth(method="lm", se=False)
     .facet_wrap("meal_name")
@@ -284,7 +284,7 @@ keeping the log axis from question 5.
     food
     .filter(c.kcal > 0, c.meal_name.is_in(["Breakfast", "Lunch", "Dinner", "Snack"]))
     .sort(c.meal_name)
-    .pipe(ggplot, aes(c.kcal))
+    .ggplot(aes(c.kcal))
     .geom_histogram(fill="white", color="black", bins=25)
     .scale_x_log10()
     .facet_grid("at_home", "meal_name")
@@ -315,7 +315,7 @@ of it, and set a theme.
 (
     person
     .sort(c.where)
-    .pipe(ggplot, aes(c.kcal))
+    .ggplot(aes(c.kcal))
     .geom_density(aes(color=c.where), adjust=0.8)
     .scale_color_manual(values={
         "Mostly at home": "#2C7BB6",

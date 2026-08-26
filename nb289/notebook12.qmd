@@ -103,7 +103,7 @@ the table you just made. Flip the coordinates so the labels are readable.
 ```{python}
 (
     food
-    .pipe(ggplot, aes(c.meal_name))
+    .ggplot(aes(c.meal_name))
     .geom_bar(fill="white", color="black")
     .coord_flip()
 )
@@ -127,7 +127,7 @@ aggregate, so that every row of a category carries the size of its own category.
     .group_by(c.meal_name)
     .agg(n = pl.len())
     .sort(c.n)
-    .pipe(ggplot, aes(c.meal_name, c.n))
+    .ggplot(aes(c.meal_name, c.n))
     .geom_col(fill="white", color="black")
     .coord_flip()
 )
@@ -137,7 +137,7 @@ aggregate, so that every row of a category carries the size of its own category.
 (
     food
     .sort(pl.len().over(c.meal_name))
-    .pipe(ggplot, aes(c.meal_name))
+    .ggplot(aes(c.meal_name))
     .geom_bar(fill="white", color="black")
     .coord_flip()
 )
@@ -164,7 +164,7 @@ items, since a mean over a handful of rows is not a number anyone should plot.
     .agg(avg_kcal = c.kcal.mean(), n = pl.len())
     .filter(c.n >= 500)
     .sort(c.avg_kcal)
-    .pipe(ggplot, aes(c.food_source, c.avg_kcal))
+    .ggplot(aes(c.food_source, c.avg_kcal))
     .geom_col(fill="white", color="black")
     .coord_flip()
 )
@@ -189,7 +189,7 @@ the long right tail and draw it again.
 ```{python}
 (
     food
-    .pipe(ggplot, aes(c.kcal))
+    .ggplot(aes(c.kcal))
     .geom_histogram(fill="white", color="black", binwidth=25, boundary=0)
 )
 ```
@@ -198,7 +198,7 @@ the long right tail and draw it again.
 (
     food
     .filter(c.kcal > 0, c.kcal <= 600)
-    .pipe(ggplot, aes(c.kcal))
+    .ggplot(aes(c.kcal))
     .geom_histogram(fill="white", color="black", binwidth=25, boundary=0)
 )
 ```
@@ -231,7 +231,7 @@ person = (
 ```{python}
 (
     person
-    .pipe(ggplot, aes(c.kcal))
+    .ggplot(aes(c.kcal))
     .geom_density(fill="white", color="black", adjust=0.8)
 )
 ```
@@ -259,7 +259,7 @@ distributions, ordered by their medians.
     .group_by(c.id, c.meal_name)
     .agg(kcal = c.kcal.sum())
     .sort(c.kcal.median().over(c.meal_name))
-    .pipe(ggplot, aes(c.meal_name, c.kcal))
+    .ggplot(aes(c.meal_name, c.kcal))
     .geom_boxplot()
     .coord_flip()
 )
@@ -282,7 +282,7 @@ string, sorting the rows first, and draw it again.
 ```{python}
 (
     person
-    .pipe(ggplot, aes(c.day_of_week, c.kcal))
+    .ggplot(aes(c.day_of_week, c.kcal))
     .geom_boxplot()
 )
 ```
@@ -292,7 +292,7 @@ string, sorting the rows first, and draw it again.
     person
     .sort(c.day_of_week)
     .with_columns(c.day_of_week.cast(pl.String))
-    .pipe(ggplot, aes(c.day_of_week, c.kcal))
+    .ggplot(aes(c.day_of_week, c.kcal))
     .geom_boxplot()
 )
 ```
@@ -321,7 +321,7 @@ their total calories, with the points behind the line.
 ```{python}
 (
     person
-    .pipe(ggplot, aes(c.grams, c.kcal))
+    .ggplot(aes(c.grams, c.kcal))
     .geom_point(alpha=0.05)
     .geom_smooth(method="lm", se=False)
 )

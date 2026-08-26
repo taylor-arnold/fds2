@@ -34,9 +34,10 @@ pl.DataFrame.print = _patched_print
 # ============================================================
 # Plotnine x Polars integration (ch04, ch07)
 # ============================================================
-# Lets ggplot() accept a Polars DataFrame directly, applies a default
-# categorical ordering to string columns, promotes WKT "geometry" columns
-# to GeoPandas for geom_map(), supports `c.COLNAME` expressions inside
+# Lets ggplot() accept a Polars DataFrame directly, adds a .ggplot()
+# method to DataFrame so a chain can open a plot without .pipe(), applies a
+# default categorical ordering to string columns, promotes WKT "geometry"
+# columns to GeoPandas for geom_map(), supports `c.COLNAME` expressions inside
 # aes(), and attaches every geom_/stat_/scale_/... component as a ggplot
 # method so plots can be built as a single method chain.
 
@@ -89,6 +90,12 @@ def _patched_geom_map_init(self, *args, **kwargs):
 
 p9.ggplot.__init__ = _patched_ggplot_init
 p9.geom_map.__init__ = _patched_geom_map_init
+
+def _df_ggplot(self, *args, **kwargs):
+    """Start a plot from a DataFrame: df.ggplot(aes(...)) == ggplot(df, aes(...))."""
+    return p9.ggplot(self, *args, **kwargs)
+
+pl.DataFrame.ggplot = _df_ggplot
 
 def _extract_names(val):
     """Recursively pull the string column name out of `c.COLNAME`-style Polars expressions."""
