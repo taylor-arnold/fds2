@@ -172,13 +172,25 @@ tagged `is_alpha == False`. In the third block, print the `doc_id` and
 ```
 
 ```{python}
-bad_tokens = anno.filter(c.token.str.contains(r"\\"))
+bad_tokens = (
+    anno
+    .filter(c.token.str.contains(r"\\"))
+)
 print(bad_tokens.height, "tokens out of", anno.height)
-bad_tokens.select(c.is_alpha.any()).item()
+(
+    bad_tokens
+    .select(c.is_alpha.any())
+    .item()
+)
 ```
 
 ```{python}
-docs.filter(c.text.str.contains(r"\\")).select(c.doc_id, c.text).row(0, named=True)
+(
+    docs
+    .filter(c.text.str.contains(r"\\"))
+    .select(c.doc_id, c.text)
+    .row(0, named=True)
+)
 ```
 
 23 of the 200 articles carry the artifact, ranging from 20% of Business
@@ -325,7 +337,12 @@ text. Find an article in the Sports category whose text contains `"Athens"`
 and print it.
 
 ```{python}
-docs.filter(c.label == "Sports", c.text.str.contains("Athens")).select(c.doc_id, c.text).row(0, named=True)
+(
+    docs
+    .filter(c.label == "Sports", c.text.str.contains("Athens"))
+    .select(c.doc_id, c.text)
+    .row(0, named=True)
+)
 ```
 
 The article confirms it: a 100-meter world champion is banned from "the

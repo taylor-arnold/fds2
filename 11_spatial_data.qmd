@@ -43,7 +43,8 @@ Because longitude and latitude are just numbers, we can make a basic plot withou
 
 ```{python}
 (
-    ggplot(metro, aes(c.lon, c.lat))
+    metro
+    .ggplot(aes(c.lon, c.lat))
     .geom_point()
 )
 ```
@@ -53,15 +54,21 @@ This scatter plot works, but it has problems. It treats longitude and latitude a
 To go further, we need to turn the latitude and longitude columns into proper geometries. In the WKT standard, a point is written as text in the form `POINT (lon lat)`, so nothing stops us from building the `geometry` column ourselves with `pl.format`.
 
 ```{python}
-metro.with_columns(
-    geometry = pl.format("POINT ({} {})", c.lon, c.lat)
+(
+    metro
+    .with_columns(
+        geometry = pl.format("POINT ({} {})", c.lon, c.lat)
+    )
 )
 ```
 
 The strings are ordinary Polars data, but every method on the `geo` namespace knows how to interpret them as geometric objects. Building coordinate strings by hand gets tedious for anything more complicated than a point, though, and the version above never declares which coordinate system the numbers belong to. The namespace provides `points_from_xy` to handle both at once: it constructs the points from two coordinate columns and records the coordinate system, defaulting to standard latitude and longitude (more on what the code 4326 means in the next section).
 
 ```{python}
-metro = metro.geo.points_from_xy("lon", "lat")
+metro = (
+    metro
+    .geo.points_from_xy("lon", "lat")
+)
 metro
 ```
 
@@ -88,7 +95,9 @@ The `to_crs` method transforms the coordinates from the current CRS into a new o
 
 ```{python}
 (
-    ggplot(metro.geo.to_crs(5069))
+    metro
+    .geo.to_crs(5069)
+    .ggplot()
     .geom_map()
     .coord_fixed()
 )
@@ -109,7 +118,10 @@ Similarly, if you want to calculate the area of a state or country, you need an 
 Static maps work well in publications and reports, but interactive maps allow for exploration. GeoPandas provides an `explore` method that builds an interactive map from the [Folium](https://python-visualization.github.io/folium/) library, which in turn uses [Leaflet.js](https://leafletjs.com/). Because `explore` is an ordinary GeoPandas method, the `geo` namespace picks it up like any other.
 
 ```{python}
-metro.geo.explore(tooltip=["name"])
+(
+    metro
+    .geo.explore(tooltip=["name"])
+)
 ```
 
 The `tooltip` parameter lists the columns to display when the user hovers over a point. Note that it takes plain column names as strings; the `c.` shorthand works inside Polars expressions and `aes()`, but here the names are handed directly to GeoPandas. Try zooming in on different regions and clicking on individual metro areas to see their names. The base map provides the geographic context that was missing from our static scatter plot.
@@ -133,7 +145,9 @@ Unlike point data, polygon data cannot be meaningfully drawn with a scatter plot
 
 ```{python}
 (
-    ggplot(state.geo.to_crs(5069))
+    state
+    .geo.to_crs(5069)
+    .ggplot()
     .geom_map(fill="white", color="black")
     .coord_fixed()
 )
@@ -144,7 +158,10 @@ Compare this to what the same data would look like in unprojected coordinates. T
 Interactive maps work with polygons just as they do with points. Users can hover over states to see their names and other attributes.
 
 ```{python}
-state.geo.explore(tooltip=["name"])
+(
+    state
+    .geo.explore(tooltip=["name"])
+)
 ```
 
 ::: {.callout-note collapse="true"}
@@ -166,13 +183,19 @@ Most of the techniques in this chapter apply to all geometry types, though some 
 Once we have polygons, we can compute geometric properties from them. Two useful ones are the *centroid* (the geometric center of a polygon) and the *area* (the amount of surface the boundary encloses). Both are only meaningful in a projected CRS; computed on raw latitude and longitude, the centroid comes out as a biased point and the area as a nonsense number in squared degrees. So we first project the states and keep the projected version from here on.
 
 ```{python}
-state = state.geo.to_crs(5069)
+state = (
+    state
+    .geo.to_crs(5069)
+)
 ```
 
 In GeoPandas, `centroid` is a property rather than a method, so it is accessed without parentheses. Because the result is a new set of geometries, the `geo` namespace writes them into the `geometry` column of the returned table.
 
 ```{python}
-state.geo.centroid
+(
+    state
+    .geo.centroid
+)
 ```
 
 Each state's polygon has been replaced by a single point at its center. Since we did not assign the result back, `state` itself still holds the original polygons. For roughly rectangular states like Colorado, the centroid falls near the geographic center. For states with irregular shapes or several disconnected parts, the centroid can land outside the state's actual boundary.
@@ -180,8 +203,15 @@ Each state's polygon has been replaced by a single point at its center. Since we
 The `area` property returns ordinary numbers rather than geometries, so the namespace appends them as a new column named after the property.
 
 ```{python}
-state = state.geo.area
-state.sort(c.area, descending=True).select(c.name, c.area)
+state = (
+    state
+    .geo.area
+)
+(
+    state
+    .sort(c.area, descending=True)
+    .select(c.name, c.area)
+)
 ```
 
 The results are in square meters, the default unit for most projected coordinate systems; dividing by 1,000,000 would give square kilometers. As expected, Alaska is the largest state by a wide margin, followed by Texas and California.
@@ -192,7 +222,8 @@ A *choropleth map* colors geographic regions according to the value of a variabl
 
 ```{python}
 (
-    ggplot(state, aes(fill=c.area))
+    state
+    .ggplot(aes(fill=c.area))
     .geom_map(color="white")
     .coord_fixed()
 )
@@ -201,7 +232,10 @@ A *choropleth map* colors geographic regions according to the value of a variabl
 The same idea works interactively. The `column` parameter tells `explore` which variable to use for coloring, and a legend shows how colors correspond to values.
 
 ```{python}
-state.geo.explore(column="area", tooltip=["name"])
+(
+    state
+    .geo.explore(column="area", tooltip=["name"])
+)
 ```
 
 Choropleth maps are useful but easy to misread. Larger regions occupy more visual space, so they dominate the viewer's attention even when they contain fewer people or matter less for the question at hand. For this reason, choropleths work best for variables that are naturally area-based (like population density) rather than absolute counts (like total population).
@@ -213,8 +247,14 @@ In @sec-restructure, we learned how to join two tables based on a shared key col
 The most common spatial join matches points to the polygons that contain them. Given our metro areas (points) and states (polygons), we can find which state contains each metro area. Spatial operations require both tables to be in the same CRS, and `state` is now in EPSG:5069, so we first project the metro points to match.
 
 ```{python}
-metro = metro.geo.to_crs(5069)
-metro.geo.sjoin(state)
+metro = (
+    metro
+    .geo.to_crs(5069)
+)
+(
+    metro
+    .geo.sjoin(state)
+)
 ```
 
 The result contains the columns from both tables, with each metro area matched to the state it falls inside. Column names that appear in both tables get `_left` and `_right` suffixes, and GeoPandas adds an `index_right` column recording which row of the right table matched. Metro areas that straddle a state boundary are assigned to whichever state contains their center point, since that is the coordinate we used to build the geometry. Notice that the geometry in the output is the point geometry from the first (left) table.
@@ -222,7 +262,10 @@ The result contains the columns from both tables, with each metro area matched t
 We can also reverse the order of the join to keep the state geometry in the result. With the states first, the output contains polygons, and each state is matched to the metro areas it contains.
 
 ```{python}
-state.geo.sjoin(metro)
+(
+    state
+    .geo.sjoin(metro)
+)
 ```
 
 This produces more rows than we have states because a state can contain many metro areas. The logic is analogous to a one-to-many relational join: the state geometry is duplicated once for each metro area inside it.
@@ -230,7 +273,10 @@ This produces more rows than we have states because a state can contain many met
 Spatial joins can test various *predicates* (spatial relationships) beyond simple containment. The `predicate` parameter chooses which relationship to use. For example, we can find which states share a border by joining the state table to itself with the `touches` predicate.
 
 ```{python}
-state.geo.sjoin(state, predicate="touches")
+(
+    state
+    .geo.sjoin(state, predicate="touches")
+)
 ```
 
 This self-join matches each state to every other state that shares at least one point on its boundary, giving all pairs of neighboring states. Each border appears twice: California touches Oregon, and Oregon touches California. If you only want each pair once, you need to filter or deduplicate the results.
@@ -248,7 +294,10 @@ Other useful predicates include:
 Sometimes we want to match features not by overlap or containment but by proximity. The `sjoin_nearest` method finds, for each feature in the first table, the closest feature in the second. It answers questions like "what is the nearest hospital to each school?" or "which weather station is closest to each measurement site?"
 
 ```{python}
-metro.geo.sjoin_nearest(metro, exclusive=True, distance_col="distance")
+(
+    metro
+    .geo.sjoin_nearest(metro, exclusive=True, distance_col="distance")
+)
 ```
 
 Here we join the metro table to itself to find each metro area's nearest neighbor. The `exclusive=True` parameter prevents each metro area from matching itself, which would always be a distance of zero, and `distance_col` adds a column with the distance to the match. Because the data is in the Albers projection, those distances are in meters. This is another place where projecting first pays off: in raw latitude and longitude the distances would come out in degrees.
@@ -261,7 +310,9 @@ A *buffer* expands a geometry outward by a fixed distance, turning each point in
 
 ```{python}
 (
-    ggplot(metro.geo.buffer(100_000))
+    metro
+    .geo.buffer(100_000)
+    .ggplot()
     .geom_map(alpha=0.3)
     .coord_fixed()
 )
@@ -272,7 +323,11 @@ The translucent fill makes the overlaps visible. The discs pile up into a nearly
 Buffers become more interesting in combination with spatial joins. Each buffered metro is now a polygon, so joining it against the states finds every state within 100 kilometers of a metro center rather than only the state that contains it.
 
 ```{python}
-metro.geo.buffer(100_000).geo.sjoin(state)
+(
+    metro
+    .geo.buffer(100_000)
+    .geo.sjoin(state)
+)
 ```
 
 Metro areas near a state line now match two or more states, which is often exactly what an analysis needs. A hospital planning study, for example, cares about everyone within driving distance, not just residents on one side of a border.
@@ -284,18 +339,28 @@ The `dissolve` method is the spatial counterpart of the `group_by` and `agg` pat
 Our state table has no region column, so we will build one, which gives us an excuse to compose several namespace operations. The Albers projection we have been using is centered on the 96th meridian, meaning a centroid with a negative x coordinate sits west of 96°W and a positive one sits east of it. The `x` property of a point geometry is available through the namespace like everything else: `state.geo.centroid` swaps the polygons for their center points, `.geo.x` appends the x coordinate as a column, and `get_column` pulls out just that column so we can attach it to the original polygon table.
 
 ```{python}
-state = state.with_columns(
-    state.geo.centroid.geo.x.get_column("x")
-).with_columns(
-    side = pl.when(c.x < 0).then(pl.lit("West")).otherwise(pl.lit("East"))
+state = (
+    state
+    .with_columns(
+        state.geo.centroid.geo.x.get_column("x")
+    )
+    .with_columns(
+        side = pl.when(c.x < 0).then(pl.lit("West")).otherwise(pl.lit("East"))
+    )
 )
-state.select(c.name, c.x, c.side)
+(
+    state
+    .select(c.name, c.x, c.side)
+)
 ```
 
 With the grouping column in place, `dissolve` works like a spatial `group_by`. The `by` parameter names the group key and `aggfunc` says how to combine the ordinary columns; here we sum the state areas within each group. The group key comes back as a regular column because the namespace moves the pandas index into the table during the return trip.
 
 ```{python}
-region = state.geo.dissolve(by="side", aggfunc={"area": "sum"})
+region = (
+    state
+    .geo.dissolve(by="side", aggfunc={"area": "sum"})
+)
 region
 ```
 
@@ -303,7 +368,8 @@ Two rows remain, one per side, and each holds a single merged geometry with the 
 
 ```{python}
 (
-    ggplot(region, aes(fill=c.side))
+    region
+    .ggplot(aes(fill=c.side))
     .geom_map(color="white")
     .coord_fixed()
 )
@@ -314,7 +380,11 @@ Two rows remain, one per side, and each holds a single merged geometry with the 
 The `explode` method goes in the opposite direction from `dissolve`: it splits every multi-part geometry into one row per part. States made of disconnected pieces, like Hawaii, become several rows, while single-polygon states pass through unchanged. The ordinary columns, including the state-level `area` we computed earlier, are simply copied onto every part.
 
 ```{python}
-state.geo.explode().filter(c.name == "Hawaii")
+(
+    state
+    .geo.explode()
+    .filter(c.name == "Hawaii")
+)
 ```
 
 Each Hawaiian island is now its own row. That copied state-level area is no longer very meaningful, but because each row now has its own geometry, per-part metrics are one chained call away. Recomputing `area` after the explode replaces the copied column with the area of each individual island.
@@ -349,7 +419,9 @@ Alaska, with its fjords and island chains, sits far ahead of everything else. Mo
 
 ```{python}
 (
-    ggplot(state.geo.simplify(20_000))
+    state
+    .geo.simplify(20_000)
+    .ggplot()
     .geom_map(fill="white", color="black")
     .coord_fixed()
 )

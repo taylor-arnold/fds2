@@ -68,7 +68,8 @@ be printed.
 
 ```{python}
 (
-    ggplot(it_city, aes(c.lon, c.lat))
+    it_city
+    .ggplot(aes(c.lon, c.lat))
     .geom_point()
 )
 ```
@@ -99,12 +100,11 @@ look like Italy?
 
 ```{python}
 (
-    ggplot(
-        it_city
-        .with_columns(
-            geometry = pl.format("POINT ({} {})", c.lat, c.lon)
-        )
+    it_city
+    .with_columns(
+        geometry = pl.format("POINT ({} {})", c.lat, c.lon)
     )
+    .ggplot()
     .geom_map()
     .coord_fixed()
 )
@@ -123,7 +123,10 @@ for anything beyond a quick demonstration.
 CRS got recorded automatically.
 
 ```{python}
-it_city = it_city.geo.points_from_xy("lon", "lat")
+it_city = (
+    it_city
+    .geo.points_from_xy("lon", "lat")
+)
 it_city
 ```
 
@@ -134,7 +137,8 @@ that with `geom_map()` and `coord_fixed()` too. Compare the two.
 
 ```{python}
 (
-    ggplot(it_city, aes(c.lon, c.lat))
+    it_city
+    .ggplot(aes(c.lon, c.lat))
     .geom_point()
     .coord_fixed()
 )
@@ -142,7 +146,9 @@ that with `geom_map()` and `coord_fixed()` too. Compare the two.
 
 ```{python}
 (
-    ggplot(it_city.geo.to_crs(7791))
+    it_city
+    .geo.to_crs(7791)
+    .ggplot()
     .geom_map()
     .coord_fixed()
 )
@@ -163,7 +169,10 @@ it just has less visible work to do on a plot this size.
 something about and check that the map has it in the right place.
 
 ```{python}
-it_city.geo.explore(tooltip=["city_name", "pop"])
+(
+    it_city
+    .geo.explore(tooltip=["city_name", "pop"])
+)
 ```
 
 8. Filter to cities with a population over 500,000, the same `.filter()`

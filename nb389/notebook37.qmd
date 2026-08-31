@@ -75,7 +75,10 @@ q1 = (
 ```
 
 ```{python}
-q1.select(c.year.unique())
+(
+    q1
+    .select(c.year.unique())
+)
 ```
 
 **Answer**: Three different years come back: 1981, 1999, and 2005. This
@@ -92,7 +95,10 @@ save it as `kat`. Build a fractional year column, extended to account for
 `hour` the way the chapter describes, and plot it against `wind`.
 
 ```{python}
-kat = storm.filter((c.name == "Katrina") & (c.year == 2005))
+kat = (
+    storm
+    .filter((c.name == "Katrina") & (c.year == 2005))
+)
 
 (
     kat
@@ -112,7 +118,10 @@ kat = storm.filter((c.name == "Katrina") & (c.year == 2005))
 and overwrite `kat` with it. Plot `date` against `wind`.
 
 ```{python}
-kat = kat.with_columns(date = pl.date(c.year, c.month, c.day))
+kat = (
+    kat
+    .with_columns(date = pl.date(c.year, c.month, c.day))
+)
 
 (
     kat
@@ -195,7 +204,10 @@ second block, use `.filter()` with `.is_in()` to find the rows whose `hour` is
 not one of the four routine values, 0, 6, 12, or 18.
 
 ```{python}
-kat = kat.with_columns(moment = pl.datetime(c.year, c.month, c.day, c.hour))
+kat = (
+    kat
+    .with_columns(moment = pl.datetime(c.year, c.month, c.day, c.hour))
+)
 
 (
     kat

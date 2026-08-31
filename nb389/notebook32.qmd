@@ -88,7 +88,8 @@ vertices around each shape.
 
 ```{python}
 (
-    ggplot(prov)
+    prov
+    .ggplot()
     .geom_map(fill="white", color="black")
     .coord_fixed()
 )
@@ -130,12 +131,16 @@ with `geom_map(fill="white", color="black")` and `coord_fixed()`, and compare th
 shape to question 2.
 
 ```{python}
-prov = prov.geo.to_crs(7791)
+prov = (
+    prov
+    .geo.to_crs(7791)
+)
 ```
 
 ```{python}
 (
-    ggplot(prov)
+    prov
+    .ggplot()
     .geom_map(fill="white", color="black")
     .coord_fixed()
 )
@@ -153,7 +158,10 @@ northern provinces, where lines of longitude are converging fastest.
 its boundary sits where it should.
 
 ```{python}
-prov.geo.explore(tooltip=["province"])
+(
+    prov
+    .geo.explore(tooltip=["province"])
+)
 ```
 
 6. Now that `prov` is projected, compute `prov.geo.area` again. In the first
@@ -162,7 +170,10 @@ provinces by area (`province` and `area`, sorted descending). The chapter noted
 the units; what are they here?
 
 ```{python}
-prov = prov.geo.area
+prov = (
+    prov
+    .geo.area
+)
 ```
 
 ```{python}
@@ -227,20 +238,27 @@ join it onto `prov`. In the third block, make a choropleth with
 `geom_map(color="white")`, `coord_fixed()`, and `fill=c.total`.
 
 ```{python}
-prov.select(c.province.n_unique(), pl.len())
+(
+    prov
+    .select(c.province.n_unique(), pl.len())
+)
 ```
 
 ```{python}
-prov = prov.join(
-    covid.group_by(c.province).agg(total = c.cases.sum()),
-    on="province",
-    how="left"
+prov = (
+    prov
+    .join(
+        covid.group_by(c.province).agg(total = c.cases.sum()),
+        on="province",
+        how="left"
+    )
 )
 ```
 
 ```{python}
 (
-    ggplot(prov, aes(fill=c.total))
+    prov
+    .ggplot(aes(fill=c.total))
     .geom_map(color="white")
     .coord_fixed()
 )
@@ -259,12 +277,16 @@ choropleth with `fill=c.dens`. How does the picture change, and which map is the
 more honest one?
 
 ```{python}
-prov = prov.with_columns(dens = c.total / (c.area / 1_000_000))
+prov = (
+    prov
+    .with_columns(dens = c.total / (c.area / 1_000_000))
+)
 ```
 
 ```{python}
 (
-    ggplot(prov, aes(fill=c.dens))
+    prov
+    .ggplot(aes(fill=c.dens))
     .geom_map(color="white")
     .coord_fixed()
 )

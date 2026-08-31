@@ -91,9 +91,18 @@ raw = pl.read_csv(
     quote_char=None,
 )
 
-print(raw.item(0, 0))
-print(raw.item(1, 0))
-print(raw.item(2, 0))
+print(
+    raw
+    .item(0, 0)
+)
+print(
+    raw
+    .item(1, 0)
+)
+print(
+    raw
+    .item(2, 0)
+)
 ```
 
 **Answer**: Three problems, visible in three lines.
@@ -181,13 +190,20 @@ then repair the column with `.str.replace_all()`, which takes the text to find a
 to put in its place. Save the repaired table back over `photos`.
 
 ```{python}
-photos.filter(c.caption.str.contains("&amp;")).height
+(
+    photos
+    .filter(c.caption.str.contains("&amp;"))
+    .height
+)
 ```
 
 ```{python}
 #| tags: [noclear]
-photos = photos.with_columns(
-    caption = c.caption.str.replace_all("&amp;", "&")
+photos = (
+    photos
+    .with_columns(
+        caption = c.caption.str.replace_all("&amp;", "&")
+    )
 )
 
 (
@@ -214,7 +230,10 @@ claim to identify a photograph: `call_number` and `filepath`. Test them both aga
 count.
 
 ```{python}
-photos.select(rows = pl.len(), calls = c.call_number.n_unique(), files = c.filepath.n_unique())
+(
+    photos
+    .select(rows = pl.len(), calls = c.call_number.n_unique(), files = c.filepath.n_unique())
+)
 ```
 
 Something is duplicated. Print the rows whose filepath is near `1a3543`, sorted, and look at
@@ -295,7 +314,10 @@ keep. It does not measure what the country looked like.
 blank cell is the only portable way to write one. Check whether this file has any.
 
 ```{python}
-photos.null_count()
+(
+    photos
+    .null_count()
+)
 ```
 
 Now look at the five photographs taken in the District of Columbia.
@@ -324,7 +346,10 @@ photos = (
     .with_columns(caption = c.caption.str.replace_all("&amp;", "&"))
 )
 
-photos.null_count()
+(
+    photos
+    .null_count()
+)
 ```
 
 **Answer**: The first block reports zero nulls in every column. Do not believe it. Washington

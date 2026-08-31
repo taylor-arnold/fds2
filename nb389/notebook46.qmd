@@ -86,7 +86,10 @@ print the 10 pairs cited together most often. Join the names in so the pairs are
 readable.
 
 ```{python}
-cc = cite.filter(c.cited_case.is_in(top))
+cc = (
+    cite
+    .filter(c.cited_case.is_in(top))
+)
 
 cocite = (
     cc
@@ -145,11 +148,14 @@ cocite_edges = (
 
 co_node, co_edge, co_G = DSNetwork.process(cocite_edges, directed=False)
 
-co_node = co_node.join(
-    case.select(c.citation, c.case_name, c.term, c.issue_description),
-    left_on="id",
-    right_on="citation",
-    how="left"
+co_node = (
+    co_node
+    .join(
+        case.select(c.citation, c.case_name, c.term, c.issue_description),
+        left_on="id",
+        right_on="citation",
+        how="left"
+    )
 )
 
 (
@@ -215,11 +221,14 @@ edges = (
 
 di_node, di_edge, di_G = DSNetwork.process(edges, directed=True)
 
-di_node = di_node.join(
-    case.select(c.citation, c.case_name, c.term),
-    left_on="id",
-    right_on="citation",
-    how="left"
+di_node = (
+    di_node
+    .join(
+        case.select(c.citation, c.case_name, c.term),
+        left_on="id",
+        right_on="citation",
+        how="left"
+    )
 )
 di_node
 ```
@@ -246,7 +255,10 @@ highlight = [
     "424 U.S. 1"      # Buckley v. Valeo
 ]
 
-di_highlight = di_node.filter(c.id.is_in(highlight))
+di_highlight = (
+    di_node
+    .filter(c.id.is_in(highlight))
+)
 
 (
     di_node
@@ -282,10 +294,13 @@ its out-degree, and between its `term` and its in-degree. Then count how many
 cases have an out-degree of exactly zero.
 
 ```{python}
-di_node.select(
-    corr_term_out = pl.corr(c.term, c.degree_out),
-    corr_term_in = pl.corr(c.term, c.degree_in),
-    n_zero_out = (c.degree_out == 0).sum()
+(
+    di_node
+    .select(
+        corr_term_out = pl.corr(c.term, c.degree_out),
+        corr_term_in = pl.corr(c.term, c.degree_in),
+        n_zero_out = (c.degree_out == 0).sum()
+    )
 )
 ```
 
@@ -319,8 +334,17 @@ profile = (
     .sort("cited_case")
 )
 
-ids = profile.get_column("cited_case").to_list()
-X = profile.drop("cited_case").to_numpy().astype(float)
+ids = (
+    profile
+    .get_column("cited_case")
+    .to_list()
+)
+X = (
+    profile
+    .drop("cited_case")
+    .to_numpy()
+    .astype(float)
+)
 X = X / np.linalg.norm(X, axis=1, keepdims=True)
 angles = np.arccos(np.clip(X @ X.T, 0, 1))
 
@@ -374,7 +398,13 @@ dist_edges = (
 
 dn_node, dn_edge, dn_G = DSNetwork.process(dist_edges, directed=False)
 
-dn_node.group_by(c.component).agg(n = pl.len()).sort(c.n, descending=True).head()
+(
+    dn_node
+    .group_by(c.component)
+    .agg(n = pl.len())
+    .sort(c.n, descending=True)
+    .head()
+)
 ```
 
 The mean distance is 1.53, almost the π/2 maximum, and 829 of the 3,160 pairs —
@@ -427,18 +457,24 @@ nn_edges = (
 
 nn_node, nn_edge, nn_G = DSNetwork.process(nn_edges, directed=False)
 
-nn_node = nn_node.join(
-    case.select(c.citation, c.case_name, c.term),
-    left_on="id",
-    right_on="citation",
-    how="left"
+nn_node = (
+    nn_node
+    .join(
+        case.select(c.citation, c.case_name, c.term),
+        left_on="id",
+        right_on="citation",
+        how="left"
+    )
 )
 
-nn_node.select(
-    n_nodes = pl.len(),
-    n_components = c.component.max(),
-    max_degree = c.degree.max(),
-    mean_degree = c.degree.mean().round(2)
+(
+    nn_node
+    .select(
+        n_nodes = pl.len(),
+        n_components = c.component.max(),
+        max_degree = c.degree.max(),
+        mean_degree = c.degree.mean().round(2)
+    )
 )
 ```
 

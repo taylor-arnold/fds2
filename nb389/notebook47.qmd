@@ -144,8 +144,15 @@ for row in fsac.iter_rows(named=True):
     img = cv2.imread(row["filepath"])
     brightness.append(img.mean())
 
-fsac = fsac.with_columns(brightness = pl.Series(brightness))
-fsac.select(c.filepath, c.photographer, c.brightness).head(5)
+fsac = (
+    fsac
+    .with_columns(brightness = pl.Series(brightness))
+)
+(
+    fsac
+    .select(c.filepath, c.photographer, c.brightness)
+    .head(5)
+)
 ```
 
 5. In the first block, show the twelve darkest images in a grid with
@@ -244,7 +251,11 @@ for row in fsac.iter_rows(named=True):
 
 results = pl.DataFrame(results)
 fsac = pl.concat([fsac, results], how="horizontal")
-fsac.select(results.columns).mean()
+(
+    fsac
+    .select(results.columns)
+    .mean()
+)
 ```
 
 Two-thirds of the average frame is neutral, which fits the muted look of aged
@@ -260,7 +271,11 @@ to HSV two ways: correctly with `cv2.COLOR_BGR2HSV`, and incorrectly with
 the color breakdowns.
 
 ```{python}
-red_row = fsac.sort(c.red, descending=True).row(0, named=True)
+red_row = (
+    fsac
+    .sort(c.red, descending=True)
+    .row(0, named=True)
+)
 img = cv2.imread(red_row["filepath"])
 DSImage.compute_colors(cv2.cvtColor(img, cv2.COLOR_BGR2HSV))
 ```

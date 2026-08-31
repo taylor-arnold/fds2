@@ -239,11 +239,25 @@ speak = (
     .explode(c.speaker)
 )
 
-print(line.select(rows = pl.len()))
-print(speak.select(rows = pl.len()))
+print(
+    line
+    .select(rows = pl.len())
+)
+print(
+    speak
+    .select(rows = pl.len())
+)
 
-print(line.filter(c.play_id == "mac").select(mac_speakers = c.character_id.n_unique()))
-print(speak.filter(c.play_id == "mac").select(mac_speakers = c.speaker.n_unique()))
+print(
+    line
+    .filter(c.play_id == "mac")
+    .select(mac_speakers = c.character_id.n_unique())
+)
+print(
+    speak
+    .filter(c.play_id == "mac")
+    .select(mac_speakers = c.speaker.n_unique())
+)
 
 (
     speak
@@ -350,7 +364,10 @@ line_num = (
     .select(c.line_id, c.num)
 )
 
-lines = line.join(line_num, on=c.line_id)
+lines = (
+    line
+    .join(line_num, on=c.line_id)
+)
 
 (
     lines

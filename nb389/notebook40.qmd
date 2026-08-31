@@ -132,7 +132,11 @@ bigram_counts = (
     .agg(bigram_count = pl.len())
 )
 
-total_bigrams = bigrams.select(pl.len()).item()
+total_bigrams = (
+    bigrams
+    .select(pl.len())
+    .item()
+)
 
 top_pmi = (
     bigram_counts
@@ -214,7 +218,12 @@ movie being reviewed?
 
 ```{python}
 for name in ["Kornbluth", "Baird"]:
-    row = docs.filter(c.text.str.contains(name)).select(c.doc_id, c.text).row(0, named=True)
+    row = (
+        docs
+        .filter(c.text.str.contains(name))
+        .select(c.doc_id, c.text)
+        .row(0, named=True)
+    )
     idx = row["text"].find(name)
     print(row["doc_id"], "-", row["text"][max(0, idx - 80):idx + 80])
 ```
@@ -342,7 +351,11 @@ before the adjective, the only case a bigram search like question 1's
 `shift(-1)` could ever catch.
 
 ```{python}
-neg = anno.filter(c.dep == "neg").select(c.doc_id, c.sid, neg_tid = c.tid, verb_idx = c.head_idx)
+neg = (
+    anno
+    .filter(c.dep == "neg")
+    .select(c.doc_id, c.sid, neg_tid = c.tid, verb_idx = c.head_idx)
+)
 
 predicate_adj = (
     anno
@@ -350,12 +363,19 @@ predicate_adj = (
     .select(c.doc_id, c.sid, verb_idx = c.head_idx, adj_tid = c.tid, adjective = c.lemma)
 )
 
-negated_adj = neg.join(predicate_adj, on=[c.doc_id, c.sid, c.verb_idx])
+negated_adj = (
+    neg
+    .join(predicate_adj, on=[c.doc_id, c.sid, c.verb_idx])
+)
 negated_adj.height
 ```
 
 ```{python}
-negated_adj.filter(c.adj_tid == c.neg_tid + 1).height
+(
+    negated_adj
+    .filter(c.adj_tid == c.neg_tid + 1)
+    .height
+)
 ```
 
 Only 30 of the 76 negated predicate adjectives have the negation word

@@ -96,7 +96,11 @@ column so each number becomes its own row, then count the total number of
 entries, how many are exactly zero, and the fraction that are zero.
 
 ```{python}
-woof.select(c.filepath, c.label, c.vit).head(3)
+(
+    woof
+    .select(c.filepath, c.label, c.vit)
+    .head(3)
+)
 ```
 
 ```{python}
@@ -196,8 +200,17 @@ image's nearest neighbor and report how often that neighbor shares its breed,
 overall and per breed. Ten breeds means random guessing would land at about 10%.
 
 ```{python}
-coords = um.select(c.dr0, c.dr1).to_numpy()
-labels_arr = um.select(c.label).to_numpy().ravel()
+coords = (
+    um
+    .select(c.dr0, c.dr1)
+    .to_numpy()
+)
+labels_arr = (
+    um
+    .select(c.label)
+    .to_numpy()
+    .ravel()
+)
 
 dist_sq = ((coords[:, None, :] - coords[None, :, :]) ** 2).sum(axis=2)
 np.fill_diagonal(dist_sq, np.inf)

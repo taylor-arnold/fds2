@@ -62,9 +62,12 @@ to 10-second bins with `.dt.truncate("10s")`, group by the bucket, count the
 keystrokes in each one, and sort by bucket.
 
 ```{python}
-klog = klog.with_columns(
-    press = c.t0.cast(pl.Int64).cast(pl.Datetime("ms")),
-    release = c.t1.cast(pl.Int64).cast(pl.Datetime("ms"))
+klog = (
+    klog
+    .with_columns(
+        press = c.t0.cast(pl.Int64).cast(pl.Datetime("ms")),
+        release = c.t1.cast(pl.Int64).cast(pl.Datetime("ms"))
+    )
 )
 
 one_id = klog["id"][0]
@@ -111,7 +114,10 @@ q2 = (
     )
     .sort(c.bucket)
 )
-q2.head(15)
+(
+    q2
+    .head(15)
+)
 ```
 
 **Answer**: 595 sessions are still going in minute 0, rising to a peak of
@@ -127,7 +133,10 @@ compute `c.dur.shift(-1).over(c.id)`, and count how many rows disagree with
 the stored `dur_after` by more than 0.05.
 
 ```{python}
-klog = klog.sort(c.id, c.press)
+klog = (
+    klog
+    .sort(c.id, c.press)
+)
 
 check = (
     klog
@@ -139,7 +148,10 @@ check = (
     )
 )
 
-check.select(c.mismatch.sum(), pl.len())
+(
+    check
+    .select(c.mismatch.sum(), pl.len())
+)
 ```
 
 **Answer**: Zero mismatches out of 1,145,051 rows. `dur_after` is exactly
@@ -153,8 +165,11 @@ Overwrite `klog` with it and print `id`, `press`, `release`, and `gap` for
 the first 5 rows of the session from question 1.
 
 ```{python}
-klog = klog.with_columns(
-    gap = c.press - c.release.shift(1).over(c.id)
+klog = (
+    klog
+    .with_columns(
+        gap = c.press - c.release.shift(1).over(c.id)
+    )
 )
 
 (
@@ -170,7 +185,10 @@ typing rather than ordinary key-to-key rhythm. Group by `id`, count the
 pauses per person, and print the 5 people with the most.
 
 ```{python}
-pauses = klog.filter(c.gap > pl.duration(seconds=2))
+pauses = (
+    klog
+    .filter(c.gap > pl.duration(seconds=2))
+)
 
 (
     pauses
@@ -241,17 +259,31 @@ avg_gap_ranked = (
     )
     .sort(c.avg_gap_ms, descending=True)
 )
-avg_gap_ranked.head(3)
+(
+    avg_gap_ranked
+    .head(3)
+)
 ```
 
 ```{python}
-worst_gap = klog.drop_nulls(c.gap).sort(c.gap, descending=True).head(1)
+worst_gap = (
+    klog
+    .drop_nulls(c.gap)
+    .sort(c.gap, descending=True)
+    .head(1)
+)
 worst_id = worst_gap["id"][0]
-worst_gap.select(c.id, c.press, c.gap, c.dur)
+(
+    worst_gap
+    .select(c.id, c.press, c.gap, c.dur)
+)
 ```
 
 ```{python}
-all_rows = klog.drop_nulls(c.gap)
+all_rows = (
+    klog
+    .drop_nulls(c.gap)
+)
 
 (
     all_rows
@@ -267,9 +299,12 @@ all_rows = klog.drop_nulls(c.gap)
 ```
 
 ```{python}
-all_rows.select(
-    avg_gap_ms = c.gap.dt.total_milliseconds().mean().round(1),
-    n = pl.len()
+(
+    all_rows
+    .select(
+        avg_gap_ms = c.gap.dt.total_milliseconds().mean().round(1),
+        n = pl.len()
+    )
 )
 ```
 
@@ -328,7 +363,10 @@ second block, count how many distinct `id`s have a keystroke landing inside
 that session's own first 15 seconds of anchor time.
 
 ```{python}
-klog = klog.with_columns(gap_ms = c.gap.dt.total_milliseconds())
+klog = (
+    klog
+    .with_columns(gap_ms = c.gap.dt.total_milliseconds())
+)
 
 correct = (
     klog
@@ -441,18 +479,30 @@ second block, confirm the finding holds for the whole corpus by checking the
 smallest value `gap` ever takes.
 
 ```{python}
-indexed = one.with_row_index("rn")
-
-overlaps = indexed.join_where(
-    indexed,
-    (c.press_right < c.release) & (c.release_right > c.press) & (c.rn != c.rn_right)
+indexed = (
+    one
+    .with_row_index("rn")
 )
 
-overlaps.select(pl.len())
+overlaps = (
+    indexed
+    .join_where(
+        indexed,
+        (c.press_right < c.release) & (c.release_right > c.press) & (c.rn != c.rn_right)
+    )
+)
+
+(
+    overlaps
+    .select(pl.len())
+)
 ```
 
 ```{python}
-klog.select(c.gap.dt.total_milliseconds().min())
+(
+    klog
+    .select(c.gap.dt.total_milliseconds().min())
+)
 ```
 
 **Answer**: Zero overlapping pairs in this session, and the corpus-wide

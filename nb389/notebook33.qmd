@@ -66,16 +66,29 @@ second block print `it_city`'s `_crs` column; in the third, print `prov`'s, to
 confirm they now agree.
 
 ```{python}
-it_city = it_city.geo.points_from_xy("lon", "lat").geo.to_crs(7791)
-prov = prov.geo.to_crs(7791)
+it_city = (
+    it_city
+    .geo.points_from_xy("lon", "lat")
+    .geo.to_crs(7791)
+)
+prov = (
+    prov
+    .geo.to_crs(7791)
+)
 ```
 
 ```{python}
-it_city.select(c._crs.first())
+(
+    it_city
+    .select(c._crs.first())
+)
 ```
 
 ```{python}
-prov.select(c._crs.first())
+(
+    prov
+    .select(c._crs.first())
+)
 ```
 
 **Answer**: Both tables now report EPSG:7791. That agreement is the
@@ -91,7 +104,10 @@ it. Look at the columns: what does a row mean now, and what are `index_right`
 and the `geometry` column showing?
 
 ```{python}
-it_city.geo.sjoin(prov)
+(
+    it_city
+    .geo.sjoin(prov)
+)
 ```
 
 **Answer**: Each row is now a city paired with the province it falls inside,
@@ -109,11 +125,18 @@ block, print the row count of the join; in the second, print the row count of
 `it_city`. Did every city match?
 
 ```{python}
-it_city.geo.sjoin(prov).select(pl.len())
+(
+    it_city
+    .geo.sjoin(prov)
+    .select(pl.len())
+)
 ```
 
 ```{python}
-it_city.select(pl.len())
+(
+    it_city
+    .select(pl.len())
+)
 ```
 
 **Answer**: Both come back 388, so no city was dropped: every one of the 388
@@ -205,7 +228,11 @@ predicate="touches")` to find every pair of provinces that share a border, and
 print how many rows come back.
 
 ```{python}
-prov.geo.sjoin(prov, predicate="touches").select(pl.len())
+(
+    prov
+    .geo.sjoin(prov, predicate="touches")
+    .select(pl.len())
+)
 ```
 
 **Answer**: 476 rows. The `touches` predicate matches two polygons whenever

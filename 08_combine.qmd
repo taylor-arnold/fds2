@@ -98,7 +98,10 @@ Note that Python will let you join on any set of columns that match between the 
 The code outline in the previous section should make more sense once we see examples using actual datasets. To do this, we need multiple datasets that we can join together. We will create a smaller version of the `country` dataset that contains only two columns, which makes it easier to view the results without scrolling. We also load a dataset of country borders, where each row shows the relationship between a country and one of its neighbors.
 
 ```{python}
-c_sml = country.select(c.iso, c.gini)
+c_sml = (
+    country
+    .select(c.iso, c.gini)
+)
 border = pl.read_csv("data/countries_borders.csv")
 border
 ```
@@ -167,7 +170,10 @@ Suppose `c_sml` had gotten corrupted somewhere upstream, perhaps because two dat
 
 ```{python}
 bad_c_sml = pl.concat([c_sml, c_sml.filter(c.iso == "AFG")])
-bad_c_sml.filter(c.iso == "AFG")
+(
+    bad_c_sml
+    .filter(c.iso == "AFG")
+)
 ```
 
 Now watch what happens when we join `border` to this corrupted table instead of the original.
@@ -184,14 +190,22 @@ Recall that the first rows of `border` all correspond to Afghanistan; there are 
 This is why it pays to check the key column *before* joining, rather than after. Back in @sec-group we used `n_unique()` alongside `len()` to check whether a column had repeated values; the same check tells us immediately whether a table is safe to use as the right-hand side of a join.
 
 ```{python}
-c_sml.select(c.iso).n_unique() == len(c_sml)
+(
+    c_sml
+    .select(c.iso)
+    .n_unique() == len(c_sml)
+)
 ```
 
 ```{python}
-bad_c_sml.select(c.iso).n_unique() == len(bad_c_sml)
+(
+    bad_c_sml
+    .select(c.iso)
+    .n_unique() == len(bad_c_sml)
+)
 ```
 
-The first check passes: `iso` is a genuine primary key in `c_sml`, one row per country. The second fails, which tells us, before we've joined anything, that `bad_c_sml` will multiply rows if we use it as the right table. Get in the habit of running this check on the right-hand table any time you're not certain the join key is unique. It takes one line and it catches the bug at its source instead of downstream, where a silently inflated row count can quietly throw off every summary statistic you compute afterward.
+The first check passes: `iso` is a genuine primary key in `c_sml`, one row per country. The second fails, which tells us, before we've joined anything, that `bad_c_sml` will multiply rows if we use it as the right table. Get in the habit of running this check on the right-hand table any time you're not certain the join key is unique. It is a short pipeline and it catches the bug at its source instead of downstream, where a silently inflated row count can quietly throw off every summary statistic you compute afterward.
 
 ## Conditional Joins
 

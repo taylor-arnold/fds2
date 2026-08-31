@@ -93,7 +93,10 @@ for row in birds.iter_rows(named=True):
     img = cv2.imread(row["filepath"])
     results.append(img.mean())
 
-birds = birds.with_columns(brightness = pl.Series(results))
+birds = (
+    birds
+    .with_columns(brightness = pl.Series(results))
+)
 birds
 ```
 
@@ -300,7 +303,10 @@ Calling the model on an image path returns a sequence of 768 numbers: the image'
 Computing embeddings for all images in the dataset takes some time, so we have precomputed these values. In fact, they have been sitting in our dataset since we loaded it at the start of the chapter, in the column named `vit`.
 
 ```{python}
-birds.select(c.filepath, c.label, c.vit)
+(
+    birds
+    .select(c.filepath, c.label, c.vit)
+)
 ```
 
 The precomputed embeddings are stored alongside the rest of the data in a Parquet file. Parquet is a columnar storage format that is particularly well-suited for analytical workloads. Unlike CSV files, Parquet preserves data types exactly, handles nested structures like lists efficiently, and compresses data effectively. This makes it an excellent choice for storing embeddings, which are arrays of floating-point numbers that would be awkward to represent in CSV format.

@@ -73,11 +73,18 @@ second block, count how many of the 200 reviews contain the literal string
 `"<br />"` somewhere in their `text`.
 
 ```{python}
-docs_raw.group_by(c.label).agg(n = pl.len())
+(
+    docs_raw
+    .group_by(c.label)
+    .agg(n = pl.len())
+)
 ```
 
 ```{python}
-docs_raw.select(c.text.str.contains("<br />").sum())
+(
+    docs_raw
+    .select(c.text.str.contains("<br />").sum())
+)
 ```
 
 2. Before cleaning anything, see what the raw HTML does to the pipeline.
@@ -111,11 +118,17 @@ chapter's own noun-frequency query in the next section filters only on
 space. Confirm the count from question 1 is now zero.
 
 ```{python}
-docs = docs_raw.with_columns(
-    text = c.text.str.replace_all("<br />", " ")
+docs = (
+    docs_raw
+    .with_columns(
+        text = c.text.str.replace_all("<br />", " ")
+    )
 )
 
-docs.select(c.text.str.contains("<br />").sum())
+(
+    docs
+    .select(c.text.str.contains("<br />").sum())
+)
 ```
 
 4. In the first block, run `DSText.process()` on the full, cleaned `docs`
@@ -164,7 +177,12 @@ recon = (
     .item()
 )
 
-original = docs.filter(c.doc_id == "doc0001").select(c.text).item()
+original = (
+    docs
+    .filter(c.doc_id == "doc0001")
+    .select(c.text)
+    .item()
+)
 
 recon == original
 ```
@@ -268,7 +286,10 @@ dirty_counts = (
     .agg(count_dirty = pl.len())
 )
 
-clean_counts.join(dirty_counts, on=c.lemma)
+(
+    clean_counts
+    .join(dirty_counts, on=c.lemma)
+)
 ```
 
 `movie` loses 8 mentions and `film` loses 6 when the HTML is left in, even

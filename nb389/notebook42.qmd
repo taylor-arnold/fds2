@@ -79,7 +79,10 @@ number of distinct lemmas it covers.
 ```{python}
 tfidf = DSText.compute_tfidf(anno, min_df=0.01, max_df=1.0)
 print(tfidf.shape)
-tfidf.select(c.lemma.n_unique())
+(
+    tfidf
+    .select(c.lemma.n_unique())
+)
 ```
 
 2. In the first block, pick two lemmas, `"olympic"` and `"profit"`, pivot
@@ -107,7 +110,10 @@ scatter_df = (
 ```
 
 ```{python}
-scatter_df.filter((c.olympic > 0) & (c.profit > 0))
+(
+    scatter_df
+    .filter((c.olympic > 0) & (c.profit > 0))
+)
 ```
 
 Zero. Eleven documents (all `Sports`) sit along the `olympic` axis with a
@@ -132,7 +138,11 @@ mat = (
     .fill_null(0)
 )
 
-X = mat.drop("doc_id").to_numpy()
+X = (
+    mat
+    .drop("doc_id")
+    .to_numpy()
+)
 pct_zero = 100 * (X == 0).sum() / X.size
 avg_nonzero = (X != 0).sum(axis=1).mean()
 
@@ -177,8 +187,17 @@ umap_full = (
 ```
 
 ```{python}
-coords = umap_full.select(c.dr0, c.dr1).to_numpy()
-labels_arr = umap_full.select(c.label).to_numpy().ravel()
+coords = (
+    umap_full
+    .select(c.dr0, c.dr1)
+    .to_numpy()
+)
+labels_arr = (
+    umap_full
+    .select(c.label)
+    .to_numpy()
+    .ravel()
+)
 
 dist_sq = ((coords[:, None, :] - coords[None, :, :]) ** 2).sum(axis=2)
 np.fill_diagonal(dist_sq, np.inf)
@@ -264,7 +283,10 @@ nn_labeled = (
     )
 )
 
-print(nn_labeled.select((c.label == c.label2).mean()))
+print(
+    nn_labeled
+    .select((c.label == c.label2).mean())
+)
 
 (
     nn_labeled
@@ -300,8 +322,17 @@ mat2 = (
     .sort(c.doc_id)
 )
 
-doc_ids2 = mat2.select(c.doc_id).to_series().to_list()
-X2 = mat2.drop("doc_id").to_numpy()
+doc_ids2 = (
+    mat2
+    .select(c.doc_id)
+    .to_series()
+    .to_list()
+)
+X2 = (
+    mat2
+    .drop("doc_id")
+    .to_numpy()
+)
 
 sq_norms = (X2 ** 2).sum(axis=1)
 euclid = np.sqrt(np.clip(sq_norms[:, None] + sq_norms[None, :] - 2 * X2 @ X2.T, 0, None))
@@ -312,7 +343,13 @@ euclid_nn = pl.DataFrame({
     "euclid_nn": [doc_ids2[i] for i in euclid.argmin(axis=1)]
 })
 
-euclid_nn.group_by(c.euclid_nn).agg(n=pl.len()).sort(c.n, descending=True).head(5)
+(
+    euclid_nn
+    .group_by(c.euclid_nn)
+    .agg(n=pl.len())
+    .sort(c.n, descending=True)
+    .head(5)
+)
 ```
 
 Two documents, `doc120007` and `doc120006`, are picked as the Euclidean
@@ -330,8 +367,14 @@ of this notebook correctly matches it to `doc120033`, another `World`
 article about a different Vancouver police case:
 
 ```{python}
-print(euclid_nn.filter(c.doc_id == "doc120070"))
-print(nn.filter(c.doc_id == "doc120070"))
+print(
+    euclid_nn
+    .filter(c.doc_id == "doc120070")
+)
+print(
+    nn
+    .filter(c.doc_id == "doc120070")
+)
 ```
 
 10. In the first block, find the single closest pair of documents in the
@@ -339,13 +382,21 @@ whole corpus under the angle distance. In the second block, print both
 articles' full text to confirm by eye what makes them so close.
 
 ```{python}
-closest_pair = text_dist.sort(c.distance).head(1)
+closest_pair = (
+    text_dist
+    .sort(c.distance)
+    .head(1)
+)
 closest_pair
 ```
 
 ```{python}
 for doc in [closest_pair.item(0, "doc_id"), closest_pair.item(0, "doc_id2")]:
-    print(docs.filter(c.doc_id == doc).item(0, "text"))
+    print(
+        docs
+        .filter(c.doc_id == doc)
+        .item(0, "text")
+    )
     print()
 ```
 
@@ -369,12 +420,22 @@ lonely = (
     .agg(n=pl.len())
     .sort(c.n, descending=True)
 )
-lonely.head(5)
+(
+    lonely
+    .head(5)
+)
 ```
 
 ```{python}
-loneliest = lonely.item(0, "doc_id")
-print(docs.filter(c.doc_id == loneliest).item(0, "text"))
+loneliest = (
+    lonely
+    .item(0, "doc_id")
+)
+print(
+    docs
+    .filter(c.doc_id == loneliest)
+    .item(0, "text")
+)
 
 (
     DSText.compute_tfidf(anno, min_df=0.01, max_df=0.5)

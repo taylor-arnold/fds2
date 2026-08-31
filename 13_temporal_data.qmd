@@ -440,7 +440,10 @@ reversions = (
     .filter(c.is_reversion)
 )
 
-reversions.select(c.doc_id, c.timestamp, c.user, c.size, c.size_diff)
+(
+    reversions
+    .select(c.doc_id, c.timestamp, c.user, c.size, c.size_diff)
+)
 ```
 
 That is a substantial number of edits that put a page back where it was two edits earlier. The criterion is a heuristic rather than a proof, since two unrelated edits could coincidentally cancel out, but the pattern is strong enough to study. Counting reversions per page shows where the disputes are.
@@ -566,7 +569,10 @@ edits_with_views = (
     )
 )
 
-edits_with_views.select(c.doc_id, c.timestamp, c.size, c.views)
+(
+    edits_with_views
+    .select(c.doc_id, c.timestamp, c.size, c.views)
+)
 ```
 
 Every edit now carries the page view count for the day it was made. The `by="doc_id"` argument is doing important work: it requires an exact match on the author before the nearest-in-time search begins, so Chaucer's edits are matched against Chaucer's traffic and nobody else's. Without it, the join would happily pair an edit to Chaucer's page with Virginia Woolf's readership. This is the same boundary problem that `.over()` solves for window functions, wearing a different hat.

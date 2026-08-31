@@ -170,15 +170,24 @@ laureates = (
     .unique(subset="page_id", keep="first")
     .sort(c.doc_id)
 )
-laureates.select(pl.len())
+(
+    laureates
+    .select(pl.len())
+)
 ```
 
 ```{python}
-laureates.head(5)
+(
+    laureates
+    .head(5)
+)
 ```
 
 ```{python}
-laureates.tail(5)
+(
+    laureates
+    .tail(5)
+)
 ```
 
 **Answer**: 81 laureates, and deduplicating on `page_id` did not drop a
@@ -191,7 +200,10 @@ Wikipedia need extra text in some of these article titles but not the
 other 75?
 
 ```{python}
-laureates.filter(c.doc_id.str.contains(r"\("))
+(
+    laureates
+    .filter(c.doc_id.str.contains(r"\("))
+)
 ```
 
 **Answer**: The parenthetical is a Wikipedia disambiguator, added whenever
@@ -255,8 +267,11 @@ data = polite_get(base_url, params).json()
 ```
 
 ```{python}
-laureates.filter(
-    c.doc_id.is_in(["John McCarthy (computer scientist)", "David Patterson (computer scientist)"])
+(
+    laureates
+    .filter(
+        c.doc_id.is_in(["John McCarthy (computer scientist)", "David Patterson (computer scientist)"])
+    )
 )
 ```
 
@@ -314,11 +329,18 @@ texts = (
     .join(laureates, on=c.page_id)
     .select(c.page_id, c.doc_id, c.text)
 )
-texts.select(pl.len())
+(
+    texts
+    .select(pl.len())
+)
 ```
 
 ```{python}
-texts.filter(c.text == "").select(pl.len())
+(
+    texts
+    .filter(c.text == "")
+    .select(pl.len())
+)
 ```
 
 **Answer**: 81 rows in, 81 rows of text out, and zero of them empty; every
@@ -346,7 +368,10 @@ longest collected articles. In the second block, sort ascending and print
 the 5 shortest. What seems to drive the difference?
 
 ```{python}
-texts = texts.with_columns(n_chars = c.text.str.len_chars())
+texts = (
+    texts
+    .with_columns(n_chars = c.text.str.len_chars())
+)
 
 (
     texts
@@ -383,12 +408,21 @@ that most Wikipedia readers never go looking for by name.
 in the second, print the count.
 
 ```{python}
-bell_labs = texts.filter(c.text.str.contains("Bell Labs"))
-bell_labs.select(c.doc_id)
+bell_labs = (
+    texts
+    .filter(c.text.str.contains("Bell Labs"))
+)
+(
+    bell_labs
+    .select(c.doc_id)
+)
 ```
 
 ```{python}
-bell_labs.select(pl.len())
+(
+    bell_labs
+    .select(pl.len())
+)
 ```
 
 **Answer**: 12 laureates' articles mention Bell Labs, including Dennis

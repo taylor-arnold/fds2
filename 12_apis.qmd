@@ -397,12 +397,16 @@ views
 The timestamps arrive as strings such as `2025010100`, so we slice off the trailing hour digits and parse the rest as a date, then join the underscore-form titles back to the `authors` table to recover the page ID. As a check that the collection worked, here are the daily views for the three Brontë sisters across the year.
 
 ```{python}
-brontes = views.filter(
-    c.doc_id.is_in(["Charlotte Brontë", "Emily Brontë", "Anne Brontë"])
+brontes = (
+    views
+    .filter(
+        c.doc_id.is_in(["Charlotte Brontë", "Emily Brontë", "Anne Brontë"])
+    )
 )
 
 (
-    ggplot(brontes, aes(c.date, c.views, color=c.doc_id))
+    brontes
+    .ggplot(aes(c.date, c.views, color=c.doc_id))
     .geom_line()
 )
 ```
@@ -459,7 +463,10 @@ The list itself, along with each author's birth year, death year, era, and gende
 
 ```{python}
 uk_curated = pl.read_csv("data/wiki_uk_meta.csv.gz")
-uk_curated.select(c.doc_id, c.born, c.died, c.era, c.gender)
+(
+    uk_curated
+    .select(c.doc_id, c.born, c.died, c.era, c.gender)
+)
 ```
 
 To attach these authors to Wikipedia we need their page IDs, which means resolving each typed title to a real article. The function below batches fifty titles per request with `redirects=1`, then follows each title through whatever substitutions the server reports. Two kinds can apply, and they can chain: `normalized` fixes mechanical issues such as capitalization and underscores, while `redirects` follows an actual pointer page. Walking the map until it stops changing handles both, in any order, however many hops deep.
@@ -496,7 +503,10 @@ def resolve_titles(titles):
     return pl.DataFrame(rows)
 
 resolved = resolve_titles(uk_curated["doc_id"].to_list())
-resolved.filter(c.doc_id != c.resolved)
+(
+    resolved
+    .filter(c.doc_id != c.resolved)
+)
 ```
 
 Two titles moved, and they moved for different reasons. `Katherine Philipps` is simply a typo, with an extra `p` that a careful transcriber still managed to type. `Margaret Cavendish` is not an error at all: it is a real Wikipedia redirect from the short form of her name to the article's full title, `Margaret Cavendish, Duchess of Newcastle-upon-Tyne`. Our list is not wrong about her, it is just less formal than Wikipedia. Both would have dropped out of the corpus had we looked up titles without following redirects, and the failure would have been silent, which is the dangerous part.
@@ -504,7 +514,10 @@ Two titles moved, and they moved for different reasons. `Katherine Philipps` is 
 Titles that resolve to nothing at all deserve a separate look, since a null page ID means no article and no redirect. Here the table comes back empty, which is the answer we want, but the check belongs in the code rather than in our memory of having once run it.
 
 ```{python}
-resolved.filter(c.page_id.is_null())
+(
+    resolved
+    .filter(c.page_id.is_null())
+)
 ```
 
 Now the spine of the second corpus. We keep the curated title as `doc_id` (it is the name the analysis chapters will print) while keying on the `page_id` the server gave us, and we carry the resolved title along in a working table because the page view API needs the canonical form rather than ours.

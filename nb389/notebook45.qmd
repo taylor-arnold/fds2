@@ -91,10 +91,13 @@ whether `citation` and `case_name` are keys in the `case` table by comparing
 each column's number of distinct values to the number of rows.
 
 ```{python}
-case.select(
-    n_citation = c.citation.n_unique(),
-    n_name = c.case_name.n_unique(),
-    n_rows = pl.len()
+(
+    case
+    .select(
+        n_citation = c.citation.n_unique(),
+        n_name = c.case_name.n_unique(),
+        n_rows = pl.len()
+    )
 )
 ```
 
@@ -130,7 +133,10 @@ edges = (
     .filter(c.citing_case.is_in(top) & c.cited_case.is_in(top))
     .rename({"citing_case": "doc_id", "cited_case": "doc_id2"})
 )
-edges.select(pl.len())
+(
+    edges
+    .select(pl.len())
+)
 ```
 
 4. In the first block, build an undirected network from this edge list with
@@ -142,11 +148,14 @@ anti-join to find the ones that are missing.
 ```{python}
 node, edge, G = DSNetwork.process(edges, directed=False)
 
-node = node.join(
-    case.select(c.citation, c.case_name, c.term, c.issue_description, c.lean),
-    left_on="id",
-    right_on="citation",
-    how="left"
+node = (
+    node
+    .join(
+        case.select(c.citation, c.case_name, c.term, c.issue_description, c.lean),
+        left_on="id",
+        right_on="citation",
+        how="left"
+    )
 )
 node
 ```
@@ -416,9 +425,12 @@ between `degree` and `eigen`, and between `eigen` and `between`, across all the
 nodes.
 
 ```{python}
-node.select(
-    corr_degree_eigen = pl.corr(c.degree, c.eigen),
-    corr_eigen_between = pl.corr(c.eigen, c.between)
+(
+    node
+    .select(
+        corr_degree_eigen = pl.corr(c.degree, c.eigen),
+        corr_eigen_between = pl.corr(c.eigen, c.between)
+    )
 )
 ```
 

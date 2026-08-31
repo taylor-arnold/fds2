@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.36">
+<meta name="generator" content="quarto-1.10.18">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -13,10 +13,13 @@
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
 */
-code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: min(4vw, 1.5em);}
-div.column{flex: auto; overflow-x: auto;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
@@ -97,10 +100,10 @@ div.csl-indent {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-5ee6335475bc6b9f2146ef75da7f65f4.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-8cfe1be3cd6456c4001e438913af0156.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script src="site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
 <link href="site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
 <link href="site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
@@ -136,7 +139,7 @@ div.csl-indent {
 <script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
 
 <script type="text/javascript">
 const typesetMath = (el) => {
@@ -387,7 +390,7 @@ window.Quarto = {
 <section id="setup" class="level2" data-number="16.1">
 <h2 data-number="16.1" class="anchored" data-anchor-id="setup"><span class="header-section-number">16.1</span> Setup</h2>
 <p>Load all of the modules and datasets needed for the chapter.</p>
-<div id="1986f61b" class="cell" data-execution_count="2">
+<div id="519f83d7" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine <span class="im">import</span> ggplot, aes, arrow</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> polars <span class="im">import</span> col <span class="im">as</span> c</span>
@@ -409,7 +412,7 @@ window.Quarto = {
 <section id="creating-a-network-object" class="level2" data-number="16.3">
 <h2 data-number="16.3" class="anchored" data-anchor-id="creating-a-network-object"><span class="header-section-number">16.3</span> Creating a Network Object</h2>
 <p>We can describe a network structure with a tabular dataset. Specifically, we can create a dataset with one row for each edge in the network. This dataset needs one column giving an identifier for the starting node of the edge and another column giving the ending node. The set of links between the Wikipedia pages is read into Python and displayed by the following block of code. Notice that we are using the same values in the <code>doc_id</code> column that were used as unique identifiers for each page text in <a href="14_text_annotations.html" class="quarto-xref"><span>Chapter 14</span></a>.</p>
-<div id="2235cd40" class="cell" data-execution_count="3">
+<div id="ac4ba584" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>page_citation</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
 <div><style>
@@ -482,7 +485,7 @@ window.Quarto = {
 </div>
 </div>
 <p>The first rows show that Marie de France has only one link (to Geoffrey Chaucer). Chaucer, on the other hand, links to six other authors in total. As a starting way to analyze the data, we can see how many pages link into each author’s page. Arranging the data by the count will give a quick understanding of how central each author’s page is to the other authors.</p>
-<div id="a7823cda" class="cell" data-execution_count="4">
+<div id="315923cd" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    page_citation</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    .group_by(c.doc_id2)</span>
@@ -527,7 +530,7 @@ window.Quarto = {
 <td>13</td>
 </tr>
 <tr class="odd">
-<td>"John Dryden"</td>
+<td>"John Keats"</td>
 <td>12</td>
 </tr>
 <tr class="even">
@@ -535,19 +538,19 @@ window.Quarto = {
 <td>…</td>
 </tr>
 <tr class="odd">
-<td>"Margaret Cavendish"</td>
-<td>1</td>
-</tr>
-<tr class="even">
 <td>"Beatrix Potter"</td>
 <td>1</td>
 </tr>
+<tr class="even">
+<td>"George Herbert"</td>
+<td>1</td>
+</tr>
 <tr class="odd">
-<td>"Bram Stoker"</td>
+<td>"Rex Warner"</td>
 <td>1</td>
 </tr>
 <tr class="even">
-<td>"Christina Rossetti"</td>
+<td>"Bram Stoker"</td>
 <td>1</td>
 </tr>
 <tr class="odd">
@@ -563,7 +566,7 @@ window.Quarto = {
 <p>Looking at the counts, we see that there are more links into the Shakespeare page than any other in our collection. While that is perhaps not surprising, it is interesting to see that Wordsworth is only two links short of Shakespeare, with 23 links. While raw counts are a useful starting point, they can only get us so far. These say nothing, for example, about how easily we can hop between two pages by following 2, 3, or 4 links. In order to understand the dataset we need a way of visualizing and modelling all of the connections at once. This requires considering the entire network structure of our dataset.</p>
 <p>Before we create a network structure from a dataset, we need to decide on what kind of network we will create. Specifically, networks can be either <em>directed</em>, in which case we distinguish between the starting and ending vertex, or <em>undirected</em>, in which we do not. For example, in our counts above, we took the direction into account for the links. Next, let’s start by treating our dataset of Wikipedia page links as undirected; all we want to consider is whether there is at least one way to click on a link and go between the two pages. Later in the chapter, we will show what changes when we add direction into the data. Any directed network can be considered undirected by ignoring the direction, though once the direction is discarded it cannot be recovered. So, it will be a good starting point to consider approaches that can be applied to any network dataset.</p>
 <p>The dataset that we have in Python is called an <em>edge list</em> <span class="citation" data-cites="kolaczyk2014statistical">[<a href="#ref-kolaczyk2014statistical" role="doc-biblioref">4</a>]</span>. It consists of a dataset where each observation is an edge. We can use the igraph library to create network objects and compute various network metrics <span class="citation" data-cites="csardi2006igraph">[<a href="#ref-csardi2006igraph" role="doc-biblioref">5</a>]</span>. Let’s create our network using our wrapper method <code>DSNetwork.process</code>.</p>
-<div id="5825bf8f" class="cell" data-execution_count="5">
+<div id="bc39ffad" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>node, edge, G <span class="op">=</span> DSNetwork.process(page_citation, directed<span class="op">=</span><span class="va">False</span>)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>node</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
@@ -605,8 +608,8 @@ window.Quarto = {
 <tbody>
 <tr class="odd">
 <td>"Marie de France"</td>
-<td>5.526513</td>
-<td>-1.227564</td>
+<td>-3.989288</td>
+<td>-3.826547</td>
 <td>1</td>
 <td>72</td>
 <td>"0"</td>
@@ -617,8 +620,8 @@ window.Quarto = {
 </tr>
 <tr class="even">
 <td>"Geoffrey Chaucer"</td>
-<td>2.165632</td>
-<td>-0.607367</td>
+<td>-1.47873</td>
+<td>-1.414664</td>
 <td>1</td>
 <td>72</td>
 <td>"1"</td>
@@ -629,8 +632,8 @@ window.Quarto = {
 </tr>
 <tr class="odd">
 <td>"William Langland"</td>
-<td>3.109215</td>
-<td>1.105054</td>
+<td>-3.709404</td>
+<td>-1.811438</td>
 <td>1</td>
 <td>72</td>
 <td>"1"</td>
@@ -641,8 +644,8 @@ window.Quarto = {
 </tr>
 <tr class="even">
 <td>"John Gower"</td>
-<td>3.410261</td>
-<td>-0.614882</td>
+<td>-2.447682</td>
+<td>-2.387576</td>
 <td>1</td>
 <td>72</td>
 <td>"1"</td>
@@ -653,8 +656,8 @@ window.Quarto = {
 </tr>
 <tr class="odd">
 <td>"John Dryden"</td>
-<td>-0.360322</td>
-<td>-1.497005</td>
+<td>0.984269</td>
+<td>-1.134725</td>
 <td>1</td>
 <td>72</td>
 <td>"1"</td>
@@ -677,8 +680,8 @@ window.Quarto = {
 </tr>
 <tr class="odd">
 <td>"Cecil Day-Lewis"</td>
-<td>-1.223932</td>
-<td>3.141216</td>
+<td>-3.153459</td>
+<td>0.8555</td>
 <td>1</td>
 <td>72</td>
 <td>"6"</td>
@@ -689,8 +692,8 @@ window.Quarto = {
 </tr>
 <tr class="even">
 <td>"Christopher Isherwood"</td>
-<td>-1.398725</td>
-<td>3.710741</td>
+<td>-3.847537</td>
+<td>0.121106</td>
 <td>1</td>
 <td>72</td>
 <td>"6"</td>
@@ -701,8 +704,8 @@ window.Quarto = {
 </tr>
 <tr class="odd">
 <td>"Louis MacNeice"</td>
-<td>-1.068848</td>
-<td>1.981752</td>
+<td>-2.480212</td>
+<td>-0.08015</td>
 <td>1</td>
 <td>72</td>
 <td>"6"</td>
@@ -713,8 +716,8 @@ window.Quarto = {
 </tr>
 <tr class="even">
 <td>"Rex Warner"</td>
-<td>-1.85889</td>
-<td>4.408045</td>
+<td>-4.491159</td>
+<td>1.194542</td>
 <td>1</td>
 <td>72</td>
 <td>"6"</td>
@@ -725,8 +728,8 @@ window.Quarto = {
 </tr>
 <tr class="odd">
 <td>"Edward Upward"</td>
-<td>-1.125058</td>
-<td>4.528647</td>
+<td>-4.487067</td>
+<td>0.434996</td>
 <td>1</td>
 <td>72</td>
 <td>"6"</td>
@@ -743,7 +746,7 @@ window.Quarto = {
 <p>The node dataset contains extracted information about each of the objects in our collection. We will describe each of these throughout the remainder of this chapter. Note that we also have metadata about the nodes, which is something that we can join into the data to help deepen our understanding of subsequent analyses.</p>
 <p>The first column gives a label for the row. In the next two columns, named <code>x</code> and <code>y</code>, is a computed way to lay out the objects in two-dimensions that maximizes linked pages being close to one another while minimizing the amount that all of the nodes are bunched together <span class="citation" data-cites="fruchterman1991graph">[<a href="#ref-fruchterman1991graph" role="doc-biblioref">6</a>]</span>. This is an example of a <em>network drawing</em> (also known as <em>graph drawing</em> in mathematics) algorithm. As with the PCA and UMAP dimensions in <a href="15_text_vectors.html" class="quarto-xref"><span>Chapter 15</span></a>, there is no exact meaning of the individual variables. Rather, it’s the relationships that they show that are interesting. Using the first three variables, we could plot the pages as a scatter plot with labels to see what pages appear to be closely related to one another.</p>
 <p>Before actually looking at this plot, it will be useful to first make some additions. The relationships that would be shown in this plot generally try to put pages that have links between them close to one another. It would be helpful to additionally put these links onto the plot as well. This is where the <code>edge</code> dataset becomes useful. The edge dataset contains one row for each edge in the dataset. The dataset has four columns. These describe the <code>x</code> and <code>y</code> values of one node in the edge and variables <code>xend</code> and <code>yend</code> to indicate where in the scatter plot the ending point of the edge is.</p>
-<div id="929120b8" class="cell" data-execution_count="6">
+<div id="ccb68985" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>edge</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="6">
 <div><style>
@@ -771,34 +774,34 @@ window.Quarto = {
 </thead>
 <tbody>
 <tr class="odd">
-<td>5.526513</td>
-<td>-1.227564</td>
-<td>2.165632</td>
-<td>-0.607367</td>
+<td>-3.989288</td>
+<td>-3.826547</td>
+<td>-1.47873</td>
+<td>-1.414664</td>
 </tr>
 <tr class="even">
-<td>2.165632</td>
-<td>-0.607367</td>
-<td>3.109215</td>
-<td>1.105054</td>
+<td>-1.47873</td>
+<td>-1.414664</td>
+<td>-3.709404</td>
+<td>-1.811438</td>
 </tr>
 <tr class="odd">
-<td>2.165632</td>
-<td>-0.607367</td>
-<td>3.410261</td>
-<td>-0.614882</td>
+<td>-1.47873</td>
+<td>-1.414664</td>
+<td>-2.447682</td>
+<td>-2.387576</td>
 </tr>
 <tr class="even">
-<td>2.165632</td>
-<td>-0.607367</td>
-<td>-0.360322</td>
-<td>-1.497005</td>
+<td>-1.47873</td>
+<td>-1.414664</td>
+<td>0.984269</td>
+<td>-1.134725</td>
 </tr>
 <tr class="odd">
-<td>2.165632</td>
-<td>-0.607367</td>
-<td>2.210142</td>
-<td>-2.321573</td>
+<td>-1.47873</td>
+<td>-1.414664</td>
+<td>-0.52553</td>
+<td>-3.005455</td>
 </tr>
 <tr class="even">
 <td>…</td>
@@ -807,34 +810,34 @@ window.Quarto = {
 <td>…</td>
 </tr>
 <tr class="odd">
-<td>-0.765121</td>
-<td>3.053965</td>
-<td>-1.85889</td>
-<td>4.408045</td>
+<td>-2.848027</td>
+<td>0.574904</td>
+<td>-4.491159</td>
+<td>1.194542</td>
 </tr>
 <tr class="even">
-<td>0.368332</td>
-<td>0.59764</td>
-<td>0.43513</td>
-<td>2.943095</td>
+<td>-0.914104</td>
+<td>0.032385</td>
+<td>-2.230916</td>
+<td>1.836503</td>
 </tr>
 <tr class="odd">
-<td>0.807956</td>
-<td>1.644518</td>
-<td>0.43513</td>
-<td>2.943095</td>
+<td>-1.260774</td>
+<td>1.315383</td>
+<td>-2.230916</td>
+<td>1.836503</td>
 </tr>
 <tr class="even">
-<td>1.471304</td>
-<td>3.687566</td>
-<td>0.43513</td>
-<td>2.943095</td>
+<td>-2.85608</td>
+<td>2.722382</td>
+<td>-2.230916</td>
+<td>1.836503</td>
 </tr>
 <tr class="odd">
-<td>0.505998</td>
-<td>1.20827</td>
-<td>0.43513</td>
-<td>2.943095</td>
+<td>-0.207633</td>
+<td>1.889483</td>
+<td>-2.230916</td>
+<td>1.836503</td>
 </tr>
 </tbody>
 </table>
@@ -842,7 +845,7 @@ window.Quarto = {
 </div>
 </div>
 <p>We can include edges into the plot by adding a geom layer of type <code>geom_segment</code>. This geometry takes four aesthetics, named exactly the same as the names in the <code>edge</code> dataset. The plot gets busy with all of these lines, so we will set the opacity (<code>alpha</code>) of them lower so as to not clutter the visual space with the connections.</p>
-<div id="36692fcb" class="cell" data-execution_count="7">
+<div id="93b208f7" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    node</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(c.x, c.y))</span>
@@ -871,7 +874,7 @@ window.Quarto = {
 <p>One of the core questions that arises when working with network data is trying to identify the relative centrality of each node in the network. Several of the derived measurements in the <code>node</code> dataset capture various forms of centrality. Let’s move through each of these measurements to see how they reveal different aspects of our network’s centrality.</p>
 <p>A <em>component</em> of a network is a collection of all the nodes that can be reached by following along the edges. The <code>node</code> dataset contains a variable called <code>component</code> describing each of the components in the network. The component numbers themselves are arbitrary labels, assigned in the order that the components are discovered. The total size of each component is the first measurement of the centrality of a node. Those nodes that are in the largest component can, in some sense, be said to have a larger centrality than other nodes that are completely cut-off from this cluster. All of the nodes on our network are contained in one large cluster, so this measurement is not particularly helpful in this specific case. Networks that have a single component are known as <em>connected</em> networks. All of the other metrics for centrality are defined in terms of a connected network. In order to apply them to networks with multiple components, each algorithm is applied separately to each component.</p>
 <p>Another measurement of centrality is a node’s <em>degree</em>. The degree of a node is the number of neighbors it has. In other words, it counts how many edges the node is a part of. The degree of each node has been computed in the <code>node</code> table. This is similar to the counts that were produced in the first section by counting occurrences in the raw edge list. The difference here is that we are counting all edges, not just those edges going into a node. As a visualization technique, we can plot the degree centrality scores on a plot of the network to show that the nodes with the highest degree do seem to sit in the middle of the plot and correspond to having a large number of edges.</p>
-<div id="172375a1" class="cell" data-execution_count="8">
+<div id="b00d42c5" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    node</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(c.x, c.y))</span>
@@ -899,7 +902,7 @@ window.Quarto = {
 <p>The degree of a node only accounts for direct neighbors. A more holistic measurement is given by a quantity called the <em>eigenvector centrality</em>. This metric is provided in the <code>node</code> table. It provides a centrality score for each node that is proportional to the sum of the scores of its neighbors. Mathematically, it assigns a set of scores <span class="math inline">\(s_j\)</span> for each node such that, for a fixed constant <span class="math inline">\(\lambda\)</span>:</p>
 <p><span class="math display">\[ \lambda \cdot s_j = \sum_{i \in \text{Neighbors}(j)} s_i \]</span></p>
 <p>The eigenvector score, by convention, scales so that the largest score is 1. It is only possible to describe the eigenvector centrality scores for a connected set of nodes on a network, so the computation is done individually for each component. For comparison, we will use the following code to plot the eigenvector centrality scores of our network.</p>
-<div id="8341df30" class="cell" data-execution_count="9">
+<div id="e08a887e" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    node</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(c.x, c.y))</span>
@@ -926,7 +929,7 @@ window.Quarto = {
 </div>
 <p>The visualization shows a slightly different pattern compared to the degree centrality scores. The biggest difference is that the eigenvector centrality is more concentrated on the most central connections, whereas degree centrality is more spread out. This is partly a result of using a linear scale to plot the colors; transforming the eigenvector centrality scores with another function before plotting would show more gradual differences across the entire network.</p>
 <p>Another measurement of centrality is given by the <em>harmonic centrality</em> score, a variant of closeness centrality that also handles networks with disconnected nodes gracefully. For each node in the network, consider the minimum number of edges that are needed to go from this node to any other node within its component. Adding the reciprocal of these scores together gives a measurement of how close a node is to all of the other nodes in the network. The harmonic centrality score for a node is given as the variable <code>close</code> in our <code>node</code> table. Again, we will plot these scores with the following code to compare to the other types of centrality scores.</p>
-<div id="0847fda6" class="cell" data-execution_count="10">
+<div id="404ab2b8" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    node</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.component <span class="op">==</span> <span class="dv">1</span>)</span>
@@ -954,7 +957,7 @@ window.Quarto = {
 </div>
 <p>The output of the harmonic centrality scores shows different patterns than the eigenvector centrality scores. Here we see a much smoother transition from the most central to the least central nodes. We will look at different kinds of networks later in the chapter that illustrate further differences between each type of centrality score.</p>
 <p>The final measurement of centrality we have in our table, <em>betweenness centrality</em>, also comes from considering minimal paths. For every two nodes in a connected component, consider all of the possible ways to go from one to the other along edges in the network. Then, consider all of the paths (there may be only one) between the two nodes that require a minimal number of hops. The betweenness centrality score measures how many of these minimal paths go through each node (there is some normalization to account for the case when there are many minimal paths, so the counts are not exact integers). This score is stored in the variable <code>between</code>. A plot of the betweenness score is given by the following code.</p>
-<div id="c063dfa4" class="cell" data-execution_count="11">
+<div id="aee09d02" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    node</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(c.x, c.y))</span>
@@ -984,7 +987,7 @@ window.Quarto = {
 <section id="clusters" class="level2" data-number="16.5">
 <h2 data-number="16.5" class="anchored" data-anchor-id="clusters"><span class="header-section-number">16.5</span> Clusters</h2>
 <p>The centrality of a node is not the only thing that we can measure when looking at networks. Another algorithm that we can perform is that of clustering. Here, we try to split the nodes into groups such that a large number of the edges are between nodes within a group rather than across groups. When we created our network, a clustering of the nodes based on the edges was automatically performed. The identifiers for the clusters are in the column called <code>cluster</code>. We can visualize the clusters defined on our Wikipedia-page network using the following code.</p>
-<div id="ecfdd90f" class="cell" data-execution_count="12">
+<div id="ea3e21e0" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    node</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(c.x, c.y))</span>
@@ -1009,7 +1012,7 @@ window.Quarto = {
 </div>
 </div>
 <p>The output of the cluster visualization shows the different communities detected in the network. We are running out of space to put labels on the plot. This is one major consideration when thinking of networks as a form of visual exploration and communication; bigger is not necessarily better. Even on a large screen, networks with hundreds of nodes or more become unwieldy to plot. As an alternative, we can summarize the network data in the form of tables. For example, we can paste together the nodes within a cluster to try to further understand the internal structure of the relationships.</p>
-<div id="f76718f8" class="cell" data-execution_count="13">
+<div id="aaa77a4e" class="cell" data-execution_count="13">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    node</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    .group_by(c.cluster)</span>
@@ -1041,32 +1044,32 @@ window.Quarto = {
 <td>"Samuel Pepys"</td>
 </tr>
 <tr class="even">
-<td>"1"</td>
-<td>"Geoffrey Chaucer; William Lang…</td>
+<td>"2"</td>
+<td>"Charles Dickens; T. S. Eliot; …</td>
 </tr>
 <tr class="odd">
 <td>"0"</td>
 <td>"Marie de France"</td>
 </tr>
 <tr class="even">
+<td>"4"</td>
+<td>"George Herbert; Henry Vaughan"</td>
+</tr>
+<tr class="odd">
 <td>"3"</td>
 <td>"William Wordsworth; John Keats…</td>
+</tr>
+<tr class="even">
+<td>"6"</td>
+<td>"W. H. Auden; Stephen Spender; …</td>
 </tr>
 <tr class="odd">
 <td>"7"</td>
 <td>"Daphne du Maurier"</td>
 </tr>
 <tr class="even">
-<td>"4"</td>
-<td>"George Herbert; Henry Vaughan"</td>
-</tr>
-<tr class="odd">
-<td>"2"</td>
-<td>"Charles Dickens; T. S. Eliot; …</td>
-</tr>
-<tr class="even">
-<td>"6"</td>
-<td>"W. H. Auden; Stephen Spender; …</td>
+<td>"1"</td>
+<td>"Geoffrey Chaucer; William Lang…</td>
 </tr>
 </tbody>
 </table>
@@ -1079,7 +1082,7 @@ window.Quarto = {
 <h2 data-number="16.6" class="anchored" data-anchor-id="co-citation-networks"><span class="header-section-number">16.6</span> Co-citation Networks</h2>
 <p>The network structure we have been working with is a form called a <em>citation network</em>. Pages are joined whenever one page links to another. This is a popular method in understanding academic articles, friendship networks on social media (e.g., tracking mentions on Twitter), or investigating the relative importance of court cases. There are some drawbacks of using citation counts, however. They are sensitive to the time-order of publication, they are affected by the relative length of each document, and they are easily affected by small changes. Wikipedia articles are continually edited, so there is no clear temporal ordering of the pages, and there is relatively little benefit for someone to artificially inflate the network centrality of an article. The length of Wikipedia articles, though, is highly variable and not always well correlated with the notoriety of the subject matter. So, partially to avoid biasing our results due to page length, and more so to illustrate the general concept when applying these techniques to other sets of citation data, let’s look at an alternative that helps to avoid all of these issues.</p>
 <p>A <em>co-citation network</em> is a method of showing links across a citation network while avoiding some of the pitfalls that arise when using direct links. A co-citation is formed between two pages whenever a third entry cites <em>both</em> of them. The idea is that if a third source talks about two sources in the same reference, there is likely a relationship between the documents. We can create a co-citation dataset from Wikipedia by first downloading all of the pages linked to from any of the author pages in our collection. We can then count how often any pair of pages in our dataset were both linked <em>into</em> from the same source. Here, we will load the dataset into Python as a structured table. Co-citations are, by definition, undirected. In the dataset below, we have sorted the edges so that <code>doc_id</code> always comes alphabetically before <code>doc_id_out</code>. The column <code>count</code> tells how many third pages cite both of the respective articles.</p>
-<div id="35288c77" class="cell" data-execution_count="14">
+<div id="1e41cb31" class="cell" data-execution_count="14">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>page_cocitation</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="14">
 <div><style>
@@ -1165,7 +1168,7 @@ window.Quarto = {
 </div>
 </div>
 <p>When working with co-citations, it is useful to only include links between two pages when the count is above some threshold. In the code below, we will filter our new edge list to include only the links that have a count of more than six different citations. We then create a new network, node, and edge set.</p>
-<div id="8d158ce7" class="cell" data-execution_count="15">
+<div id="f9a56651" class="cell" data-execution_count="15">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>filtered_cocitations <span class="op">=</span> (</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    page_cocitation</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.count <span class="op">&gt;</span> <span class="dv">6</span>)</span>
@@ -1178,7 +1181,7 @@ window.Quarto = {
 <span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>In the code block below, we will look at the nodes with the largest eigenvector centrality scores, with the top ten printed in the text. As with the previous network, there is only one component in this network; otherwise, we would want to filter the data such that we are looking at pages in the largest component, which we could identify using the <code>component_size</code> column.</p>
-<div id="23d741cc" class="cell" data-execution_count="16">
+<div id="a434eaa7" class="cell" data-execution_count="16">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    cocite_node</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    .sort(c.eigen, descending<span class="op">=</span><span class="va">True</span>)</span>
@@ -1268,7 +1271,7 @@ window.Quarto = {
 <section id="directed-networks" class="level2" data-number="16.7">
 <h2 data-number="16.7" class="anchored" data-anchor-id="directed-networks"><span class="header-section-number">16.7</span> Directed Networks</h2>
 <p>At the start of the chapter, we noted that networks can be given edges that are either directed or undirected. The algorithms and metrics we have looked at so far all work on undirected networks and so even in the case of the original links, which do have a well-defined direction, we have been treating the links as undirected. It is possible to create a network object that takes this relationship into account by setting the <code>directed</code> argument to <code>True</code>.</p>
-<div id="dd83cd2e" class="cell" data-execution_count="17">
+<div id="db1d4fe4" class="cell" data-execution_count="17">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>directed_node, directed_edge, directed_G <span class="op">=</span> DSNetwork.process(</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    page_citation, </span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    directed<span class="op">=</span><span class="va">True</span></span>
@@ -1315,8 +1318,8 @@ window.Quarto = {
 <tbody>
 <tr class="odd">
 <td>"Marie de France"</td>
-<td>3.866909</td>
-<td>-4.169052</td>
+<td>-4.01577</td>
+<td>3.79968</td>
 <td>9</td>
 <td>1</td>
 <td>"0"</td>
@@ -1328,8 +1331,8 @@ window.Quarto = {
 </tr>
 <tr class="even">
 <td>"Geoffrey Chaucer"</td>
-<td>1.444791</td>
-<td>-1.711004</td>
+<td>-1.489643</td>
+<td>1.410434</td>
 <td>10</td>
 <td>60</td>
 <td>"1"</td>
@@ -1341,8 +1344,8 @@ window.Quarto = {
 </tr>
 <tr class="odd">
 <td>"William Langland"</td>
-<td>3.537791</td>
-<td>-1.072507</td>
+<td>-3.707403</td>
+<td>1.792249</td>
 <td>12</td>
 <td>1</td>
 <td>"1"</td>
@@ -1354,8 +1357,8 @@ window.Quarto = {
 </tr>
 <tr class="even">
 <td>"John Gower"</td>
-<td>2.516404</td>
-<td>-2.429922</td>
+<td>-2.413694</td>
+<td>2.401019</td>
 <td>10</td>
 <td>60</td>
 <td>"1"</td>
@@ -1367,8 +1370,8 @@ window.Quarto = {
 </tr>
 <tr class="odd">
 <td>"John Dryden"</td>
-<td>-0.734084</td>
-<td>-1.068393</td>
+<td>0.900869</td>
+<td>1.131255</td>
 <td>10</td>
 <td>60</td>
 <td>"1"</td>
@@ -1393,8 +1396,8 @@ window.Quarto = {
 </tr>
 <tr class="odd">
 <td>"Cecil Day-Lewis"</td>
-<td>2.354355</td>
-<td>2.681267</td>
+<td>-3.167682</td>
+<td>-0.914427</td>
 <td>10</td>
 <td>60</td>
 <td>"6"</td>
@@ -1406,8 +1409,8 @@ window.Quarto = {
 </tr>
 <tr class="even">
 <td>"Christopher Isherwood"</td>
-<td>2.991743</td>
-<td>2.850177</td>
+<td>-3.866843</td>
+<td>-0.178478</td>
 <td>10</td>
 <td>60</td>
 <td>"6"</td>
@@ -1419,8 +1422,8 @@ window.Quarto = {
 </tr>
 <tr class="odd">
 <td>"Louis MacNeice"</td>
-<td>2.284242</td>
-<td>1.487978</td>
+<td>-2.494633</td>
+<td>0.046658</td>
 <td>10</td>
 <td>60</td>
 <td>"6"</td>
@@ -1432,8 +1435,8 @@ window.Quarto = {
 </tr>
 <tr class="even">
 <td>"Rex Warner"</td>
-<td>3.409233</td>
-<td>3.582371</td>
+<td>-4.498442</td>
+<td>-1.263491</td>
 <td>10</td>
 <td>60</td>
 <td>"6"</td>
@@ -1445,8 +1448,8 @@ window.Quarto = {
 </tr>
 <tr class="odd">
 <td>"Edward Upward"</td>
-<td>2.804322</td>
-<td>3.752724</td>
+<td>-4.501795</td>
+<td>-0.502984</td>
 <td>10</td>
 <td>60</td>
 <td>"6"</td>
@@ -1463,7 +1466,7 @@ window.Quarto = {
 </div>
 <p>The <code>node</code> table contains a slightly different set of measurements. Harmonic centrality is no longer available; eigenvector and betweenness centrality are still computed, and both now take the directions of the edges into account. There are now three different degree counts: the out-degree (number of links on the page), the in-degree (number of links into a page), and the total of these two.</p>
 <p>We can, if desired, use the directed structure in our plot. To visualize a directed network, we add an <code>arrow</code> argument to the <code>geom_segment</code> layer.</p>
-<div id="0f30effa" class="cell" data-execution_count="18">
+<div id="fd18e801" class="cell" data-execution_count="18">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    directed_node</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(c.x, c.y))</span>
@@ -1487,7 +1490,7 @@ window.Quarto = {
 </div>
 <p>Visualizing the direction of the arrows can be helpful for illustrating concepts in smaller networks.</p>
 <p>An interesting analysis that we can do with a directed network is to look at the in-degree as a function of the out-degree. The code below creates a plot that investigates the relationship between these two degree counts. We have highlighted a set of six authors that show interesting relationships between the two variables.</p>
-<div id="c502d6c8" class="cell" data-execution_count="19">
+<div id="fcb34d30" class="cell" data-execution_count="19">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>highlight_authors <span class="op">=</span> [</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"William Shakespeare"</span>, <span class="st">"William Wordsworth"</span>, <span class="st">"T. S. Eliot"</span>, </span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Lord Byron"</span>, <span class="st">"W. H. Auden"</span>, <span class="st">"George Orwell"</span></span>

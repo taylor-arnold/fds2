@@ -106,7 +106,8 @@ Try mapping a plotnine aesthetic to country using `cell_wide`. There is no `iso`
 ```{python}
 #| eval: false
 (
-    ggplot(cell_wide, aes(x=c.year, y=c.USA))
+    cell_wide
+    .ggplot(aes(x=c.year, y=c.USA))
     .geom_line()
 )
 ```
@@ -127,7 +128,7 @@ cell_long = (
 )
 ```
 
-With `iso` as a column, `color=c.iso` is enough to tell plotnine to draw one line per country; here we also filter to the same four countries as in @sec-graphics, since a line per each of the 174 countries would be unreadable. This is also the answer to a question you may have had back when we first plotted `cellphone` by country: that plot worked on the first try, with no reshaping, because `cellphone` was already stored long, with one row per *year × country* combination. The general rule is this: before reaching for `ggplot()`, check whether the variable you want to map to an aesthetic (color, shape, facet, and so on) has its own column. If it does not, unpivot first.
+With `iso` as a column, `color=c.iso` is enough to tell plotnine to draw one line per country; here we also filter to the same four countries as in @sec-graphics, since a line per each of the 174 countries would be unreadable. This is also the answer to a question you may have had back when we first plotted `cellphone` by country: that plot worked on the first try, with no reshaping, because `cellphone` was already stored long, with one row per *year × country* combination. The general rule is this: before reaching for `.ggplot()`, check whether the variable you want to map to an aesthetic (color, shape, facet, and so on) has its own column. If it does not, unpivot first.
 
 ## Expand List Columns
 

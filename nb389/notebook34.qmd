@@ -61,16 +61,29 @@ both `it_city` and `prov` into EPSG:7791. In the second block, print
 `it_city`'s `_crs` column; in the third, print `prov`'s, to confirm they agree.
 
 ```{python}
-it_city = it_city.geo.points_from_xy("lon", "lat").geo.to_crs(7791)
-prov = prov.geo.to_crs(7791)
+it_city = (
+    it_city
+    .geo.points_from_xy("lon", "lat")
+    .geo.to_crs(7791)
+)
+prov = (
+    prov
+    .geo.to_crs(7791)
+)
 ```
 
 ```{python}
-it_city.select(c._crs.first())
+(
+    it_city
+    .select(c._crs.first())
+)
 ```
 
 ```{python}
-prov.select(c._crs.first())
+(
+    prov
+    .select(c._crs.first())
+)
 ```
 
 2. Buffer every city by 20 kilometers with `it_city.geo.buffer(20_000)` and
@@ -79,7 +92,9 @@ discs overlap the most, and where do they stay isolated?
 
 ```{python}
 (
-    ggplot(it_city.geo.buffer(20_000))
+    it_city
+    .geo.buffer(20_000)
+    .ggplot()
     .geom_map(alpha=0.3)
     .coord_fixed()
 )
@@ -98,11 +113,20 @@ in the second, print the row count of the buffered join. What does the jump
 mean?
 
 ```{python}
-it_city.geo.sjoin(prov).select(pl.len())
+(
+    it_city
+    .geo.sjoin(prov)
+    .select(pl.len())
+)
 ```
 
 ```{python}
-it_city.geo.buffer(20_000).geo.sjoin(prov).select(pl.len())
+(
+    it_city
+    .geo.buffer(20_000)
+    .geo.sjoin(prov)
+    .select(pl.len())
+)
 ```
 
 **Answer**: The plain join returns 388 rows, one per city, the same result as
@@ -146,15 +170,28 @@ spot.
 and how many distinct regions came through (`c.region.n_unique()`).
 
 ```{python}
-region_map = covid.select(c.region, c.province).unique()
-region_map.select(c.province.n_unique(), pl.len())
+region_map = (
+    covid
+    .select(c.region, c.province)
+    .unique()
+)
+(
+    region_map
+    .select(c.province.n_unique(), pl.len())
+)
 ```
 
 ```{python}
-prov = prov.join(region_map, on="province", how="left")
-prov.select(
-    n_missing = c.region.is_null().sum(),
-    n_region = c.region.n_unique()
+prov = (
+    prov
+    .join(region_map, on="province", how="left")
+)
+(
+    prov
+    .select(
+        n_missing = c.region.is_null().sum(),
+        n_region = c.region.n_unique()
+    )
 )
 ```
 
@@ -169,8 +206,14 @@ regions. Print the regions sorted by total area (in square kilometers,
 dividing by 1e6), largest first.
 
 ```{python}
-prov = prov.geo.area
-region = prov.geo.dissolve(by="region", aggfunc={"area": "sum"})
+prov = (
+    prov
+    .geo.area
+)
+region = (
+    prov
+    .geo.dissolve(by="region", aggfunc={"area": "sum"})
+)
 (
     region
     .select(c.region, (c.area / 1e6).round(0).alias("area_km2"))
@@ -192,14 +235,18 @@ province borders?
 
 ```{python}
 (
-    ggplot(region)
+    region
+    .ggplot()
     .geom_map(fill="white", color="black")
     .coord_fixed()
 )
 ```
 
 ```{python}
-region.select(pl.len())
+(
+    region
+    .select(pl.len())
+)
 ```
 
 **Answer**: `region` has 21 rows against `prov`'s 107, and the plot shows why:
@@ -214,11 +261,18 @@ count. In the third block, group the exploded table by `province`, count
 the parts, and print the five provinces with the most.
 
 ```{python}
-prov.select(pl.len())
+(
+    prov
+    .select(pl.len())
+)
 ```
 
 ```{python}
-prov.geo.explode().select(pl.len())
+(
+    prov
+    .geo.explode()
+    .select(pl.len())
+)
 ```
 
 ```{python}
@@ -295,16 +349,27 @@ block, plot the simplified provinces with `geom_map(fill="white", color=
 "black")` and `coord_fixed()`.
 
 ```{python}
-prov.geo.count_coordinates().select(c.count_coordinates.sum())
-```
-
-```{python}
-prov.geo.simplify(5_000).geo.count_coordinates().select(c.count_coordinates.sum())
+(
+    prov
+    .geo.count_coordinates()
+    .select(c.count_coordinates.sum())
+)
 ```
 
 ```{python}
 (
-    ggplot(prov.geo.simplify(5_000))
+    prov
+    .geo.simplify(5_000)
+    .geo.count_coordinates()
+    .select(c.count_coordinates.sum())
+)
+```
+
+```{python}
+(
+    prov
+    .geo.simplify(5_000)
+    .ggplot()
     .geom_map(fill="white", color="black")
     .coord_fixed()
 )
@@ -323,7 +388,11 @@ same trade (fewer vertices for a small, controlled loss of detail) is what
 before trusting anything computed above. Print how many are not.
 
 ```{python}
-prov.geo.is_valid.select(n_invalid = (~c.is_valid).sum())
+(
+    prov
+    .geo.is_valid
+    .select(n_invalid = (~c.is_valid).sum())
+)
 ```
 
 **Answer**: Zero. Every one of the 107 province polygons is topologically

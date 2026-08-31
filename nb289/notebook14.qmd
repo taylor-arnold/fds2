@@ -61,19 +61,31 @@ variable.
 ```{python}
 print(play.shape, char.shape, line.shape, word.shape)
 
-play.head(3)
+(
+    play
+    .head(3)
+)
 ```
 
 ```{python}
-char.head(3)
+(
+    char
+    .head(3)
+)
 ```
 
 ```{python}
-line.head(3)
+(
+    line
+    .head(3)
+)
 ```
 
 ```{python}
-word.head(3)
+(
+    word
+    .head(3)
+)
 ```
 
 **Answer**: A row of `play` is a play (37 of them). A row of `line` is one line as it is
@@ -92,10 +104,22 @@ observation. So a claim about the unit is a claim you can test: count the distin
 of the id and compare it to the number of rows. Do that for each table.
 
 ```{python}
-print(play.select(rows = pl.len(), ids = c.play_id.n_unique()))
-print(char.select(rows = pl.len(), ids = c.character_id.n_unique()))
-print(line.select(rows = pl.len(), ids = c.line_id.n_unique()))
-print(word.select(rows = pl.len(), ids = c.word_id.n_unique()))
+print(
+    play
+    .select(rows = pl.len(), ids = c.play_id.n_unique())
+)
+print(
+    char
+    .select(rows = pl.len(), ids = c.character_id.n_unique())
+)
+print(
+    line
+    .select(rows = pl.len(), ids = c.line_id.n_unique())
+)
+print(
+    word
+    .select(rows = pl.len(), ids = c.word_id.n_unique())
+)
 ```
 
 **Answer**: Three of the four pass. `play_id`, `line_id`, and `word_id` each have exactly
@@ -260,8 +284,16 @@ problem. It cost us the ability to sort a scene.
 compare that with the number of characters the dramatis personae lists for it.
 
 ```{python}
-print(char.filter(c.play_id == "mac").select(listed = pl.len()))
-print(line.filter(c.play_id == "mac").select(speakers = c.character_id.n_unique()))
+print(
+    char
+    .filter(c.play_id == "mac")
+    .select(listed = pl.len())
+)
+print(
+    line
+    .filter(c.play_id == "mac")
+    .select(speakers = c.character_id.n_unique())
+)
 
 (
     line
@@ -343,8 +375,16 @@ one this is. The cast list of *Macbeth* includes a Porter. Ask the lines table h
 he speaks.
 
 ```{python}
-print(char.filter(c.character_id == "Porter_Mac").select(c.character_id, c.name))
-print(line.filter(c.character_id == "Porter_Mac").select(porter_lines = pl.len()))
+print(
+    char
+    .filter(c.character_id == "Porter_Mac")
+    .select(c.character_id, c.name)
+)
+print(
+    line
+    .filter(c.character_id == "Porter_Mac")
+    .select(porter_lines = pl.len())
+)
 ```
 
 Zero. The Porter is one of the most famous speaking parts in the play, the drunk answering the

@@ -175,7 +175,10 @@ bigrams = (
         bigram = c.lemma + " " + c.next_token
     )
 )
-bigrams.select(c.doc_id, c.sid, c.tid, c.lemma, c.next_token, c.bigram)
+(
+    bigrams
+    .select(c.doc_id, c.sid, c.tid, c.lemma, c.next_token, c.bigram)
+)
 ```
 
 The `shift(-1)` operation moves each column up by one position within each document and sentence, so that each row contains both the current token and the following token. Because the filter on alphabetic tokens comes before the shift, each bigram pairs successive words, skipping over any punctuation that fell between them, and the `.over()` grouping keeps pairs from crossing sentence boundaries.
@@ -225,7 +228,11 @@ bigram_counts = (
     .agg(bigram_count = pl.len())
 )
 
-total_bigrams = bigrams.select(pl.len()).item()
+total_bigrams = (
+    bigrams
+    .select(pl.len())
+    .item()
+)
 ```
 
 And, finally, we can combine the data together to get the PMI scores for each bigram and sort to find those with the highest scores.
@@ -316,7 +323,10 @@ entities = (
         entity_text = c.token.str.join(" "),
     )
 )
-entities.select(c.doc_id, c.ent_type, c.entity_text)
+(
+    entities
+    .select(c.doc_id, c.ent_type, c.entity_text)
+)
 ```
 
 Now we can analyze entities at the appropriate level of granularity. For example, we can find the most frequently mentioned people across all documents:

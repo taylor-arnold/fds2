@@ -80,7 +80,10 @@ n_common = (
 )
 print(n_common, "of", text_en.height, "authors have a French page")
 
-missing = text_en.join(text_fr.select(c.doc_id), on="doc_id", how="anti")
+missing = (
+    text_en
+    .join(text_fr.select(c.doc_id), on="doc_id", how="anti")
+)
 
 (
     missing
@@ -124,9 +127,16 @@ docs_en = (
     .join(text_fr.select(c.doc_id), on="doc_id")
     .sort(c.doc_id)
 )
-docs_fr = text_fr.sort(c.doc_id)
+docs_fr = (
+    text_fr
+    .sort(c.doc_id)
+)
 
-print(docs_en.select(c.doc_id).equals(docs_fr.select(c.doc_id)))
+print(
+    docs_en
+    .select(c.doc_id)
+    .equals(docs_fr.select(c.doc_id))
+)
 ```
 
 ```{python}
@@ -177,8 +187,30 @@ should look like?
 
 ```{python}
 for author in ["Jane Austen"]:
-    print("EN", author, DSText.compute_tfidf(anno_en, min_df=0.01, max_df=1.0).filter(c.doc_id == author).sort(c.tfidf, descending=True).head(10).select(c.lemma).to_series().to_list())
-    print("FR", author, DSText.compute_tfidf(anno_fr, min_df=0.01, max_df=1.0).filter(c.doc_id == author).sort(c.tfidf, descending=True).head(10).select(c.lemma).to_series().to_list())
+    print(
+        "EN", author,
+        (
+            DSText.compute_tfidf(anno_en, min_df=0.01, max_df=1.0)
+            .filter(c.doc_id == author)
+            .sort(c.tfidf, descending=True)
+            .head(10)
+            .select(c.lemma)
+            .to_series()
+            .to_list()
+        )
+    )
+    print(
+        "FR", author,
+        (
+            DSText.compute_tfidf(anno_fr, min_df=0.01, max_df=1.0)
+            .filter(c.doc_id == author)
+            .sort(c.tfidf, descending=True)
+            .head(10)
+            .select(c.lemma)
+            .to_series()
+            .to_list()
+        )
+    )
 ```
 
 No. The chapter's own text claims that TF-IDF "downweights generic terms...
@@ -208,8 +240,30 @@ tfidf_en = DSText.compute_tfidf(anno_en, min_df=0.01, max_df=0.5)
 tfidf_fr = DSText.compute_tfidf(anno_fr, min_df=0.01, max_df=0.5)
 
 for author in ["Jane Austen", "A. A. Milne", "T. S. Eliot"]:
-    print("EN", author, tfidf_en.filter(c.doc_id == author).sort(c.tfidf, descending=True).head(10).select(c.lemma).to_series().to_list())
-    print("FR", author, tfidf_fr.filter(c.doc_id == author).sort(c.tfidf, descending=True).head(10).select(c.lemma).to_series().to_list())
+    print(
+        "EN", author,
+        (
+            tfidf_en
+            .filter(c.doc_id == author)
+            .sort(c.tfidf, descending=True)
+            .head(10)
+            .select(c.lemma)
+            .to_series()
+            .to_list()
+        )
+    )
+    print(
+        "FR", author,
+        (
+            tfidf_fr
+            .filter(c.doc_id == author)
+            .sort(c.tfidf, descending=True)
+            .head(10)
+            .select(c.lemma)
+            .to_series()
+            .to_list()
+        )
+    )
 ```
 
 Mostly yes. Dropping every lemma that appears in more than half the corpus
@@ -229,8 +283,24 @@ check its `upos` tag and `is_alpha` flag. In the third block, print the raw
 text around the first occurrence of `"parser"` on A. A. Milne's page.
 
 ```{python}
-print(text_en.with_columns(n = c.text.str.count_matches("mw-parser-output")).select(c.n.sum()).item(), "matches in English text")
-print(text_fr.with_columns(n = c.text.str.count_matches("mw-parser-output")).select(c.n.sum()).item(), "matches in French text")
+print(
+    (
+        text_en
+        .with_columns(n = c.text.str.count_matches("mw-parser-output"))
+        .select(c.n.sum())
+        .item()
+    ),
+    "matches in English text"
+)
+print(
+    (
+        text_fr
+        .with_columns(n = c.text.str.count_matches("mw-parser-output"))
+        .select(c.n.sum())
+        .item()
+    ),
+    "matches in French text"
+)
 
 (
     text_en
@@ -242,11 +312,21 @@ print(text_fr.with_columns(n = c.text.str.count_matches("mw-parser-output")).sel
 ```
 
 ```{python}
-anno_en.filter(c.token == "parser").select(c.doc_id, c.token, c.upos, c.is_alpha).unique()
+(
+    anno_en
+    .filter(c.token == "parser")
+    .select(c.doc_id, c.token, c.upos, c.is_alpha)
+    .unique()
+)
 ```
 
 ```{python}
-idx = docs_en.filter(c.doc_id == "A. A. Milne").item(0, "text").find("parser")
+idx = (
+    docs_en
+    .filter(c.doc_id == "A. A. Milne")
+    .item(0, "text")
+    .find("parser")
+)
 docs_en.filter(c.doc_id == "A. A. Milne").item(0, "text")[idx - 120 : idx + 120]
 ```
 
@@ -322,7 +402,10 @@ nn_fr = (
     .drop("distance")
 )
 
-nn_compare = nn_en.join(nn_fr, on="doc_id")
+nn_compare = (
+    nn_en
+    .join(nn_fr, on="doc_id")
+)
 nn_compare
 ```
 
@@ -331,7 +414,11 @@ both languages? Compare this to the chance rate of matching by accident
 among 72 other authors.
 
 ```{python}
-agree_rate = nn_compare.select((c.nn_en == c.nn_fr).mean()).item()
+agree_rate = (
+    nn_compare
+    .select((c.nn_en == c.nn_fr).mean())
+    .item()
+)
 print(round(agree_rate, 3), "agreement rate")
 print(round(1 / 72, 3), "chance rate")
 ```
@@ -356,21 +443,73 @@ with `parser` removed from `anno_en`.
 
 ```{python}
 for author in ["Ann Radcliffe", "Jane Austen"]:
-    print("EN", author, tfidf_en.filter(c.doc_id == author).sort(c.tfidf, descending=True).head(5).select(c.lemma).to_series().to_list())
-    print("FR", author, tfidf_fr.filter(c.doc_id == author).sort(c.tfidf, descending=True).head(5).select(c.lemma).to_series().to_list())
+    print(
+        "EN", author,
+        (
+            tfidf_en
+            .filter(c.doc_id == author)
+            .sort(c.tfidf, descending=True)
+            .head(5)
+            .select(c.lemma)
+            .to_series()
+            .to_list()
+        )
+    )
+    print(
+        "FR", author,
+        (
+            tfidf_fr
+            .filter(c.doc_id == author)
+            .sort(c.tfidf, descending=True)
+            .head(5)
+            .select(c.lemma)
+            .to_series()
+            .to_list()
+        )
+    )
 ```
 
 ```{python}
 for author in ["A. A. Milne", "T. S. Eliot", "George Orwell"]:
-    print("EN", author, tfidf_en.filter(c.doc_id == author).sort(c.tfidf, descending=True).head(5).select(c.lemma).to_series().to_list())
-    print("FR", author, tfidf_fr.filter(c.doc_id == author).sort(c.tfidf, descending=True).head(5).select(c.lemma).to_series().to_list())
+    print(
+        "EN", author,
+        (
+            tfidf_en
+            .filter(c.doc_id == author)
+            .sort(c.tfidf, descending=True)
+            .head(5)
+            .select(c.lemma)
+            .to_series()
+            .to_list()
+        )
+    )
+    print(
+        "FR", author,
+        (
+            tfidf_fr
+            .filter(c.doc_id == author)
+            .sort(c.tfidf, descending=True)
+            .head(5)
+            .select(c.lemma)
+            .to_series()
+            .to_list()
+        )
+    )
 ```
 
 ```{python}
-milne_eliot = dist_en.filter(c.doc_id == "A. A. Milne", c.doc_id2 == "T. S. Eliot").item(0, "distance")
+milne_eliot = (
+    dist_en
+    .filter(c.doc_id == "A. A. Milne", c.doc_id2 == "T. S. Eliot")
+    .item(0, "distance")
+)
 
 dist_en_no_parser = DSText.compute_distances(anno_en.filter(c.lemma != "parser"), min_df=0.01, max_df=0.5)
-milne_eliot_no_parser = dist_en_no_parser.filter(c.doc_id == "A. A. Milne", c.doc_id2 == "T. S. Eliot").item(0, "distance")
+milne_eliot_no_parser = (
+    dist_en_no_parser
+    .filter(c.doc_id == "A. A. Milne", c.doc_id2 == "T. S. Eliot")
+    .item(0, "distance")
+)
 
 print(round(milne_eliot, 3), "with parser")
 print(round(milne_eliot_no_parser, 3), "without parser")
@@ -432,11 +571,20 @@ umap_fr = (
 
 ```{python}
 def era_nn_rate(umap_df):
-    coords = umap_df.select(c.dr0, c.dr1).to_numpy()
+    coords = (
+        umap_df
+        .select(c.dr0, c.dr1)
+        .to_numpy()
+    )
     dist_sq = ((coords[:, None, :] - coords[None, :, :]) ** 2).sum(axis=2)
     np.fill_diagonal(dist_sq, np.inf)
     nn_idx = dist_sq.argmin(axis=1)
-    eras = umap_df.select(c.era).to_series().to_numpy()
+    eras = (
+        umap_df
+        .select(c.era)
+        .to_series()
+        .to_numpy()
+    )
     return (eras == eras[nn_idx]).mean()
 
 print(round(era_nn_rate(umap_en), 3), "EN same-era nearest-neighbor rate")

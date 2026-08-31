@@ -83,7 +83,10 @@ using `.is_in()`. Print how many there are with `.select(pl.len())`.
 Use `.select()` with `c.tailnum.n_unique()`.
 
 ```{python}
-rva.select(c.tailnum.n_unique())
+(
+    rva
+    .select(c.tailnum.n_unique())
+)
 ```
 
 4. In the first block, add a `delay_total` column (`dep_delay` plus
@@ -94,15 +97,22 @@ print `carrier`, `dep_delay`, `delay_total`, and `status` for 5 rows. In the
 second block, count how many flights fall into each status.
 
 ```{python}
-q4 = rva.with_columns(
-    delay_total = c.dep_delay + c.arr_delay,
-    status = pl.when(c.dep_delay.is_null())
-        .then(pl.lit("cancelled"))
-        .when(c.dep_delay > 15)
-        .then(pl.lit("delayed"))
-        .otherwise(pl.lit("on time"))
+q4 = (
+    rva
+    .with_columns(
+        delay_total = c.dep_delay + c.arr_delay,
+        status = pl.when(c.dep_delay.is_null())
+            .then(pl.lit("cancelled"))
+            .when(c.dep_delay > 15)
+            .then(pl.lit("delayed"))
+            .otherwise(pl.lit("on time"))
+    )
 )
-q4.select(c.carrier, c.dep_delay, c.delay_total, c.status).head(5)
+(
+    q4
+    .select(c.carrier, c.dep_delay, c.delay_total, c.status)
+    .head(5)
+)
 ```
 
 ```{python}
@@ -118,9 +128,12 @@ q4.select(c.carrier, c.dep_delay, c.delay_total, c.status).head(5)
 counts match.
 
 ```{python}
-rva.select(
-    n_null_dep_time = c.dep_time.is_null().sum(),
-    n_null_dep_delay = c.dep_delay.is_null().sum()
+(
+    rva
+    .select(
+        n_null_dep_time = c.dep_time.is_null().sum(),
+        n_null_dep_delay = c.dep_delay.is_null().sum()
+    )
 )
 ```
 
@@ -134,7 +147,8 @@ trend line with `method="lm"` and `se=False`.
 
 ```{python}
 (
-    ggplot(rva, aes(c.dep_delay, c.arr_delay))
+    rva
+    .ggplot(aes(c.dep_delay, c.arr_delay))
     .geom_point(alpha=0.1)
     .geom_smooth(method="lm", se=False, color="red")
 )
@@ -213,11 +227,14 @@ find the minimum, mean, and maximum `distance`, along with the number of
 distinct destinations.
 
 ```{python}
-rva.select(
-    dist_min = c.distance.min(),
-    dist_mean = c.distance.mean(),
-    dist_max = c.distance.max(),
-    n_dest = c.dest.n_unique()
+(
+    rva
+    .select(
+        dist_min = c.distance.min(),
+        dist_mean = c.distance.mean(),
+        dist_max = c.distance.max(),
+        n_dest = c.dest.n_unique()
+    )
 )
 ```
 
@@ -289,7 +306,8 @@ q14
 
 ```{python}
 (
-    ggplot(q14, aes(c.month, c.n_cum))
+    q14
+    .ggplot(aes(c.month, c.n_cum))
     .geom_line()
 )
 ```
@@ -299,7 +317,8 @@ and `boundary=0`.
 
 ```{python}
 (
-    ggplot(rva, aes(c.dep_delay))
+    rva
+    .ggplot(aes(c.dep_delay))
     .geom_histogram(binwidth=10, boundary=0)
 )
 ```
@@ -312,7 +331,8 @@ flights before the boxes are even computed.
 
 ```{python}
 (
-    ggplot(rva, aes(c.carrier, c.dep_delay))
+    rva
+    .ggplot(aes(c.carrier, c.dep_delay))
     .geom_boxplot()
     .coord_cartesian(ylim=(-30, 60))
 )
@@ -323,7 +343,8 @@ flights before the boxes are even computed.
 
 ```{python}
 (
-    ggplot(rva, aes(c.dep_delay))
+    rva
+    .ggplot(aes(c.dep_delay))
     .geom_histogram(binwidth=15, boundary=0)
     .facet_wrap("carrier")
 )
@@ -375,12 +396,16 @@ q20 = (
         value_name="minutes"
     )
 )
-q20.head(5)
+(
+    q20
+    .head(5)
+)
 ```
 
 ```{python}
 (
-    ggplot(q20, aes(c.delay_type, c.minutes))
+    q20
+    .ggplot(aes(c.delay_type, c.minutes))
     .geom_boxplot()
     .coord_cartesian(ylim=(-30, 60))
 )
