@@ -5,7 +5,7 @@ update.py
 Behavior:
 - Searches `nb289` and `nb389` for files matching `notebookXX.qmd`.
 - Parses the YAML header in each file for `title` and `solutions-release-date`.
-- Compares the release date (at 12:00 PM / noon) to the current system time.
+- Compares the release date (at that directory's release hour) to the current system time.
 - If the current time is past the release time (or if MAKE_ALL is True), the notebook is marked for release.
 - Updates the `_quarto.yml` file in the respective directory, specifically modifying 
   the `project.render` list and the `website.sidebar.contents` list.
@@ -28,6 +28,12 @@ import datetime
 # Set to True to forcefully release all notebooks (ignore dates). Useful when
 # testing a full render; leave it False so solutions appear on their own dates.
 MAKE_ALL = False
+
+# Hour of the day (24-hour clock) at which a notebook's solutions go live on its
+# release date. Each course keeps its own hour so solutions can appear after that
+# section has met; anything not listed here falls back to noon.
+RELEASE_HOURS = {"nb289": 9, "nb389": 9}
+DEFAULT_RELEASE_HOUR = 12
 
 # Quarto never deletes files it has already written, so a notebook dropped from
 # the render list keeps its old HTML sitting in the output directory, reachable
@@ -66,16 +72,15 @@ def _extract_metadata(content: str) -> tuple[str, str]:
     
     return title, rel_date
 
-def _should_release(date_str: str) -> bool:
-    """Determines if a notebook should be released based on noon of the given date."""
+def _should_release(date_str: str, hour: int = DEFAULT_RELEASE_HOUR) -> bool:
+    """Determines if a notebook should be released based on the given date and hour."""
     if MAKE_ALL:
         return True
         
     try:
         # Assuming date format is YYYY-MM-DD
         release_date = datetime.datetime.strptime(date_str, "%Y-%m-%d")
-        # Set release time to 12:00 PM (noon)
-        release_time = release_date.replace(hour=12, minute=0, second=0)
+        release_time = release_date.replace(hour=hour, minute=0, second=0)
         
         return datetime.datetime.now() >= release_time
     except ValueError:
@@ -254,7 +259,8 @@ def _prune_search_index(out_dir: str, unreleased: list, dry_run: bool = False) -
 # --- Core --------------------------------------------------------------------
 
 def process_directory(directory: str, dry_run: bool = False):
-    print(f"\n{Colors.HEADER}{Colors.BOLD}Scanning Directory: {directory}{Colors.ENDC}")
+    hour = RELEASE_HOURS.get(os.path.basename(os.path.normpath(directory)), DEFAULT_RELEASE_HOUR)
+    print(f"\n{Colors.HEADER}{Colors.BOLD}Scanning Directory: {directory}{Colors.ENDC} {Colors.OKCYAN}(releases at {hour:02d}:00){Colors.ENDC}")
     
     if not os.path.isdir(directory):
         print(f"{Colors.WARNING}Warning: Directory '{directory}' not found. Skipping.{Colors.ENDC}")
@@ -277,7 +283,7 @@ def process_directory(directory: str, dry_run: bool = False):
             content = f.read()
 
         title, rel_date = _extract_metadata(content)
-        will_release = _should_release(rel_date)
+        will_release = _should_release(rel_date, hour)
 
         if will_release:
             released_notebooks.append({
