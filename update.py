@@ -327,7 +327,15 @@ def main():
         process_directory(d, dry_run=dry_run)
 
     tail = "Dry run complete." if dry_run else "All updates complete!"
-    print(f"\n{Colors.OKGREEN}{Colors.BOLD}{tail}{Colors.ENDC}\n")
+    print(f"\n{Colors.OKGREEN}{Colors.BOLD}{tail}{Colors.ENDC}")
+
+    # This script only rewrites the _quarto.yml files; nothing here re-renders
+    # the notebooks, so the released solutions do not reach docs/ until Quarto
+    # runs over each directory.
+    print(f"\n{Colors.BOLD}Next: recompile the notebooks with{Colors.ENDC}")
+    for d in target_dirs:
+        print(f"  {Colors.OKCYAN}uv run quarto render {d}{Colors.ENDC}")
+    print()
 
 if __name__ == "__main__":
     main()
