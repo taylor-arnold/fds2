@@ -68,6 +68,7 @@ the third block, rewrite `category_members` exactly as in notebook35, rebuild
 the full `laureates` table, and print its shape.
 
 ```{python}
+#| tags: [noclear]
 def polite_get(url, params=None):
     session.cookies.clear()
     response = session.get(url, params=params, headers=headers)
@@ -78,6 +79,7 @@ def polite_get(url, params=None):
 ```
 
 ```{python}
+#| tags: [noclear]
 params = {
     "action": "query",
     "format": "json",
@@ -91,6 +93,7 @@ first_call.from_cache
 ```
 
 ```{python}
+#| tags: [noclear]
 def category_members(category):
     members = []
     params = {
@@ -140,6 +143,7 @@ the same way category members did, attach `doc_id` with `add_doc_id`, and print
 the shape of the resulting `links` table.
 
 ```{python}
+#| tags: [noclear]
 def add_doc_id(df, spine=None):
     spine = laureates if spine is None else spine
     return (
@@ -150,6 +154,7 @@ def add_doc_id(df, spine=None):
 ```
 
 ```{python}
+#| tags: [noclear]
 rows = []
 for page_id in laureates["page_id"]:
     params = {
@@ -190,6 +195,7 @@ laureate's page to find the explanation, and print the offending template's
 title.
 
 ```{python}
+#| tags: [noclear]
 links_internal = (
     links
     .join(
@@ -208,6 +214,7 @@ links_internal = (
 ```
 
 ```{python}
+#| tags: [noclear]
 (
     links_internal
     .group_by(c.doc_id)
@@ -218,6 +225,7 @@ links_internal = (
 ```
 
 ```{python}
+#| tags: [noclear]
 params = {
     "action": "query",
     "format": "json",
@@ -252,6 +260,7 @@ the 5 earliest-created articles. In the third block, print the 5 most recently
 created.
 
 ```{python}
+#| tags: [noclear]
 rows = []
 for page_id in laureates["page_id"]:
     params = {
@@ -292,6 +301,7 @@ revisions = (
 ```
 
 ```{python}
+#| tags: [noclear]
 created = (
     revisions
     .group_by(c.doc_id)
@@ -305,6 +315,7 @@ created = (
 ```
 
 ```{python}
+#| tags: [noclear]
 (
     created
     .tail(5)
@@ -331,6 +342,7 @@ and print the shape. In the second block, sum `views` per laureate and print
 the 5 highest totals.
 
 ```{python}
+#| tags: [noclear]
 from urllib.parse import quote
 
 pv_base = (
@@ -375,6 +387,7 @@ views = (
 ```
 
 ```{python}
+#| tags: [noclear]
 (
     views
     .group_by(c.doc_id)
@@ -400,6 +413,7 @@ far more interwiki reach (144 language editions, from question 7, against
 about why, and what does the plot itself leave unexplained?
 
 ```{python}
+#| tags: [noclear]
 hinton = (
     views
     .filter(c.doc_id == "Geoffrey Hinton")
@@ -429,6 +443,7 @@ laureate, and print the 6 laureates with the most language editions. In the
 second block, print the 6 with the fewest.
 
 ```{python}
+#| tags: [noclear]
 ids = laureates["page_id"].to_list()
 batches = [ids[i:(i + 50)] for i in range(0, len(ids), 50)]
 
@@ -469,6 +484,7 @@ lang_counts = (
 ```
 
 ```{python}
+#| tags: [noclear]
 (
     lang_counts
     .sort(c.n_langs)
@@ -498,6 +514,7 @@ own. What happened to each of the five, and why isn't "resolves to a real,
 unambiguous page" the same test as "belongs to this population"?
 
 ```{python}
+#| tags: [noclear]
 def resolve_titles(titles):
     rows = []
     params = {
@@ -571,6 +588,7 @@ short manifest recording the retrieval date, the population definition, and
 each table's row count, and print the manifest.
 
 ```{python}
+#| tags: [noclear]
 rows = []
 for page_id in laureates["page_id"]:
     params = {
@@ -597,6 +615,7 @@ texts = (
 
 ```{python}
 #| eval: false
+#| tags: [noclear]
 from pathlib import Path
 
 Path("data/turing").mkdir(parents=True, exist_ok=True)
@@ -610,6 +629,7 @@ langlinks.write_parquet("data/turing/langlinks.parquet")
 ```
 
 ```{python}
+#| tags: [noclear]
 #| eval: false
 from datetime import date
 
@@ -652,6 +672,7 @@ Why does pinning a revision ID matter more here than pinning a format version,
 even though the callout on API versioning treats them side by side?
 
 ```{python}
+#| tags: [noclear]
 latest = (
     revisions
     .filter(c.doc_id == "Donald Knuth")
@@ -675,6 +696,7 @@ pinned["timestamp"], pinned["slots"]["main"]["*"][:200]
 ```
 
 ```{python}
+#| tags: [noclear]
 params_v1 = {
     "action": "query",
     "format": "json",
