@@ -8,7 +8,7 @@ warnings.filterwarnings("ignore")
 
 ## Introduction
 
-It's commonly said in data science that most of our time is spent collecting and cleaning data. If we collect data in a clean format from the start, we can proceed directly to the exploration stage. Chapter 9 laid out the theory behind that claim: what makes a table tidy, and why. This chapter is about practice. Rather than the framework itself, it covers the decisions you actually face when building a dataset from scratch.
+It's commonly said in data science that most of our time is spent collecting and cleaning data. If we collect data in a clean format from the start, we can proceed directly to the exploration stage. @sec-restructure laid out the theory behind that claim: what makes a table tidy, and why. This chapter covers the practical decisions you face when building a dataset from scratch.
 
 Two sources are worth reading in full. Karl Broman and Kara Woo's "Data Organization in Spreadsheets" mixes practical advice with a discussion of the principles behind it [@ch02:broman2018data]. Catherine D'Ignazio and Lauren Klein's *Data Feminism* raises questions of bias, inequality, and power that come up constantly when collecting and organizing data, even in projects that look purely technical [@klein2020feminism].
 
@@ -16,7 +16,7 @@ This chapter gives a concise set of recommendations for organizing and storing d
 
 ## What Tables?
 
-The initial step in designing storage for tabular data is deciding what different tables we will need. As we saw in Chapter 9 when discussing pivots and unpivots, the most important characteristic that determines the structure of a specific table is the unit of observation. Recall that the unit of observation can be a simple value (such as `day` or `plant`) or a combination of values (such as `day × plant`). So, we need to decide which simple and complex units of observation we need for our specific application. There are two general principles that we should keep in mind in this process:
+The initial step in designing storage for tabular data is deciding what different tables we will need. As we saw in @sec-restructure when discussing pivots and unpivots, the most important characteristic that determines the structure of a specific table is the unit of observation. Recall that the unit of observation can be a simple value (such as `day` or `plant`) or a combination of values (such as `day × plant`). So, we need to decide which simple and complex units of observation we need for our specific application. There are two general principles that we should keep in mind in this process:
 
 - **prefer longer to wider**: When we have a situation where we need to decide between a longer and a wider format, prefer the longer format. It is easier to extend, easier to check, and there is usually only one long format instead of multiple possible wide ones.
 - **respect unit of observation**: When filling in data in a table, a general rule is that we only record data that describes the entire unit of observation. This is always the case for a simple unit of observation, but can easily be broken when we have a complex key. 
@@ -76,13 +76,13 @@ If the file has multiple sheets and you don't specify `sheet_name`, Polars reads
 
 CSV files are just as common and, because they carry no information about types or encoding, tend to break in more varied ways. The function `pl.read_csv()` has a long list of arguments to handle this. In practice, a handful come up over and over:
 
-- **`separator`**: CSV technically stands for comma-separated values, but plenty of files use a semicolon, a tab, or a pipe instead, often because they were exported from a system configured for a locale where the comma is a decimal separator. Set `separator=";"` (or whatever character the file actually uses) to fix this.
+- **`separator`**: CSV technically stands for comma-separated values, but plenty of files use a semicolon, a tab, or a pipe instead, often because they were exported from a system configured for a locale where the comma is a decimal separator. Set `separator=";"` (or whatever character the file uses) to fix this.
 - **`encoding`**: Polars assumes UTF-8 by default. Older files, or files exported from Windows programs, are often encoded as `"windows-1252"` or `"latin1"` instead. Reading a file with the wrong encoding usually produces garbled characters rather than an outright error, so this one is easy to miss until you spot a name like "JosÃ©" where "José" should be.
-- **`skip_rows`**: Some export tools add a title, a generation date, or a logo caption above the actual header row. Setting `skip_rows` to the number of lines to discard gets you to the real start of the table.
+- **`skip_rows`**: Some export tools add a title, a generation date, or a logo caption above the header row. Setting `skip_rows` to the number of lines to discard gets you to the real start of the table.
 - **`null_values`**: Missing data is not always blank. Surveys and legacy databases frequently use a placeholder such as `"NA"`, `"N/A"`, `"-99"`, or `"."`. Passing a list of these strings to `null_values` tells Polars to treat them as missing rather than as literal text or, worse, as numbers.
 - **`schema_overrides`**: Polars guesses each column's type from its contents, and the guess is sometimes wrong in a way that loses information. A ZIP code column full of five-digit numbers gets read as an integer, which silently drops the leading zero from "02138." Passing `schema_overrides={"zip_code": pl.Utf8}` forces that column to stay text.
 
-Putting several of these together on a single file is normal, not exceptional:
+A single file often needs several of these at once:
 
 ```{python}
 #| eval: false
@@ -96,7 +96,7 @@ survey = pl.read_csv(
 )
 ```
 
-The messy CSV file from @sec-types is a good one to revisit here. It is not a contrived example; it is closer to what you should expect from real, second-hand data than the clean files we have been using for most of this book. Fixing it draws on the same skills built up across the last several chapters: recognizing the unit of observation to know which rows belong together, reshaping the result into a tidy layout once it loads, and checking the loaded data frame against the grammar-of-graphics tools from earlier chapters to confirm that a column of what looked like numbers didn't quietly load as text. Reading an imperfect file is rarely a single function call. It's a short investigation, and everything else in this book is what you investigate with.
+The messy CSV file of Massachusetts cities from @sec-types is a good one to revisit here. It is closer to what you should expect from real, second-hand data than the clean files we have been using for most of this book. Its problems are type problems, and most of them can be fixed while reading the file. Setting `schema_overrides={"zip": pl.Utf8}` keeps the ZIP codes as text, so Boston stays 02108 instead of losing its leading zero, which no later cast can restore. Setting `null_values=["n/a"]` turns Pittsfield's placeholder into a missing value, so the `pop` column loads as integers instead of text. The `founded` column still arrives as text and can be converted with `.str.to_date()`, as in @sec-types. Whatever arguments you use, check the schema of the loaded data frame to confirm that a column of what looked like numbers didn't load as text. Reading an imperfect file is rarely a single function call; it is usually a short investigation that uses the tools from the rest of this book.
 
 ## Data Dictionary
 
@@ -139,7 +139,7 @@ Above, we described the data dictionary as a tabular dataset. It is also possibl
 
 ## Extensions
 
-We have provided a consolidation of the information from the research papers mentioned in the introduction, focusing on issues of particular concern for humanities data collection. The first places to look for more information are the papers mentioned above: Karl Broman and Kara Woo's "Data Organization in Spreadsheets" [@ch02:broman2018data] and Catherine D'Ignazio and Lauren Klein's *Data Feminism* [@klein2020feminism]. Hadley Wickham's "Tidy Data," discussed in Chapter 9, is also worth a second look here, since its theoretical framework underlies much of the practical advice above [@ch02:hadley2014tidy]. Another source for thinking about data dictionaries, data documentation, and data publishing is the "Datasheets for Datasets" paper [@gebru2021datasheets]. While the paper focuses on predictive modeling, it offers useful examples of the documentation needed when publishing large datasets and provides a critical lens on how choices made during data collection fundamentally affect subsequent data analyses.
+We have provided a consolidation of the information from the research papers mentioned in the introduction, focusing on issues of particular concern for humanities data collection. The first places to look for more information are the papers mentioned above: Karl Broman and Kara Woo's "Data Organization in Spreadsheets" [@ch02:broman2018data] and Catherine D'Ignazio and Lauren Klein's *Data Feminism* [@klein2020feminism]. Hadley Wickham's "Tidy Data," discussed in @sec-restructure, is also worth a second look here, since its theoretical framework underlies much of the practical advice above [@ch02:hadley2014tidy]. Another source for thinking about data dictionaries, data documentation, and data publishing is the "Datasheets for Datasets" paper [@gebru2021datasheets]. While the paper focuses on predictive modeling, it offers useful examples of the documentation needed when publishing large datasets and provides a critical lens on how choices made during data collection fundamentally affect subsequent data analyses.
 
 The kinds of data that need to be collected and how to collect them ultimately depend on one's underlying research questions. The process of translating a research question into a quantitative framework is outside the scope of this text, but it is an important consideration when working with data to address research questions in the humanities. There are many good guides to research design, though the majority focus on either scientific, hypothesis-driven quantitative designs or purely qualitative data collection. We recommend a few sources that sit at the intersection of these approaches.
 

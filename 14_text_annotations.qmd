@@ -29,9 +29,9 @@ docs = pl.read_csv("data/wiki_uk_authors_text.csv")
 
 Every dataset we have encountered so far in this book has consisted of structured observations: rows with well-defined columns containing numbers, categories, or dates. A large share of recorded information, though, exists only as unstructured text. Medical records pair coded diagnoses with free-text physician notes, and customer feedback arrives as open-ended survey responses. Archives hold centuries of letters, newspapers, and books that no one ever entered into a spreadsheet.
 
-Working with textual data requires a different approach than working with numbers. A sentence is not just a sequence of characters; it has grammar, and the meaning of each word depends on the words around it. The word "bank" means something different in "river bank" than in "bank account". The phrase "not bad" is usually a mild compliment even though it contains a negation. These subtleties make text rich, and they also make it hard to analyze computationally.
+Working with textual data requires a different approach than working with numbers. A sentence has grammar, and the meaning of each word depends on the words around it. The word "bank" means something different in "river bank" than in "bank account". The phrase "not bad" is usually a mild compliment even though it contains a negation. These subtleties make text rich, and they also make it hard to analyze computationally.
 
-This is the first of two chapters on textual data. Here, we introduce tools for turning unstructured text into structured tables that can be analyzed with the techniques developed throughout this book. Once text has been converted into tables of tokens, counts, and annotations, familiar operations such as filtering, grouping, and joining let us ask questions about language. What words distinguish one author from another? What grammatical patterns characterize a corpus? How is a particular word actually used in context? In the next chapter (@sec-text-vec), we build on the annotations created here to represent entire documents as numeric vectors, which lets us measure similarity between documents and compare collections across languages.
+This is the first of two chapters on textual data. Here, we introduce tools for turning unstructured text into structured tables that can be analyzed with the techniques developed throughout this book. Once text has been converted into tables of tokens, counts, and annotations, familiar operations such as filtering, grouping, and joining let us ask questions about language. What words distinguish one author from another? What grammatical patterns characterize a corpus? How is a particular word used in context? In the next chapter (@sec-text-vec), we build on the annotations created here to represent entire documents as numeric vectors, which lets us measure similarity between documents and compare collections across languages.
 
 We will use spaCy, a modern natural language processing library, to do the linguistic work. SpaCy provides pre-trained models that tokenize text, identify parts of speech, recognize named entities, and parse grammatical structure. Our job is to take the output of these models and reshape it into forms suitable for analysis. To keep that reshaping out of the way, this book's `funs` module includes a small utility class called `DSText` whose functions wrap the spaCy calls we need. Before using each one, we will look at the code behind it so that none of the steps feel like magic.
 
@@ -67,7 +67,7 @@ The metadata table contains structured information about each author: birth and 
 
 Natural language processing transforms raw text into structured annotations. The `DSText.process` function sends each document through spaCy's processing pipeline, which performs several analyses in sequence: tokenization (splitting text into words and punctuation), part-of-speech tagging (identifying nouns, verbs, adjectives), lemmatization (reducing words to their base forms), named entity recognition (identifying people, places, organizations), and dependency parsing (analyzing grammatical relationships).
 
-It is worth pausing to see what the wrapper actually does before running it. At its core, the function is nothing more than three nested loops: one over documents, one over the sentences within a document, and one over the tokens within a sentence. Each token becomes a dictionary, and the list of dictionaries becomes a Polars DataFrame. A lightly trimmed version of the code looks like this (shown for reference, not run):
+Before running the wrapper, we look at what it does. The function is three nested loops: one over documents, one over the sentences within a document, and one over the tokens within a sentence. Each token becomes a dictionary, and the list of dictionaries becomes a Polars DataFrame. A lightly trimmed version of the code looks like this (shown for reference, not run):
 
 ```python
 tokens_list = []
@@ -92,9 +92,9 @@ for row in docs_df.iter_rows(named=True):            # each document
 pl.DataFrame(tokens_list)
 ```
 
-Two details deserve a comment. First, spaCy attributes that end in an underscore, such as `lemma_` and `pos_`, return human-readable strings; the same attributes without the underscore return integer codes that spaCy uses internally. Second, spaCy numbers tokens from the start of the entire document (`token.i`), while our table numbers them within each sentence. The wrapper subtracts the sentence's starting position so that `tid` and `head_idx` share the same coordinate system, and it points the root token of each sentence at itself. This bookkeeping is exactly what makes the join-based analyses later in the chapter possible.
+Two details deserve a comment. First, spaCy attributes that end in an underscore, such as `lemma_` and `pos_`, return human-readable strings; the same attributes without the underscore return integer codes that spaCy uses internally. Second, spaCy numbers tokens from the start of the entire document (`token.i`), while our table numbers them within each sentence. The wrapper subtracts the sentence's starting position so that `tid` and `head_idx` share the same coordinate system, and it points the root token of each sentence at itself. The join-based analyses later in the chapter depend on this bookkeeping.
 
-The actual function stores a few extra token attributes beyond those shown above, but the structure is the same. We now run it on the full set of documents; this takes a minute or two because every page has to pass through the entire pipeline.
+The full function stores a few extra token attributes beyond those shown above, but the structure is the same. We now run it on the full set of documents; this takes a minute or two because every page has to pass through the entire pipeline.
 
 ```{python}
 anno = DSText.process(docs, nlp)
@@ -150,7 +150,7 @@ We can use a similar technique to learn about the contents of each individual do
 )
 ```
 
-The output shows many connections between adjectives and the authors. Here, the connections again fall roughly into two groups. Some of the adjectives are fairly generic (such as "more", "other", and "many") and probably say more about the people writing the pages than about the subjects themselves. Other adjectives provide contextual information about each of the authors. For example, several selected adjectives describe an author's work, such as "victorian" for Alfred, Lord Tennyson and Oscar Wilde, "metaphysical" for John Donne, and "supernatural" for Ann Radcliffe. While it is good to see expected relationships to demonstrate the data and techniques are functioning properly, it is also valuable when computational techniques point out the unexpected.
+The output shows many connections between adjectives and the authors. Here, the connections again fall roughly into two groups. Some of the adjectives are fairly generic (such as "more", "other", and "many") and probably say more about the people writing the pages than about the subjects themselves. Other adjectives provide contextual information about each of the authors. For example, several selected adjectives describe an author's work, such as "victorian" for Alfred, Lord Tennyson and Oscar Wilde, "metaphysical" for John Donne, and "supernatural" for Ann Radcliffe. Expected relationships like these show that the data and techniques are working, but computational techniques are also valuable when they point out the unexpected.
 
 The frequent-adjective lists also expose a limitation of raw counts: the same generic words rise to the top of nearly every page. In the next chapter (@sec-text-vec) we introduce TF-IDF, a weighting scheme built to surface the vocabulary that distinguishes each document from the rest of the collection.
 
@@ -160,7 +160,7 @@ So far we have analyzed individual words in isolation. But meaning often emerges
 
 A unigram is a single token (what we have been working with). A bigram is a pair of adjacent tokens. A trigram is a sequence of three tokens. In general, an n-gram captures local word order, which is lost when we treat documents as unordered collections of words.
 
-Constructing n-grams requires us to look at tokens in context. The window functions that we introduced in @sec-window allow us to access neighboring rows, which we can use to pair each token with the tokens that follow it. In @sec-temporal, we shifted page sizes to compare successive Wikipedia revisions; here, exactly the same `.shift()` and `.over()` methods align adjacent words on the same row. This is a nice illustration of the point made at the start of the temporal chapter: any dataset with a meaningful row ordering can be treated with temporal tools, and a text read token-by-token is exactly such a dataset.
+Constructing n-grams requires us to look at tokens in context. The window functions that we introduced in @sec-window allow us to access neighboring rows, which we can use to pair each token with the tokens that follow it. In @sec-temporal, we shifted page sizes to compare successive Wikipedia revisions; here, exactly the same `.shift()` and `.over()` methods align adjacent words on the same row. The temporal chapter argued at the outset that any dataset with a meaningful row ordering can be treated with temporal tools, and a text read token by token is such a dataset.
 
 ```{python}
 bigrams = (
@@ -265,7 +265,7 @@ And, finally, we can combine the data together to get the PMI scores for each bi
 )
 ```
 
-The high-PMI bigrams tell a different story than the high-frequency bigrams. These are phrases where the component words strongly predict each other: proper names, technical terms, and domain-specific expressions. Many of these would be good candidates for treating as single units in downstream analysis. Notice the `filter(c.bigram_count >= 5)` step; without a minimum count, PMI is dominated by pairs of rare words that happen to appear together once, which are usually noise rather than genuine collocations.
+The high-PMI bigrams tell a different story than the high-frequency bigrams. These are phrases where the component words strongly predict each other: proper names, technical terms, and domain-specific expressions. Many of these would be good candidates for treating as single units in downstream analysis. Notice the `filter(c.bigram_count >= 5)` step; without a minimum count, PMI is dominated by pairs of rare words that happen to appear together once, which are usually noise.
 
 We can extend the same logic to trigrams by shifting twice:
 
@@ -306,7 +306,7 @@ Named entity recognition (NER) identifies and classifies proper nouns and other 
 
 Each token that is part of a named entity receives a type label. Multi-word entities like "United Kingdom" have the same label on each constituent token. To work with complete entities rather than individual tokens, we need to group consecutive tokens with the same entity type.
 
-This is where the `ent_iob` column earns its place in the table. A "B" marks the first token of each entity, so taking a cumulative sum of the indicator `c.ent_iob == "B"` within each document assigns every token of the first entity the id 1, every token of the second entity the id 2, and so on. Grouping by that id and joining the tokens back together with `str.join` reconstructs the full entity text.
+The `ent_iob` column makes this possible. A "B" marks the first token of each entity, so taking a cumulative sum of the indicator `c.ent_iob == "B"` within each document assigns every token of the first entity the id 1, every token of the second entity the id 2, and so on. Grouping by that id and joining the tokens back together with `str.join` reconstructs the full entity text.
 
 ```{python}
 entities = (
@@ -379,7 +379,7 @@ people = (
 )
 ```
 
-Pairs of people who frequently appear together across documents may have historical connections: collaborators, rivals, members of the same literary movement, or subjects of comparative study. In @sec-networks we will see that a table of pairs like this one is exactly an edge list, and the co-occurrence relationships extracted here can be analyzed as a network in their own right.
+Pairs of people who frequently appear together across documents may have historical connections: collaborators, rivals, members of the same literary movement, or subjects of comparative study. In @sec-networks we will see that a table of pairs like this one is an edge list, and the co-occurrence relationships extracted here can be analyzed as a network in their own right.
 
 ## Dependency Parsing
 
@@ -464,7 +464,7 @@ The adjective-noun pairs give a compact picture of how things get described in t
 
 ## Keyword in Context (KWIC)
 
-Sometimes we want to see how a specific word is used across the corpus. A *concordance* or *keyword in context* (KWIC) display shows each occurrence of a target word along with the words that surround it. The technique predates computers by centuries and is still one of the best ways to check what a word is actually doing in a text, since counts and scores can only ever summarize.
+Sometimes we want to see how a specific word is used across the corpus. A *concordance* or *keyword in context* (KWIC) display shows each occurrence of a target word along with the words that surround it. The technique predates computers by centuries. Counts and scores can only summarize, so a concordance is still one of the best ways to check how a word is used in a text.
 
 The logic is implemented in the `DSText.kwic` function. It finds every row whose lemma matches the keyword, and for each match it pulls the tokens from the same sentence whose `tid` falls within a fixed window on either side. The core of the code looks like this (shown for reference, not run):
 
@@ -492,7 +492,7 @@ Because the window is defined by `sid` and `tid`, the context never crosses a se
 DSText.kwic(anno, "poetry", max_num=15, window=5)
 ```
 
-The KWIC display shows patterns that aggregate statistics miss. We can see the actual phrases in which a word appears, the grammatical constructions it participates in, and the semantic contexts that surround it. Is "poetry" typically the subject of a sentence or the object? What verbs and adjectives accompany it? Whenever a frequency table suggests that a word matters, a quick concordance is the cheapest way to check what that word is really doing.
+The KWIC display shows patterns that aggregate statistics miss: the phrases in which a word appears, the grammatical constructions it takes part in, and the surrounding context. Is "poetry" typically the subject of a sentence or the object? What verbs and adjectives accompany it? Whenever a frequency table suggests that a word matters, a quick concordance is the cheapest way to check how it is used.
 
 ## Complexity Metrics
 
@@ -611,6 +611,6 @@ The plot lets us check whether the two aspects of style move together. Pages wri
 
 In this chapter, we converted raw text into a structured annotation table and analyzed it using the Polars operations developed throughout this book. Each row of the annotation table is a token labeled with its lemma, part of speech, entity type, and grammatical role, and this single table supported a wide range of analyses: frequency counts by part of speech, n-grams and PMI-based collocations, named entities and their co-occurrences, grammatical patterns extracted from the dependency parse, keyword-in-context displays, and stylistic complexity metrics. Along the way we opened up the `DSText` wrapper functions used here to see that each one is built from the same loops, chains, and joins we have been writing throughout this book.
 
-Throughout the chapter, our unit of analysis remained the individual token, or a short window of tokens. In the next chapter, we shift perspective: instead of asking about words within documents, we ask about whole documents within a collection. That change of scale requires a new mathematical representation, the document vector, and it is the bridge between textual data and the numeric modeling tools that occupy the rest of the book.
+Throughout the chapter, our unit of analysis remained the individual token, or a short window of tokens. In the next chapter, we shift perspective: instead of asking about words within documents, we ask about whole documents within a collection. That change of scale requires a new mathematical representation, the document vector, which connects textual data to the numeric modeling tools that occupy the rest of the book.
 
 ## References {-}

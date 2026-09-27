@@ -33,7 +33,7 @@ A *foreign key* is a primary key from one table that appears in another table. F
 
 ## Joining by Relation
 
-We will start with an abstract example before turning to a specific example using actual DataFrames in Python. Assume we have two tables, `table_one` and `table_two`. The column `key_col` appears in both tables: it is a primary key in `table_two` and a foreign key in `table_one`. This means it has a single unique row associated with it in `table_two` but possibly many instances in `table_one`.
+We will start with an abstract example before turning to a specific example using DataFrames in Python. Assume we have two tables, `table_one` and `table_two`. The column `key_col` appears in both tables: it is a primary key in `table_two` and a foreign key in `table_one`. This means it has a single unique row associated with it in `table_two` but possibly many instances in `table_one`.
 
 To join the information in these two tables, we use the `.join()` method of the table containing the foreign key. The arguments include the second dataset and the name of the key used to combine the tables.
 
@@ -91,11 +91,11 @@ Or, if the key has different names in the two tables, we can describe them with 
 )
 ```
 
-Note that Python will let you join on any set of columns that match between the two tables, whether or not either column is actually a primary key. When the join column is not unique in the right-hand table, the result can be surprising, and possibly very large. We'll see exactly what that looks like, and how to catch it before it happens, in @sec-diagnosing-joins below. Avoid joins that do not follow the pattern here (foreign key in the left table and a primary key in the right table).
+Note that Python will let you join on any set of columns that match between the two tables, whether or not either column is a primary key. When the join column is not unique in the right-hand table, the result can be surprising, and possibly very large. We'll see what that looks like, and how to catch it before it happens, in @sec-diagnosing-joins below. Avoid joins that do not follow the pattern here (foreign key in the left table and a primary key in the right table).
 
 ## Join Examples
 
-The code outline in the previous section should make more sense once we see examples using actual datasets. To do this, we need multiple datasets that we can join together. We will create a smaller version of the `country` dataset that contains only two columns, which makes it easier to view the results without scrolling. We also load a dataset of country borders, where each row shows the relationship between a country and one of its neighbors.
+The code outline in the previous section should make more sense once we see examples using real datasets. To do this, we need multiple datasets that we can join together. We will create a smaller version of the `country` dataset that contains only two columns, which makes it easier to view the results without scrolling. We also load a dataset of country borders, where each row shows the relationship between a country and one of its neighbors.
 
 ```{python}
 c_sml = (
@@ -115,7 +115,7 @@ We can use a relational join to add the Gini coefficient for the country referen
 )
 ```
 
-Notice that the Gini coefficient of the base country has been added to the data. The first five rows all correspond to borders with Afghanistan and therefore the same value of the Gini coefficient (27.8) is duplicated for each of the rows. Similarly, the last four rows correspond to Zimbabwe and repeat the Gini coefficient value of 50.3 in each. As with other data methods we use, the `.join()` method returns a new dataset without modifying the original data. We would need to save the output if we wanted to work further with the results.
+Notice that the Gini coefficient of the base country has been added to the data. The first rows all correspond to Afghanistan's six borders, and therefore the same value of the Gini coefficient (27.8) is duplicated for each of them. Similarly, the last four rows correspond to Zimbabwe and repeat the Gini coefficient value of 50.3 in each. As with other data methods we use, the `.join()` method returns a new dataset without modifying the original data. We would need to save the output if we wanted to work further with the results.
 
 The DataFrame after the join has only 641 observations compared to the 829 observations in the original. The reason is that our `country` data only contains those countries for which we have full economic data. This means that some of the countries in `border` do not have an entry in `c_sml`. The default relational join is an inner join, so these missing corresponding rows are removed from the result. Changing to a left join restores the DataFrame to the same number of observations as the original `border` data.
 
@@ -160,11 +160,11 @@ Filtering joins are also a quick way to check data quality. Above, we saw that j
 )
 ```
 
-Any rows that show up here are not explained by missing economic data. They are `iso` codes in the border dataset that don't correspond to any row in the country table at all. In a real project, this is exactly the kind of thing you'd want to chase down: is `border` including dependent territories or disputed regions that `country` deliberately excludes, or is there a typo in one of the codes? A semi-join answers the mirror-image question. `border.join(country, on=c.iso, how="semi")` would keep only the rows of `border` whose `iso` value *does* have a match, without adding any of `country`'s columns. That is useful when you want to filter one table down to "things that exist elsewhere" and nothing more.
+Any rows that show up here are not explained by missing economic data. They are `iso` codes in the border dataset that don't correspond to any row in the country table at all. In a real project, you would want to chase these down: is `border` including dependent territories or disputed regions that `country` deliberately excludes, or is there a typo in one of the codes? A semi-join answers the mirror-image question. `border.join(country, on=c.iso, how="semi")` would keep only the rows of `border` whose `iso` value *does* have a match, without adding any of `country`'s columns. That is useful when you want to filter one table down to "things that exist elsewhere" and nothing more.
 
 ## Diagnosing Bad Joins {#sec-diagnosing-joins}
 
-We said above that joining on a column that isn't a primary key in the right table can produce surprising, and possibly very large, results. Let's see exactly what that looks like, because this is the single join bug you are most likely to write yourself.
+We said above that joining on a column that isn't a primary key in the right table can produce surprising, and possibly very large, results. This is the join bug you are most likely to write yourself, so we look at it in detail.
 
 Suppose `c_sml` had gotten corrupted somewhere upstream, perhaps because two data sources were merged carelessly, and ended up with two rows for Afghanistan instead of one. We can simulate that here by adding a duplicate row.
 
@@ -187,7 +187,7 @@ Now watch what happens when we join `border` to this corrupted table instead of 
 
 Recall that the first rows of `border` all correspond to Afghanistan; there are six of them. Each one of those rows now matches *two* rows in `bad_c_sml` instead of one, so the join produces six extra rows, 647 instead of 641, all of them duplicate copies of Afghanistan's borders. Nothing in the code raised an error. Polars did exactly what we asked: it matched every row in the left table against every matching row in the right table, however many there were. If this had been a real dataset and we hadn't been watching the row count carefully, we might not have noticed the duplication at all, especially in a larger table where the extra rows blend in.
 
-This is why it pays to check the key column *before* joining, rather than after. Back in @sec-group we used `n_unique()` alongside `len()` to check whether a column had repeated values; the same check tells us immediately whether a table is safe to use as the right-hand side of a join.
+It pays to check the key column *before* joining. Back in @sec-group we used `n_unique()` alongside `len()` to check whether a column had repeated values; the same check tells us immediately whether a table is safe to use as the right-hand side of a join.
 
 ```{python}
 (
@@ -205,7 +205,7 @@ This is why it pays to check the key column *before* joining, rather than after.
 )
 ```
 
-The first check passes: `iso` is a genuine primary key in `c_sml`, one row per country. The second fails, which tells us, before we've joined anything, that `bad_c_sml` will multiply rows if we use it as the right table. Get in the habit of running this check on the right-hand table any time you're not certain the join key is unique. It is a short pipeline and it catches the bug at its source instead of downstream, where a silently inflated row count can quietly throw off every summary statistic you compute afterward.
+The first check passes: `iso` is a primary key in `c_sml`, one row per country. The second fails, which tells us, before we've joined anything, that `bad_c_sml` will multiply rows if we use it as the right table. Get in the habit of running this check on the right-hand table any time you're not certain the join key is unique. The check is short, and it catches the bug before a silently inflated row count can throw off every summary statistic you compute afterward.
 
 ## Conditional Joins
 
@@ -239,7 +239,7 @@ The function `.join_asof` combines two datasets by matching each row in the firs
 
 The original motivation for the `.join_asof` method was to join two time-series datasets. The idea is that we might want the current (most recent) value from one table relative to another. Hence the function's name and the fact that it uses the `backward` strategy by default to find the nearest value in the second dataset that is less than or equal to (i.e., no later than) the value in the first. You can set the strategy to `forward` to look in the other direction, or to `nearest` to find the closest value. You can also add additional keys with the `by`, `by_left`, or `by_right` options; these keys must match exactly before performing the nearest search. The tables must be pre-sorted by the join key(s) for the function to work.
 
-If we need to do more exotic joins between two tables, we can use the `.join_where` method. It takes one or more expressions in the same format used by the `.filter` method to specify exactly which pairs of rows to keep in the joined dataset. To refer to columns that share the same name in both datasets, use the `_right` suffix to indicate the second dataset. Below is an example that finds all pairs of countries in Africa and Asia where the difference in the Gini coefficient is less than 5.
+If we need to do more exotic joins between two tables, we can use the `.join_where` method. It takes one or more expressions in the same format used by the `.filter` method to specify which pairs of rows to keep in the joined dataset. To refer to columns that share the same name in both datasets, use the `_right` suffix to indicate the second dataset. Below is an example that finds all pairs of countries in Africa and Asia where the difference in the Gini coefficient is less than 5.
 
 ```{python}
 (
@@ -251,7 +251,7 @@ If we need to do more exotic joins between two tables, we can use the `.join_whe
 )
 ```
 
-This method can be slow because it needs to manually check every combination of rows in the two datasets. However, it is very powerful and useful when combining two reasonably sized datasets in a complex way. Notice that we could obtain the same result by starting with a cross join (which returns every combination of rows) and then applying a filter. The benefit of the `.join_where` is that it avoids having to store in memory all combinations of non-matching rows by effectively combining the cross join and filtering into a single step.
+This method can be slow because it needs to manually check every combination of rows in the two datasets. However, it is very powerful and useful when combining two reasonably sized datasets in a complex way. Notice that we could obtain the same result by starting with a cross join (which returns every combination of rows) and then applying a filter. The benefit of the `.join_where` is that it avoids having to store in memory all combinations of non-matching rows by combining the cross join and filtering into a single step.
 
 ## Attaching a Group Summary
 
@@ -282,4 +282,4 @@ region_avg = (
 )
 ```
 
-Both produce the same output column. `.over()` is more concise and is the natural choice when the summary is the only thing you need. The agg-then-join version is worth reaching for when you need the intermediate summary table for its own sake (to inspect it, plot it, or join it against something else), since `.group_by().agg()` gives you that table directly, while `.over()` never materializes it at all.
+Both produce the same output column. `.over()` is more concise and is the natural choice when the summary is the only thing you need. The agg-then-join version is worth reaching for when you need the intermediate summary table for its own sake (to inspect it, plot it, or join it against something else), since `.group_by().agg()` gives you that table directly, while `.over()` never creates it.

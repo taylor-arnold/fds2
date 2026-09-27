@@ -25,13 +25,13 @@ birds = pl.read_parquet("data/birds10.parquet")
 
 ## Introduction
 
-Images are among the most ubiquitous forms of data in the modern world. Every day, billions of photographs are captured on smartphones, satellites orbit the Earth generating terabytes of imagery, medical scanners produce detailed views of the human body, and security cameras record countless hours of video. The ability to extract meaningful information from these images has become one of the most important capabilities in data science.
+Images are among the most common forms of data. Every day, billions of photographs are captured on smartphones, satellites generate terabytes of imagery, medical scanners produce detailed views of the human body, and security cameras record countless hours of video. Extracting information from these images has become a major part of data science.
 
-At their core, digital images are simply arrays of numbers. Each pixel in an image stores numerical values representing color or intensity. Yet from these raw numbers emerge faces, objects, scenes, and stories. The challenge of image analysis lies in bridging this gap between low-level pixel values and high-level semantic meaning. How do we go from a grid of numbers to understanding that an image contains a bird, or that a person in a photograph is smiling, or that a tumor is present in a medical scan?
+Digital images are arrays of numbers: each pixel stores values representing color or intensity. The challenge of image analysis is to get from these low-level pixel values to what the image depicts. How do we go from a grid of numbers to understanding that an image contains a bird, or that a person in a photograph is smiling, or that a tumor is present in a medical scan?
 
 In this chapter, we explore several approaches to extracting information from images. We begin with basic properties that can be computed directly from pixel values, including brightness and color distributions. These simple features, while limited in their semantic power, provide useful descriptors for large collections of images and can reveal interesting patterns in visual datasets. We then turn to embeddings produced by large pre-trained neural networks, which represent each image as a dense vector in the same spirit as the document vectors of @sec-text-vec. Once images are points in a vector space, the geometric toolkit we developed for text carries over directly: we can map an entire photo collection with UMAP, measure similarities with dot products, and even classify images into categories described in plain English, all without training a model of our own.
 
-The progression in this chapter mirrors the broader evolution of computer vision as a field. Early approaches relied on hand-crafted features computed from pixel statistics. Modern methods use neural networks to learn relevant features directly from data. Both perspectives remain valuable: simple pixel-based features are interpretable, fast to compute, and often sufficient for exploratory analysis, while deep learning models offer unprecedented accuracy for complex recognition tasks. Understanding both approaches equips you to choose the right tool for each analytical situation.
+The progression in this chapter mirrors the broader evolution of computer vision as a field. Early approaches relied on hand-crafted features computed from pixel statistics. Modern methods use neural networks to learn relevant features directly from data. Both remain useful. Simple pixel-based features are interpretable, fast to compute, and often sufficient for exploratory analysis, while deep learning models are far more accurate on complex recognition tasks.
 
 ## Image Arrays
 
@@ -41,7 +41,7 @@ We will work with the birds image dataset, which contains photographs of ten spe
 birds
 ```
 
-The dataset contains a `filepath` column pointing to each image file, a `label` column identifying the species, and an `index` column giving a row number that can be used to link results back to individual files. It also contains two columns of precomputed numbers, `vit` and `siglip`, which we will set aside until the second half of the chapter. This structure, with metadata in a table and actual image files stored separately, is a common pattern for working with image datasets. It allows us to use familiar tabular data tools for filtering, grouping, and summarizing while keeping the image files in their native format.
+The dataset contains a `filepath` column pointing to each image file, a `label` column identifying the species, and an `index` column giving a row number that can be used to link results back to individual files. It also contains two columns of precomputed numbers, `vit` and `siglip`, which we will set aside until the second half of the chapter. This structure, with metadata in a table and the image files stored separately, is a common pattern for working with image datasets. It allows us to use familiar tabular data tools for filtering, grouping, and summarizing while keeping the image files in their native format.
 
 Before turning to the pixel data, let's look at one example of each of the ten species. Examining the data visually gives us intuition about which categories might be easy or difficult to distinguish from one another.
 
@@ -137,7 +137,7 @@ Despite this limitation, brightness can reveal interesting patterns across categ
 )
 ```
 
-The species are ordered here by their mean brightness, which is what the sort by `c.brightness.mean().over(c.label)` arranges before the plot is drawn. Ostrich images are the brightest on average, followed by robins and swallows, and peacock images are the darkest. Why might this be? Consider how each species is typically photographed. Ostriches are often captured outdoors in bright savanna settings, while peacocks with their dark iridescent plumage are sometimes photographed against dramatic dark backgrounds that emphasize their colorful displays. The brightness distribution reflects not just the birds themselves but the entire photographic context.
+The species are ordered here by their mean brightness, which is what the sort by `c.brightness.mean().over(c.label)` arranges before the plot is drawn. Ostrich images are the brightest on average, followed by robins and swallows, and peacock images are the darkest. The likely explanation is how each species is typically photographed. Ostriches are often captured outdoors in bright savanna settings, while peacocks with their dark iridescent plumage are sometimes photographed against dark backgrounds that emphasize their colorful displays. The brightness distribution reflects the photographic context as well as the birds.
 
 ## Hue, Saturation, and Value
 
@@ -183,7 +183,7 @@ $$
 
 The value component is simply the maximum RGB value. Saturation measures how much the color differs from gray by comparing the range of RGB values to the maximum. Hue is computed by determining which RGB component is dominant and calculating the position around the color wheel.
 
-In practice we never write any of this out ourselves. The formulas are here so that the three components mean something concrete rather than arriving as three unexplained numbers; OpenCV applies them for us with a single function call, and there is no reason to memorize them.
+In practice OpenCV applies these formulas for us with a single function call, and there is no need to memorize them. They are given here so that the three components have a concrete meaning.
 
 OpenCV provides built-in functions for color space conversion. Here is how to convert an image from BGR to HSV.
 
@@ -235,7 +235,7 @@ Now our dataset includes columns for each color category, enabling systematic an
 )
 ```
 
-The images with the highest yellow proportions include many hummingbirds photographed near yellow-green foliage, as well as the expected yellow birds. This demonstrates how color analysis captures not just the subject but the entire scene.
+The images with the highest yellow proportions include many hummingbirds photographed near yellow-green foliage, as well as the expected yellow birds. Like brightness, color proportions measure the entire scene, background included.
 
 We can compare the yellow content across species systematically.
 
@@ -271,7 +271,7 @@ The pixel statistics developed so far describe images at the level of raw color.
 
 We faced a similar gap with text in @sec-text-vec. There, the solution was to represent each document as a vector and let geometry do the rest: documents with similar vocabulary became nearby points, and distances, similarity scores, and two-dimensional maps of the collection all followed from that representation. We would like the same thing for images: a vector for each image such that pictures with similar content sit close together in space. For text, we could build the vectors ourselves by counting terms and applying TF-IDF weights. For images, no comparably simple recipe exists. Counting pixels by color, as we did above, is the visual analogue of counting words, but nearly all of the meaning in an image lies in how the pixels are arranged, and no small set of hand-written rules describes arrangement well.
 
-The tools that do capture arrangement are deep neural networks: large statistical models with millions of adjustable parameters that are fit (the machine learning term is *trained*) on enormous collections of labeled images. How these models are built and trained fills entire courses and is beyond the scope of this book. For our purposes, a rough picture is enough. A network trained to classify images processes each picture through a long sequence of stages. Early stages respond to simple patterns such as edges and textures. Later stages combine these into larger structures, such as an eye or a patch of feathers. The final stage converts this accumulated description into a prediction of the image's category. Just before that last step, the network has reduced the image to a fixed-length list of numbers summarizing its content. That list is an embedding in exactly the sense of @sec-text-vec: a vector representation in which similar objects are close together.
+The tools that do capture arrangement are deep neural networks: large statistical models with millions of adjustable parameters that are fit (the machine learning term is *trained*) on enormous collections of labeled images. How these models are built and trained fills entire courses and is beyond the scope of this book. For our purposes, a rough picture is enough. A network trained to classify images processes each picture through a long sequence of stages. Early stages respond to simple patterns such as edges and textures. Later stages combine these into larger structures, such as an eye or a patch of feathers. The final stage converts this accumulated description into a prediction of the image's category. Just before that last step, the network has reduced the image to a fixed-length list of numbers summarizing its content. That list is an embedding in the sense of @sec-text-vec: a vector representation in which similar objects are close together.
 
 Training such a network from scratch requires millions of labeled images and weeks of time on specialized hardware, resources far beyond a typical data analysis project. Fortunately, we do not have to train one. Research groups at large companies and universities have trained these models and released them publicly. The final predictions of a released model are usually not what we need, since the categories it was trained on rarely match the ones we care about. But the embedding computed just before the prediction is generic: it describes what is in the image, whatever the image happens to be. Reusing a model trained for one task as the starting point for a different task is called *transfer learning*, and in one form or another it accounts for the vast majority of practical applications of deep learning.
 
@@ -309,9 +309,9 @@ Computing embeddings for all images in the dataset takes some time, so we have p
 )
 ```
 
-The precomputed embeddings are stored alongside the rest of the data in a Parquet file. Parquet is a columnar storage format that is particularly well-suited for analytical workloads. Unlike CSV files, Parquet preserves data types exactly, handles nested structures like lists efficiently, and compresses data effectively. This makes it an excellent choice for storing embeddings, which are arrays of floating-point numbers that would be awkward to represent in CSV format.
+The precomputed embeddings are stored alongside the rest of the data in a Parquet file. Parquet is a columnar storage format designed for analytical workloads. Unlike CSV files, Parquet preserves data types exactly, handles nested structures like lists efficiently, and compresses data well. This makes it a good choice for storing embeddings, which are arrays of floating-point numbers that would be awkward to represent in CSV format.
 
-What can we do with these vectors? Everything we did with document vectors. A natural first step is to visualize the whole collection at once. As in @sec-text-vec, UMAP can project the 768-dimensional embeddings down to two dimensions while preserving, as much as possible, the relative distances between points. This lets us see how the different bird species arrange themselves in the embedding space.
+Anything we did with document vectors, we can now do with these. A natural first step is to visualize the whole collection at once. As in @sec-text-vec, UMAP can project the 768-dimensional embeddings down to two dimensions while preserving, as much as possible, the relative distances between points. This lets us see how the different bird species arrange themselves in the embedding space.
 
 ```{python}
 (
@@ -326,11 +326,11 @@ What can we do with these vectors? Everything we did with document vectors. A na
 )
 ```
 
-Notice that the UMAP projection does an incredibly good job of separating the categories. Images of the same species cluster tightly together, while different species form distinct groups. This is worth pausing over: nothing in our code told the model anything about our ten species. The ViT model was trained on a different set of images with a different set of labels, yet its embeddings capture the visual features that distinguish a robin from a peacock. Compare this with the brightness and color boxplots earlier in the chapter, where the species distributions overlapped heavily. The embedding representation encodes far more of what the images actually show.
+The UMAP projection separates the categories very well. Images of the same species cluster tightly together, while different species form distinct groups. Nothing in our code told the model anything about our ten species. The ViT model was trained on a different set of images with a different set of labels, yet its embeddings capture the visual features that distinguish a robin from a peacock. In the brightness and color boxplots earlier in the chapter, by contrast, the species distributions overlapped heavily. The embeddings encode far more of what the images show.
 
 ## Zero-Shot Classification
 
-The UMAP plot shows that the embeddings separate the species, but it does not, on its own, tell us which cluster is which. To go from visualization to prediction, we will use an even newer class of deep learning models called zero-shot models. These allow us to classify images into categories that we describe in plain language, with no labeled examples and no additional training at all. The idea sounds almost magical at first.
+The UMAP plot shows that the embeddings separate the species, but it does not, on its own, tell us which cluster is which. To go from visualization to prediction, we will use an even newer class of deep learning models called zero-shot models. These allow us to classify images into categories that we describe in plain language, with no labeled examples and no additional training at all.
 
 Zero-shot learning became practical with the development of multimodal models that learn to connect images and text in a shared embedding space. These models are trained on massive datasets of image-caption pairs scraped from the internet. By learning to match images with their textual descriptions, the models develop an understanding of concepts that can be expressed in natural language. To classify a new image, we simply compare its embedding to the embeddings of text descriptions of each possible category.
 
@@ -369,7 +369,7 @@ Now we can compute the similarity between this text embedding and every image in
 )
 ```
 
-Visualizing the similarity scores by bird species shows that canary images indeed have the highest similarity to our "a photo of a canary" text prompt. This demonstrates that the model has learned a meaningful connection between the visual appearance of canaries and the word "canary" without us ever explicitly teaching it this connection.
+Visualizing the similarity scores by bird species shows that canary images have the highest similarity to our "a photo of a canary" text prompt. The model connects the appearance of canaries with the word "canary", even though we never taught it that connection.
 
 ```{python}
 (
@@ -384,7 +384,7 @@ Visualizing the similarity scores by bird species shows that canary images indee
 )
 ```
 
-To perform zero-shot classification on the entire dataset, we need to create text embeddings for all of our bird species categories. We can then assign each image to the category whose text embedding it is most similar to. This process requires no training data at all; we are simply leveraging the knowledge the model acquired during its original pre-training.
+To perform zero-shot classification on the entire dataset, we need to create text embeddings for all of our bird species categories. We can then assign each image to the category whose text embedding it is most similar to. This process requires no training data at all; it relies entirely on what the model learned during its original pre-training.
 
 ```{python}
 embed = (
@@ -414,7 +414,7 @@ For each image, we compute its similarity to every category label, then select t
 )
 ```
 
-The zero-shot classifier makes only a couple of errors. It is remarkable that we can achieve such a strong classification rate without a single labeled training example. This approach is particularly valuable when labeled data is expensive or impossible to obtain, when there are a very large number of categories, or when we need to quickly prototype a classification system for new categories.
+The zero-shot classifier makes only a couple of errors, without a single labeled training example. This approach is particularly valuable when labeled data is expensive or impossible to obtain, when there are a very large number of categories, or when we need to quickly prototype a classification system for new categories.
 
 Let's examine the images that the zero-shot classifier got wrong. Understanding these errors can provide insight into the model's limitations and the ambiguity inherent in visual classification.
 
@@ -442,4 +442,4 @@ These misclassifications involve birds in strange positions or cropped at the ed
 
 In this chapter, we treated images the way @sec-text-vec treated documents: first as raw material for hand-computed summaries, then as points in a vector space. Pixel statistics such as brightness and color proportions are fast to compute and easy to interpret, and they revealed real patterns in the bird photographs, but they describe the entire frame (background, lighting, and photographic style) rather than the subject. Embeddings from pre-trained neural networks close that gap. The ViT model, through transfer learning, converted each photograph into a dense 768-dimensional vector, and a UMAP projection of those vectors separated the ten species almost perfectly, using knowledge the model acquired long before it ever saw our data.
 
-The SigLIP model took the idea one step further by embedding images and text into a single shared space. There, the cosine similarities of @sec-text-vec became a classifier: each image was assigned the species name whose text embedding it sat closest to, with no labeled examples and no training on our part. The general lesson is that once complex objects, whether documents or photographs, are represented as vectors, the same small geometric toolkit of distances, similarities, and projections does most of the analytical work.
+The SigLIP model took the idea one step further by embedding images and text into a single shared space. There, the cosine similarities of @sec-text-vec became a classifier: each image was assigned the species name whose text embedding it sat closest to, with no labeled examples and no training on our part. Once complex objects, whether documents or photographs, are represented as vectors, the same small geometric toolkit of distances, similarities, and projections does most of the analytical work.

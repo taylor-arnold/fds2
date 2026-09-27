@@ -23,9 +23,9 @@ country = pl.read_csv("data/countries.csv")
 
 ## Introduction
 
-Every time we have printed a DataFrame, the display has shown a short label under each column name: `str` under the country names, `i64` under the GDP figures, `f64` under the latitudes. These labels are *data types*. Every column in a DataFrame has exactly one type, and that type determines what the column can do: whether its values can be added together, whether they sort numerically or alphabetically, and how missing entries behave. So far we have been able to ignore them, because the `country` dataset arrives in good shape. That luck does not hold.
+Every time we have printed a DataFrame, the display has shown a short label under each column name: `str` under the country names, `i64` under the GDP figures, `f64` under the latitudes. These labels are *data types*. Every column in a DataFrame has exactly one type, and that type determines what the column can do: whether its values can be added together, whether they sort numerically or alphabetically, and how missing entries behave. So far we have been able to ignore them, because the `country` dataset arrives in good shape.
 
-This chapter has two goals. The first is to explain the type system: what the common types are, how to check them, how to convert a column from one type to another, and what happens when a value is missing or invalid. The second goal is to go back and give a proper account of something we have been using all along. In the last chapter we wrote fragments such as `c.pop` and `c.hdi > 0.9` and handed them to `.sort()`, `.select()`, `.filter()`, and `.with_columns()`, and we said only that they were recipes rather than data. That was true but vague. These fragments are objects called *expressions*, and understanding what they are explains why the same `c.` syntax keeps turning up inside method after method for the rest of the book.
+This chapter has two goals. The first is to explain the type system: what the common types are, how to check them, how to convert a column from one type to another, and what happens when a value is missing or invalid. The second is to explain something we have been using all along. In the last chapter we wrote fragments such as `c.pop` and `c.hdi > 0.9` and handed them to `.sort()`, `.select()`, `.filter()`, and `.with_columns()`, and we described them only as recipes. These fragments are objects called *expressions*. Understanding them explains why the same `c.` syntax turns up inside method after method for the rest of the book.
 
 Because the methods from @sec-organize are now in hand, we will use them freely here to display results, without further comment.
 
@@ -48,7 +48,7 @@ To see one, we can use `.select()` to place a computed column next to the data i
 )
 ```
 
-The new column's header reads `bool`. Comparison operators (`>`, `<`, `>=`, `<=`, `==`, `!=`) always produce Boolean columns, whatever the type of their inputs. This is what `.filter()` was consuming in the last chapter: the comparison builds a column of `True` and `False` values, and `.filter()` keeps the rows marked `True`. The Boolean type was there the whole time; we simply had no name for it.
+The new column's header reads `bool`. Comparison operators (`>`, `<`, `>=`, `<=`, `==`, `!=`) always produce Boolean columns, whatever the type of their inputs. This is what `.filter()` was consuming in the last chapter: the comparison builds a column of `True` and `False` values, and `.filter()` keeps the rows marked `True`.
 
 ## Why Types Matter
 
@@ -61,7 +61,7 @@ cities
 
 Look at the printed types. The `zip` column was read as `i64`, and every code has lost its leading zero: Boston's ZIP code is 02108, but the table says 2108. ZIP codes are labels that happen to be written with digits, not quantities, and treating them as integers has silently damaged them. The `pop` column has the opposite problem. One city's population was entered as `"n/a"`, and because a column must have a single type, that one entry forced the entire column to be read as `str`. The `founded` column is also `str`, since `read_csv` has no way to know those particular strings are dates.
 
-None of this produces an error message. The file reads, the table prints, and everything looks roughly right. The damage only surfaces when we try to use the data. Suppose we ask for the largest population in the table:
+None of this produces an error message, and the printed table looks roughly right. The damage only surfaces when we try to use the data. Suppose we ask for the largest population in the table:
 
 ```{python}
 (
@@ -70,7 +70,7 @@ None of this produces an error message. The file reads, the table prints, and ev
 )
 ```
 
-The answer is `"n/a"`. Strings compare alphabetically, character by character, and `"n"` comes after every digit. Even without the stray entry, alphabetical order would put `"28613"` after `"206518"`, because the comparison never gets past the first character. Arithmetic fails more loudly: asking for `c.pop * 2` raises an error, since Polars refuses to multiply text. A column with the wrong type cannot be trusted, and the printed header is where the problem shows up first, so checking it after every `read_csv` is worth making a habit.
+The answer is `"n/a"`. Strings compare alphabetically, character by character, and `"n"` comes after every digit. Even without the stray entry, alphabetical order would put `"28613"` after `"206518"`, because the comparison never gets past the first character. Arithmetic fails more loudly: asking for `c.pop * 2` raises an error, since Polars refuses to multiply text. The printed header is the first place a wrong type shows up, so it is worth checking after every `read_csv`.
 
 ## Casting
 
@@ -99,7 +99,7 @@ Now back to the broken `pop` column in `cities`. Casting it to a numeric type sh
 
 The column is now `i64`, the real populations are numbers, and Pittsfield's entry has become `null`, the subject of the next section. Its maximum is now a number rather than `"n/a"`.
 
-What about the ZIP codes? Casting `c.zip` to `pl.String` turns 2108 back into text, but the text it produces is `"2108"`; the leading zero was discarded when the file was read and a cast cannot recover it. The honest fix is to prevent the damage in the first place by telling `read_csv` to treat the column as text from the start. We cover the options for reading imperfect files in @sec-collect. In the meantime, the lesson stands: casting repairs types, not lost information.
+What about the ZIP codes? Casting `c.zip` to `pl.String` turns 2108 back into text, but the text it produces is `"2108"`; the leading zero was discarded when the file was read and a cast cannot recover it. The fix is to prevent the damage in the first place by telling `read_csv` to treat the column as text from the start. We cover the options for reading imperfect files in @sec-collect.
 
 ## Missing and Invalid Values
 
@@ -114,7 +114,7 @@ The cast above introduced a `null` into the `pop` column. A `null` is Polars' ma
 
 Countries in the Southern Hemisphere have negative latitudes, so their rows show `NaN`. Many libraries blur nulls and NaNs together; Polars keeps them separate, and it pays to keep the distinction straight. A `null` means "we do not have this value." A `NaN` means "we computed this value and the mathematics broke." The two are handled by parallel sets of tools: `.is_null()` tests for missing values and `.is_nan()` for invalid ones, `.fill_null()` replaces missing values and `.fill_nan()` replaces invalid ones, and the row-dropping methods `.drop_nulls()` and `.drop_nans()` from the last chapter remove rows containing each. This is the distinction @sec-organize promised to explain: dropping nulls does not remove NaNs, and dropping NaNs does not remove nulls.
 
-The filling methods take the replacement value as their argument. Below, we fill the missing population with 0. Whether 0 is a sensible stand-in depends entirely on what the analysis does next; for a sum it is harmless, while for an average it would quietly drag the result down. There is no universally correct fill value.
+The filling methods take the replacement value as their argument. Below, we fill the missing population with 0. Whether 0 is a sensible stand-in depends entirely on what the analysis does next; for a sum it is harmless, while for an average it would drag the result down.
 
 ```{python}
 (
@@ -132,15 +132,15 @@ Polars also provides methods that fill a missing value using its neighbors in th
 
 ## Expressions
 
-By this point we have written a great many `c.` fragments: `c.pop` on its own, `c.hdi > 0.9`, `c.pop.sqrt()`, `c.pop.cast(pl.Int64, strict=False)`. We have handed them to `.sort()`, `.select()`, `.filter()`, and `.with_columns()`, and we have described them loosely as recipes that Polars runs one row at a time. It is time to be precise, because these fragments are the single idea that the rest of the book is built on.
+By this point we have written a great many `c.` fragments: `c.pop` on its own, `c.hdi > 0.9`, `c.pop.sqrt()`, `c.pop.cast(pl.Int64, strict=False)`. We have handed them to `.sort()`, `.select()`, `.filter()`, and `.with_columns()`, and we have described them loosely as recipes that Polars runs one row at a time. The rest of the book is built on these fragments, so we now describe them precisely.
 
-Start by doing something we have not done before: type one alone in a cell, with no DataFrame anywhere in sight.
+First, we type one alone in a cell, with no DataFrame anywhere in sight.
 
 ```{python}
 c.pop
 ```
 
-The result is not a column of numbers. It is an object called an *expression*, and its printed form is essentially a note that says "the column named pop." No data is attached, and none could be, because `c.pop` on its own is not connected to any DataFrame. It does not know that `country` exists. It is a description of a computation, not the computation's result.
+The result is an object called an *expression*, not a column of numbers. Its printed form is essentially a note that says "the column named pop." No data is attached, and none could be, because `c.pop` on its own is not connected to any DataFrame. It is a description of a computation, not the computation's result.
 
 Expressions can be built up using arithmetic, comparisons, and methods, and each step produces another expression rather than a value. All of the following are expressions, and running any of them alone would again print a description rather than data:
 
@@ -152,18 +152,18 @@ c.hdi > 0.9
 c.pop.cast(pl.Int64, strict=False).fill_null(0)
 ```
 
-An expression produces values only when it is handed to a *context*: a DataFrame method that takes the description and applies it to actual data. Every method from the last chapter that accepted a `c.` fragment was acting as a context. `.select()` evaluates expressions and returns their results as the columns of a new DataFrame. `.with_columns()` evaluates them and attaches the results to the DataFrame it was given. `.filter()` evaluates a Boolean expression and keeps the rows where it comes out `True`. `.sort()` evaluates one and uses the result to order the rows.
+An expression produces values only when it is handed to a *context*: a DataFrame method that takes the description and applies it to data. Every method from the last chapter that accepted a `c.` fragment was acting as a context. `.select()` evaluates expressions and returns their results as the columns of a new DataFrame. `.with_columns()` evaluates them and attaches the results to the DataFrame it was given. `.filter()` evaluates a Boolean expression and keeps the rows where it comes out `True`. `.sort()` evaluates one and uses the result to order the rows.
 
 This is why the same expression can be moved from one method to another without changing a character of it. The comparison `c.hdi > 0.9` appeared in `.select()` earlier in this chapter, where it produced a column of `True` and `False` values, and in `.filter()` in the last chapter, where it decided which rows survived. It is the same description in both places. The expression does not know or care which context will run it, and the context does not care how the expression was built.
 
-That separation is the reason the `c.` syntax repeats across the whole book instead of being replaced by something new every chapter. @sec-group hands these same expressions to `.agg()` to summarize groups; @sec-window hands them to `.over()` to compute within groups; the chapters on text, networks, and images hand them to the same handful of contexts again. There is no second syntax coming. What changes from here on is the set of contexts, not the thing they consume.
+That separation is the reason the `c.` syntax repeats across the whole book instead of being replaced by something new every chapter. @sec-group hands these same expressions to `.agg()` to summarize groups; @sec-window hands them to `.over()` to compute within groups; the chapters on text, networks, and images hand them to the same handful of contexts again. What changes in later chapters is the set of contexts; the expressions they consume stay the same.
 
-The separation between describing a computation and running it has a practical benefit as well, and it is one we have already claimed without justifying. In the last chapter we said that chaining methods together lets Polars optimize the whole sequence internally. This is why it can. A chain hands Polars a full description of the work before any of it starts, which leaves Polars free to reorganize the steps into a faster order. Nothing needs to change in your code for this to happen; it is simply a consequence of the design.
+Separating the description of a computation from running it also has a practical benefit. In the last chapter we said that chaining methods together lets Polars optimize the whole sequence internally. It can do so because a chain hands Polars a full description of the work before any of it starts, so Polars is free to reorganize the steps into a faster order. This requires no change to your code.
 
 ::: {.callout-note collapse="true"}
 ## Column names that break the `c.` syntax
 
-Writing `c.pop` only works when the column name is a valid Python name: letters, digits, and underscores, not starting with a digit. A column called `median age` or `GDP (2020)` cannot follow the dot. For these, call `c` as a function with the name in quotes, as in `c("median age")`. The resulting expression behaves exactly like any other. If a dataset will be used at length, it is often easier to rename such columns once at the start with the `.rename()` method from @sec-organize.
+Writing `c.pop` only works when the column name is a valid Python name: letters, digits, and underscores, not starting with a digit. A column called `median age` or `GDP (2020)` cannot follow the dot. For these, call `c` as a function with the name in quotes, as in `c("median age")`. The resulting expression behaves like any other. If a dataset will be used at length, it is often easier to rename such columns once at the start with the `.rename()` method from @sec-organize.
 :::
 
 ## Strings, Dates, and Categories
@@ -179,7 +179,7 @@ String columns carry a collection of methods under the `.str` prefix, covering t
 )
 ```
 
-Dates get their own types as well. The `founded` column in `cities` is currently a `str`, which means the values can be printed but not treated as points in time; nothing relates `"1626-06-24"` to `"1630-09-07"` except alphabetical order, which for dates written year-first happens to coincide with time order, and for most other formats does not. The `.str.to_date()` method parses text into a genuine `date` column:
+Dates get their own types as well. The `founded` column in `cities` is currently a `str`, which means the values can be printed but not treated as points in time. The only relation between `"1626-06-24"` and `"1630-09-07"` is alphabetical order, which matches time order for dates written year-first but not for most other formats. The `.str.to_date()` method parses text into a `date` column:
 
 ```{python}
 (
@@ -190,7 +190,7 @@ Dates get their own types as well. The `founded` column in `cities` is currently
 
 A `date` column knows about years, months, and durations, and supports arithmetic that respects the calendar. We will use dates when we meet time-based data later in the book.
 
-Finally, Polars offers a Categorical type for string columns that take values from a fixed, limited set, such as `region` in the country data. It stores each distinct value once, which saves memory on large datasets and can make grouping faster. For the data sizes in this book the plain `str` type is simpler and entirely adequate, so we mention Categorical only so it is recognizable in documentation and in other people's code.
+Finally, Polars offers a Categorical type for string columns that take values from a fixed, limited set, such as `region` in the country data. It stores each distinct value once, which saves memory on large datasets and can make grouping faster. For the data sizes in this book the plain `str` type is simpler and adequate, so we mention Categorical only so it is recognizable in documentation and in other people's code.
 
 ## Extensions
 

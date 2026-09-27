@@ -24,13 +24,13 @@ cellphone = pl.read_csv("data/countries_cellphone.csv")
 
 ## Introduction
 
-The previous chapter ended with a limitation. Aggregation answers questions about groups by collapsing each group to a single row: one mean per region, one count per subregion. The individual rows are gone from the result, and with them any chance of comparing a row to its group. This chapter introduces *window functions*, which compute the same group-level quantities but attach the answers to the original rows instead of replacing them. The contrast is the organizing idea of the chapter, and it is worth stating plainly: aggregation reduces rows, window functions preserve them.
+The previous chapter ended with a limitation. Aggregation answers questions about groups by collapsing each group to a single row: one mean per region, one count per subregion. The individual rows are gone from the result, and with them any chance of comparing a row to its group. This chapter introduces *window functions*, which compute the same group-level quantities but attach the answers to the original rows instead of replacing them. Aggregation reduces rows; window functions preserve them. That contrast organizes the chapter.
 
 The tools here are also where row order starts to matter. Alongside grouped computations, we cover functions that look up and down a column, such as shifting values by a row, accumulating running totals, and averaging over a sliding window. These are the natural tools for data with a time dimension, and the `cellphone` data gives us one.
 
 ## The Problem
 
-Suppose we want each country's share of its region's population. This is a perfectly ordinary question, and it needs two ingredients on every row: the country's own population, which is already there, and the region's total, which is not. With the tools of @sec-group we can compute the regional totals easily enough:
+Suppose we want each country's share of its region's population. This is an ordinary question, and it needs two ingredients on every row: the country's own population, which is already there, and the region's total, which is not. With the tools of @sec-group we can compute the regional totals easily enough:
 
 ```{python}
 (
@@ -40,9 +40,9 @@ Suppose we want each country's share of its region's population. This is a perfe
 )
 ```
 
-But now we are stuck. The totals live in a small summary table with one row per region, and the populations live in the original table with one row per country. Dividing one by the other requires lining the two tables up, which is a *join*, a technique we will not meet until @sec-combine. Even once we have joins, using one here means building a second table and matching it back, all to move five numbers into place.
+The totals live in a small summary table with one row per region, and the populations live in the original table with one row per country. Dividing one by the other requires lining the two tables up, which is a *join*, a technique we will not meet until @sec-combine. Even once we have joins, using one here means building a second table and matching it back, all to move five numbers into place.
 
-What we actually want is to skip the detour: compute the regional total and hand it directly to every country in that region, without the summary table ever existing on its own. That is exactly what a window function does.
+A window function skips that detour. It computes the regional total and hands it directly to every country in that region, without the summary table ever existing on its own.
 
 ## The over Method
 
@@ -58,12 +58,12 @@ The `.over()` method turns an aggregation into a window function. Written after 
 )
 ```
 
-Read the new expression from the inside out. `c.pop.sum()` is a description of a sum, and `.over(c.region)` scopes that sum to each region. The result has the same 135 rows as `country`; no rows were lost, and the regional total appears, repeated, on every row of its region. The division then happens row by row, exactly as in @sec-types. Every country in the output now carries its share, and the sort brings the regionally dominant countries to the top.
+Read the new expression from the inside out. `c.pop.sum()` is a description of a sum, and `.over(c.region)` scopes that sum to each region. The result has the same 135 rows as `country`; no rows were lost, and the regional total appears, repeated, on every row of its region. The division then happens row by row, as in @sec-types. Every country in the output now carries its share, and the sort brings the regionally dominant countries to the top.
 
 ::: {.callout-note collapse="true"}
 ## Where to put .over()
 
-You may encounter code that writes the window the other way around, as `c.pop.over(c.region).sum()`, with the aggregation last. Beware: this is valid syntax and runs without error, but it computes something different. The `.sum()` is applied after the window expression, so every row receives the grand total of the whole column rather than its region's total. The results are silently wrong, which makes this a bug to watch for, not a matter of style. The order used here, aggregation first and `.over()` second, is the one Polars documents, and it reads the way it computes: "the sum of pop, within each region." We use that order throughout.
+You may encounter code that writes the window the other way around, as `c.pop.over(c.region).sum()`, with the aggregation last. Beware: this is valid syntax and runs without error, but it computes something different. The `.sum()` is applied after the window expression, so every row receives the grand total of the whole column rather than its region's total. Because the results are silently wrong, this is a bug to watch for, not a matter of style. The order used here, aggregation first and `.over()` second, is the one Polars documents, and it reads the way it computes: "the sum of pop, within each region." We use that order throughout.
 :::
 
 To make the contrast with aggregation concrete, here is the same quantity, the average HDI of each region, computed both ways. First with `.agg()`, which returns one row per region:
@@ -97,7 +97,7 @@ That last question points to a third use. Since a windowed expression is still j
 )
 ```
 
-No new column is created here at all. The regional medians are computed, compared against each row, and discarded, leaving roughly half of each region behind. One computation, three contexts: `agg` gives a summary table, `over` in `with_columns` gives an annotated table, and `over` in `filter` gives a subset. This is the payoff of the expression idea from @sec-types, and it is why that chapter insisted the syntax would keep reappearing.
+No new column is created here. The regional medians are computed, compared against each row, and discarded, leaving roughly half of each region behind. The same computation has now appeared in three contexts: `agg` gives a summary table, `over` in `with_columns` gives an annotated table, and `over` in `filter` gives a subset. This is why @sec-types said the expression syntax would keep reappearing.
 
 ## Shift and Ordered Windows
 
@@ -117,7 +117,7 @@ The example below sorts countries from largest to smallest and expresses each co
 
 Because the meaning of "the row above" or "the row below" depends entirely on the sort order, a `.shift()` should almost always sit directly after the `.sort()` that gives it that meaning.
 
-Shifting becomes far more useful on time series, and this is where the `cellphone` data comes in. Each row records one country in one year, so the year-over-year change in subscriptions is each row's value minus the value one row earlier, once the rows are sorted by year. But there is a trap. If we sort the whole table and shift, the first year of each country would subtract the last year of the *previous* country, producing one nonsense value at every seam. The shift needs to restart at each country boundary, and `.over()` is how we say so:
+Shifting becomes far more useful on time series, and this is where the `cellphone` data comes in. Each row records one country in one year, so the year-over-year change in subscriptions is each row's value minus the value one row earlier, once the rows are sorted by year. If we sort the whole table and shift, however, the first year of each country would subtract the last year of the *previous* country, producing one nonsense value at every seam. The shift needs to restart at each country boundary, and `.over()` is how we say so:
 
 ```{python}
 (
@@ -129,7 +129,7 @@ Shifting becomes far more useful on time series, and this is where the `cellphon
 )
 ```
 
-Within each country, every year now shows its gain over the previous year. The first year of each country has no previous year, so its change is `null`, and the null propagates through the subtraction just as @sec-types described. This combination, an ordered function scoped by `.over()`, is the workhorse pattern of the chapter, and it is worth pausing to read the expression again until both parts feel separate: `shift(1)` says *look one row up*, and `.over(c.iso)` says *but never across a country boundary*.
+Within each country, every year now shows its gain over the previous year. The first year of each country has no previous year, so its change is `null`, and the null propagates through the subtraction just as @sec-types described. This combination, an ordered function scoped by `.over()`, is the most common pattern in the chapter. Its two parts do separate jobs: `shift(1)` says *look one row up*, and `.over(c.iso)` says *but never across a country boundary*.
 
 Polars offers a shortcut, `.diff()`, that computes the difference with the shifted value in one step, but writing out the subtraction makes the mechanics visible, so we will keep doing that for now.
 
@@ -165,7 +165,7 @@ Two more ordered tools round out the family. The `.rank()` method assigns each v
 
 Unlike `.shift()`, the `.rank()` method does not care how the rows are sorted; it computes positions from the values themselves. The final `.sort()` above only affects how the result is displayed.
 
-The `.cum_sum()` method computes a running total, where each row shows the sum of every value up to and including itself. Here order matters again. One revealing use is the cumulative share of world population after sorting countries from largest to smallest:
+The `.cum_sum()` method computes a running total, where each row shows the sum of every value up to and including itself. Here order matters again. One use is the cumulative share of world population after sorting countries from largest to smallest:
 
 ```{python}
 (
@@ -179,7 +179,7 @@ The `.cum_sum()` method computes a running total, where each row shows the sum o
 )
 ```
 
-Scanning down the `cum_share` column shows how quickly the total accumulates; a remarkably small number of countries is enough to pass half of the world's population. Note the two aggregations playing different roles in one expression: `.cum_sum()` is a running total that changes on every row, while `.sum()` is the plain fixed total from @sec-group. Like the other functions in this section, `.cum_sum()` accepts `.over()` when the running total should restart within each group.
+Scanning down the `cum_share` column shows how quickly the total accumulates; a small number of countries is enough to pass half of the world's population. Note the two aggregations playing different roles in one expression: `.cum_sum()` is a running total that changes on every row, while `.sum()` is the plain fixed total from @sec-group. Like the other functions in this section, `.cum_sum()` accepts `.over()` when the running total should restart within each group.
 
 ## Rolling Windows
 
@@ -204,7 +204,7 @@ Each row of `cell_smooth` is the average of that year and the four before it, wh
 
 With both tools in hand, the choice between them comes down to one question: what should the result look like? If the answer is a table of groups, one row each, use `group_by` and `agg`. If the answer is the original table with group information written onto it, or filtered by it, use `over`. Aggregation reduces rows, window functions preserve them, and neither is a substitute for the other. In practice the two often appear in the same analysis: an `agg` to report regional summaries, an `over` to flag which countries drive them.
 
-Readers coming from dplyr have seen the second pattern before under a different guise. A grouped tibble passed to `mutate()` or `filter()` behaves like our `over` expressions, computing within groups while keeping the rows. Polars simply attaches the grouping to the expression rather than to the table. The pandas equivalent is `groupby()` followed by `.transform()`, which many pandas users meet late or not at all; if that method never quite made sense, `over` is the same idea with the pieces laid out in the open.
+Readers coming from dplyr have seen the second pattern before under a different guise. A grouped tibble passed to `mutate()` or `filter()` behaves like our `over` expressions, computing within groups while keeping the rows. Polars attaches the grouping to the expression rather than to the table. The pandas equivalent is `groupby()` followed by `.transform()`, which many pandas users meet late or not at all; if that method never quite made sense, `over` is the same idea with the pieces laid out in the open.
 
 We close with a plot, partly as a preview of @sec-graphics-ii and partly because it shows a window that runs in the other direction. Every window so far grouped by country and looked across years. The plot below does the reverse: within each *year*, it computes each country's share of the group's combined subscriptions, then draws how those shares shift over time.
 

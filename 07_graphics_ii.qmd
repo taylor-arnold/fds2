@@ -27,7 +27,7 @@ cellphone = pl.read_csv("data/countries_cellphone.csv")
 
 In @sec-graphics we built visualizations one row at a time. Each point, each text label, and each line segment came directly from a single record in the data. In @sec-group we learned to do something quite different: group the rows of a table and compute a summary for each group with `group_by` and `agg`. This chapter joins those two ideas together.
 
-That join is the whole point of the geometries we start with here. A bar chart of counts, a boxplot for each region, a histogram: none of these draw one shape per row. Each one first runs a grouped computation over the data and then draws the result. Once you see that a statistical geometry is a `group_by` and `agg` in disguise, the rest of this chapter is mostly about control and polish: choosing the scales that map data to color and position, splitting a plot into small panels, and labeling everything so the result is ready to show to someone else.
+The geometries we start with here depend on that combination. A bar chart of counts, a boxplot for each region, a histogram: none of these draw one shape per row. Each one first runs a grouped computation over the data and then draws the result. Once you see that a statistical geometry is a `group_by` and `agg` in disguise, the rest of this chapter is mostly about control and polish: choosing the scales that map data to color and position, splitting a plot into small panels, and labeling everything so the result is ready to show to someone else.
 
 ## Statistical Geometries
 
@@ -55,13 +55,13 @@ The result is a small table: one row per subregion, with a count next to each. N
 )
 ```
 
-The height of each bar is exactly the count we computed by hand a moment ago. `geom_bar` took a categorical aesthetic, grouped the rows by its value, counted the rows in each group, and drew each count as a bar. It did the `group_by` and `agg` for us and then rendered the answer. That is what "statistics-based geometry" means for the rest of this chapter.
+The height of each bar is the count we computed by hand a moment ago. `geom_bar` took a categorical aesthetic, grouped the rows by its value, counted the rows in each group, and drew each count as a bar. It did the `group_by` and `agg` for us and then rendered the answer. That is what "statistics-based geometry" means for the rest of this chapter.
 
 The bars themselves come out in a jumbled order, because the subregions appear on the axis in the order the rows happen to sit in the `country` table. That is a real problem for a plot with this many categories, and the next section is about fixing it.
 
 Letting `geom_bar` count for us is convenient, but in practice the number you want to plot is often already sitting in a frame. Maybe you computed it with `group_by` and `agg`, or it arrived from a database or a colleague already summarized. For that case there is `geom_col`, which does no counting of its own. You give it an `x` and a `y`, and it draws each `y` value as the height of a bar.
 
-We can reproduce the plot above by aggregating first and piping the result straight into `ggplot`. The chain reads as one continuous thought: group the rows, summarize each group, sort them, then plot.
+We can reproduce the plot above by aggregating first and piping the result straight into `ggplot`. The chain groups the rows, summarizes each group, sorts them, and then plots.
 
 ```{python}
 (
@@ -77,15 +77,15 @@ We can reproduce the plot above by aggregating first and piping the result strai
 
 The bars are the same as in the plot above, but they arrive in a readable order, and the labor is split differently. Here we counted the countries ourselves and `geom_col` only drew the numbers. Notice that nothing in the plotting code asked for the ordering; it came from the `.sort()` we ran on the table before plotting it. The next section takes that idea apart. This pattern, aggregate and then draw the result with a column geometry, is the one you will use most often once your data grows past toy examples, because real summaries usually involve more than a plain count: an average price per category, a total revenue per month, a median score per group. Compute the summary you want with the tools from @sec-group, then plot it with `geom_col`.
 
-The two geometries look nearly identical on the page and are a reliable source of confusion, so it is worth stating the difference plainly: it is a question of who does the counting. `geom_bar` takes a single categorical aesthetic and counts the rows in each category for you, so the height of each bar is a tally it computes internally. `geom_col` takes both an `x` and a `y` and draws each `y` value as given, so you supply the height. Reach for `geom_bar` when you want the raw count of how many rows fall into each category and you would rather not compute it yourself, and reach for `geom_col` when the number you want to show is already in the frame. If you ever find yourself computing a count with `group_by` only to feed it to `geom_bar`, you wanted `geom_col`.
+The two geometries look nearly identical on the page and are often confused. The difference is who does the counting. `geom_bar` takes a single categorical aesthetic and counts the rows in each category for you, so the height of each bar is a tally it computes internally. `geom_col` takes both an `x` and a `y` and draws each `y` value as given, so you supply the height. Reach for `geom_bar` when you want the raw count of how many rows fall into each category and you would rather not compute it yourself, and reach for `geom_col` when the number you want to show is already in the frame. If you ever find yourself computing a count with `group_by` only to feed it to `geom_bar`, you wanted `geom_col`.
 
 ## Ordering Categories
 
-One of the two count plots above came out in a readable order and the other did not, and the difference between them is worth stating as a rule: **a categorical axis follows the order the values first appear in the data**. There is no separate ordering step inside the plot and no default alphabetical sort to work around. Whatever order the rows are in when they reach `ggplot` is the order you get, so ordering a plot means sorting the data before it is plotted.
+One of the two count plots above came out in a readable order and the other did not, and the difference comes from one rule: **a categorical axis follows the order the values first appear in the data**. There is no separate ordering step inside the plot and no default alphabetical sort to work around. Whatever order the rows are in when they reach `ggplot` is the order you get, so ordering a plot means sorting the data before it is plotted.
 
 The `geom_col` version did this without any fuss, because the number the bars were ordered by, the count `n`, was already a column of the table. A plain `.sort(c.n)` put the rows in order and the bars followed. That is the same one-line move the population bar chart in @sec-graphics made when it sorted the Northern African countries by `pop`, and it covers most cases you will meet: if the value you want to order by is in the frame, sort by it.
 
-The `geom_bar` version is the harder case, and it is harder for an interesting reason. There, the count exists only inside the plot; the table we handed over has one row per country and no column of counts to sort on. What we need is a count per subregion written onto every row of that subregion, which is exactly what the window functions of @sec-window do. Sorting by `pl.len().over(c.subregion)` orders the countries by the size of the subregion each one belongs to, and the bars pick that order up.
+The `geom_bar` version is harder, because the count exists only inside the plot; the table we handed over has one row per country and no column of counts to sort on. What we need is a count per subregion written onto every row of that subregion, which is what the window functions of @sec-window do. Sorting by `pl.len().over(c.subregion)` orders the countries by the size of the subregion each one belongs to, and the bars pick that order up.
 
 ```{python}
 (
@@ -201,11 +201,11 @@ All of the statistical geometries we have seen, from `geom_bar` through `geom_sm
 
 Python makes many choices for us automatically when it builds a plot. When we mapped the color of the points to a variable, Python decided which specific colors to use. It also chose how large to make the axes, where to place tick marks, and where to draw grid lines. Leaving these details to Python is convenient because it lets us stay focused on the data. Sometimes, though, when we are preparing a plot for others or the defaults are hard to read, we want to set them ourselves. That is what scales are for.
 
-Each aesthetic in the grammar of graphics has a scale attached to it. A scale describes how the plot turns an aesthetic into something you can actually see. The scale for the `x` aesthetic sets the smallest and largest values on the horizontal axis and decides how to label it. A color scale sets which color goes with each category and how to lay out the legend. To change a default scale, we add a scale function to the plot. Its position relative to the geometries does not matter, and by convention we group scales after the geometries.
+Each aesthetic in the grammar of graphics has a scale attached to it. A scale describes how the plot turns an aesthetic into something you can see. The scale for the `x` aesthetic sets the smallest and largest values on the horizontal axis and decides how to label it. A color scale sets which color goes with each category and how to lay out the legend. To change a default scale, we add a scale function to the plot. Its position relative to the geometries does not matter, and by convention we group scales after the geometries.
 
-When we map color to a categorical column, the colors we get by default run from dark purple through green to bright yellow. This palette is called *viridis*, and it is a good default: it is friendly to color-blind readers, it prints well in black and white, and it holds up on a bad projector. The scale that produces it has a name, `scale_color_cmap_d()`, and adding that line to the plot changes nothing at all, because it is what we were already getting. It is worth knowing the name anyway, because a scale we can name is a scale we can change.
+When we map color to a categorical column, the colors we get by default run from dark purple through green to bright yellow. This palette is called *viridis*, and it is a good default: it is friendly to color-blind readers, it prints well in black and white, and it holds up on a bad projector. The scale that produces it has a name, `scale_color_cmap_d()`, and adding that line to the plot changes nothing, because it is what we were already getting. Knowing the name is still useful, because changing the palette means changing this scale.
 
-To change the palette, pass a different color map to that same scale, as in `scale_color_cmap_d(cmap_name="plasma")`. To change it more thoroughly, use a different scale. The function `scale_color_brewer()` offers a set of hand-designed palettes, and its qualitative ones are built for exactly this case, where the categories have no order and we want colors that are easy to tell apart rather than colors that run along a ramp.
+To change the palette, pass a different color map to that same scale, as in `scale_color_cmap_d(cmap_name="plasma")`. To change it more thoroughly, use a different scale. The function `scale_color_brewer()` offers a set of hand-designed palettes, and its qualitative ones are built for this case, where the categories have no order and we want colors that are easy to tell apart rather than colors that run along a ramp.
 
 ```{python}
 (
@@ -270,7 +270,7 @@ Facets are another way to show differences across the levels of a categorical va
 
 By default every panel shares one x-axis and one y-axis, which is what lets us compare them at a glance: a higher point in one panel really is higher. The `scales` option changes that. Setting it to `free_x`, `free_y`, or `free` gives each panel its own range, which makes a small panel legible and, in the same stroke, destroys the comparison the facets were for. Reach for it rarely, and say so when you do. A related function, `facet_grid`, takes two variables and arranges the panels across both rows and columns; it accepts `scales` as well, along with a `space` option that lets the panels themselves differ in size.
 
-Facets can make certain relationships far easier to read and give your output a polished, professional look. Use them with some restraint, though. People new to data science tend to overuse them badly. They work best when you have only a few categories and have already used the other tools in this chapter and the last to bring out the patterns in the data.
+Facets can make certain relationships far easier to read and give a plot a polished look. Use them with some restraint, though. People new to data science tend to overuse them badly. They work best when you have only a few categories and have already used the other tools in this chapter and the last to bring out the patterns in the data.
 
 ## Labels and Themes
 
@@ -302,7 +302,7 @@ The other way to prepare a plot for distribution is to change its theme. Themes 
 theme_set(theme_minimal())
 ```
 
-A minimal theme can feel too bare when you are first poking at a dataset, but it is an excellent choice for the final version. There are many resources online for tuning a theme further to suit your needs.
+A minimal theme can feel too bare when you are first poking at a dataset, but it is a good choice for the final version. There are many resources online for tuning a theme further to suit your needs.
 
 ## Best Practices
 

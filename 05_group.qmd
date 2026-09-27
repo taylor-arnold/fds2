@@ -50,11 +50,11 @@ On its own that is not very useful, because the "first" country in a region depe
 )
 ```
 
-The pattern of sorting and then taking the top row of each group comes up often; keep it in mind as a standard move. The sections that follow describe the other methods that can act on grouped data.
+The pattern of sorting and then taking the top row of each group comes up often. The sections that follow describe the other methods that can act on grouped data.
 
 ## What group_by Returns
 
-Here is a question that looks trivial but is not. What happens if we call `.group_by` and stop there, without adding a method after it?
+What happens if we call `.group_by` and stop there, without adding a method after it?
 
 ```{python}
 #| eval: false
@@ -64,13 +64,13 @@ Here is a question that looks trivial but is not. What happens if we call `.grou
 )
 ```
 
-You might expect a table with the regions listed out, or perhaps the original data with some marker showing the groups. You get neither. Running this code prints a single line naming a `GroupBy` object along with a memory address, something with no rows and no columns to show. It is not a DataFrame at all.
+You might expect a table with the regions listed out, or the original data with some marker showing the groups. Instead, running this code prints a single line naming a `GroupBy` object along with a memory address, with no rows or columns to show. It is not a DataFrame.
 
-This is the idea to hold onto for the rest of the chapter. In Polars, `.group_by` does not compute anything and does not return data. It returns a promise: an instruction that says "the next operation should run once per group." That promise has to be consumed by whatever method comes next. The methods that can consume it are a short list: `.agg()`, which we turn to in the next section, along with `.head()`, `.tail()`, `.len()`, and a handful of direct shortcuts like `.mean()` and `.sum()` that aggregate every non-grouping column at once. A `GroupBy` object cannot be printed as a table because there is nothing to print until you say what to do with the groups. This is why the `.head(n=1)` examples above worked: the `.head` supplied the missing instruction.
+In Polars, `.group_by` does not compute anything and does not return data. It returns a promise: an instruction that says "the next operation should run once per group." That promise has to be consumed by whatever method comes next. The methods that can consume it are a short list: `.agg()`, which we turn to in the next section, along with `.head()`, `.tail()`, `.len()`, and a handful of direct shortcuts like `.mean()` and `.sum()` that aggregate every non-grouping column at once. A `GroupBy` object cannot be printed as a table because there is nothing to print until you say what to do with the groups. This is why the `.head(n=1)` examples above worked: the `.head` supplied the missing instruction.
 
-If you are coming to Polars from R or from pandas, this will feel unfamiliar, and the reason is easy to miss.
+If you are coming to Polars from R or from pandas, this will feel unfamiliar.
 
-In dplyr, `group_by()` returns a grouped tibble. The grouping is a property that sticks to the data. You can group once, run several verbs, and every one of them respects the grouping, right up until you call `ungroup()` to remove it. Forgetting to ungroup is a classic source of bugs precisely because the grouping persists silently.
+In dplyr, `group_by()` returns a grouped tibble. The grouping is a property that sticks to the data. You can group once, run several verbs, and every one of them respects the grouping, right up until you call `ungroup()` to remove it. Forgetting to ungroup is a classic source of bugs because the grouping persists silently.
 
 In pandas, `df.groupby(...)` returns a `DataFrameGroupBy` object, and it is common to save that object to a variable and call several things on it in turn. The grouped object is a thing you hold onto and reuse.
 
@@ -78,7 +78,7 @@ Polars has neither of these. There is no grouped DataFrame that carries the grou
 
 ## Aggregation
 
-Looking at individual rows tells us only so much. Most of the time we want a summary: one number that stands in for a whole group. The `.agg()` method (short for aggregate) is the main tool for this. It lets us say exactly which numbers to compute and which columns to compute them from.
+Looking at individual rows tells us only so much. Most of the time we want a summary: one number that stands in for a whole group. The `.agg()` method (short for aggregate) is the main tool for this. It lets us say which numbers to compute and which columns to compute them from.
 
 ```{python}
 (
@@ -108,7 +108,7 @@ We can compute several numbers at once by listing more items inside `.agg`. A us
 
 Now each row of the result gives the mean HDI, the median HDI, and the number of countries for one region. Reading across a row tells us about that region; reading down a column compares the regions on one measure.
 
-If you run the last two examples yourself, you may notice something unsettling: the order of the rows can change from one run to the next. You did not break anything. When Polars groups data it builds the groups in parallel using a hash table, and the order in which finished groups come out is not fixed. If you want a predictable order, pass `maintain_order=True` to `.group_by`, which returns the groups in the order their first row appears in the original data.
+If you run the last two examples yourself, you may notice that the order of the rows can change from one run to the next. This is expected. When Polars groups data it builds the groups in parallel using a hash table, and the order in which finished groups come out is not fixed. If you want a predictable order, pass `maintain_order=True` to `.group_by`, which returns the groups in the order their first row appears in the original data.
 
 ```{python}
 (
@@ -123,7 +123,7 @@ If you run the last two examples yourself, you may notice something unsettling: 
 
 There is a modest cost to maintaining order, which is why it is off by default. For a final table you are about to read or print, turning it on is usually the right call. For an intermediate step in a longer pipeline, leave it off.
 
-So far every group has been defined by a single variable, but that is not a requirement. We can pass several columns to `.group_by`, and a group is then every combination of their values that actually occurs in the data. To show this without introducing a new dataset, we first add a column recording whether a country lies in the Northern Hemisphere, then group by region and by that column together.
+So far every group has been defined by a single variable, but that is not a requirement. We can pass several columns to `.group_by`, and a group is then every combination of their values that occurs in the data. To show this without introducing a new dataset, we first add a column recording whether a country lies in the Northern Hemisphere, then group by region and by that column together.
 
 ```{python}
 (
@@ -139,7 +139,7 @@ So far every group has been defined by a single variable, but that is not a requ
 
 The result has one row for each region-and-hemisphere combination that exists in the data. A region whose countries all sit north of the equator produces a single row; a region split across the equator produces two.
 
-Just as the grouping can be richer than a single column, so can the thing we aggregate. It does not have to be a bare column; it can be an expression, and this is where aggregation starts to earn its keep. Suppose we want to count, within each region, how many countries have a population above one hundred million. The comparison `c.pop > 100` produces a column of true and false values (population in this dataset is measured in millions), and calling `.sum()` on a boolean column counts the true entries.
+Just as the grouping can be richer than a single column, so can the thing we aggregate: it can be any expression, not only a bare column. Suppose we want to count, within each region, how many countries have a population above one hundred million. The comparison `c.pop > 100` produces a column of true and false values (population in this dataset is measured in millions), and calling `.sum()` on a boolean column counts the true entries.
 
 ```{python}
 (
@@ -155,11 +155,11 @@ We never had to create a "large country" column in the data. The expression was 
 
 ## Counting
 
-Counting rows by group is probably the single most common thing you will do with grouped data, so it pays to be precise about it. Polars gives you a few ways to count, and they answer slightly different questions.
+Counting rows by group is probably the most common thing you will do with grouped data. Polars gives you a few ways to count, and they answer slightly different questions.
 
-The clearest way to count rows is `pl.len()`. It returns the number of rows in each group and does not depend on any particular column, which is exactly what you want when the question is simply "how many countries are in this region."
+The clearest way to count rows is `pl.len()`. It returns the number of rows in each group and does not depend on any particular column, which is what you want when the question is simply "how many countries are in this region."
 
-There is also a `.count()` method that you call on a specific column. It counts the non-missing values in that column, not the rows. When a column has no missing data the two give the same answer, but when it does, `.count()` is smaller. Every country in this dataset has an HDI, so counting that column would tell us nothing new. The Gini coefficient, which measures income inequality, is missing for a number of countries. The example below counts both: `n` is the number of countries in each region, while `n_gini` is the number of those countries that actually have a Gini coefficient recorded.
+There is also a `.count()` method that you call on a specific column. It counts the non-missing values in that column, not the rows. When a column has no missing data the two give the same answer, but when it does, `.count()` is smaller. Every country in this dataset has an HDI, so counting that column would tell us nothing new. The Gini coefficient, which measures income inequality, is missing for a number of countries. The example below counts both: `n` is the number of countries in each region, while `n_gini` is the number of those countries that have a Gini coefficient recorded.
 
 ```{python}
 (
@@ -183,7 +183,7 @@ Finally, `.n_unique()` counts the distinct values in a column. It answers "how m
 )
 ```
 
-Take care with `.n_unique()` when the column has holes in it, because it does not ignore missing values the way `.count()` does. It treats `null` as a value like any other, distinct from all the real ones. The Gini column holds 100 different numbers, plus some countries with no number at all, and `.n_unique()` reports 101. If you want the number of distinct values that are actually there, remove the missing ones first.
+Take care with `.n_unique()` when the column has holes in it, because it does not ignore missing values the way `.count()` does. It treats `null` as a value like any other, distinct from all the real ones. The Gini column holds 100 different numbers, plus some countries with no number at all, and `.n_unique()` reports 101. If you want the number of distinct values that are present, remove the missing ones first.
 
 ```{python}
 (
@@ -195,13 +195,13 @@ Take care with `.n_unique()` when the column has holes in it, because it does no
 )
 ```
 
-For most work `pl.len()` is what you reach for. Use `.count()` when you specifically care about non-missing values, and `.n_unique()` when you care about distinct ones, remembering that "distinct" quietly includes being missing.
+For most work `pl.len()` is what you reach for. Use `.count()` when you specifically care about non-missing values, and `.n_unique()` when you care about distinct ones, remembering that it counts a missing value as one more distinct value.
 
 ## Aggregating the Whole Frame
 
 Sometimes there are no groups. You want one summary of the entire dataset: the mean population across all countries, the total, the number of rows. It is tempting to call `.agg` without a `.group_by` in front of it, but Polars does not allow that. Unlike R and pandas, `.agg` here always belongs to a grouping.
 
-The solution is `.select`, using exactly the same aggregation syntax you would put inside `.agg`. We met `.select` earlier as a way to choose columns, but when the expressions inside it are aggregations, it collapses the whole frame to a single row.
+The solution is `.select`, using the same aggregation syntax you would put inside `.agg`. We met `.select` earlier as a way to choose columns, but when the expressions inside it are aggregations, it collapses the whole frame to a single row.
 
 ```{python}
 (
@@ -218,9 +218,9 @@ The result is a one-row DataFrame with a column for each summary we asked for. U
 
 ## Aggregation as Row Reduction
 
-It helps to name the pattern that runs through this chapter, because the next one is built around pushing back on it. Every aggregation reduces: it takes the many rows of a group and returns exactly one row for that group. After you compute the average HDI per region, the individual countries are no longer in the result. Their values went into the average and then the rows themselves were discarded. That is the whole point when the answer you want is one number per group.
+One pattern runs through this chapter, and the next chapter introduces an alternative to it. Every aggregation reduces: it takes the many rows of a group and returns exactly one row for that group. After you compute the average HDI per region, the individual countries are no longer in the result. Their values went into the average and then the rows themselves were discarded. That is what we want when the answer is one number per group.
 
-But it raises a natural question. What if you want a group-level number and you also want to keep the rows? Say you want each country labeled with its share of its own region's total population. The number is computed per group, but you want it attached to every country, not collapsed down to one row per region. Aggregation cannot do this, because reducing the rows is the one thing it always does. The next chapter introduces the tool for computing a value per group while leaving every original row in place.
+Sometimes, though, we want a group-level number and also want to keep the rows. Say you want each country labeled with its share of its own region's total population. The number is computed per group, but you want it attached to every country, not collapsed down to one row per region. Aggregation cannot do this, because reducing the rows is the one thing it always does. The next chapter introduces the tool for computing a value per group while leaving every original row in place.
 
 ## Aggregation Functions
 

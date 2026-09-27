@@ -25,15 +25,15 @@ country = pl.read_csv("data/countries.csv")
 
 This chapter covers the core methods for organizing a dataset: reordering its rows, choosing which columns to keep, and filtering down to the rows you care about. We will also look at how to create new columns from existing ones, rename columns, and remove duplicate rows. Every method in this chapter works on a single DataFrame at a time, one row or one column at a time, with no notion of groups. Later chapters build on these same methods once we start comparing categories of data against each other.
 
-All of the operations below come from the Polars library, the same one we used to read our data. Each takes a DataFrame as input and returns a modified DataFrame as output, which means the methods can be chained together in a single pipeline. Individually, these methods are simple. Chained together, they let you turn a raw dataset into exactly the shape you need for an analysis.
+All of the operations below come from the Polars library, the same one we used to read our data. Each takes a DataFrame as input and returns a modified DataFrame as output, so the methods can be chained together in a single pipeline. Chained together, these simple methods can turn a raw dataset into the shape an analysis needs.
 
 ## Referring to Columns
 
-Nearly every method in this chapter needs to be told which column to work on, so before we start we need a way of pointing at one. That is what the `c.` prefix is for. Writing `c.pop` refers to the column named `pop`, `c.region` to the column named `region`, and so on for any column in the dataset.
+Nearly every method in this chapter needs to be told which column to work on, and the `c.` prefix is how we point at one. Writing `c.pop` refers to the column named `pop`, `c.region` to the column named `region`, and so on for any column in the dataset.
 
-A `c.` reference can carry more than just a name. We can attach a comparison to it, as in `c.hdi > 0.9`, which asks a yes-or-no question of every row. We can attach a method, as in `c.pop.sqrt()`, which takes the square root of every value. And we can do arithmetic with it, as in `c.pop * 1000`. In each case the result is a recipe rather than a number: Polars works through it one row at a time when we hand it to a DataFrame method, and the answer comes back with one entry per row.
+A `c.` reference can carry more than a name. We can attach a comparison to it, as in `c.hdi > 0.9`, which asks a yes-or-no question of every row. We can attach a method, as in `c.pop.sqrt()`, which takes the square root of every value. And we can do arithmetic with it, as in `c.pop * 1000`. In each case the result is a recipe rather than a number: Polars works through it one row at a time when we hand it to a DataFrame method, and the answer comes back with one entry per row.
 
-That is all we need for now. These `c.` fragments turn out to be genuine objects in their own right, with a name and a set of rules worth knowing, and the next chapter takes them apart properly. Here we will simply use them.
+These `c.` fragments are objects in their own right, with a name and their own rules, and the next chapter covers them in detail. Here we will simply use them.
 
 ## Sorting Rows
 
@@ -79,7 +79,7 @@ After running this code, `country_saved` holds the reordered dataset, while `cou
 
 ## Selecting Columns
 
-When a dataset has many columns, it is often useful to select or reorder a subset of them. The `.select()` method does this: give it a set of columns and it returns a DataFrame containing exactly those, in the order listed.
+When a dataset has many columns, it is often useful to select or reorder a subset of them. The `.select()` method does this: give it a set of columns and it returns a DataFrame containing only those, in the order listed.
 
 ```{python}
 (
@@ -103,7 +103,7 @@ We often want a subset of a dataset's rows for a particular analysis or visualiz
 )
 ```
 
-The `.tail(n=<int>)` method works the same way but starts from the bottom of the table. The `.drop_nulls()` and `.drop_nans()` methods require no arguments and return only rows without missing values or without invalid numeric results, respectively. Polars keeps those two kinds of gap separate, and the next chapter explains the difference; for now it is enough to know that both methods exist and that neither one removes what the other one does.
+The `.tail(n=<int>)` method works the same way but starts from the bottom of the table. The `.drop_nulls()` and `.drop_nans()` methods require no arguments and return only rows without missing values or without invalid numeric results, respectively. Polars keeps these two kinds of gap separate, so neither method removes what the other does; the next chapter explains the difference.
 
 The `.sample` method randomly selects rows. Specify the number of rows with `n=<int>` or a fraction with `fraction=<float>`. Below, we take a random 20% sample of the dataset.
 
@@ -114,7 +114,7 @@ The `.sample` method randomly selects rows. Specify the number of rows with `n=<
 )
 ```
 
-The `.filter()` method selects rows that meet a condition on the dataset's variables. It expects a condition of the kind we described above: a comparison such as `c.hdi > 0.9`, which Polars evaluates once per row and which answers `True` or `False` each time. The rows answering `True` are kept and the rest are discarded. Rows where the value being tested is missing are discarded as well, since a comparison against a missing value has no answer. The code below keeps only the rows where the Human Development Index (HDI) is greater than 0.9.
+The `.filter()` method selects rows that meet a condition on the dataset's variables. It expects a condition of the kind we described above: a comparison such as `c.hdi > 0.9`, which Polars evaluates as `True` or `False` for each row. The rows answering `True` are kept and the rest are discarded. Rows where the value being tested is missing are discarded as well, since a comparison against a missing value has no answer. The code below keeps only the rows where the Human Development Index (HDI) is greater than 0.9.
 
 ```{python}
 (
@@ -184,7 +184,7 @@ By default, `.unique()` keeps an arbitrary row from each set of duplicates. Set 
 
 Creating or modifying columns is a fundamental part of data analysis. You will often need to compute a new variable from existing columns, build an indicator (dummy) variable, or transform a variable before analysis.
 
-The basic pattern for adding a column is the `.with_columns()` method: specify each new or modified value, defined in terms of existing columns. Where `.select()` returns only the columns it is given, `.with_columns()` keeps the whole DataFrame and attaches the new columns to it, which is the only real difference between the two. Giving a new column the name of an existing one overwrites it. The example below multiplies the `pop` column (in millions) by 1,000 to get the population in thousands.
+The basic pattern for adding a column is the `.with_columns()` method: specify each new or modified value, defined in terms of existing columns. Where `.select()` returns only the columns it is given, `.with_columns()` keeps the whole DataFrame and attaches the new columns to it. Otherwise the two work the same way. Giving a new column the name of an existing one overwrites it. The example below multiplies the `pop` column (in millions) by 1,000 to get the population in thousands.
 
 ```{python}
 (
@@ -218,9 +218,9 @@ Polars includes a method called `.alias` that can be used within `.with_columns`
 
 ## Pipes
 
-Chaining methods together is a powerful pattern. It keeps code readable, avoids naming a pile of intermediate variables, and lets Polars optimize the whole sequence of operations internally. One limitation of method chaining is that it only gives you access to methods built into Polars. The `.pipe` method gets around this by letting you call an arbitrary function with the DataFrame as its first argument.
+Chaining methods keeps code readable, avoids naming a pile of intermediate variables, and lets Polars optimize the whole sequence of operations internally. One limitation of method chaining is that it only gives you access to methods built into Polars. The `.pipe` method gets around this by letting you call an arbitrary function with the DataFrame as its first argument.
 
-The rule is simple: `df.pipe(f)` does the same thing as `f(df)`. The advantage is that it can be written as one more step in a chain rather than as a function wrapped around the outside of it. A quick way to see this is to pipe a DataFrame into `type`, the built-in Python function that reports what kind of object it has been given.
+`df.pipe(f)` does the same thing as `f(df)`, but it can be written as one more step in a chain instead of as a function wrapped around the outside of it. A quick way to see this is to pipe a DataFrame into `type`, the built-in Python function that reports what kind of object it has been given.
 
 ```{python}
 (
@@ -229,9 +229,9 @@ The rule is simple: `df.pipe(f)` does the same thing as `f(df)`. The advantage i
 )
 ```
 
-The DataFrame was handed to `type` as its argument, and `type` reported back what it was. Writing `type(country)` would have produced exactly the same answer. Nothing is special about `type` here; any function that accepts a DataFrame will do.
+The DataFrame was handed to `type` as its argument, and `type` reported back what it was. Writing `type(country)` would have produced the same answer. Nothing is special about `type` here; any function that accepts a DataFrame will do.
 
-`.pipe` takes the function to apply as its first argument, and passes any additional arguments straight through to that function. That is what makes it useful in practice: `df.pipe(f, x, y)` does the same thing as `f(df, x, y)`, written as one more step in the chain rather than as a function wrapped around the outside of it.
+`.pipe` takes the function to apply as its first argument, and passes any additional arguments straight through to that function, so `df.pipe(f, x, y)` does the same thing as `f(df, x, y)`.
 
 Our `funs.py` file adds one small convenience of its own, as a method rather than through `.pipe`. Polars prints ten rows of a DataFrame by default; the `.print()` method lets us choose a different number. Here we ask for `4`, which shows the first two rows and the last two.
 
@@ -246,7 +246,7 @@ Leaving out the number prints eight rows. Pass a number larger than the height o
 
 ## Further Functions
 
-One more function is worth knowing before moving on: `pl.when`, which creates a column that depends on a condition elsewhere in the data. The example below builds a column equal to 1 for countries in the Northern Hemisphere and 0 for those in the Southern Hemisphere.
+The last function in this chapter is `pl.when`, which creates a column that depends on a condition elsewhere in the data. The example below builds a column equal to 1 for countries in the Northern Hemisphere and 0 for those in the Southern Hemisphere.
 
 ```{python}
 #| eval: false
@@ -296,4 +296,4 @@ Coming from dplyr, the main adjustments are prefixing column names with `c.`, us
 
 Coming from pandas involves a few more changes, most of which simplify the code. There is no index column to reset after every operation, no aggregation functions wrapped in tuples, and no `eval` or `query` methods buried behind an extra layer of quoted strings.
 
-As with pandas and dplyr, Polars also provides functions for pivots and table joins, which we cover in @sec-restructure. The arguments differ slightly across the three libraries, but the underlying transformations are much the same.
+As with pandas and dplyr, Polars also provides functions for pivots and table joins, which we cover in @sec-restructure and @sec-combine. The arguments differ slightly across the three libraries, but the underlying transformations are much the same.

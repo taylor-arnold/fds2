@@ -211,31 +211,7 @@ top_people = (
 top_people
 ```
 
-4. Pick two names from question 3's list and check what they actually refer
-to by searching `docs` for the surrounding text. Confirm each one by eye:
-is it a real person (a director, an actor) or a fictional character in the
-movie being reviewed?
-
-```{python}
-for name in ["Kornbluth", "Baird"]:
-    row = (
-        docs
-        .filter(c.text.str.contains(name))
-        .select(c.doc_id, c.text)
-        .row(0, named=True)
-    )
-    idx = row["text"].find(name)
-    print(row["doc_id"], "-", row["text"][max(0, idx - 80):idx + 80])
-```
-
-`Kornbluth` names Josh and Jacob Kornbluth, the real directors of `Haiku
-Tunnel`. `Baird` is John Baird, a character in `The Couch Trip`. Nothing in
-the `PERSON` label distinguishes the two; the chapter's biography pages
-never raise this problem, since every `PERSON` entity there is unambiguously
-a real historical figure. In a review corpus, "who is this?" is a question
-the entity type alone cannot answer.
-
-5. Group `entities` by `ent_type`, count, and plot the result as a bar chart
+4. Group `entities` by `ent_type`, count, and plot the result as a bar chart
 with `geom_col()` and `coord_flip()`, matching the chapter's own entity-type
 plot.
 
@@ -258,7 +234,7 @@ and `ORG`. Reviews count things (a rating out of ten, a number of stars, "one
 of the worst films") far more than they cite calendar dates, which biography
 pages do constantly for birth, death, and publication years.
 
-6. Reconstruct subject-verb pairs the way the chapter does: select `VERB`
+5. Reconstruct subject-verb pairs the way the chapter does: select `VERB`
 tokens as `verbs`, then join every `nsubj` token to the verb sitting at its
 `head_idx` within the same `doc_id` and `sid`. Print the 10 most frequent
 subject-verb pairs.
@@ -290,15 +266,15 @@ verbs = (
 )
 ```
 
-Every single pair in this list has `I` or `you` as the subject; the closest
-a movie-related noun gets is `movie` itself, in 9th place. Compare this to
+Nine of the ten pairs have `I` or `you` as the subject, the tenth is the
+generic `it have`, and no movie-related noun makes the list at all. Compare this to
 the chapter's own finding for the biography pages, where the most common
 subjects were the authors and their works ("author write", "work receive").
 A review corpus's dependency structure is dominated by its narrator, not by
 the thing being described, which is exactly what a first-person genre should
 look like once you have a tool that can actually show it.
 
-7. Extract adjective-noun pairs the way the chapter does (`dep == "amod"`,
+6. Extract adjective-noun pairs the way the chapter does (`dep == "amod"`,
 joined to the `NOUN` sitting at `head_idx`), restrict to pairs where the
 noun is `"movie"` or `"film"`, and print the count for `"good"` and `"bad"`
 by `label`.
@@ -341,10 +317,10 @@ tighter grammatical filter helps when the word being filtered for is doing
 real evaluative work, but it is not a fix for negation on its own, since
 "not good" is still `good` attached to the same head as `movie`.
 
-8. In the first block, find every negated predicate adjective: join tokens
+7. In the first block, find every negated predicate adjective: join tokens
 with `dep == "neg"` to `ADJ` tokens with `dep in ["acomp", "attr"]` that
 share the same `head_idx` within a `doc_id`/`sid` (this is the same "share a
-head" logic question 6 used for subjects and verbs), and count how many
+head" logic question 5 used for subjects and verbs), and count how many
 negated predicate adjectives exist in total. In the second block, count how
 many of them have the negation word sitting in the position immediately
 before the adjective, the only case a bigram search like question 1's
@@ -386,10 +362,10 @@ corpus, not because the sentences are unusual, but because negation in
 English does not have to sit next to the word it negates. Dependency
 parsing catches all 76 the same way regardless of the gap, because it is
 tracking a grammatical relationship, not a distance. This is the tool the
-last notebook's question 10 was missing: a real way to tell "good" and "not
+last notebook's question 6 was missing: a real way to tell "good" and "not
 good" apart.
 
-9. Run `DSText.kwic()` on the lemma `"acting"` with `window=5` and
+8. Run `DSText.kwic()` on the lemma `"acting"` with `window=5` and
 `max_num=10`.
 
 ```{python}
@@ -403,7 +379,7 @@ adjective-frequency table would show this as directly, since "acting" here
 is playing the role of the noun being judged, and the judgments on either
 side of it in the printout are the actual words reviewers reached for.
 
-10. Compute the four complexity metrics from the chapter (mean sentence
+9. Compute the four complexity metrics from the chapter (mean sentence
 length, type-token ratio, mean word length, and content-word ratio) per
 document, join them into a single table, and print the mean of each metric
 grouped by `label`.
@@ -470,27 +446,10 @@ differs by about half a word, word length by four hundredths of a
 character. These are measures of *style*, and the style of a positive
 review and a negative review of the same kind of movie, written by the same
 kind of person, is not obviously different. Sentiment lives in which words
-get chosen, as questions 7 and 8 showed, not in how long or how varied the
+get chosen, as questions 6 and 7 showed, not in how long or how varied the
 sentences carrying those words happen to be.
 
-11. Plot `mean_sentence_length` against `mean_word_length` from
-`style_metrics`, coloring points by `label`.
-
-```{python}
-(
-    style_metrics
-    .ggplot(aes(c.mean_sentence_length, c.mean_word_length, color=c.label))
-    .geom_point()
-    .labs(title="Sentence Length vs. Word Length by Review Sentiment", x="Mean Sentence Length", y="Mean Word Length")
-)
-```
-
-The two colors sit on top of each other across the whole plot, with no
-region dominated by one label. This is the visual version of question 10's
-finding: whatever separates a positive review from a negative one, it is
-not this pair of style measures.
-
-12. Count the number of `"!"` tokens per document, join that count onto
+10. Count the number of `"!"` tokens per document, join that count onto
 `docs`, and print the mean per-review count and the fraction of reviews
 containing at least one `"!"`, grouped by `label`.
 

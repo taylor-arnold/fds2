@@ -317,13 +317,15 @@ out of the degree counts.
 7. The last two networks come from *distances* rather than citations. We have no
 text for these cases, so we build a distance from the citation structure itself:
 represent each case by the set of later cases that cite it, and call two cases
-close when those sets of citers overlap. Concretely, build a matrix with one row
-per landmark and one column per citing case, holding 1 where the citation
-exists, and compute the angle distance between every pair of rows — the same
-`to_numpy`/normalize/`arccos` construction the text chapter used for its own
-distances. Print the six closest pairs.
+close when those sets of citers overlap. The code below is provided for you:
+it builds a matrix with one row per landmark and one column per citing case,
+holding 1 where the citation exists, and computes the angle distance between
+every pair of rows, the same construction the text chapter's `compute_distances`
+uses internally. Run it, and look at the six closest pairs. Do they make sense
+as pairs of related cases?
 
 ```{python}
+#| tags: [noclear]
 profile = (
     cite
     .filter(c.cited_case.is_in(top))
@@ -374,36 +376,20 @@ The distance found real doctrinal pairs without ever being told what any case is
 about, only who cites it — which is exactly the spot-check-against-something-you-
 know the chapter asks for before trusting an embedding or a distance.
 
-8. Before building a distance network, look at the distances themselves. Print
-the smallest and mean distance, and count how many of the pairs sit exactly at
-the maximum possible angle distance of π/2. Then, following the chapter, build a
-distance network by keeping every pair closer than a cutoff, and check how many
-components it lands in.
+8. Before building a network from these distances, look at the distances
+themselves. Print the smallest and mean distance, and count how many of the
+pairs sit at the maximum possible angle distance of π/2 (use
+`c.distance > 1.5707`) out of the total number of pairs.
 
 ```{python}
-print(
-    dist.select(
+(
+    dist
+    .select(
         smallest = c.distance.min(),
         mean = c.distance.mean(),
         n_orthogonal = (c.distance > 1.5707).sum(),
         n_pairs = pl.len()
     )
-)
-
-dist_edges = (
-    dist
-    .filter(c.distance < 1.4)
-    .select(c.doc_id, c.doc_id2)
-)
-
-dn_node, dn_edge, dn_G = DSNetwork.process(dist_edges, directed=False)
-
-(
-    dn_node
-    .group_by(c.component)
-    .agg(n = pl.len())
-    .sort(c.n, descending=True)
-    .head()
 )
 ```
 
@@ -411,23 +397,26 @@ The mean distance is 1.53, almost the π/2 maximum, and 829 of the 3,160 pairs �
 better than a quarter — sit *exactly* at π/2, meaning they share no citer at
 all. This is the same crowding-against-the-maximum we saw with sparse text
 vectors: when each case has hundreds of citers spread across thousands of
-possible citing cases, almost any two of them are nearly orthogonal. A fixed
-distance cutoff is a blunt instrument here. Set it at 1.4 and the network
-shatters into a dozen disconnected pieces; nudge it to 1.5 and nearly every pair
-becomes an edge at once. There is no cutoff that gives a single readable network,
-because the distances are all bunched at one end. The next section fixes this by
-ranking neighbors instead of thresholding them.
+possible citing cases, almost any two of them are nearly orthogonal. That makes
+a fixed distance cutoff, the way the chapter describes building a distance
+network, a blunt instrument here. With the distances all bunched at one end,
+tiny changes to the cutoff reshape the whole network: keeping pairs closer
+than 1.4 leaves it in 11 disconnected pieces, while 1.52 already joins
+everything into one. The next question ranks neighbors instead of
+thresholding them.
 
 9. A *symmetric nearest-neighbor* network sidesteps the cutoff problem. For each
 case, take its k closest neighbors, and keep an edge only when two cases are
 *mutually* in each other's top k. Because the rule is per-case, a popular case
 cannot collect more than k edges, and the network can never have a degree above
-k. Build it with `k = 5`. Since your `dist` table has each pair once, first
-stack it with a copy of itself with the two columns swapped so every case sees
-all of its neighbors, take the 5 nearest per case, and keep only the pairs that
-appear from both directions.
+k. The code below is provided for you and builds it with `k = 5`. It stacks
+`dist` with a copy of itself with the two columns swapped so every case sees
+all of its neighbors, takes the 5 nearest per case, and keeps only the pairs
+that appear from both directions. Run it and look at the summary it prints:
+how many components does the network have, and what is its largest degree?
 
 ```{python}
+#| tags: [noclear]
 k = 5
 
 both = pl.concat([

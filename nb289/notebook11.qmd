@@ -55,26 +55,9 @@ Unless a question says otherwise, just print the result of each block; do not sa
 it to a variable.
 
 1. `.rank()` gives each value its position within the column, and `.over()` scopes
-that position to a group. Rank the 2010 cities within their own state, then sort the
-result by state and rank so you can read each state's list from the top.
-
-```{python}
-(
-    us_pop
-    .filter(c.year == 2010)
-    .with_columns(rank = c.population.rank().over(c.state))
-    .sort(c.state, c.rank)
-)
-```
-
-**Answer**: The number one city in Alabama is Huntsville, with 180,105 people, and
-the number four city is Birmingham, with 212,237. The ranking is upside down.
-`.rank()` counts from the smallest value by default, so rank 1 went to the smallest
-city in each state rather than the largest. Nothing here is broken and nothing
-raised an error, which is the whole problem: a rank column is a column of small
-integers that looks equally plausible in either direction.
-
-2. Turn it over with `descending=True`, then keep only the rank 1 rows to get the
+that position to a group. By default it counts from the smallest value, so rank 1
+would be the smallest city; pass `descending=True` to make rank 1 the largest. Rank
+the 2010 cities within their own state, then keep only the rank 1 rows to get the
 largest city in each of the 46 states, sorted by population.
 
 ```{python}
@@ -93,7 +76,7 @@ and worked out the positions itself. The `.sort()` at the end only decides what 
 look at first. This is the opposite of `.shift()`, which has no opinion about values
 and does nothing but count rows.
 
-3. Now rank on the other axis. Instead of ranking cities within a state, rank them
+2. Now rank on the other axis. Instead of ranking cities within a state, rank them
 within a census year, which gives every city its national position at every point in
 its history. Follow Detroit down the column.
 
@@ -114,7 +97,7 @@ the early ranks are enormous and slightly wrong for that reason: 73 cities are
 recorded as `0` in 1900, they tie with each other, and all 73 of them get rank 253.
 A rank computed over a column full of placeholder zeros ranks the placeholders too.
 
-4. Ranks are more interesting as movement. Rank the cities within each year, keep
+3. Ranks are more interesting as movement. Rank the cities within each year, keep
 just 1900 and 2010, and then use `.shift()` from last week to subtract one rank from
 the other. Sort so the biggest climbers come first.
 
@@ -151,7 +134,7 @@ first, so it means "position among all 289 cities that year," and only then does
 filter cut the table down to two years. Compute the rank after the filter and it
 would mean "position among these two years," which is not a thing anyone wants.
 
-5. `.cum_sum()` is a running total: each row adds itself to everything above it. Take
+4. `.cum_sum()` is a running total: each row adds itself to everything above it. Take
 the 2010 census, sort the cities from largest to smallest, and compute the running
 share of the 289-city total.
 
@@ -175,7 +158,7 @@ number, the same on all 289 rows. Also note that the `.sort()` is not cosmetic h
 Sort the table differently and every number in the column changes, which was never
 true of `.rank()`.
 
-6. Add an `.over()` and the running total restarts in each group. Sort the cities by
+5. Add an `.over()` and the running total restarts in each group. Sort the cities by
 state, and within state from largest to smallest, then accumulate within the state.
 
 ```{python}
@@ -197,30 +180,13 @@ Los Angeles at 21 percent, and needs ten of them to pass half. One state has a s
 city with its own gravity and the other has a coastline of them, and the cumulative
 column says so more clearly than either total does.
 
-7. `.rolling_mean()` averages each row with its neighbors to smooth out the noise.
+6. `.rolling_mean()` averages each row with its neighbors to smooth out the noise.
 It is an ordered function like the others, so it needs a sort, and it needs an
-`.over()` for exactly the same reason `.shift()` did. Leave the `.over()` off first
-and look at what happens at a boundary.
-
-```{python}
-(
-    us_pop
-    .sort(c.city, c.year)
-    .with_columns(smooth = c.population.rolling_mean(window_size=3))
-    .filter(c.city.is_in(["Akron, OH", "Albany, NY"]), c.year <= 1810)
-)
-```
-
-**Answer**: Albany had 3,498 people in 1790 and its smoothed value is 139,894. The
-window is three rows deep and it does not know that the two rows above Albany's first
-row belong to Akron, whose 2000 and 2010 censuses are the ones it just averaged in.
-The rolling window walks across the city boundary exactly as the shift did, and the
-damage is worse here, because a shift ruins one row per city and a window of size
-three ruins two.
-
-8. Do it properly. Compute each city's change since the previous census, as you did
-last week, then smooth that change over a three-census window, scoping both to the
-city. Read Detroit from 1900 on.
+`.over()` for exactly the same reason `.shift()` did: without it, the window would
+average the first rows of one city with the last rows of the city sorted before it.
+Compute each city's change since the previous census, as you did last week, then
+smooth that change over a three-census window, scoping both to the city. Read Detroit
+from 1900 on.
 
 ```{python}
 (
@@ -241,7 +207,7 @@ the 1970 row, and never comes back. Smoothing does not add any information to th
 It removes some, and the argument for doing it is that what it removes was noise, an
 argument you have to make each time rather than assume.
 
-9. Close with a picture. Give every city its share of the census-year total, then
+7. Close with a picture. Give every city its share of the census-year total, then
 keep six cities and draw their shares over time with `.geom_line()`.
 
 ```{python}

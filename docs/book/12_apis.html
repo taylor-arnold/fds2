@@ -349,7 +349,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="setup" class="level2" data-number="12.1">
 <h2 data-number="12.1" class="anchored" data-anchor-id="setup"><span class="header-section-number">12.1</span> Setup</h2>
 <p>Load the modules needed for the chapter. We will use the requests and requests-cache modules to make API calls over the network.</p>
-<div id="79eb93bb" class="cell" data-execution_count="2">
+<div id="8de5b7b5" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> time</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> urllib.parse <span class="im">import</span> quote</span>
@@ -367,7 +367,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="introduction" class="level2" data-number="12.2">
 <h2 data-number="12.2" class="anchored" data-anchor-id="introduction"><span class="header-section-number">12.2</span> Introduction</h2>
 <p>Every dataset in the book so far arrived as a file: something we could read with <code>pl.read_csv</code> and inspect in full before writing a line of analysis code. A lot of interesting data does not come packaged that way. It sits on remote servers and is only available through a programmatic interface, either because it changes too often to distribute as a static file or because the provider wants to control how it is accessed. Weather forecasts, library catalogs, legislative records, and the entire edit history of Wikipedia all fall in this category.</p>
-<p>This chapter has two goals. The first is to teach the mechanics of <em>application programming interfaces</em> (APIs): how to send an HTTP request, read the response codes, page through large result sets, and turn nested JSON into the flat tables we know how to work with. The second goal is to actually build something with those mechanics. Over the course of the chapter we will assemble a corpus of Wikipedia articles about nineteenth-century British and Irish novelists, collecting each article’s metadata, full text, internal links, revision history, daily page views, and links to versions in other languages. The chapters that follow on temporal, textual, and network data all analyze this corpus, so the output here is not a throwaway example. It is a small, documented data pipeline, and the decisions we make while building it (how the sample is defined, how redirects are handled, which identifiers we key on, when the data was retrieved) will matter every time the data gets used later.</p>
+<p>This chapter has two goals. The first is to teach the mechanics of <em>application programming interfaces</em> (APIs): how to send an HTTP request, read the response codes, page through large result sets, and turn nested JSON into the flat tables we know how to work with. The second goal is to build something with those mechanics. Over the course of the chapter we will assemble a corpus of Wikipedia articles about nineteenth-century British and Irish novelists, collecting each article’s metadata, full text, internal links, revision history, daily page views, and links to versions in other languages. The chapters that follow on temporal, textual, and network data all analyze this corpus, so what we build here is a small, documented data pipeline, and the decisions we make while building it (how the sample is defined, how redirects are handled, which identifiers we key on, when the data was retrieved) will matter every time the data gets used later.</p>
 <p>We work with Wikipedia for a practical reason: its APIs are free, require no account or key, and expose an unusually wide range of data types from a single source. The same request patterns apply to almost any HTTP-based API you will meet in practice.</p>
 </section>
 <section id="apis-and-http-requests" class="level2" data-number="12.3">
@@ -379,7 +379,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="caching-responses" class="level2" data-number="12.4">
 <h2 data-number="12.4" class="anchored" data-anchor-id="caching-responses"><span class="header-section-number">12.4</span> Caching Responses</h2>
 <p>Before making any requests, we set up a local cache that stores every response we receive. The <code>requests_cache</code> library provides a drop-in replacement for a standard <code>requests</code> session that saves responses in a SQLite database file and returns the saved copy whenever the same request is repeated.</p>
-<div id="9e5d62f5" class="cell" data-execution_count="3">
+<div id="3d613b95" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>session <span class="op">=</span> requests_cache.CachedSession(</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    cache_name<span class="op">=</span><span class="st">"data/wiki/requests_cache"</span>,</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    backend<span class="op">=</span><span class="st">"sqlite"</span>,</span>
@@ -389,12 +389,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The cache matters for three reasons. It avoids hammering the server with repeated requests for the same data, which the Wikimedia Foundation explicitly asks clients to avoid. It makes development fast, since re-running a notebook pulls everything from disk instead of the network. And, most useful for our purposes, the cache file is a permanent record of the exact bytes the server sent us. Setting <code>expire_after=None</code> means entries never expire, so the SQLite file becomes the <em>raw layer</em> of our pipeline: every table we build later in the chapter can be reconstructed from it without touching the network at all. We will return to this idea when we discuss reproducibility at the end of the chapter.</p>
-<p>The <code>allowable_codes</code> setting deserves a note, because the default is to store only successful responses with status code 200. That default treats every other code as a failure not worth remembering, which is the wrong call for a 404. When we ask for the page views of an article that has none, the server’s 404 is not an error to retry; it is a stable, informative answer, and it will be the same answer tomorrow. Leaving it out of the cache means those requests go back over the network on every rerun, which is exactly the behavior the cache exists to prevent. Adding 404 to the allowable codes records the negative result alongside the positive ones, so that a second run of the chapter reaches the network zero times. Codes we genuinely might want to retry, such as the 429 of a rate limit or a 500 from a struggling server, stay uncached.</p>
+<p>By default, <code>requests_cache</code> stores only successful responses with status code 200 and treats every other code as a failure not worth remembering. For a 404 that is the wrong call. When we ask for the page views of an article that has none, the server’s 404 is a stable answer that will be the same tomorrow, so there is nothing to retry. Leaving it out of the cache would send those requests back over the network on every rerun. Adding 404 to <code>allowable_codes</code> records the negative results alongside the positive ones, so that a second run of the chapter reaches the network zero times. Codes we might want to retry, such as the 429 of a rate limit or a 500 from a struggling server, stay uncached.</p>
 </section>
 <section id="a-first-request" class="level2" data-number="12.5">
 <h2 data-number="12.5" class="anchored" data-anchor-id="a-first-request"><span class="header-section-number">12.5</span> A First Request</h2>
 <p>An API call needs three things: the endpoint URL, a dictionary of parameters, and a set of headers identifying who we are. The parameters are specific to each API, so consulting the documentation is unavoidable. The <code>User-Agent</code> header identifies your application and gives server administrators a way to contact you if your requests cause problems. Wikimedia requires a descriptive one; requests with generic or missing user agents may be blocked.</p>
-<div id="955cf7ec" class="cell" data-execution_count="4">
+<div id="4be55487" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>base_url <span class="op">=</span> <span class="st">"https://en.wikipedia.org/w/api.php"</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>headers <span class="op">=</span> {</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"User-Agent"</span>: <span class="st">"DataScienceBook/1.0 (tarnold2@richmond.edu)"</span></span>
@@ -414,7 +414,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>The <code>action</code> parameter tells the Action API what kind of operation we want (<code>query</code> retrieves data), <code>format</code> asks for JSON, <code>prop</code> names the property to fetch (<code>info</code> returns basic page metadata), and <code>titles</code> names the article. The status code of 200 confirms the request succeeded. The response body is JSON, which the response object can parse directly into Python dictionaries and lists.</p>
-<div id="9c5234ee" class="cell" data-execution_count="5">
+<div id="b39d5766" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> response.json()</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>data[<span class="st">"query"</span>][<span class="st">"pages"</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
@@ -431,7 +431,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>Here we see a pattern that recurs constantly with APIs: the useful data is nested several levels deep, inside <code>data["query"]["pages"]</code>, and is keyed by the page’s numeric ID rather than arranged as rows. We navigate to the nested records, pull out the fields we want as a list of dictionaries, and hand that list to Polars.</p>
-<div id="ed3ac53a" class="cell" data-execution_count="6">
+<div id="5372b509" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>rows <span class="op">=</span> []</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> page <span class="kw">in</span> data[<span class="st">"query"</span>][<span class="st">"pages"</span>].values():</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    rows.append({</span>
@@ -482,10 +482,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="being-a-polite-client" class="level2" data-number="12.6">
 <h2 data-number="12.6" class="anchored" data-anchor-id="being-a-polite-client"><span class="header-section-number">12.6</span> Being a Polite Client</h2>
-<p>Wikimedia’s APIs are free, and the etiquette they ask for in return is modest: send a real <code>User-Agent</code>, make requests serially rather than in parallel, and cache what you receive. There is also a formal <em>rate limit</em>, a cap on how many requests a client may send per unit of time. Exceed it and the server starts answering with status code 429 (“too many requests”) instead of data, at which point the correct behavior is to wait and retry rather than to push harder. Commercial APIs tend to have much stricter limits than Wikimedia’s, and hitting them repeatedly can get a key revoked, so pausing between requests is a habit worth building early.</p>
+<p>Wikimedia’s APIs are free, and the etiquette they ask for in return is modest: send a real <code>User-Agent</code>, make requests serially rather than in parallel, and cache what you receive. There is also a formal <em>rate limit</em>, a cap on how many requests a client may send per unit of time. Exceed it and the server starts answering with status code 429 (“too many requests”) instead of data, at which point the correct behavior is to wait and retry. Commercial APIs tend to have much stricter limits than Wikimedia’s, and hitting them repeatedly can get a key revoked, so pausing between requests is a habit worth building early.</p>
 <p>Since every request in the rest of the chapter uses the same session and headers, we wrap the pattern in a helper function. It raises an error on any failing status code and sleeps briefly after each request that actually went over the network. Cached responses skip the pause, which is what makes re-running the chapter fast.</p>
-<p>One detail matters more than it looks: clearing the session’s cookies before every request. Wikimedia’s responses carry <code>Vary: Cookie</code>, and the rotating session cookies it sets (<code>WMF-Uniq</code>, <code>NetworkProbeLimit</code>, and similar) would otherwise accumulate in <code>session.cookies</code> and get resent on later requests. Because <code>requests_cache</code> honors <code>Vary</code> headers by comparing the cookies attached to the current request against the cookies attached when a response was first cached, and those values differ on every run, a stale cookie jar silently defeats the entire cache: <code>expire_after=None</code> looks like it should make every rerun instant, but each request still fails its <code>Vary: Cookie</code> check and goes back out over the network. Since this API needs no cookies to work, clearing them keeps every request’s cookie state identical (empty) across runs, so cached entries actually get reused.</p>
-<div id="c81ee7b9" class="cell" data-execution_count="7">
+<p>The helper also clears the session’s cookies before every request, and the cache depends on it. Wikimedia’s responses carry <code>Vary: Cookie</code>, and the rotating session cookies it sets (<code>WMF-Uniq</code>, <code>NetworkProbeLimit</code>, and similar) would otherwise accumulate in <code>session.cookies</code> and get resent on later requests. <code>requests_cache</code> honors <code>Vary</code> headers by comparing the cookies on the current request with the cookies on the request that was first cached. Those values differ on every run, so a stale cookie jar silently defeats the whole cache. Even with <code>expire_after=None</code>, each request would fail its <code>Vary: Cookie</code> check and go back out over the network. This API needs no cookies, so clearing them keeps every request’s cookie state identical (empty) across runs, and cached entries get reused.</p>
+<div id="2d6050a6" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> polite_get(url, params<span class="op">=</span><span class="va">None</span>):</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    session.cookies.clear()</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    response <span class="op">=</span> session.get(url, params<span class="op">=</span>params, headers<span class="op">=</span>headers)</span>
@@ -501,7 +501,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>There are several reasonable ways to define a set of Wikipedia pages. You can curate a list by hand, which gives full control but does not scale and encodes your own blind spots. You can query the Wikidata knowledge graph for entities matching structured criteria such as occupation and birth country. Or you can use Wikipedia’s own <em>category</em> system, in which editors tag each article with subject labels. We take the category route here because it stays within the API we have already met, and because its imperfections are instructive.</p>
 <p>Our population is defined as the article pages belonging to two categories: <code>Category:Victorian novelists</code> and <code>Category:19th-century Irish novelists</code>. Together these give a corpus of nineteenth-century British and Irish novelists that is large enough to be interesting and small enough to collect in one sitting. Two caveats belong in the record. First, categories are maintained by volunteer editors, so membership reflects tagging practice as much as historical fact; an author missing the tag is invisible to us. Second, we collect only direct members and do not descend into subcategories, a deliberate choice that keeps the definition simple at the cost of some coverage.</p>
 <p>The Action API returns category members through <code>list=categorymembers</code>. A single response holds at most 500 results, so retrieving a full category requires <em>pagination</em>: when more results remain, the response includes a <code>continue</code> block whose values we feed back into the parameters of the next request, repeating until the block disappears.</p>
-<div id="3f642ac2" class="cell" data-execution_count="8">
+<div id="749ca9e0" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> category_members(category):</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    members <span class="op">=</span> []</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    params <span class="op">=</span> {</span>
@@ -521,7 +521,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> members</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Setting <code>cmtype</code> to <code>page</code> filters out subcategories and files, and <code>cmlimit</code> set to <code>"max"</code> asks for the largest batch the server allows. We run the function over both categories and stack the results into a table. A handful of authors appear in both categories, so we deduplicate on the page ID, keeping the first category we saw for each.</p>
-<div id="9a84443a" class="cell" data-execution_count="9">
+<div id="9c4ad22f" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>categories <span class="op">=</span> [</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Category:Victorian novelists"</span>,</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Category:19th-century Irish novelists"</span></span>
@@ -625,9 +625,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>This table is the spine of the corpus, and it carries two identifiers rather than one. The numeric <code>page_id</code> is the stable key: it survives a page being renamed, which a title does not. The article title, which we store as <code>doc_id</code>, is the readable key: <code>Emily Brontë</code> tells you who a row is about and <code>10393</code> does not. Neither is redundant, because each does something the other cannot, so every table we build below carries both. The chapters that analyze this corpus key their work on <code>doc_id</code>, since it is just as unique within the corpus and far easier to interpret in a printed table or a plot legend. Either column can join a table back to this one using the techniques from <a href="08_combine.html" class="quarto-xref"><span>Chapter 8</span></a>.</p>
+<p>This table is the spine of the corpus, and it carries two identifiers rather than one. The numeric <code>page_id</code> is the stable key: it survives a page being renamed, which a title does not. The article title, which we store as <code>doc_id</code>, is the readable key: <code>Emily Brontë</code> tells you who a row is about and <code>10393</code> does not. Every table we build below carries both. The chapters that analyze this corpus key their work on <code>doc_id</code>, since it is just as unique within the corpus and far easier to interpret in a printed table or a plot legend. Either column can join a table back to this one using the techniques from <a href="08_combine.html" class="quarto-xref"><span>Chapter 8</span></a>.</p>
 <p>Because that pairing shows up in every table that follows, it is worth a small helper. Given any table with a <code>page_id</code>, it looks the page up in a spine table, attaches the matching <code>doc_id</code>, and moves both keys to the front. The spine defaults to <code>authors</code>, which is what we want everywhere in this chapter until the very last section, where a second corpus arrives with a spine of its own.</p>
-<div id="2e4c8839" class="cell" data-execution_count="10">
+<div id="6fbbf3c2" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> add_doc_id(df, spine<span class="op">=</span><span class="va">None</span>):</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    spine <span class="op">=</span> authors <span class="cf">if</span> spine <span class="kw">is</span> <span class="va">None</span> <span class="cf">else</span> spine</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (</span>
@@ -641,7 +641,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 data-number="12.8" class="anchored" data-anchor-id="redirects-and-missing-pages"><span class="header-section-number">12.8</span> Redirects and Missing Pages</h2>
 <p>Our population came from category listings, which hand us canonical titles and page IDs directly. Corpora built from a hand-curated list start from titles typed by a person, and those are far less reliable. Wikipedia handles the mess through <em>redirects</em>: the page “Charlotte Bronte”, without the diaeresis, is not an article but a pointer that forwards readers to “Charlotte Brontë”. Dozens of alternate spellings, pen names, and former titles resolve this way. A title with no article and no redirect is simply missing.</p>
 <p>The Action API can resolve redirects for us if we pass <code>redirects=1</code>, and it batches nicely: up to 50 titles can go in a single request, separated by pipe characters. Here is a small demonstration with one redirect, one canonical title, and one title that does not exist.</p>
-<div id="4a86e19e" class="cell" data-execution_count="11">
+<div id="5953593c" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>params <span class="op">=</span> {</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"action"</span>: <span class="st">"query"</span>,</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"format"</span>: <span class="st">"json"</span>,</span>
@@ -656,7 +656,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>The <code>redirects</code> block records each substitution the server made, mapping the title we asked for to the title we got. Keeping this mapping is worth the trouble: if your source list says “Charlotte Bronte” and your corpus says “Charlotte Brontë”, the mapping is the only thing that connects them. Missing pages show up in the <code>pages</code> block flagged with a <code>missing</code> key and a negative placeholder ID.</p>
-<div id="915e4c64" class="cell" data-execution_count="12">
+<div id="36901869" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>{k: v <span class="cf">for</span> k, v <span class="kw">in</span> data[<span class="st">"query"</span>][<span class="st">"pages"</span>].items() <span class="cf">if</span> <span class="st">"missing"</span> <span class="kw">in</span> v}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="12">
 <pre><code>{'-1': {'ns': 0,
@@ -674,7 +674,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="article-text" class="level2" data-number="12.9">
 <h2 data-number="12.9" class="anchored" data-anchor-id="article-text"><span class="header-section-number">12.9</span> Article Text</h2>
 <p>With the population fixed, we start attaching data to it, beginning with the article text that the later chapter on textual data will analyze. The TextExtracts property of the Action API returns article text with the wiki markup stripped away. Setting <code>explaintext</code> gives plain text rather than HTML. The one quirk is that full-length extracts are limited to a single page per request, so this step is a loop over the corpus rather than a batched call. On the first run it is the slow part of the chapter; on every later run the cache answers instantly.</p>
-<div id="f09923ec" class="cell" data-execution_count="13">
+<div id="1ebd54b1" class="cell" data-execution_count="13">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>rows <span class="op">=</span> []</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> page_id <span class="kw">in</span> authors[<span class="st">"page_id"</span>]:</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    params <span class="op">=</span> {</span>
@@ -774,19 +774,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>A quick look at the opening of one article confirms the format: readable prose with section headings marked by equals signs, and no citations, tables, or infoboxes.</p>
-<div id="fc8d980f" class="cell" data-execution_count="14">
+<div id="a2bdab01" class="cell" data-execution_count="14">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(texts.row(<span class="dv">0</span>, named<span class="op">=</span><span class="va">True</span>)[<span class="st">"text"</span>][:<span class="dv">400</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Alfred Edward Woodley Mason (7 May 1865 – 22 November 1948) was an English author and Liberal Party Member of Parliament. He is best remembered for his 1902 novel of courage and cowardice in wartime, The Four Feathers, and is also known as the creator of Inspector Hanaud, a French detective who was an early template for Agatha Christie's famous Hercule Poirot.
 His prolific output in short stories </code></pre>
 </div>
 </div>
-<p>Extracts are a processed view of the article, which is exactly what we want for text analysis. If a project instead needs the raw wiki markup or the rendered HTML, the API provides both (through <code>prop=revisions</code> with <code>rvprop=content</code>, or the page HTML endpoints of the REST API), and the loop above transfers with minor changes.</p>
+<p>Extracts are a processed view of the article, which suits text analysis. If a project instead needs the raw wiki markup or the rendered HTML, the API provides both (through <code>prop=revisions</code> with <code>rvprop=content</code>, or the page HTML endpoints of the REST API), and the loop above transfers with minor changes.</p>
 </section>
 <section id="links-between-pages" class="level2" data-number="12.10">
 <h2 data-number="12.10" class="anchored" data-anchor-id="links-between-pages"><span class="header-section-number">12.10</span> Links Between Pages</h2>
 <p>Wikipedia articles link to each other constantly, and those links form a network: Charlotte Brontë’s article links to Elizabeth Gaskell’s, who wrote her biography. The chapter on network data will study this structure, so here we collect each article’s outgoing internal links. The <code>links</code> property returns them, restricted by <code>plnamespace=0</code> to links pointing at ordinary articles rather than talk pages or categories. Link lists can be long, so the same <code>continue</code> pagination we used for category members shows up again.</p>
-<div id="ecdb3456" class="cell" data-execution_count="15">
+<div id="c93ad64e" class="cell" data-execution_count="15">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>rows <span class="op">=</span> []</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> page_id <span class="kw">in</span> authors[<span class="st">"page_id"</span>]:</span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    params <span class="op">=</span> {</span>
@@ -892,7 +892,7 @@ His prolific output in short stories </code></pre>
 </div>
 </div>
 <p>Each row is one directed edge from an author’s page to some target title. Most targets are outside the corpus (places, novels, publishers), which is fine; the table records everything, and narrowing it is a join. Matching the target titles against the <code>authors</code> table keeps only the author-to-author edges and attaches the target’s identifiers.</p>
-<div id="bb1f4823" class="cell" data-execution_count="16">
+<div id="b9eb94f8" class="cell" data-execution_count="16">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>links_internal <span class="op">=</span> (</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    links</span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    .join(</span>
@@ -1019,7 +1019,7 @@ His prolific output in short stories </code></pre>
 <section id="revision-histories" class="level2" data-number="12.11">
 <h2 data-number="12.11" class="anchored" data-anchor-id="revision-histories"><span class="header-section-number">12.11</span> Revision Histories</h2>
 <p>Every Wikipedia article carries its complete edit history, and that history is a time series: when was the page created, when did editing surge, how did the article grow? The later chapter on temporal data starts from exactly this table. The <code>revisions</code> property returns the history in reverse chronological order, and for popular authors it runs to thousands of entries, so pagination appears once more, this time via a property-specific <code>rvcontinue</code> token that the generic <code>continue</code> block carries for us. We request the revision ID, timestamp, editor name, article size, and the editor’s summary comment at each revision, but not the article content itself, which keeps the responses small.</p>
-<div id="365b1f4b" class="cell" data-execution_count="17">
+<div id="75cd687a" class="cell" data-execution_count="17">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>rows <span class="op">=</span> []</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> page_id <span class="kw">in</span> authors[<span class="st">"page_id"</span>]:</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    params <span class="op">=</span> {</span>
@@ -1197,9 +1197,9 @@ His prolific output in short stories </code></pre>
 <pre><code>https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/
     {project}/{access}/{agent}/{article}/{granularity}/{start}/{end}</code></pre>
 <p>Each path segment is a choice. We use the <code>en.wikipedia</code> project, <code>all-access</code> to combine desktop and mobile, the <code>user</code> agent class to count human readers and exclude bots, <code>daily</code> granularity, and a fixed date range covering the 2025 calendar year. Fixing the range explicitly, rather than asking for “the last N days”, means a rerun of this code requests the same data rather than a window that drifts with the current date. The article title goes into the path with spaces replaced by underscores and any special characters percent-encoded, which is what <code>quote</code> handles.</p>
-<p>Notice <code>rest_v1</code> sitting in the URL. This is <em>API versioning</em>: the provider promises that endpoints under <code>v1</code> keep behaving the same way, and breaking changes arrive under a new version prefix instead. Version numbers in URLs are one of the quiet foundations of reproducible pipelines, since code that pins a version does not break when the provider moves on.</p>
+<p>Notice <code>rest_v1</code> sitting in the URL. This is <em>API versioning</em>: the provider promises that endpoints under <code>v1</code> keep behaving the same way, and breaking changes arrive under a new version prefix instead. Version numbers in URLs help keep pipelines reproducible, since code that pins a version does not break when the provider moves on.</p>
 <p>One wrinkle is that a small number of pages have no view data at all, and the API reports this with a 404 status rather than an empty list. Our <code>polite_get</code> helper would raise an error on a 404, so this loop calls the session directly and treats the status code as information: 404 means skip, anything else non-200 is a real problem. This is the loop that makes the <code>allowable_codes</code> setting from the caching section pay off. Those 404s are cached like any other response, so the handful of authors without view data are quietly skipped on every rerun without a single request leaving the machine.</p>
-<div id="832985e1" class="cell" data-execution_count="18">
+<div id="b2730095" class="cell" data-execution_count="18">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>pv_base <span class="op">=</span> (</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/"</span></span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"en.wikipedia/all-access/user/</span><span class="sc">{article}</span><span class="st">/daily/20250101/20251231"</span></span>
@@ -1333,7 +1333,7 @@ His prolific output in short stories </code></pre>
 </div>
 </div>
 <p>The timestamps arrive as strings such as <code>2025010100</code>, so we slice off the trailing hour digits and parse the rest as a date, then join the underscore-form titles back to the <code>authors</code> table to recover the page ID. As a check that the collection worked, here are the daily views for the three Brontë sisters across the year.</p>
-<div id="a04777e3" class="cell" data-execution_count="19">
+<div id="dd004b31" class="cell" data-execution_count="19">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>brontes <span class="op">=</span> (</span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    views</span>
 <span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(</span>
@@ -1359,7 +1359,7 @@ His prolific output in short stories </code></pre>
 <section id="language-links" class="level2" data-number="12.13">
 <h2 data-number="12.13" class="anchored" data-anchor-id="language-links"><span class="header-section-number">12.13</span> Language Links</h2>
 <p>English Wikipedia is one wiki among hundreds, and most of our authors have articles in other languages too. The <code>langlinks</code> property lists, for each page, the languages that have a corresponding article and its title there. Unlike text extracts, this property batches: we can send fifty page IDs per request, using the same chunking trick throughout, with <code>continue</code> pagination inside each batch in case the language lists overflow a response.</p>
-<div id="9f074028" class="cell" data-execution_count="20">
+<div id="eb244e43" class="cell" data-execution_count="20">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>ids <span class="op">=</span> authors[<span class="st">"page_id"</span>].to_list()</span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>batches <span class="op">=</span> [ids[i:(i <span class="op">+</span> <span class="dv">50</span>)] <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, <span class="bu">len</span>(ids), <span class="dv">50</span>)]</span>
 <span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1488,11 +1488,11 @@ His prolific output in short stories </code></pre>
 </section>
 <section id="a-second-corpus" class="level2" data-number="12.14">
 <h2 data-number="12.14" class="anchored" data-anchor-id="a-second-corpus"><span class="header-section-number">12.14</span> A Second Corpus</h2>
-<p>The category route gave us 376 novelists, nearly all of them born within a few decades of one another. For some questions that is the right corpus. For others it is the wrong one, and it is worth being honest about why. Suppose we want to ask which authors were alive at the same time. Among 376 Victorians, almost everyone overlaps with almost everyone, and the answer is a wall of yes. The question only becomes interesting over a population that spans centuries.</p>
+<p>The category route gave us 376 novelists, nearly all of them born within a few decades of one another. For some questions that is the right corpus, and for others it is not. Suppose we want to ask which authors were alive at the same time. Among 376 Victorians, almost everyone overlaps with almost everyone, and the answer is a wall of yes. The question only becomes interesting over a population that spans centuries.</p>
 <p>So we build a second, smaller corpus: 75 British and Irish authors running from Marie de France in the twelfth century to Seamus Heaney in the twenty-first. It is small enough that its tables fit on a printed page, and it is spread thinly enough across time that temporal questions have sparse, legible answers. The chapters on temporal, textual, and network data all work with this corpus; the larger one stays on disk in case you want to explore it further.</p>
-<p>This is the hand-curated route that “Defining the Population” named and declined, so building it costs us the thing that route costs everyone: the titles were typed by a person, and people typing 75 names make mistakes. That is exactly what the redirect machinery is for, and here is where it earns its place.</p>
-<p>The list itself, along with each author’s birth year, death year, era, and gender, as well as a link to each page and a short display name, lives in a small curated file in the repository. Those biographical fields do not come from the Action API at all. Somebody compiled them by hand, and a reader who wants to verify them has to check them against something other than Wikipedia. That is not an embarrassment to bury; it is precisely the kind of fact a provenance record exists to state.</p>
-<div id="41156fa5" class="cell" data-execution_count="21">
+<p>This is the hand-curated route that “Defining the Population” named and declined. The titles were typed by a person, and people typing 75 names make mistakes, which the redirect handling from earlier in the chapter will catch.</p>
+<p>The list itself, along with each author’s birth year, death year, era, and gender, as well as a link to each page and a short display name, lives in a small curated file in the repository. Those biographical fields do not come from the Action API at all. Somebody compiled them by hand, and a reader who wants to verify them has to check them against something other than Wikipedia. A provenance record should say so.</p>
+<div id="95d267bb" class="cell" data-execution_count="21">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>uk_curated <span class="op">=</span> pl.read_csv(<span class="st">"data/wiki_uk_meta.csv.gz"</span>)</span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    uk_curated</span>
@@ -1608,7 +1608,7 @@ His prolific output in short stories </code></pre>
 </div>
 </div>
 <p>To attach these authors to Wikipedia we need their page IDs, which means resolving each typed title to a real article. The function below batches fifty titles per request with <code>redirects=1</code>, then follows each title through whatever substitutions the server reports. Two kinds can apply, and they can chain: <code>normalized</code> fixes mechanical issues such as capitalization and underscores, while <code>redirects</code> follows an actual pointer page. Walking the map until it stops changing handles both, in any order, however many hops deep.</p>
-<div id="1e7021e0" class="cell" data-execution_count="22">
+<div id="53249dbb" class="cell" data-execution_count="22">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> resolve_titles(titles):</span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>    rows <span class="op">=</span> []</span>
 <span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    batches <span class="op">=</span> [titles[i:(i <span class="op">+</span> <span class="dv">50</span>)] <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, <span class="bu">len</span>(titles), <span class="dv">50</span>)]</span>
@@ -1682,9 +1682,9 @@ His prolific output in short stories </code></pre>
 </div>
 </div>
 </div>
-<p>Two titles moved, and they moved for different reasons. <code>Katherine Philipps</code> is simply a typo, with an extra <code>p</code> that a careful transcriber still managed to type. <code>Margaret Cavendish</code> is not an error at all: it is a real Wikipedia redirect from the short form of her name to the article’s full title, <code>Margaret Cavendish, Duchess of Newcastle-upon-Tyne</code>. Our list is not wrong about her, it is just less formal than Wikipedia. Both would have dropped out of the corpus had we looked up titles without following redirects, and the failure would have been silent, which is the dangerous part.</p>
+<p>Two titles moved, and they moved for different reasons. <code>Katherine Philipps</code> is simply a typo, with an extra <code>p</code> that a careful transcriber still managed to type. <code>Margaret Cavendish</code> is not an error: it is a real Wikipedia redirect from the short form of her name to the article’s full title, <code>Margaret Cavendish, Duchess of Newcastle-upon-Tyne</code>. Our list is just less formal than Wikipedia. Had we looked up titles without following redirects, both authors would have dropped out of the corpus without any warning.</p>
 <p>Titles that resolve to nothing at all deserve a separate look, since a null page ID means no article and no redirect. Here the table comes back empty, which is the answer we want, but the check belongs in the code rather than in our memory of having once run it.</p>
-<div id="6910ca3b" class="cell" data-execution_count="23">
+<div id="a95f493a" class="cell" data-execution_count="23">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    resolved</span>
 <span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.page_id.is_null())</span>
@@ -1718,7 +1718,7 @@ His prolific output in short stories </code></pre>
 </div>
 </div>
 <p>Now the spine of the second corpus. We keep the curated title as <code>doc_id</code> (it is the name the analysis chapters will print) while keying on the <code>page_id</code> the server gave us, and we carry the resolved title along in a working table because the page view API needs the canonical form rather than ours.</p>
-<div id="6da1bd45" class="cell" data-execution_count="24">
+<div id="e94c13f0" class="cell" data-execution_count="24">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>uk_pages <span class="op">=</span> (</span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>    uk_curated</span>
 <span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    .join(resolved, on<span class="op">=</span>c.doc_id)</span>
@@ -1865,8 +1865,8 @@ His prolific output in short stories </code></pre>
 </div>
 </div>
 </div>
-<p>The revision histories come next, with one change from the loop we wrote before: we ask for 500 revisions and stop, rather than paginating to the end of history. Five hundred is the most a single request will return, so dropping the <code>continue</code> loop gives us exactly the 500 most recent edits per page. This is a deliberate ceiling rather than a shortcut. Chaucer’s article has been edited for twenty years, and the full history of all 75 pages would be a large table that answers no question the analysis chapters actually ask.</p>
-<div id="c917e3a7" class="cell" data-execution_count="25">
+<p>The revision histories come next, with one change from the loop we wrote before: we ask for 500 revisions and stop, rather than paginating to the end of history. Five hundred is the most a single request will return, so dropping the <code>continue</code> loop gives us exactly the 500 most recent edits per page. The ceiling is deliberate. Chaucer’s article has been edited for twenty years, and the full history of all 75 pages would be a large table that answers no question the analysis chapters ask.</p>
+<div id="03fd75ee" class="cell" data-execution_count="25">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>rows <span class="op">=</span> []</span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> page_id <span class="kw">in</span> uk_meta[<span class="st">"page_id"</span>]:</span>
 <span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    params <span class="op">=</span> {</span>
@@ -2037,7 +2037,7 @@ His prolific output in short stories </code></pre>
 </div>
 </div>
 <p>Page views use the same REST endpoint and the same fixed 2025 window as before, sent against the resolved titles.</p>
-<div id="6881ad44" class="cell" data-execution_count="26">
+<div id="c4925804" class="cell" data-execution_count="26">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>rows <span class="op">=</span> []</span>
 <span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> row <span class="kw">in</span> uk_pages.iter_rows(named<span class="op">=</span><span class="va">True</span>):</span>
 <span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>    article <span class="op">=</span> quote(row[<span class="st">"resolved"</span>].replace(<span class="st">" "</span>, <span class="st">"_"</span>), safe<span class="op">=</span><span class="st">""</span>)</span>
@@ -2188,13 +2188,13 @@ His prolific output in short stories </code></pre>
 </div>
 </div>
 </div>
-<p>Notice what these two tables do not contain: a <code>Date</code> column, or a <code>Datetime</code> column. The page views carry <code>year</code>, <code>month</code>, and <code>day</code> as three separate integers, and the revisions carry a timestamp string in the <code>YYYY-MM-DD HH:MM:SS</code> form that <a href="10_collect.html" class="quarto-xref"><span>Chapter 10</span></a> recommends for recording times by hand. Our main corpus, parsed as it was built, follows the other convention.</p>
+<p>Neither table contains a <code>Date</code> or <code>Datetime</code> column. The page views carry <code>year</code>, <code>month</code>, and <code>day</code> as three separate integers, and the revisions carry a timestamp string in the <code>YYYY-MM-DD HH:MM:SS</code> form that <a href="10_collect.html" class="quarto-xref"><span>Chapter 10</span></a> recommends for recording times by hand. Our main corpus, parsed as it was built, follows the other convention.</p>
 <p>The inconsistency is on purpose. Recording the components and constructing a date from them are two different jobs, and <a href="13_temporal_data.html" class="quarto-xref"><span>Chapter 13</span></a> is about the second one. Leaving these columns in the form the API and a careful data-recorder would give us means the next chapter has something real to convert.</p>
 </section>
 <section id="raw-and-processed-layers" class="level2" data-number="12.15">
 <h2 data-number="12.15" class="anchored" data-anchor-id="raw-and-processed-layers"><span class="header-section-number">12.15</span> Raw and Processed Layers</h2>
 <p>We now have nine tables in memory across two corpora, and it is time to make the pipeline’s structure explicit on disk. The design principle is a separation between two layers. The <em>raw layer</em> is the requests cache: the exact, unmodified responses the servers sent, stored as they arrived. The <em>processed layer</em> is the set of tidy tables we built from them, saved in Parquet format. Everything in the processed layer can be regenerated from the raw layer by re-running this chapter’s code, without any network access, which means normalization decisions (which fields to keep, how to parse timestamps, how to handle duplicates) can be revisited months later without re-downloading anything.</p>
-<div id="5e277127" class="cell" data-execution_count="27">
+<div id="3389b5bb" class="cell" data-execution_count="27">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>Path(<span class="st">"data/wiki/uk"</span>).mkdir(parents<span class="op">=</span><span class="va">True</span>, exist_ok<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>authors.write_parquet(<span class="st">"data/wiki/authors.parquet"</span>)</span>
@@ -2209,7 +2209,7 @@ His prolific output in short stories </code></pre>
 <span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>uk_views.write_parquet(<span class="st">"data/wiki/uk/pageviews.parquet"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The remaining chapters read these files directly and never call the APIs again. A dataset that other people (including your future self) will use also needs documentation, and the minimum viable form is a manifest file recording what was collected, from where, when, and under what definition of the population. Writing it programmatically keeps the counts honest.</p>
-<div id="abaac19c" class="cell" data-execution_count="28">
+<div id="5e928f28" class="cell" data-execution_count="28">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datetime <span class="im">import</span> date</span>
 <span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>manifest <span class="op">=</span> <span class="ss">f"""# Wikipedia author corpus</span></span>
@@ -2229,13 +2229,13 @@ His prolific output in short stories </code></pre>
 <span id="cb33-17"><a href="#cb33-17" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">"data/wiki/MANIFEST.md"</span>, <span class="st">"w"</span>) <span class="im">as</span> f:</span>
 <span id="cb33-18"><a href="#cb33-18" aria-hidden="true" tabindex="-1"></a>    f.write(manifest)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>None of this is elaborate, and that is the point. A directory of Parquet files, a cache, and a manifest turn “some data I downloaded” into a dataset that can be checked, cited, and rebuilt.</p>
+<p>None of this is elaborate. A directory of Parquet files, a cache, and a manifest turn “some data I downloaded” into a dataset that can be checked, cited, and rebuilt.</p>
 </section>
 <section id="reproducible-snapshots" class="level2" data-number="12.16">
 <h2 data-number="12.16" class="anchored" data-anchor-id="reproducible-snapshots"><span class="header-section-number">12.16</span> Reproducible Snapshots</h2>
-<p>Wikipedia changes every minute, so the corpus we just built is a <em>snapshot</em>: what the encyclopedia looked like at the moment of retrieval. Someone running this chapter’s code next year will get different category memberships, longer articles, and more revisions, and nothing in the code will warn them that the results have shifted. Reproducibility here does not mean freezing Wikipedia; it means being precise about what was captured and making the captured version recoverable. Our pipeline does this at three levels.</p>
+<p>Wikipedia changes every minute, so the corpus we just built is a <em>snapshot</em>: what the encyclopedia looked like at the moment of retrieval. Someone running this chapter’s code next year will get different category memberships, longer articles, and more revisions, and nothing in the code will warn them that the results have shifted. We cannot freeze Wikipedia, so reproducibility here means being precise about what was captured and making the captured version recoverable. Our pipeline does this at three levels.</p>
 <p>The manifest records the retrieval date and the population definition, so anyone can state exactly what the snapshot covers. The requests cache preserves the responses themselves, so the processed tables can be rebuilt byte-for-byte from the raw layer. And the revision IDs in the <code>revisions</code> table pin each article to immutable versions: passing an ID to the Action API’s <code>revids</code> parameter returns that exact text forever, even after the live article has moved on. Archiving the <code>data/wiki/</code> directory alongside the analysis code is therefore a complete, self-contained record of the study’s inputs.</p>
-<p>Two further practices round out the picture. First, when an API offers versioned output, ask for it explicitly: we already rely on the <code>rest_v1</code> prefix, and the Action API has a similar mechanism described in the callout below. Second, for projects that need all of Wikipedia rather than a sample, the Wikimedia Foundation publishes complete database dumps at <a href="https://dumps.wikimedia.org/">https://dumps.wikimedia.org/</a>, which are themselves dated snapshots and remove the API from the loop entirely.</p>
+<p>Two further practices help. First, when an API offers versioned output, ask for it explicitly: we already rely on the <code>rest_v1</code> prefix, and the Action API has a similar mechanism described in the callout below. Second, for projects that need all of Wikipedia rather than a sample, the Wikimedia Foundation publishes complete database dumps at <a href="https://dumps.wikimedia.org/">https://dumps.wikimedia.org/</a>, which are themselves dated snapshots and remove the API from the loop entirely.</p>
 <div class="callout callout-style-simple callout-note callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -2255,7 +2255,7 @@ His prolific output in short stories </code></pre>
 </section>
 <section id="conclusions" class="level2" data-number="12.17">
 <h2 data-number="12.17" class="anchored" data-anchor-id="conclusions"><span class="header-section-number">12.17</span> Conclusions</h2>
-<p>This chapter treated data acquisition as engineering rather than as a download step. The HTTP mechanics came first: endpoints, parameters, headers, status codes, pagination, rate limits, and the flattening of nested JSON into tables. We then put them to work building a corpus of nineteenth-century British and Irish novelists, with deliberate decisions along the way about how the population was sampled, how redirects and missing pages were handled, why every table carries both a stable key and a readable one, and how the raw and processed layers of the pipeline stay separate. A second, smaller corpus followed from a curated list, sampled a different way for different questions.</p>
+<p>This chapter treated data acquisition as an engineering task. The HTTP mechanics came first: endpoints, parameters, headers, status codes, pagination, rate limits, and the flattening of nested JSON into tables. We then put them to work building a corpus of nineteenth-century British and Irish novelists, with deliberate decisions along the way about how the population was sampled, how redirects and missing pages were handled, why every table carries both a stable key and a readable one, and how the raw and processed layers of the pipeline stay separate. A second, smaller corpus followed from a curated list, sampled a different way for different questions.</p>
 <p>The pattern generalizes well beyond Wikipedia. Whatever the API, the same questions apply: what defines the population, which identifier is stable, where do the raw responses live, and what someone would need to rebuild your tables. The corpus now waits on disk, and the next chapters pick it up: the revision histories and page views feed the temporal analysis, the article texts feed the textual analysis, and the link table feeds the network analysis.</p>
 </section>
 <section id="references" class="level2 unnumbered">

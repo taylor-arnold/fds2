@@ -97,41 +97,10 @@ of the meals they name. The column looks like a property of the food. Part of it
 property of the interview.
 
 3. Now hand the same column to a plot. `geom_bar` takes one categorical aesthetic,
-counts the rows in each category, and draws each count as a bar, so it should reproduce
-the table you just made. Flip the coordinates so the labels are readable.
-
-```{python}
-(
-    food
-    .ggplot(aes(c.meal_name))
-    .geom_bar(fill="white", color="black")
-    .coord_flip()
-)
-```
-
-The bar heights are right and the plot is close to useless. `Other` and `Tentempie`, the
-two smallest categories in the data, sit at the top, and `Dinner` is at the bottom.
-Nothing sorted them, which is the point: a categorical axis follows the order the values
-first appear in the data, and `meal_name` first appears in whatever order the survey
-happened to store its rows. There is no ordering step inside the plot to reach for.
-
-4. Ordering the plot means ordering the data. There are two ways to do it, and they
-differ in who does the counting. The first is to compute the counts yourself, sort them,
-and hand the finished numbers to `geom_col`, which draws the `y` you give it and counts
-nothing. The second is to leave the counting to `geom_bar` and sort the rows by a window
-aggregate, so that every row of a category carries the size of its own category.
-
-```{python}
-(
-    food
-    .group_by(c.meal_name)
-    .agg(n = pl.len())
-    .sort(c.n)
-    .ggplot(aes(c.meal_name, c.n))
-    .geom_col(fill="white", color="black")
-    .coord_flip()
-)
-```
+counts the rows in each category, and draws each count as a bar. Left alone, the bars
+come out in whatever order the meal names first appear in the data, so sort the rows by
+`pl.len().over(c.meal_name)` before plotting, and flip the coordinates so the labels are
+readable.
 
 ```{python}
 (
@@ -143,19 +112,18 @@ aggregate, so that every row of a category carries the size of its own category.
 )
 ```
 
-The two plots are identical, and in neither one did we tell the plot to sort anything.
-The first sorts a table of 20 rows on a column that is right there. The second sorts a
-table of 173,174 rows on a number that does not exist in it: `pl.len().over(c.meal_name)`
-writes each category's size onto every row of that category. That is last chapter's
-window function, earning its keep in a bar chart. Reach for `geom_col` when the number
-you want is already in the frame, and for `geom_bar` when it is a plain count of rows and
-you would rather not compute it.
+The sort is on a number that does not exist in the table: `pl.len().over(c.meal_name)`
+writes each category's size onto every row of that category, which is last chapter's
+window function earning its keep in a bar chart. You could also have counted the rows
+yourself with `group_by`, sorted the 20-row result, and drawn it with `geom_col`; the
+picture is the same. The long tail of small categories is easier to see here than in the
+table: `Dinner`, `Lunch`, `Breakfast`, and `Snack` dwarf everything else.
 
-5. Here is where the two geometries stop being interchangeable, because the number worth
-drawing is not always a count. Draw the average calories per item by `food_source`. Drop
-the rows where the source was not recorded, and keep only sources with at least 500
-items, since a mean over a handful of rows is not a number anyone should plot.
-
+4. Here is where the two geometries stop being interchangeable, because the number worth
+drawing is not always a count. Draw the average calories per item by `food_source` with
+`geom_col`. Drop the rows where the source was not recorded, and keep only sources with
+at least 500 items, since a mean over a handful of rows is not a number anyone should
+plot.
 ```{python}
 (
     food
@@ -181,7 +149,7 @@ so this is a statement about how calorically dense a single recorded item tends 
 Fast food arrives in bigger units, and one of the reasons the supermarket bar is low is
 that a glass of water from your own kitchen is an item too.
 
-6. Turn to the calories themselves. A histogram cuts a numeric column into equal
+5. Turn to the calories themselves. A histogram cuts a numeric column into equal
 intervals and counts the values in each one, which makes it a grouped count where the
 groups are intervals. Draw one for `kcal` with a bin width of 25. Then cut the zeros and
 the long right tail and draw it again.
@@ -211,12 +179,12 @@ water: 11,069 bottled and 10,111 from the tap. Nearly half of everything filed u
 food, and while they are in the frame they set the y-axis and flatten everything else.
 
 In the second plot the shape is visible: a peak in the smallest bin and a long, steady
-decline. The median item is 79 calories. Be honest with yourself about what those two
+decline. The median item in the whole table is 79 calories. Be honest with yourself about what those two
 filters did, though. They did not fix the plot; they chose a subset of the data and
 plotted that. The 23,132 zeros and the 4,862 calorie item are still out there, and a
 reader looking at the second histogram cannot see either one.
 
-7. Items are not the unit anyone actually cares about. Add up each person's day and look
+6. Items are not the unit anyone actually cares about. Add up each person's day and look
 at the distribution of daily totals instead. Save this one as `person`, since we use it
 again below.
 
@@ -248,7 +216,7 @@ asked to remember the previous day. Under-reporting in dietary recall is large,
 systematic, and not evenly spread across people. Every number in this notebook inherits
 it.
 
-8. A boxplot summarizes a numeric column separately for each level of a categorical one.
+7. A boxplot summarizes a numeric column separately for each level of a categorical one.
 Total up what each person ate at each of the four main meals, then draw the four
 distributions, ordered by their medians.
 
@@ -266,7 +234,7 @@ distributions, ordered by their medians.
 ```
 
 The medians run 347 calories at breakfast, 360 at snacks, 510 at lunch, and 639 at
-dinner. The ordering trick is the one from question 4 with a median in place of a count:
+dinner. The ordering trick is the one from question 3 with a median in place of a count:
 `.sort(c.kcal.median().over(c.meal_name))` writes each meal's median onto every row of
 that meal and sorts on it. Sorting on a plain `.sort(c.kcal)` would have ordered the
 meals by whichever person in each one happened to land first.
@@ -275,17 +243,10 @@ Snacks are the interesting box. The median is near breakfast's, but the box is m
 wider and the whisker runs further, because "snack" covers both a stick of gum and a
 second dinner.
 
-9. Now the same idea on the day of the week. Draw a boxplot of each person's daily
-calories against `day_of_week`, which is stored as an integer. Then cast the column to a
-string, sorting the rows first, and draw it again.
-
-```{python}
-(
-    person
-    .ggplot(aes(c.day_of_week, c.kcal))
-    .geom_boxplot()
-)
-```
+8. Now the same idea on the day of the week. Draw a boxplot of each person's daily
+calories against `day_of_week`. The column is stored as an integer, which plotnine would
+read as a continuous quantity and draw as a single box, so sort the rows by it and then
+cast it to a string before plotting.
 
 ```{python}
 (
@@ -297,23 +258,16 @@ string, sorting the rows first, and draw it again.
 )
 ```
 
-**Answer**: The first plot is one box, sitting at x = 4, spanning the whole axis.
-Plotnine reads a column of numbers as a continuous quantity, so it saw no categories to
-split on and drew a single box over all 11,925 people, parked at the midpoint of the
-range. Nothing raised an error, and the box it drew is a perfectly accurate summary of a
-table you never asked it to summarize. Once the column is text, each distinct value
-becomes a category and you get seven boxes.
-
-The sort has to come before the cast. Sort a string column and you get 1, 2, 3, 4, 5, 6,
-7 by luck here, but 1, 10, 11, 2 the moment there are more than nine categories. The
-medians barely move, from 1,744 on day 1 to 1,898 on day 6.
+**Answer**: The sort has to come before the cast. Sort a string column and you get 1, 2,
+3, 4, 5, 6, 7 by luck here, but 1, 10, 11, 2 the moment there are more than nine
+categories. The medians barely move, from 1,744 on day 1 to 1,898 on day 6.
 
 The boxes are also not what they look like. They appear to be seven comparable groups,
 and they are not: day 1 holds 942 people, while days 5, 6, and 7 hold 3,149, 2,797, and
 2,005. That imbalance is a fact about when the survey scheduled its interviews, not about
 when America eats, and no plot of this column will tell you which day is which.
 
-10. Close with two numeric columns. `geom_smooth` fits a model to the relationship
+9. Close with two numeric columns. `geom_smooth` fits a model to the relationship
 between them and draws the fitted curve; with `method="lm"` it is a straight line, and
 `se=False` turns off the confidence band. Plot each person's total mass of food against
 their total calories, with the points behind the line.

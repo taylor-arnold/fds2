@@ -30,7 +30,7 @@ import requests_cache
 
 Every dataset in the book so far arrived as a file: something we could read with `pl.read_csv` and inspect in full before writing a line of analysis code. A lot of interesting data does not come packaged that way. It sits on remote servers and is only available through a programmatic interface, either because it changes too often to distribute as a static file or because the provider wants to control how it is accessed. Weather forecasts, library catalogs, legislative records, and the entire edit history of Wikipedia all fall in this category.
 
-This chapter has two goals. The first is to teach the mechanics of *application programming interfaces* (APIs): how to send an HTTP request, read the response codes, page through large result sets, and turn nested JSON into the flat tables we know how to work with. The second goal is to actually build something with those mechanics. Over the course of the chapter we will assemble a corpus of Wikipedia articles about nineteenth-century British and Irish novelists, collecting each article's metadata, full text, internal links, revision history, daily page views, and links to versions in other languages. The chapters that follow on temporal, textual, and network data all analyze this corpus, so the output here is not a throwaway example. It is a small, documented data pipeline, and the decisions we make while building it (how the sample is defined, how redirects are handled, which identifiers we key on, when the data was retrieved) will matter every time the data gets used later.
+This chapter has two goals. The first is to teach the mechanics of *application programming interfaces* (APIs): how to send an HTTP request, read the response codes, page through large result sets, and turn nested JSON into the flat tables we know how to work with. The second goal is to build something with those mechanics. Over the course of the chapter we will assemble a corpus of Wikipedia articles about nineteenth-century British and Irish novelists, collecting each article's metadata, full text, internal links, revision history, daily page views, and links to versions in other languages. The chapters that follow on temporal, textual, and network data all analyze this corpus, so what we build here is a small, documented data pipeline, and the decisions we make while building it (how the sample is defined, how redirects are handled, which identifiers we key on, when the data was retrieved) will matter every time the data gets used later.
 
 We work with Wikipedia for a practical reason: its APIs are free, require no account or key, and expose an unusually wide range of data types from a single source. The same request patterns apply to almost any HTTP-based API you will meet in practice.
 
@@ -58,7 +58,7 @@ session = requests_cache.CachedSession(
 
 The cache matters for three reasons. It avoids hammering the server with repeated requests for the same data, which the Wikimedia Foundation explicitly asks clients to avoid. It makes development fast, since re-running a notebook pulls everything from disk instead of the network. And, most useful for our purposes, the cache file is a permanent record of the exact bytes the server sent us. Setting `expire_after=None` means entries never expire, so the SQLite file becomes the *raw layer* of our pipeline: every table we build later in the chapter can be reconstructed from it without touching the network at all. We will return to this idea when we discuss reproducibility at the end of the chapter.
 
-The `allowable_codes` setting deserves a note, because the default is to store only successful responses with status code 200. That default treats every other code as a failure not worth remembering, which is the wrong call for a 404. When we ask for the page views of an article that has none, the server's 404 is not an error to retry; it is a stable, informative answer, and it will be the same answer tomorrow. Leaving it out of the cache means those requests go back over the network on every rerun, which is exactly the behavior the cache exists to prevent. Adding 404 to the allowable codes records the negative result alongside the positive ones, so that a second run of the chapter reaches the network zero times. Codes we genuinely might want to retry, such as the 429 of a rate limit or a 500 from a struggling server, stay uncached.
+By default, `requests_cache` stores only successful responses with status code 200 and treats every other code as a failure not worth remembering. For a 404 that is the wrong call. When we ask for the page views of an article that has none, the server's 404 is a stable answer that will be the same tomorrow, so there is nothing to retry. Leaving it out of the cache would send those requests back over the network on every rerun. Adding 404 to `allowable_codes` records the negative results alongside the positive ones, so that a second run of the chapter reaches the network zero times. Codes we might want to retry, such as the 429 of a rate limit or a 500 from a struggling server, stay uncached.
 
 ## A First Request
 
@@ -107,11 +107,11 @@ The `length` field is the size of the article source in bytes and `touched` reco
 
 ## Being a Polite Client
 
-Wikimedia's APIs are free, and the etiquette they ask for in return is modest: send a real `User-Agent`, make requests serially rather than in parallel, and cache what you receive. There is also a formal *rate limit*, a cap on how many requests a client may send per unit of time. Exceed it and the server starts answering with status code 429 ("too many requests") instead of data, at which point the correct behavior is to wait and retry rather than to push harder. Commercial APIs tend to have much stricter limits than Wikimedia's, and hitting them repeatedly can get a key revoked, so pausing between requests is a habit worth building early.
+Wikimedia's APIs are free, and the etiquette they ask for in return is modest: send a real `User-Agent`, make requests serially rather than in parallel, and cache what you receive. There is also a formal *rate limit*, a cap on how many requests a client may send per unit of time. Exceed it and the server starts answering with status code 429 ("too many requests") instead of data, at which point the correct behavior is to wait and retry. Commercial APIs tend to have much stricter limits than Wikimedia's, and hitting them repeatedly can get a key revoked, so pausing between requests is a habit worth building early.
 
 Since every request in the rest of the chapter uses the same session and headers, we wrap the pattern in a helper function. It raises an error on any failing status code and sleeps briefly after each request that actually went over the network. Cached responses skip the pause, which is what makes re-running the chapter fast.
 
-One detail matters more than it looks: clearing the session's cookies before every request. Wikimedia's responses carry `Vary: Cookie`, and the rotating session cookies it sets (`WMF-Uniq`, `NetworkProbeLimit`, and similar) would otherwise accumulate in `session.cookies` and get resent on later requests. Because `requests_cache` honors `Vary` headers by comparing the cookies attached to the current request against the cookies attached when a response was first cached, and those values differ on every run, a stale cookie jar silently defeats the entire cache: `expire_after=None` looks like it should make every rerun instant, but each request still fails its `Vary: Cookie` check and goes back out over the network. Since this API needs no cookies to work, clearing them keeps every request's cookie state identical (empty) across runs, so cached entries actually get reused.
+The helper also clears the session's cookies before every request, and the cache depends on it. Wikimedia's responses carry `Vary: Cookie`, and the rotating session cookies it sets (`WMF-Uniq`, `NetworkProbeLimit`, and similar) would otherwise accumulate in `session.cookies` and get resent on later requests. `requests_cache` honors `Vary` headers by comparing the cookies on the current request with the cookies on the request that was first cached. Those values differ on every run, so a stale cookie jar silently defeats the whole cache. Even with `expire_after=None`, each request would fail its `Vary: Cookie` check and go back out over the network. This API needs no cookies, so clearing them keeps every request's cookie state identical (empty) across runs, and cached entries get reused.
 
 ```{python}
 def polite_get(url, params=None):
@@ -178,7 +178,7 @@ authors = (
 authors
 ```
 
-This table is the spine of the corpus, and it carries two identifiers rather than one. The numeric `page_id` is the stable key: it survives a page being renamed, which a title does not. The article title, which we store as `doc_id`, is the readable key: `Emily Brontë` tells you who a row is about and `10393` does not. Neither is redundant, because each does something the other cannot, so every table we build below carries both. The chapters that analyze this corpus key their work on `doc_id`, since it is just as unique within the corpus and far easier to interpret in a printed table or a plot legend. Either column can join a table back to this one using the techniques from @sec-combine.
+This table is the spine of the corpus, and it carries two identifiers rather than one. The numeric `page_id` is the stable key: it survives a page being renamed, which a title does not. The article title, which we store as `doc_id`, is the readable key: `Emily Brontë` tells you who a row is about and `10393` does not. Every table we build below carries both. The chapters that analyze this corpus key their work on `doc_id`, since it is just as unique within the corpus and far easier to interpret in a printed table or a plot legend. Either column can join a table back to this one using the techniques from @sec-combine.
 
 Because that pairing shows up in every table that follows, it is worth a small helper. Given any table with a `page_id`, it looks the page up in a spine table, attaches the matching `doc_id`, and moves both keys to the front. The spine defaults to `authors`, which is what we want everywhere in this chapter until the very last section, where a second corpus arrives with a spine of its own.
 
@@ -248,7 +248,7 @@ A quick look at the opening of one article confirms the format: readable prose w
 print(texts.row(0, named=True)["text"][:400])
 ```
 
-Extracts are a processed view of the article, which is exactly what we want for text analysis. If a project instead needs the raw wiki markup or the rendered HTML, the API provides both (through `prop=revisions` with `rvprop=content`, or the page HTML endpoints of the REST API), and the loop above transfers with minor changes.
+Extracts are a processed view of the article, which suits text analysis. If a project instead needs the raw wiki markup or the rendered HTML, the API provides both (through `prop=revisions` with `rvprop=content`, or the page HTML endpoints of the REST API), and the loop above transfers with minor changes.
 
 ## Links Between Pages
 
@@ -351,7 +351,7 @@ https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/
 
 Each path segment is a choice. We use the `en.wikipedia` project, `all-access` to combine desktop and mobile, the `user` agent class to count human readers and exclude bots, `daily` granularity, and a fixed date range covering the 2025 calendar year. Fixing the range explicitly, rather than asking for "the last N days", means a rerun of this code requests the same data rather than a window that drifts with the current date. The article title goes into the path with spaces replaced by underscores and any special characters percent-encoded, which is what `quote` handles.
 
-Notice `rest_v1` sitting in the URL. This is *API versioning*: the provider promises that endpoints under `v1` keep behaving the same way, and breaking changes arrive under a new version prefix instead. Version numbers in URLs are one of the quiet foundations of reproducible pipelines, since code that pins a version does not break when the provider moves on.
+Notice `rest_v1` sitting in the URL. This is *API versioning*: the provider promises that endpoints under `v1` keep behaving the same way, and breaking changes arrive under a new version prefix instead. Version numbers in URLs help keep pipelines reproducible, since code that pins a version does not break when the provider moves on.
 
 One wrinkle is that a small number of pages have no view data at all, and the API reports this with a 404 status rather than an empty list. Our `polite_get` helper would raise an error on a 404, so this loop calls the session directly and treats the status code as information: 404 means skip, anything else non-200 is a real problem. This is the loop that makes the `allowable_codes` setting from the caching section pay off. Those 404s are cached like any other response, so the handful of authors without view data are quietly skipped on every rerun without a single request leaving the machine.
 
@@ -453,13 +453,13 @@ Counting rows per author gives a rough measure of international prominence, and 
 
 ## A Second Corpus
 
-The category route gave us 376 novelists, nearly all of them born within a few decades of one another. For some questions that is the right corpus. For others it is the wrong one, and it is worth being honest about why. Suppose we want to ask which authors were alive at the same time. Among 376 Victorians, almost everyone overlaps with almost everyone, and the answer is a wall of yes. The question only becomes interesting over a population that spans centuries.
+The category route gave us 376 novelists, nearly all of them born within a few decades of one another. For some questions that is the right corpus, and for others it is not. Suppose we want to ask which authors were alive at the same time. Among 376 Victorians, almost everyone overlaps with almost everyone, and the answer is a wall of yes. The question only becomes interesting over a population that spans centuries.
 
 So we build a second, smaller corpus: 75 British and Irish authors running from Marie de France in the twelfth century to Seamus Heaney in the twenty-first. It is small enough that its tables fit on a printed page, and it is spread thinly enough across time that temporal questions have sparse, legible answers. The chapters on temporal, textual, and network data all work with this corpus; the larger one stays on disk in case you want to explore it further.
 
-This is the hand-curated route that "Defining the Population" named and declined, so building it costs us the thing that route costs everyone: the titles were typed by a person, and people typing 75 names make mistakes. That is exactly what the redirect machinery is for, and here is where it earns its place.
+This is the hand-curated route that "Defining the Population" named and declined. The titles were typed by a person, and people typing 75 names make mistakes, which the redirect handling from earlier in the chapter will catch.
 
-The list itself, along with each author's birth year, death year, era, and gender, as well as a link to each page and a short display name, lives in a small curated file in the repository. Those biographical fields do not come from the Action API at all. Somebody compiled them by hand, and a reader who wants to verify them has to check them against something other than Wikipedia. That is not an embarrassment to bury; it is precisely the kind of fact a provenance record exists to state.
+The list itself, along with each author's birth year, death year, era, and gender, as well as a link to each page and a short display name, lives in a small curated file in the repository. Those biographical fields do not come from the Action API at all. Somebody compiled them by hand, and a reader who wants to verify them has to check them against something other than Wikipedia. A provenance record should say so.
 
 ```{python}
 uk_curated = pl.read_csv("data/wiki_uk_meta.csv.gz")
@@ -509,7 +509,7 @@ resolved = resolve_titles(uk_curated["doc_id"].to_list())
 )
 ```
 
-Two titles moved, and they moved for different reasons. `Katherine Philipps` is simply a typo, with an extra `p` that a careful transcriber still managed to type. `Margaret Cavendish` is not an error at all: it is a real Wikipedia redirect from the short form of her name to the article's full title, `Margaret Cavendish, Duchess of Newcastle-upon-Tyne`. Our list is not wrong about her, it is just less formal than Wikipedia. Both would have dropped out of the corpus had we looked up titles without following redirects, and the failure would have been silent, which is the dangerous part.
+Two titles moved, and they moved for different reasons. `Katherine Philipps` is simply a typo, with an extra `p` that a careful transcriber still managed to type. `Margaret Cavendish` is not an error: it is a real Wikipedia redirect from the short form of her name to the article's full title, `Margaret Cavendish, Duchess of Newcastle-upon-Tyne`. Our list is just less formal than Wikipedia. Had we looked up titles without following redirects, both authors would have dropped out of the corpus without any warning.
 
 Titles that resolve to nothing at all deserve a separate look, since a null page ID means no article and no redirect. Here the table comes back empty, which is the answer we want, but the check belongs in the code rather than in our memory of having once run it.
 
@@ -536,7 +536,7 @@ uk_meta = (
 uk_meta
 ```
 
-The revision histories come next, with one change from the loop we wrote before: we ask for 500 revisions and stop, rather than paginating to the end of history. Five hundred is the most a single request will return, so dropping the `continue` loop gives us exactly the 500 most recent edits per page. This is a deliberate ceiling rather than a shortcut. Chaucer's article has been edited for twenty years, and the full history of all 75 pages would be a large table that answers no question the analysis chapters actually ask.
+The revision histories come next, with one change from the loop we wrote before: we ask for 500 revisions and stop, rather than paginating to the end of history. Five hundred is the most a single request will return, so dropping the `continue` loop gives us exactly the 500 most recent edits per page. The ceiling is deliberate. Chaucer's article has been edited for twenty years, and the full history of all 75 pages would be a large table that answers no question the analysis chapters ask.
 
 ```{python}
 rows = []
@@ -608,7 +608,7 @@ uk_views = (
 uk_views
 ```
 
-Notice what these two tables do not contain: a `Date` column, or a `Datetime` column. The page views carry `year`, `month`, and `day` as three separate integers, and the revisions carry a timestamp string in the `YYYY-MM-DD HH:MM:SS` form that @sec-collect recommends for recording times by hand. Our main corpus, parsed as it was built, follows the other convention.
+Neither table contains a `Date` or `Datetime` column. The page views carry `year`, `month`, and `day` as three separate integers, and the revisions carry a timestamp string in the `YYYY-MM-DD HH:MM:SS` form that @sec-collect recommends for recording times by hand. Our main corpus, parsed as it was built, follows the other convention.
 
 The inconsistency is on purpose. Recording the components and constructing a date from them are two different jobs, and @sec-temporal is about the second one. Leaving these columns in the form the API and a careful data-recorder would give us means the next chapter has something real to convert.
 
@@ -654,15 +654,15 @@ with open("data/wiki/MANIFEST.md", "w") as f:
     f.write(manifest)
 ```
 
-None of this is elaborate, and that is the point. A directory of Parquet files, a cache, and a manifest turn "some data I downloaded" into a dataset that can be checked, cited, and rebuilt.
+None of this is elaborate. A directory of Parquet files, a cache, and a manifest turn "some data I downloaded" into a dataset that can be checked, cited, and rebuilt.
 
 ## Reproducible Snapshots
 
-Wikipedia changes every minute, so the corpus we just built is a *snapshot*: what the encyclopedia looked like at the moment of retrieval. Someone running this chapter's code next year will get different category memberships, longer articles, and more revisions, and nothing in the code will warn them that the results have shifted. Reproducibility here does not mean freezing Wikipedia; it means being precise about what was captured and making the captured version recoverable. Our pipeline does this at three levels.
+Wikipedia changes every minute, so the corpus we just built is a *snapshot*: what the encyclopedia looked like at the moment of retrieval. Someone running this chapter's code next year will get different category memberships, longer articles, and more revisions, and nothing in the code will warn them that the results have shifted. We cannot freeze Wikipedia, so reproducibility here means being precise about what was captured and making the captured version recoverable. Our pipeline does this at three levels.
 
 The manifest records the retrieval date and the population definition, so anyone can state exactly what the snapshot covers. The requests cache preserves the responses themselves, so the processed tables can be rebuilt byte-for-byte from the raw layer. And the revision IDs in the `revisions` table pin each article to immutable versions: passing an ID to the Action API's `revids` parameter returns that exact text forever, even after the live article has moved on. Archiving the `data/wiki/` directory alongside the analysis code is therefore a complete, self-contained record of the study's inputs.
 
-Two further practices round out the picture. First, when an API offers versioned output, ask for it explicitly: we already rely on the `rest_v1` prefix, and the Action API has a similar mechanism described in the callout below. Second, for projects that need all of Wikipedia rather than a sample, the Wikimedia Foundation publishes complete database dumps at [https://dumps.wikimedia.org/](https://dumps.wikimedia.org/), which are themselves dated snapshots and remove the API from the loop entirely.
+Two further practices help. First, when an API offers versioned output, ask for it explicitly: we already rely on the `rest_v1` prefix, and the Action API has a similar mechanism described in the callout below. Second, for projects that need all of Wikipedia rather than a sample, the Wikimedia Foundation publishes complete database dumps at [https://dumps.wikimedia.org/](https://dumps.wikimedia.org/), which are themselves dated snapshots and remove the API from the loop entirely.
 
 ::: {.callout-note collapse="true"}
 ## Versioning in the Action API
@@ -672,7 +672,7 @@ The Action API does not put a version number in its URL, but its JSON output is 
 
 ## Conclusions
 
-This chapter treated data acquisition as engineering rather than as a download step. The HTTP mechanics came first: endpoints, parameters, headers, status codes, pagination, rate limits, and the flattening of nested JSON into tables. We then put them to work building a corpus of nineteenth-century British and Irish novelists, with deliberate decisions along the way about how the population was sampled, how redirects and missing pages were handled, why every table carries both a stable key and a readable one, and how the raw and processed layers of the pipeline stay separate. A second, smaller corpus followed from a curated list, sampled a different way for different questions.
+This chapter treated data acquisition as an engineering task. The HTTP mechanics came first: endpoints, parameters, headers, status codes, pagination, rate limits, and the flattening of nested JSON into tables. We then put them to work building a corpus of nineteenth-century British and Irish novelists, with deliberate decisions along the way about how the population was sampled, how redirects and missing pages were handled, why every table carries both a stable key and a readable one, and how the raw and processed layers of the pipeline stay separate. A second, smaller corpus followed from a curated list, sampled a different way for different questions.
 
 The pattern generalizes well beyond Wikipedia. Whatever the API, the same questions apply: what defines the population, which identifier is stable, where do the raw responses live, and what someone would need to rebuild your tables. The corpus now waits on disk, and the next chapters pick it up: the revision histories and page views feed the temporal analysis, the article texts feed the textual analysis, and the link table feeds the network analysis.
 

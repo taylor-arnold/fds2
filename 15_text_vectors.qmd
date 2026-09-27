@@ -36,7 +36,7 @@ In the previous chapter, we transformed the Wikipedia pages of 75 British and Ir
 
 Answering questions like these requires comparing whole documents to one another, and comparing documents requires representing each one as a single mathematical object rather than as a stream of tokens. In this chapter we develop that representation in three steps. First, we summarize each document by the counts of the terms it contains, refined by the TF-IDF weighting that emphasizes distinctive vocabulary. Second, we reinterpret these weighted counts geometrically, treating each document as a point in a high-dimensional space. Finally, we use this geometry to measure the distance between documents, to project the whole collection into two dimensions for visualization, and to compare corpora across languages.
 
-The geometric perspective developed here matters well beyond this chapter. The distances between documents that we compute become the raw material for the distance and nearest-neighbor networks of @sec-networks, and the general strategy of converting complex objects into numeric vectors reappears when we work with images.
+The geometric perspective developed here returns later in the book. The distances between documents that we compute become the raw material for the distance and nearest-neighbor networks of @sec-networks, and the general strategy of converting complex objects into numeric vectors reappears when we work with images.
 
 ## TF-IDF
 
@@ -95,7 +95,7 @@ For comparison, here is what the corresponding TF-IDF matrix looks like for our 
 tfidf_example.style.set_caption("TF-IDF Matrix").background_gradient(cmap="Oranges", vmin=0, vmax=tfidf_example.max().max()).format("{:.2f}")
 ```
 
-Now that we have a conceptual understanding of TF and TF-IDF matrices, let's see how to construct them in Python. The wrapper `DSText.compute_tfidf` produces the scores for us, and its code is nothing more than a single Polars chain in which every step uses methods we already know. A trimmed version looks like this (shown for reference, not run):
+Now that we have a conceptual understanding of TF and TF-IDF matrices, let's see how to construct them in Python. The wrapper `DSText.compute_tfidf` produces the scores for us, and its code is a single Polars chain in which every step uses methods we already know. A trimmed version looks like this (shown for reference, not run):
 
 ```python
 n_docs = df.select(c.doc_id.n_unique()).item()
@@ -117,7 +117,7 @@ n_docs = df.select(c.doc_id.n_unique()).item()
 
 The first `group_by` counts how often each lemma appears in each document, and the window expression `c.tf.sum().over(c.doc_id)` converts those counts into within-document proportions. This means the *tf* in the formula above is a proportion rather than a raw count; the small matrices shown earlier used raw counts only to keep the numbers readable. A second window expression counts how many distinct documents contain each lemma, giving the *df* term. The `filter` step in the middle implements the two arguments `min_df` and `max_df`, which are proportions between zero and one: setting `max_df=0.5`, for instance, drops every lemma appearing in more than half of the documents, and `min_df=0.01` drops lemmas appearing in fewer than 1% of them. The `max_df` cutoff acts as an automatic stop word list tailored to the corpus, removing whatever vocabulary is common to most of the pages instead of relying on a fixed list.
 
-Rather than producing the wide matrix described in the small examples above, the chain leaves the output in long format (see @sec-restructure for a review of wide versus long), with one non-zero combination of term and document in each row. We run it here on the annotations, dropping every lemma that appears in more than half of the documents. With only 75 documents, the smallest possible document frequency is 1/75, so the `min_df=0.01` filter removes nothing here; it is a guard that earns its keep on larger corpora.
+Rather than producing the wide matrix described in the small examples above, the chain leaves the output in long format (see @sec-restructure for a review of wide versus long), with one non-zero combination of term and document in each row. We run it here on the annotations, dropping every lemma that appears in more than half of the documents. With only 75 documents, the smallest possible document frequency is 1/75, so the `min_df=0.01` filter removes nothing here; it only has an effect on larger corpora.
 
 ```{python}
 tfidf = DSText.compute_tfidf(anno, min_df=0.01, max_df=0.5)
@@ -137,11 +137,11 @@ Once we have this table, we can combine the top terms from each document to char
 )
 ```
 
-The top TF-IDF terms for each document tend to be proper nouns and domain-specific vocabulary that distinguish one article from another. Compare these to the simple frequency counts from the previous chapter: the `max_df` cutoff removes generic terms like "year" and "work" that appear across nearly all of the biographies, and what remains are the names, places, and titles that actually identify each author.
+The top TF-IDF terms for each document tend to be proper nouns and domain-specific vocabulary that distinguish one article from another. Compare these to the simple frequency counts from the previous chapter: the `max_df` cutoff removes generic terms like "year" and "work" that appear across nearly all of the biographies, and what remains are the names, places, and titles that identify each author.
 
 ## Documents as Vectors
 
-The TF-IDF matrix introduced above contains a row for each document and a column for each term, with the TF-IDF weight in each cell. There is a productive way to think about this structure: each row of the matrix is a list of numbers that describes a document. We can interpret this list of numbers as a set of coordinates, turning each document into a *point in space*. This geometric perspective connects textual analysis to the statistical modeling and dimensionality reduction tools that we have developed throughout this book.
+The TF-IDF matrix introduced above contains a row for each document and a column for each term, with the TF-IDF weight in each cell. Each row of the matrix is a list of numbers that describes a document. We can interpret this list of numbers as a set of coordinates, turning each document into a *point in space*. This geometric perspective connects textual analysis to the statistical modeling and dimensionality reduction tools that we have developed throughout this book.
 
 To build intuition for this idea, let's start with just two terms. Suppose we look at the TF-IDF scores for the lemmas "poem" and "novel" across our collection of author pages. Each document has a TF-IDF score for "poem" and a TF-IDF score for "novel", giving us two numbers per document. We can plot these as coordinates on a standard scatter plot, with one axis for each term. Both lemmas are common enough in this corpus that the `max_df=0.5` cutoff removed them from the `tfidf` table above, so for this illustration we recompute the scores without the cap. Because the wrapper returns its results in long format, we then pivot the two terms into columns and fill the missing combinations with zero.
 
@@ -168,7 +168,7 @@ We cannot visualize a space with thousands of dimensions, but the geometry works
 
 Once documents are points in a numeric space, the rest of the book's toolkit applies. Dimensionality reduction methods such as PCA or UMAP can project the points down to two dimensions for plotting. Prediction models can classify documents based on their positions, and clustering algorithms can discover groups of similar pages without being told what to look for.
 
-One important feature of these document vectors is that most of their entries are zero. Any given document uses only a small fraction of the total vocabulary, so most TF-IDF scores are zero. A vector with mostly zero entries is called *sparse*, and this representation is sometimes called a *sparse embedding*. Despite the large number of dimensions, the actual information content of each vector is modest, which matters for computational efficiency but does not change how we think about the geometry.
+One important feature of these document vectors is that most of their entries are zero. Any given document uses only a small fraction of the total vocabulary, so most TF-IDF scores are zero. A vector with mostly zero entries is called *sparse*, and this representation is sometimes called a *sparse embedding*. Despite the large number of dimensions, the information content of each vector is modest, which matters for computational efficiency but does not change how we think about the geometry.
 
 The code below puts this idea into practice using the wrapper function `umap_text`. The wrapper builds the document-term matrix from the long annotation table, using the column passed as `doc_id` to identify the rows and the column passed as `term_id` to define the vocabulary, and applies the `min_df` and `max_df` filters before fitting the UMAP model. As with the other model wrappers in this book, calling `.predict(full=True)` returns a table with one row per document, and the two projected coordinates arrive in the columns `dr0` and `dr1`. Documents that use similar vocabulary will appear near each other in the resulting plot.
 
@@ -195,7 +195,7 @@ The `min_df` and `max_df` parameters filter the vocabulary before constructing t
 
 The UMAP plot gives a visual impression of which documents are similar, but for many applications we need the similarities themselves as numbers. Which page is the single closest match to the Jane Austen page? Which pairs of pages are so similar that we might link them together? Questions like these call for an explicit *distance* defined between every pair of document vectors.
 
-The most familiar notion of distance, the straight-line Euclidean distance between two points, turns out to be a poor choice for document vectors. What we care about is the *mix* of vocabulary a document uses, and Euclidean distance responds to the overall magnitude of the vectors as much as to that mix. The problem is at its worst when term frequencies are raw counts, as they are in many TF-IDF implementations: a long Wikipedia page and a short one about the same subject use similar vocabulary in similar *proportions*, but the long page then has systematically larger values, sits much farther from the origin, and length differences swamp the vocabulary differences we actually care about. Our wrapper's within-document proportions soften this, but documents still differ in overall magnitude, and that magnitude is not something we want a distance to measure.
+The most familiar notion of distance, the straight-line Euclidean distance between two points, turns out to be a poor choice for document vectors. What we care about is the *mix* of vocabulary a document uses, and Euclidean distance responds to the overall magnitude of the vectors as much as to that mix. The problem is worst when term frequencies are raw counts, as they are in many TF-IDF implementations. A long Wikipedia page and a short one about the same subject use similar vocabulary in similar *proportions*, but the long page has systematically larger values and sits much farther from the origin. The difference in length then swamps the differences in vocabulary. Our wrapper's within-document proportions soften this, but documents still differ in overall magnitude, and that magnitude is not something we want a distance to measure.
 
 The standard fix is to measure the *angle* between the two vectors rather than the straight-line distance between their endpoints. Two documents that use vocabulary in the same proportions point in the same direction from the origin, regardless of their lengths, so the angle between them is small. Mathematically, the angle distance between documents $a$ and $b$ is computed from the normalized inner product of their vectors:
 
@@ -219,7 +219,7 @@ X = X / np.linalg.norm(X, axis=1, keepdims=True)   # unit-length rows
 angles = np.arccos(np.clip(X @ X.T, 0, 1))          # pairwise angles
 ```
 
-After the rows are rescaled to unit length, the matrix product `X @ X.T` contains every pairwise inner product at once, which is exactly the quantity inside the arccosine of the formula above. The `clip` guards against floating-point values that land a hair outside the valid range of the arccosine. The wrapper then unpivots the resulting square array back into a long table with one row per pair of documents. Each unordered pair appears exactly once, with `doc_id` alphabetically before `doc_id2`.
+After the rows are rescaled to unit length, the matrix product `X @ X.T` contains every pairwise inner product at once, which is the quantity inside the arccosine of the formula above. The `clip` guards against floating-point values that land a hair outside the valid range of the arccosine. The wrapper then unpivots the resulting square array back into a long table with one row per pair of documents. Each unordered pair appears exactly once, with `doc_id` alphabetically before `doc_id2`.
 
 ```{python}
 text_dist = DSText.compute_distances(anno, min_df=0.01, max_df=0.5)
@@ -285,7 +285,7 @@ anno_fr = DSText.process(docs_fr, nlp_fr)
 anno_fr
 ```
 
-French and English have different grammatical structures, and we might expect these to show up in the part-of-speech frequencies. French tends to use determiners (articles) more often, for instance, since nearly every French noun requires one. Rather than taking claims like this on faith, we can check them directly by stacking the two annotation tables and comparing the proportion of each part of speech within each language.
+French and English have different grammatical structures, and we might expect these to show up in the part-of-speech frequencies. French tends to use determiners (articles) more often, for instance, since nearly every French noun requires one. We can check claims like this by stacking the two annotation tables and comparing the proportion of each part of speech within each language.
 
 ```{python}
 (
@@ -302,9 +302,9 @@ French and English have different grammatical structures, and we might expect th
 )
 ```
 
-Differences at this level are linguistic rather than content-based, but they matter when interpreting comparative analyses. A gap in determiner frequency between an English corpus and a French one tells us about grammar, not about editorial choices, and any comparison of the two editions has to look past it.
+Differences at this level come from grammar rather than content, but they matter when interpreting comparative analyses. A gap in determiner frequency between the English and French corpora says nothing about editorial choices, and any comparison of the two editions has to look past it.
 
-The vector representation developed in this chapter applies to the French annotations exactly as it did to the English ones. Running `DSText.compute_tfidf` on `anno_fr` produces a TF-IDF table over French lemmas, and the top-scoring terms for each page summarize how the French edition characterizes each author.
+The vector representation developed in this chapter applies to the French annotations as it did to the English ones. Running `DSText.compute_tfidf` on `anno_fr` produces a TF-IDF table over French lemmas, and the top-scoring terms for each page summarize how the French edition characterizes each author.
 
 ```{python}
 (
@@ -317,7 +317,7 @@ The vector representation developed in this chapter applies to the French annota
 )
 ```
 
-Because the two editions have different vocabularies, the English and French vectors live in different spaces and cannot be compared directly. The *structure* of each collection, however, can be. We can build a UMAP projection of the French pages with exactly the same code we used for the English ones.
+Because the two editions have different vocabularies, the English and French vectors live in different spaces and cannot be compared directly. The *structure* of each collection, however, can be. We can build a UMAP projection of the French pages with the same code we used for the English ones.
 
 ```{python}
 (
@@ -336,12 +336,12 @@ Because the two editions have different vocabularies, the English and French vec
 )
 ```
 
-If the French projection groups the authors differently than the English one, that difference reflects a genuine difference in how the two communities of editors describe these figures. The same historical figure may be framed differently depending on the national perspective of the Wikipedia editors, and events central to one country's narrative may be peripheral to another's. The tools in this chapter make it possible to investigate such questions systematically rather than anecdotally.
+If the French projection groups the authors differently than the English one, that reflects a difference in how the two communities of editors describe these figures. The same historical figure may be framed differently depending on the national perspective of the Wikipedia editors, and events central to one country's narrative may be peripheral to another's. The tools in this chapter make it possible to investigate such questions systematically rather than anecdotally.
 
 ## Summary
 
-In this chapter, we converted the annotation table from the previous chapter into a numeric representation of whole documents. TF-IDF weighting turns raw term counts into scores that emphasize each document's distinctive vocabulary, and interpreting each document's scores as coordinates turns the corpus into a cloud of points in a high-dimensional space. From that geometry we obtained a two-dimensional map of the collection through UMAP, explicit angle distances between every pair of documents, and a set of tools that carried over unchanged to the French edition of the same pages. As in the previous chapter, opening up the wrapper functions showed that they consist of short Polars chains plus a little linear algebra, rather than anything exotic.
+In this chapter, we converted the annotation table from the previous chapter into a numeric representation of whole documents. TF-IDF weighting turns raw term counts into scores that emphasize each document's distinctive vocabulary, and interpreting each document's scores as coordinates turns the corpus into a cloud of points in a high-dimensional space. From that geometry we obtained a two-dimensional map of the collection through UMAP, explicit angle distances between every pair of documents, and a set of tools that carried over unchanged to the French edition of the same pages. As in the previous chapter, opening up the wrapper functions showed that they consist of short Polars chains plus a little linear algebra.
 
-The pairwise distance table is the direct link to the next chapter: distances between documents define relationships, and a table of relationships between pairs of objects is precisely a network.
+The pairwise distance table leads directly into the next chapter. Distances between documents define relationships, and a table of relationships between pairs of objects is a network.
 
 ## References {-}

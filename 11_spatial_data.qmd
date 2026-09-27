@@ -49,7 +49,7 @@ Because longitude and latitude are just numbers, we can make a basic plot withou
 )
 ```
 
-This scatter plot works, but it has problems. It treats longitude and latitude as if they were ordinary Cartesian coordinates, when they actually describe positions on a curved surface. The distortion gets worse at higher latitudes, where equal increments in longitude correspond to shorter physical distances. The plot also gives the viewer nothing to orient by: no coastlines and no state boundaries.
+This scatter plot works, but it has problems. It treats longitude and latitude as if they were ordinary Cartesian coordinates, when they describe positions on a curved surface. The distortion gets worse at higher latitudes, where equal increments in longitude correspond to shorter physical distances. The plot also gives the viewer nothing to orient by: no coastlines and no state boundaries.
 
 To go further, we need to turn the latitude and longitude columns into proper geometries. In the WKT standard, a point is written as text in the form `POINT (lon lat)`, so nothing stops us from building the `geometry` column ourselves with `pl.format`.
 
@@ -76,7 +76,7 @@ The result is the same `geometry` column of readable WKT strings, such as `POINT
 
 ## Coordinate Systems (CRS)
 
-One of the most important concepts in spatial analysis is the *coordinate reference system* (CRS), sometimes called a *spatial reference system*. A CRS defines how coordinates map to actual locations on Earth. This might seem straightforward, but Earth's surface is curved while maps are flat. Any attempt to represent the globe on a two-dimensional surface involves trade-offs: you can preserve shapes or areas or distances, but never all three at once.
+One of the most important concepts in spatial analysis is the *coordinate reference system* (CRS), sometimes called a *spatial reference system*. A CRS defines how coordinates map to locations on Earth. This might seem straightforward, but Earth's surface is curved while maps are flat. Any attempt to represent the globe on a two-dimensional surface involves trade-offs: you can preserve shapes or areas or distances, but never all three at once.
 
 The most common CRS for storing geographic data is WGS 84 (World Geodetic System 1984), which uses latitude and longitude measured in degrees. It is the system used by GPS devices and most web mapping services, and it is what `points_from_xy` recorded for us above; `crs=4326` is its default. For visualization and for many calculations, however, we usually want to *project* the data into a different CRS that is optimized for a particular region or purpose.
 
@@ -198,7 +198,7 @@ In GeoPandas, `centroid` is a property rather than a method, so it is accessed w
 )
 ```
 
-Each state's polygon has been replaced by a single point at its center. Since we did not assign the result back, `state` itself still holds the original polygons. For roughly rectangular states like Colorado, the centroid falls near the geographic center. For states with irregular shapes or several disconnected parts, the centroid can land outside the state's actual boundary.
+Each state's polygon has been replaced by a single point at its center. Since we did not assign the result back, `state` itself still holds the original polygons. For roughly rectangular states like Colorado, the centroid falls near the geographic center. For states with irregular shapes or several disconnected parts, the centroid can land outside the state's boundary.
 
 The `area` property returns ordinary numbers rather than geometries, so the namespace appends them as a new column named after the property.
 
@@ -242,7 +242,7 @@ Choropleth maps are useful but easy to misread. Larger regions occupy more visua
 
 ## Spatial Joins
 
-In @sec-restructure, we learned how to join two tables based on a shared key column. Spatial joins extend this idea by joining tables based on geometric relationships. Instead of matching rows where a key value is equal, we match rows where geometries intersect, touch, contain, or sit within some distance of each other.
+In @sec-combine, we learned how to join two tables based on a shared key column. Spatial joins extend this idea by joining tables based on geometric relationships. Instead of matching rows where a key value is equal, we match rows where geometries intersect, touch, contain, or sit within some distance of each other.
 
 The most common spatial join matches points to the polygons that contain them. Given our metro areas (points) and states (polygons), we can find which state contains each metro area. Spatial operations require both tables to be in the same CRS, and `state` is now in EPSG:5069, so we first project the metro points to match.
 
@@ -300,13 +300,13 @@ Sometimes we want to match features not by overlap or containment but by proximi
 )
 ```
 
-Here we join the metro table to itself to find each metro area's nearest neighbor. The `exclusive=True` parameter prevents each metro area from matching itself, which would always be a distance of zero, and `distance_col` adds a column with the distance to the match. Because the data is in the Albers projection, those distances are in meters. This is another place where projecting first pays off: in raw latitude and longitude the distances would come out in degrees.
+Here we join the metro table to itself to find each metro area's nearest neighbor. The `exclusive=True` parameter prevents each metro area from matching itself, which would always be a distance of zero, and `distance_col` adds a column with the distance to the match. Because the data is in the Albers projection, those distances are in meters. In raw latitude and longitude, the distances would come out in degrees.
 
 Nearest neighbor joins are computationally expensive because they potentially compare every feature in the first table to every feature in the second. GeoPandas uses spatial index structures (R-trees) to prune most of these comparisons, but the operation still scales worse than a simple predicate join, so expect it to be slow on large datasets.
 
 ## Buffers
 
-A *buffer* expands a geometry outward by a fixed distance, turning each point into a disc and each polygon into a slightly larger polygon. Buffers are how we answer "within X of" questions: the region within 100 kilometers of a metro center is exactly the 100 kilometer buffer around its point. Because `buffer` returns new geometries, the namespace writes them into the `geometry` column, just as `centroid` did. The distance is measured in the units of the current CRS, so with our data in the Albers projection the argument below means 100,000 meters. This is one more reason the earlier projection step matters: buffering unprojected data by 100,000 would ask for discs 100,000 degrees across.
+A *buffer* expands a geometry outward by a fixed distance, turning each point into a disc and each polygon into a slightly larger polygon. Buffers are how we answer "within X of" questions: the region within 100 kilometers of a metro center is the 100 kilometer buffer around its point. Because `buffer` returns new geometries, the namespace writes them into the `geometry` column, just as `centroid` did. The distance is measured in the units of the current CRS, so with our data in the Albers projection the argument below means 100,000 meters. Buffering unprojected data by 100,000 would ask for discs 100,000 degrees across.
 
 ```{python}
 (
@@ -330,7 +330,7 @@ Buffers become more interesting in combination with spatial joins. Each buffered
 )
 ```
 
-Metro areas near a state line now match two or more states, which is often exactly what an analysis needs. A hospital planning study, for example, cares about everyone within driving distance, not just residents on one side of a border.
+Metro areas near a state line now match two or more states, which is often what an analysis needs. A hospital planning study, for example, cares about everyone within driving distance, not just residents on one side of a border.
 
 ## Dissolving Boundaries
 
@@ -377,7 +377,7 @@ Two rows remain, one per side, and each holds a single merged geometry with the 
 
 ## Exploding Geometries
 
-The `explode` method goes in the opposite direction from `dissolve`: it splits every multi-part geometry into one row per part. States made of disconnected pieces, like Hawaii, become several rows, while single-polygon states pass through unchanged. The ordinary columns, including the state-level `area` we computed earlier, are simply copied onto every part.
+The `explode` method goes in the opposite direction from `dissolve`: it splits every multi-part geometry into one row per part. States made of disconnected pieces, like Hawaii, become several rows, while single-polygon states pass through unchanged. The ordinary columns, including the state-level `area` we computed earlier, are copied onto every part.
 
 ```{python}
 (
@@ -427,7 +427,7 @@ Alaska, with its fjords and island chains, sits far ahead of everything else. Mo
 )
 ```
 
-For real work a much smaller tolerance, on the order of the width of a plotted line, cuts vertex counts dramatically without any visible change. One caveat: each geometry is simplified independently, so neighboring states can develop small gaps or overlaps along their shared borders. That rarely matters for plotting, but it can affect spatial joins that use predicates like `touches`, so simplify for display rather than for analysis.
+For real work a much smaller tolerance, on the order of the width of a plotted line, cuts vertex counts dramatically without any visible change. Each geometry is simplified independently, however, so neighboring states can develop small gaps or overlaps along their shared borders. That rarely matters for plotting, but it can affect spatial joins that use predicates like `touches`, so simplify for display rather than for analysis.
 
 ## Best Practices
 
