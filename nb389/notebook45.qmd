@@ -54,10 +54,9 @@ an `issue_description`, and whether the decision's direction was coded
 `liberal` or `conservative` in `lean`. A row of `cite` is one precedent link:
 the case in `citing_case` refers to the earlier case in `cited_case` somewhere
 in its opinion. There are 231,775 such links across more than two centuries of
-decisions, which is far too many to draw as a single network. Most of this
-notebook is spent building a small, readable subnetwork of the most-cited
-cases and then measuring it. Print your results unless a question says to save
-them.
+decisions, far too many to draw as a single network, so most of this notebook
+builds a small, readable subnetwork of the most-cited cases and then measures
+it. Print your results unless a question says to save them.
 
 1. As a first look at the raw edge list, count how many times each case is
 cited by another. Group `cite` by `cited_case`, count the rows in each group
@@ -82,9 +81,9 @@ from `case` so the result is readable. Print the top 10.
 
 The top of the list is a run of cases most people recognize: *McCulloch v.
 Maryland* with 255 citations into it, then *Miranda*, *Boyd v. United States*,
-and *Gibbons v. Ogden*. Counting the links *into* a case rather than out of it
-measures how often the case is used as precedent, and it avoids rewarding a
-case simply for having a long opinion that cites many others.
+and *Gibbons v. Ogden*. Counting the links *into* a case measures how often it
+is used as precedent. Counting links out would reward a case for having a
+long opinion that cites many others.
 
 2. To get a network small enough to draw, restrict attention to the 80
 most-cited cases and the links among them. First build the list of the 80
@@ -150,13 +149,13 @@ node
 The network has only 77 nodes, not 80. The three missing cases are *Pennoyer
 v. Neff*, *Mathews v. Eldridge*, and *Chevron v. Natural Resources Defense
 Council*. All three are cited heavily across the whole corpus, which is how
-they reached the top 80, but they belong to other areas of law, civil
-procedure and administrative deference rather than constitutional rights, and
-none of them happens to share a citation with any other case in this set. An
-edge list only ever contains nodes that appear in an edge, so an isolated case
-drops out with no error and no warning. This is the network version of the
-row-count check: confirm how many nodes survived before trusting anything
-computed from them.
+they reached the top 80, but they belong to other areas of law (civil
+procedure and administrative deference, not constitutional rights), and none
+of them cites or is cited by another case in this set. An edge list only
+contains nodes that appear in an edge, so an isolated case drops out without
+an error or a warning. This is the network version of the row-count check:
+confirm how many nodes survived before trusting anything computed from
+them.
 
 4. Draw the network. Put the edges down first as a `geom_segment` layer using
 the `edge` table, with a low `alpha` so the lines do not overwhelm the plot,
@@ -179,9 +178,9 @@ no meaning.
 ```
 
 The layout pushes the densely cross-cited cases toward the center and leaves
-the more isolated ones on the rim. There are too many cases here, with names
-too long, to label every point, which is already a hint that tables will do
-more of the work than the picture from here on.
+the more isolated ones on the rim. There are too many cases with names too
+long to label every point, so from here on tables will do more of the work
+than the picture.
 
 5. The first centrality measure is degree, the number of edges a node has,
 which the `node` table already carries in the `degree` column. In the first
@@ -214,13 +213,13 @@ block, redraw the network coloring the points by degree.
 ```
 
 The most connected case is *Palko v. Connecticut* with 23 links, followed by
-*Gideon* and a cluster of criminal-procedure and free-speech cases. Notice
-that *McCulloch*, which led the raw citation count in question 1, is nowhere
-near the top here. Degree in this network counts only ties to the other 79
-landmark cases, and *Palko* (the case that framed how the Bill of Rights
-applies to the states) is cited by many of those later rights cases, while
-most of *McCulloch*'s citations come from ordinary cases outside the set. The
-center of the network is not the same as the leader of the raw count.
+*Gideon* and a cluster of criminal-procedure and free-speech cases.
+*McCulloch*, which led the raw citation count in question 1, is nowhere near
+the top here. Degree in this network counts only ties to the other landmark
+cases. *Palko* (the case that framed how the Bill of Rights applies to the
+states) is cited by many of the later rights cases, while most of
+*McCulloch*'s citations come from ordinary cases outside the set. The center
+of the network is not the leader of the raw count.
 
 6. Eigenvalue centrality scores a node by the scores of its neighbors, so that
 being cited by central cases counts for more than being cited by peripheral
@@ -253,11 +252,12 @@ network by it.
 )
 ```
 
-The eigenvalue ranking concentrates even harder on the incorporation and
+The eigenvalue ranking concentrates even more on the incorporation and
 free-speech core: *Palko* at 1.0, then *Gideon*, *Near v. Minnesota*, one of
-the *NAACP* cases, and *Malloy v. Hogan*. As the chapter notes, the color scale is linear, so
-most of the network reads as dark, and the gradient across the less central
-cases only becomes visible if the scores are transformed first.
+the *NAACP* cases, and *Malloy v. Hogan*. As the chapter notes, the color
+scale is linear, so most of the network reads as dark, and the gradient
+across the less central cases only becomes visible if the scores are
+transformed first.
 
 7. Betweenness centrality, in the `between` column, counts how many of the
 shortest paths between other cases run through a given node. In the first
@@ -293,13 +293,13 @@ block, print the top 10, this time showing `between` next to `degree` and
 The first four places on the betweenness list go to the same hubs that led on
 degree and eigenvalue. The next two do not: *Ashwander v. TVA* and *McCulloch
 v. Maryland* each have a degree of only 8 and an eigenvalue near 0.1, yet both
-score almost as high on betweenness as *Gideon*. These
-are bridge cases. They sit between the commerce and federalism cases on one
-side and the rights cases on the other, so the shortest path from one region to
-the other runs through them even though neither is deeply embedded in a single
-cluster. The chapter says its own author network was too small to separate
-betweenness from the other centrality measures; this network, which spans
-several distinct areas of law, shows the difference plainly.
+score almost as high on betweenness as *Gideon*. These are bridge cases. They
+sit between the commerce and federalism cases on one side and the rights
+cases on the other, so the shortest path from one region to the other runs
+through them even though neither is deeply embedded in a single cluster. The
+chapter says its author network was too small to separate betweenness from
+the other centrality measures; this network, which spans several distinct
+areas of law, shows the difference plainly.
 
 8. The `cluster` column holds a community label assigned when the network was
 built. In the first block, color the network by `cluster`. In the second block,
@@ -329,13 +329,13 @@ case names.
 )
 ```
 
-The clusters line up with recognizable areas of law rather than falling out
-arbitrarily. One cluster is made up entirely of Fourth Amendment
-search-and-seizure cases: *Boyd*, *Weeks*, *Carroll*, *Olmstead*, *Katz*,
-*Terry*, and *Bivens*. Another gathers the federalism and federal-jurisdiction
-cases around *McCulloch* and *ex parte Young*. A pair of antitrust decisions,
-*Standard Oil* and *Socony*, sits off on its own in a two-node cluster,
-connected to the rest but not part of the constitutional-law core.
+The clusters line up with recognizable areas of law. One cluster is made up
+entirely of Fourth Amendment search-and-seizure cases: *Boyd*, *Weeks*,
+*Carroll*, *Olmstead*, *Katz*, *Terry*, and *Bivens*. Another gathers the
+federalism and federal-jurisdiction cases around *McCulloch* and *ex parte
+Young*. A pair of antitrust decisions, *Standard Oil* and *Socony*, forms its
+own two-node cluster, connected to the rest but outside the
+constitutional-law core.
 
 One cluster prints with no names at all. It holds a single node, `"75 U.S.
 168"`, which was cited often enough to reach the top 80 but has no row in the
@@ -360,11 +360,11 @@ nodes.
 )
 ```
 
-Degree and eigenvalue move together almost perfectly, at a correlation of 0.91,
+Degree and eigenvalue move together closely, at a correlation of 0.91,
 which is why the plots in questions 5 and 6 looked so similar. Eigenvalue and
-betweenness, though, correlate only 0.37. That gap is exactly the bridge cases
-from question 7: *McCulloch* and *Ashwander* are near the top on betweenness
-and near the bottom on eigenvalue, and a handful of nodes like them is enough
-to pull the correlation well below what the other pair shows. It is worth
-measuring the relationship rather than reading it off the two colored plots,
-which are similar enough by eye to hide the difference.
+betweenness correlate at only 0.37, and the bridge cases from question 7
+account for the gap: *McCulloch* and *Ashwander* are near the top on
+betweenness and near the bottom on eigenvalue, and a handful of nodes like
+them is enough to pull the correlation well below the other pair. The two
+colored plots look similar enough by eye to hide this difference, which is
+why it is worth measuring.

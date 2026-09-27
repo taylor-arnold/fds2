@@ -66,12 +66,12 @@ anno = DSText.process(docs.select(c.doc_id, c.text), nlp)
 
 ### Questions
 
-`docs` and `anno` carry the same 200 IMDb movie reviews from the last
+`docs` and `anno` carry the same 200 IMDb movie reviews as the last
 notebook, 100 labeled `"positive"` and 100 labeled `"negative"`, with the
 stray `<br />` HTML already replaced by a space before `anno` was built.
-This notebook picks up where that one left off: instead of single tokens and
-parts of speech, we work with multi-word phrases, named entities, and
-grammatical structure. Print results unless a question says otherwise.
+This notebook moves from single tokens and parts of speech to multi-word
+phrases, named entities, and grammatical structure. Print results unless a
+question says otherwise.
 
 1. Build the bigram table the same way the chapter does: filter `anno` to
 alphabetic tokens, shift `lemma` and `is_alpha` by `-1` within each `doc_id`
@@ -103,8 +103,8 @@ bigrams = (
 
 As in the chapter, raw frequency mostly turns up function-word glue ("of
 the", "in the", "to be") plus the two words for the thing being reviewed
-("this movie", "the film"). None of it is specific to movie reviews as a
-genre; the same bigrams would top the list for almost any English corpus.
+("this movie", "the film"). Nothing here is specific to movie reviews; the
+same bigrams would top the list for almost any English corpus.
 
 2. Compute PMI for every bigram, following the chapter's chain: count each
 word, count each bigram, join the two word counts onto the bigram table, and
@@ -166,16 +166,16 @@ top_pmi = (
 top_pmi
 ```
 
-The chapter's own PMI list for the Wikipedia author pages was almost
-entirely proper nouns: book titles ("Biographia Literaria"), historical
-events ("Molotov-Ribbentrop Pact"), and names of people the authors wrote
-about. This list has proper nouns too ("New York", "Cathy Lee"), but it also
-surfaces genre vocabulary that no biography page would ever produce ("sci
-fi", "low budget", "special effect", "production value", "support cast")
-and first-person review phrasing ("my opinion", "my favorite", "apart
-from"). PMI measures how strongly two words predict each other, and in a
-corpus of reviews, some of the tightest predictable pairs come from the
-genre's own vocabulary and its narrator's voice rather than from names.
+The chapter's PMI list for the Wikipedia author pages was almost entirely
+proper nouns: book titles ("Biographia Literaria"), historical events
+("Molotov-Ribbentrop Pact"), and names of people the authors wrote about.
+This list has proper nouns too ("New York", "Cathy Lee"), but it also has
+genre vocabulary no biography page would produce ("sci fi", "low budget",
+"special effect", "production value", "support cast") and first-person
+review phrasing ("my opinion", "my favorite", "apart from"). PMI measures how
+strongly two words predict each other, and in a corpus of reviews some of
+the most predictable pairs come from the genre's vocabulary and the
+reviewer's voice.
 
 3. Build the `entities` table the same way the chapter does: filter `anno`
 to rows with a non-empty `ent_type`, mark the start of each entity with
@@ -227,12 +227,12 @@ plot.
 )
 ```
 
-`PERSON` still leads, as it did for the biography pages, but the order
-underneath it changes: `ORG` and `CARDINAL` outrank `DATE` here, while in
-the chapter's corpus `DATE` was the third most common type behind `PERSON`
-and `ORG`. Reviews count things (a rating out of ten, a number of stars, "one
-of the worst films") far more than they cite calendar dates, which biography
-pages do constantly for birth, death, and publication years.
+`PERSON` still leads, as it did for the biography pages, but the order below
+it changes. `ORG`, `CARDINAL`, and `GPE` all outrank `DATE` here, while in
+the chapter's corpus `DATE` was third behind `PERSON` and `ORG`. Reviews
+count things (a rating out of ten, a number of stars, "one of the worst
+films") far more than they cite calendar dates, which biography pages do
+constantly for birth, death, and publication years.
 
 5. Reconstruct subject-verb pairs the way the chapter does: select `VERB`
 tokens as `verbs`, then join every `nsubj` token to the verb sitting at its
@@ -267,12 +267,11 @@ verbs = (
 ```
 
 Nine of the ten pairs have `I` or `you` as the subject, the tenth is the
-generic `it have`, and no movie-related noun makes the list at all. Compare this to
-the chapter's own finding for the biography pages, where the most common
-subjects were the authors and their works ("author write", "work receive").
-A review corpus's dependency structure is dominated by its narrator, not by
-the thing being described, which is exactly what a first-person genre should
-look like once you have a tool that can actually show it.
+generic `it have`, and no movie-related noun makes the list. In the chapter's
+biography pages, the most common subjects were the authors and their works
+("author write", "work receive"). A review corpus's dependency structure is
+dominated by its narrator instead of the thing being described, as you
+would expect from a first-person genre.
 
 6. Extract adjective-noun pairs the way the chapter does (`dep == "amod"`,
 joined to the `NOUN` sitting at `head_idx`), restrict to pairs where the
@@ -307,15 +306,14 @@ amod = (
 )
 ```
 
-Restricting to a real grammatical attachment ("bad movie", not just "bad"
-anywhere in the review) sharpens the signal for `bad` well past what the
-last notebook found from raw whole-review counts: 16 negative uses of "bad
-movie"/"bad film" against a single positive one, versus 86-to-17 for the
-word `bad` anywhere in the review. `good`, though, barely moves: 9 negative
-against 8 positive, almost exactly as balanced as the raw count was. A
-tighter grammatical filter helps when the word being filtered for is doing
-real evaluative work, but it is not a fix for negation on its own, since
-"not good" is still `good` attached to the same head as `movie`.
+Restricting to a grammatical attachment ("bad movie", not just "bad"
+anywhere in the review) sharpens the signal for `bad` well beyond the last
+notebook's whole-review counts: 16 negative uses of "bad movie"/"bad film"
+against a single positive one, compared with 86 to 17 for `bad` anywhere.
+`good` stays close to even, 9 negative against 8 positive. A tighter
+grammatical filter helps when the word is doing real evaluative work, but it
+does not handle negation: in "not a good movie", `good` still attaches to
+`movie`, and the "not" hangs off a different word.
 
 7. In the first block, find every negated predicate adjective: join tokens
 with `dep == "neg"` to `ADJ` tokens with `dep in ["acomp", "attr"]` that
@@ -355,15 +353,14 @@ negated_adj.height
 ```
 
 Only 30 of the 76 negated predicate adjectives have the negation word
-directly next to them; the other 46 have something in between, sometimes a
-single word ("never tired"), sometimes a whole clause. A bigram search for
-"not X" would have silently missed 61% of the true negations in this
-corpus, not because the sentences are unusual, but because negation in
-English does not have to sit next to the word it negates. Dependency
-parsing catches all 76 the same way regardless of the gap, because it is
-tracking a grammatical relationship, not a distance. This is the tool the
-last notebook's question 6 was missing: a real way to tell "good" and "not
-good" apart.
+directly before them. The other 46 have something in between, sometimes a
+single word ("never get tired") and sometimes several ("Never have I been so
+frustrated"). A bigram search for "not X" would have missed 61% of these
+negations, because English negation does not have to sit next to the word it
+negates. The dependency join finds all 76 regardless of the gap, since it
+follows a grammatical relationship instead of a distance. That is what the
+last notebook's question 6 was missing: a way to tell "good" and "not good"
+apart.
 
 8. Run `DSText.kwic()` on the lemma `"acting"` with `window=5` and
 `max_num=10`.
@@ -372,12 +369,12 @@ good" apart.
 DSText.kwic(anno, "acting", max_num=10, window=5)
 ```
 
-The concordance shows both halves of the corpus at once, since the display
-is not filtered by `label`: "terrible", "decidedly bad", and "purely" sit
-next to "good acting" and "above average" within the same 10 lines. No
-adjective-frequency table would show this as directly, since "acting" here
-is playing the role of the noun being judged, and the judgments on either
-side of it in the printout are the actual words reviewers reached for.
+The display is not filtered by `label`, so the concordance shows both halves
+of the corpus at once: "terrible", "decidedly bad", and "purely" sit near
+"good acting" and "above average" within the same 10 lines. An
+adjective-frequency table would not show this as directly. Here "acting" is
+the noun being judged, and the words on either side of it are the ones
+reviewers chose.
 
 9. Compute the four complexity metrics from the chapter (mean sentence
 length, type-token ratio, mean word length, and content-word ratio) per
@@ -442,12 +439,12 @@ style_metrics = (
 ```
 
 None of the four metrics separates the two labels by much: sentence length
-differs by about half a word, word length by four hundredths of a
-character. These are measures of *style*, and the style of a positive
-review and a negative review of the same kind of movie, written by the same
-kind of person, is not obviously different. Sentiment lives in which words
-get chosen, as questions 6 and 7 showed, not in how long or how varied the
-sentences carrying those words happen to be.
+differs by about half a word, and word length by four hundredths of a
+character. These are measures of *style*, and positive and negative reviews
+of the same kind of movie, written by the same kind of person, have no
+obvious reason to differ in style. As questions 6 and 7 showed, sentiment
+lives in which words get chosen, not in how long or varied the sentences
+are.
 
 10. Count the number of `"!"` tokens per document, join that count onto
 `docs`, and print the mean per-review count and the fraction of reviews
@@ -475,10 +472,10 @@ excl_counts = (
 ```
 
 Here the two labels finally split: negative reviews average 1.21
-exclamation points against 0.52 for positive ones, more than double. It is a
-small, crude signal on its own, and it says nothing about *what* is being
-exclaimed, but it is a real difference in a place none of the chapter's
-four standard metrics thought to look. Punctuation is not a linguistic
-category the chapter covers, and building this count required nothing more
-than the `.filter()` and `.group_by()` chain every earlier chapter already
-supplied.
+exclamation points against 0.52 for positive ones, more than double. The
+share of reviews with any exclamation point is much closer (36% against
+31%), so the gap comes from a minority of negative reviews that use many. It
+is a crude signal and says nothing about *what* is being exclaimed, but it
+is a real difference in a place none of the chapter's four standard metrics
+looks. The chapter does not cover punctuation, and the count needed nothing
+beyond the `.filter()` and `.group_by()` chain from earlier chapters.

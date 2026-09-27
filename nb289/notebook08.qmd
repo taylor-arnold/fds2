@@ -101,9 +101,8 @@ first. Then explain where the answer to question 1 actually came from.
 **Answer**: Now we get Aberdeen, Albertville, and Alamogordo. Grouping does not
 put the rows in any order, and `.head(n=1)` keeps the first row of each group as
 the rows happen to arrive. The file we loaded is stored sorted by population,
-largest first, so question 1 gave us the largest metros by accident. Sorting by
-name destroys that and the same code now answers a different question. The first
-row of a group means nothing until you decide what "first" means.
+largest first, so question 1 gave us the largest metros by accident. Once the
+rows are sorted by name, the same code answers a different question.
 
 3. Do it on purpose. Sort by population, largest first, and then take the top row
 of each division.
@@ -154,14 +153,12 @@ comes back.
 )
 ```
 
-**Answer**: Not a table. You get one line naming a `GroupBy` object and a memory
-address, with no rows and no columns to print. This is the thing to remember about
-grouping in Polars: `.group_by()` does not compute anything. It returns an
-instruction saying that whatever comes next should run once per group, and that
-instruction has to be consumed by the method on the following line. In questions
-1 through 4 the `.head()` was doing the consuming. There is no grouped table
-sitting in memory, and nothing to ungroup afterwards. The grouping exists only in
-the gap between two lines.
+**Answer**: You get one line naming a `GroupBy` object and a memory address, with
+no rows and no columns to print. In Polars, `.group_by()` does not compute
+anything. It returns an instruction saying that whatever comes next should run
+once per group, and the method on the following line has to consume that
+instruction. In questions 1 through 4 the `.head()` was doing the consuming.
+There is no grouped table sitting in memory, and nothing to ungroup afterwards.
 
 6. Now aggregate. Count the metros in each division with `pl.len()` and sort the
 result from most to fewest.
@@ -217,10 +214,9 @@ population, and then answer.
 
 **Answer**: It is the mean of 26 numbers, one per metro, and every metro counts
 once. Boston has 4.9 million people and Vineyard Haven has 20,000, and they
-contribute equally to the average. So $73,900 is the income of the typical New
-England metro area, which is not the income of the typical New England household.
-Aggregation always answers a question about the rows you gave it. Here a row is a
-place, not a person.
+contribute equally to the average. Aggregation answers a question about the rows
+you gave it, and here a row is a place, not a person. $73,900 is the income of
+the typical New England metro area, not of the typical New England household.
 
 9. A group can be defined by more than one column. Add a column marking whether a
 metro has more than a million people, then group by that column and `quad`
@@ -244,8 +240,7 @@ same in all five regions: the big metros are richer than the small ones, by abou
 $12,000 in the north central states and by nearly $21,000 in the west. Only 57 of
 the 934 metros clear a million people.
 
-10. The thing you aggregate does not have to be a column. It can be an expression.
-Count, in each division, how many metros have a median one-bedroom rent above
+10. You can aggregate an expression as well as a column. Count, in each division, how many metros have a median one-bedroom rent above
 $1,200. Keep `pl.len()` alongside it so you can see the count against the size of
 the division.
 
@@ -283,12 +278,11 @@ the mean of `rent_perc_income` for each division, and sort by rent.
 
 Read down the two columns. Mean rent runs from $937 in the Pacific division to
 $561 in East South Central, a difference of about two thirds. The share of income
-that rent consumes runs from 30.7 percent to 26.9 percent, which is barely a
-difference at all. Rents are not high or low on their own; they are high or low
-against local incomes, and the two move together closely enough that the burden
-comes out nearly flat across the country. The expensive divisions are also the
-ones where people earn more. If you want to find the places where housing is
-actually a strain, the rent column is the wrong one to sort on.
+that rent consumes runs only from 30.7 percent to 26.9 percent. The expensive
+divisions are also the ones where people earn more, and rent and income move
+together closely enough that the burden comes out nearly flat across the country.
+If you want to find the places where housing is a strain, the rent column is the
+wrong one to sort on.
 
 12. Aggregation gives you a small table, and a small table is something you can
 plot. Take the mean income by division from question 7 and draw it as a bar chart,
@@ -313,9 +307,7 @@ sort before you plot.
 )
 ```
 
-The grouping is doing the work that makes this plot possible. There is no way to
-draw nine bars from a table of 934 metros without first turning it into a table of
-nine rows, and that reduction, many rows in and one row per group out, is what
-aggregation is for. Note also where the `.sort()` sits. It orders the aggregated
+To draw nine bars from a table of 934 metros, you first need a table of nine
+rows, and producing one row per group is what aggregation does. Note also where the `.sort()` sits. It orders the aggregated
 result, because by the time the bars are drawn there are only nine rows left to
 put in order.

@@ -225,13 +225,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="setup" class="level3">
 <h3 class="anchored" data-anchor-id="setup">Setup</h3>
 <p>Run all of the following before starting the notebook.</p>
-<div id="2886f2d7" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="1">
+<div id="be717651" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="1">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span> wget <span class="op">-</span>q <span class="op">-</span>nc https:<span class="op">//</span>raw.githubusercontent.com<span class="op">/</span>taylor<span class="op">-</span>arnold<span class="op">/</span>fds2<span class="op">/</span>refs<span class="op">/</span>heads<span class="op">/</span>main<span class="op">/</span>funs.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<div id="11b08aa0" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="2">
+<div id="f9f46416" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="2">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
@@ -243,14 +243,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>ub <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<div id="77fb640c" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="3">
+<div id="1373a4f2" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="3">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> warnings</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>warnings.filterwarnings(<span class="st">"ignore"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<div id="384e0ef0" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="5">
+<div id="cdd0bd0a" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="5">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>it_city <span class="op">=</span> pl.read_csv(ub <span class="op">+</span> <span class="st">"data/it_cities.csv"</span>)</span>
@@ -261,11 +261,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="questions" class="level3">
 <h3 class="anchored" data-anchor-id="questions">Questions</h3>
-<p>This is the last notebook built on the Italy family, so it brings back all three tables at once. <code>it_city</code> is the 388-city point table (<code>city_name</code>, <code>lon</code>, <code>lat</code>, <code>pop</code>); <code>prov</code> is the 107-province polygon table (<code>province</code>, <code>geometry</code>); <code>covid</code> is the daily case series from notebook32, but today only its <code>region</code> column matters. Every province in <code>covid</code> carries a <code>region</code> name, one of Italy’s 21 official statistical regions (21, not the usual 20, because Trentino-Alto Adige’s two autonomous provinces, Trento and Bolzano, are tracked as their own regions). <code>covid</code> has no polygon of its own, so region is a grouping that has to be joined onto <code>prov</code> before it can be mapped. Print results unless a question says otherwise.</p>
+<p>This is the last notebook built on the Italy tables, so it brings back all three at once. <code>it_city</code> is the 388-city point table (<code>city_name</code>, <code>lon</code>, <code>lat</code>, <code>pop</code>); <code>prov</code> is the 107-province polygon table (<code>province</code>, <code>geometry</code>); <code>covid</code> is the daily case series from notebook32, though today only its <code>region</code> column matters. Every province in <code>covid</code> carries a <code>region</code> name, one of Italy’s 21 official statistical regions. There are 21 rather than the usual 20 because Trentino-Alto Adige’s two autonomous provinces, Trento and Bolzano, are tracked as their own regions. <code>covid</code> has no polygons, so the region has to be joined onto <code>prov</code> before it can be mapped. Print results unless a question says otherwise.</p>
 <ol type="1">
 <li>In the first block, build a point <code>geometry</code> for <code>it_city</code>, then project both <code>it_city</code> and <code>prov</code> into EPSG:7791. In the second block, print <code>it_city</code>’s <code>_crs</code> column; in the third, print <code>prov</code>’s, to confirm they agree.</li>
 </ol>
-<div id="9f7eb7ad" class="cell" data-execution_count="6">
+<div id="4043cbc8" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>it_city <span class="op">=</span> (</span>
@@ -279,7 +279,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<div id="68dd6d10" class="cell" data-execution_count="7">
+<div id="fc306657" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -314,7 +314,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<div id="92ac3bd0" class="cell" data-execution_count="8">
+<div id="9a147aba" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -352,7 +352,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="2" type="1">
 <li>Buffer every city by 20 kilometers with <code>it_city.geo.buffer(20_000)</code> and plot the result with <code>geom_map(alpha=0.3)</code> and <code>coord_fixed()</code>. Where do the discs overlap the most, and where do they stay isolated?</li>
 </ol>
-<div id="dc55eff4" class="cell" data-execution_count="9">
+<div id="e7458730" class="cell" data-execution_count="9">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -371,11 +371,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p><strong>Answer</strong>: The discs pile into solid, near-black clusters across the Po Valley in the north and the coastal stretch from Naples down toward Bari, while Sardinia and the mountainous interior of the south show mostly separate, barely touching circles. The 20-kilometer radius is fixed, so the darkness is really a map of how close together the cities themselves are, not of anything about the discs.</p>
+<p><strong>Answer</strong>: The discs pile into solid, near-black clusters across the Po Valley in the north and along the coast from Naples down toward Bari. Sardinia and the mountainous interior of the south show mostly separate circles that barely touch. Because the 20-kilometer radius is fixed, the darkness maps how close together the cities are.</p>
 <ol start="3" type="1">
 <li>Compare <code>it_city.geo.sjoin(prov)</code> to <code>it_city.geo.buffer(20_000).geo.sjoin( prov)</code>. In the first block, print the row count of <code>it_city.geo.sjoin(prov)</code>; in the second, print the row count of the buffered join. What does the jump mean?</li>
 </ol>
-<div id="e745e88e" class="cell" data-execution_count="10">
+<div id="df15a8a1" class="cell" data-execution_count="10">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -411,7 +411,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<div id="0e35d592" class="cell" data-execution_count="11">
+<div id="10c228bb" class="cell" data-execution_count="11">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -448,11 +448,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p><strong>Answer</strong>: The plain join returns 388 rows, one per city, the same result as notebook33. The buffered join returns 1,110: once each city becomes a 20-kilometer disc instead of a single point, thousands of cities near a province line now overlap two or more provinces at once, so they show up more than once in the result. Nothing here is wrong; a buffered join answers a different question (“which provinces are within 20 km of this city?”) than a plain containment join does (“which province contains this city?”), and the two are not expected to agree.</p>
+<p><strong>Answer</strong>: The plain join returns 388 rows, one per city, the same result as notebook33. The buffered join returns 1,110. Once each city becomes a 20-kilometer disc, many cities near a province line overlap two or more provinces and show up more than once. A buffered join answers a different question (“which provinces are within 20 km of this city?”) from a plain containment join (“which province contains this city?”), so the two counts should not agree.</p>
 <ol start="4" type="1">
 <li>Group the buffered join from question 3 by <code>city_name</code> and print the five cities with the most province matches.</li>
 </ol>
-<div id="c0555c27" class="cell" data-execution_count="12">
+<div id="a8649285" class="cell" data-execution_count="12">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -491,19 +491,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>10</td>
 </tr>
 <tr class="even">
+<td>"Cologno Monzese"</td>
+<td>8</td>
+</tr>
+<tr class="odd">
 <td>"Rovereto"</td>
 <td>8</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>"Vignola"</td>
 <td>8</td>
 </tr>
-<tr class="even">
-<td>"Brugherio"</td>
-<td>8</td>
-</tr>
 <tr class="odd">
-<td>"Cologno Monzese"</td>
+<td>"Brugherio"</td>
 <td>8</td>
 </tr>
 </tbody>
@@ -511,11 +511,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p><strong>Answer</strong>: Rovereto, Brugherio, Cologno Monzese, and Vignola each land within 20 km of eight different provinces, and Massa tops the list at ten. Rovereto, Brugherio, and Cologno Monzese all sit in the ring of small, tightly packed provinces around Milan and Trento, so a 20-kilometer disc genuinely reaches several neighbors there. Massa’s count is inflated for a different reason: notebook33 found three separate cities named Massa in three different provinces, and grouping by name here quietly merges their match counts together, the same duplicate-name trap from last time showing up in a new spot.</p>
+<p><strong>Answer</strong>: Rovereto, Brugherio, Cologno Monzese, and Vignola each land within 20 km of eight different provinces, and Massa tops the list at ten. Rovereto, Brugherio, and Cologno Monzese sit in the ring of small, tightly packed provinces around Milan and Trento, where a 20-kilometer disc reaches several neighbors. Massa’s count is inflated for another reason. Notebook33 found three separate cities named Massa in three different provinces, and grouping by name merges their match counts: the duplicate-name problem from last time, in a new place.</p>
 <ol start="5" type="1">
 <li>In the first block, build a province-to-region lookup from <code>covid</code> (<code>select</code> <code>region</code> and <code>province</code>, then <code>.unique()</code>) and check it is a clean key with <code>.select(c.province.n_unique(), pl.len())</code>. In the second block, join it onto <code>prov</code> and print how many provinces failed to match (<code>c.region.is_null().sum()</code>) and how many distinct regions came through (<code>c.region.n_unique()</code>).</li>
 </ol>
-<div id="a018353d" class="cell" data-execution_count="13">
+<div id="0d265a4a" class="cell" data-execution_count="13">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>region_map <span class="op">=</span> (</span>
@@ -558,7 +558,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<div id="1cf45862" class="cell" data-execution_count="14">
+<div id="eb11b909" class="cell" data-execution_count="14">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>prov <span class="op">=</span> (</span>
@@ -603,11 +603,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p><strong>Answer</strong>: The lookup has exactly 107 rows for 107 distinct provinces, so it is a clean key with nothing to collapse. The join onto <code>prov</code> leaves zero missing regions and recovers all 21, the same join-key discipline from earlier chapters applied before trusting a spatial grouping.</p>
+<p><strong>Answer</strong>: The lookup has exactly 107 rows for 107 distinct provinces, so it is a clean key. The join onto <code>prov</code> leaves zero missing regions and recovers all 21. This is the same join-key check from earlier chapters, done before trusting a spatial grouping.</p>
 <ol start="6" type="1">
 <li>Compute each province’s area with <code>.geo.area</code>, then <code>.geo.dissolve( by="region", aggfunc={"area": "sum"})</code> to merge the provinces into their 21 regions. Print the regions sorted by total area (in square kilometers, dividing by 1e6), largest first.</li>
 </ol>
-<div id="7ed47f12" class="cell" data-execution_count="15">
+<div id="a2e48366" class="cell" data-execution_count="15">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>prov <span class="op">=</span> (</span>
@@ -694,11 +694,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p><strong>Answer</strong>: Sicilia comes out on top at roughly 25,800 square kilometers, just ahead of Piemonte, Sardegna, Lombardia, and Toscana, with Valle d’Aosta smallest at around 3,300. Sicily leading is a real fact about Italy, not an artifact of summing province areas: it is genuinely the largest of the 20 traditional regions, and the sum here recovers that from 9 separate province polygons without ever being told the answer directly.</p>
+<p><strong>Answer</strong>: Sicilia comes out on top at roughly 25,800 square kilometers, just ahead of Piemonte, Sardegna, Lombardia, and Toscana, and Valle d’Aosta is smallest at around 3,300. Sicily really is the largest of the 20 traditional regions, and the sum recovers that from 9 separate province polygons without being told.</p>
 <ol start="7" type="1">
 <li>In the first block, plot the dissolved <code>region</code> table with <code>geom_map(fill= "white", color="black")</code> and <code>coord_fixed()</code>. In the second block, print the row count of <code>region</code> to compare against <code>prov</code>’s. What happened to the province borders?</li>
 </ol>
-<div id="8bae644e" class="cell" data-execution_count="16">
+<div id="24d8588e" class="cell" data-execution_count="16">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -716,7 +716,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<div id="bdb24198" class="cell" data-execution_count="17">
+<div id="0a0a281d" class="cell" data-execution_count="17">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -751,11 +751,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p><strong>Answer</strong>: <code>region</code> has 21 rows against <code>prov</code>’s 107, and the plot shows why: the lines separating provinces inside the same region are gone, leaving only the 21 regional outlines. <code>dissolve</code> did to the polygons what a <code>group_by</code> does to a table, merging every row that shares a key into one and discarding the internal structure that key no longer distinguishes.</p>
+<p><strong>Answer</strong>: <code>region</code> has 21 rows against <code>prov</code>’s 107, and the plot shows why. The lines separating provinces inside the same region are gone, leaving only the 21 regional outlines. <code>dissolve</code> does to polygons what <code>group_by</code> does to a table: it merges every row that shares a key into one and discards the internal structure the key no longer distinguishes.</p>
 <ol start="8" type="1">
 <li>In the first block, print the row count of <code>prov</code>. In the second block, explode the full <code>prov</code> table with <code>.geo.explode()</code> and print the new row count. In the third block, group the exploded table by <code>province</code>, count the parts, and print the five provinces with the most.</li>
 </ol>
-<div id="f2292610" class="cell" data-execution_count="18">
+<div id="f8d94482" class="cell" data-execution_count="18">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -790,7 +790,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<div id="ace4bd60" class="cell" data-execution_count="19">
+<div id="a2820d19" class="cell" data-execution_count="19">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -826,7 +826,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<div id="cdfe422e" class="cell" data-execution_count="20">
+<div id="dcab00b1" class="cell" data-execution_count="20">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -884,11 +884,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p><strong>Answer</strong>: 107 rows become 526, so on average each province is made of about five separate polygon pieces even though most provinces are a single solid shape. Sassari leads with 124 parts, followed by Trieste, Sud Sardegna, Livorno, and Trapani, all provinces whose coastline includes islands or scattered offshore rock.</p>
+<p><strong>Answer</strong>: 107 rows become 526, an average of about five polygon pieces per province, even though most provinces are a single solid shape. Sassari leads with 124 parts, followed by Trieste, Sud Sardegna, Livorno, and Trapani, all coastal provinces.</p>
 <ol start="9" type="1">
 <li>Filter the exploded table to <code>province == "Napoli"</code>, recompute <code>.geo.area</code>, and print the four largest parts in square kilometers. Do the sizes match what is known about Naples’s islands?</li>
 </ol>
-<div id="d6a87635" class="cell" data-execution_count="21">
+<div id="343ecbbe" class="cell" data-execution_count="21">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -937,11 +937,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p><strong>Answer</strong>: The largest part is about 1,115 square kilometers, the mainland province itself. The next three, at roughly 46, 11, and 3 square kilometers, line up almost exactly with the real areas of Ischia (about 46 km²), Capri (about 10 km²), and Procida (about 4 km²), the three inhabited islands in the Bay of Naples. Exploding turned a single “Napoli” row into pieces small enough to check against places most people have actually heard of.</p>
+<p><strong>Answer</strong>: The largest part, about 1,115 square kilometers, is the mainland province. The next three, at roughly 46, 11, and 3 square kilometers, line up almost exactly with the real areas of Ischia (about 46 km²), Capri (about 10 km²), and Procida (about 4 km²), the three inhabited islands in the Bay of Naples. Exploding turned a single “Napoli” row into pieces you can check against places most people have heard of.</p>
 <ol start="10" type="1">
 <li>Filter the exploded table to <code>province == "Trieste"</code> instead, recompute <code>.geo.area</code>, and print the five largest parts. Does a high part count always mean real islands, the way it did for Naples?</li>
 </ol>
-<div id="7424fd45" class="cell" data-execution_count="22">
+<div id="b932bf6a" class="cell" data-execution_count="22">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -993,11 +993,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p><strong>Answer</strong>: No.&nbsp;The mainland part is about 212 square kilometers, and every other part is a sliver of two hundredths of a square kilometer or smaller, too small to be a real offshore island. Trieste has no islands at all. The 41 parts question 8 found for Trieste are almost entirely digitization noise in the boundary file, not geography. Part count alone cannot tell the two situations apart; only looking at the actual areas, as Naples’s answer just did, can. This is the polygon-validity caution from the chapter’s Best Practices section in concrete form: an operation like <code>explode</code> can run cleanly and still hand back results that need a second look before they are trusted.</p>
+<p><strong>Answer</strong>: No.&nbsp;The mainland part is about 212 square kilometers, and every other part is two hundredths of a square kilometer or smaller, too small to be an offshore island. Trieste has no islands. The 41 parts question 8 found for Trieste are almost entirely digitization noise in the boundary file. The part count alone cannot separate the two cases; you have to look at the areas, as the Naples answer did. This is the polygon-validity caution from the chapter’s Best Practices section: an operation like <code>explode</code> can run cleanly and still return results that need a second look.</p>
 <ol start="11" type="1">
 <li>In the first block, count total vertices in <code>prov</code> with <code>.geo.count_coordinates()</code> (<code>.select(c.count_coordinates.sum())</code>). In the second block, repeat the count after <code>.geo.simplify(5_000)</code>. In the third block, plot the simplified provinces with <code>geom_map(fill="white", color= "black")</code> and <code>coord_fixed()</code>.</li>
 </ol>
-<div id="ced95be4" class="cell" data-execution_count="23">
+<div id="0b808031" class="cell" data-execution_count="23">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -1033,7 +1033,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<div id="2c0d4512" class="cell" data-execution_count="24">
+<div id="9bfb58d3" class="cell" data-execution_count="24">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -1070,7 +1070,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<div id="e7bdda15" class="cell" data-execution_count="25">
+<div id="0468bf50" class="cell" data-execution_count="25">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -1089,11 +1089,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p><strong>Answer</strong>: The unsimplified boundaries carry 147,591 vertices; a 5-kilometer tolerance cuts that to 3,346, a 44-fold reduction. The map is still recognizably Italy, with every region and every named island from earlier in the notebook still in place, but the coastlines have visibly straightened into short, angular segments. Real work would use a tolerance closer to the width of a plotted line rather than one deliberately this coarse, but the same trade (fewer vertices for a small, controlled loss of detail) is what <code>simplify</code> is doing either way.</p>
+<p><strong>Answer</strong>: The unsimplified boundaries carry 147,591 vertices, and a 5-kilometer tolerance cuts that to 3,346, a 44-fold reduction. The map is still recognizably Italy, with every region and every named island from earlier in the notebook in place, but the coastlines have straightened into short, angular segments. Real work would use a tolerance closer to the width of a plotted line. The trade is the same at any tolerance: fewer vertices for a small, controlled loss of detail.</p>
 <ol start="12" type="1">
 <li>Check that every polygon in <code>prov</code> is actually valid with <code>.geo.is_valid</code> before trusting anything computed above. Print how many are not.</li>
 </ol>
-<div id="823ac69c" class="cell" data-execution_count="26">
+<div id="9260bfdc" class="cell" data-execution_count="26">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -1129,7 +1129,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p><strong>Answer</strong>: Zero. Every one of the 107 province polygons is topologically valid, which is worth confirming rather than assuming: an invalid polygon (one with a self-intersection or a similar defect) can make <code>area</code>, <code>dissolve</code>, or <code>explode</code> silently return wrong numbers instead of raising an error, the same way the CRS mismatch in notebook33 and the empty-buffer trap in question 3 above could both run without complaint while quietly answering the wrong question. A dataset earns the right to be trusted at this scale only after a check like this one comes back clean.</p>
+<p><strong>Answer</strong>: Zero. All 107 province polygons are topologically valid. Check this instead of assuming it: an invalid polygon (one with a self-intersection or a similar defect) can make <code>area</code>, <code>dissolve</code>, or <code>explode</code> return wrong numbers without raising an error, just as the CRS mismatch in notebook33 ran without complaint while answering the wrong question. Trust results at this scale only after a check like this one comes back clean.</p>
 
 
 <!-- -->
@@ -1668,16 +1668,16 @@ document.addEventListener('DOMContentLoaded', function() {
 <span id="cb26-55"><a href="#cb26-55" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb26-56"><a href="#cb26-56" aria-hidden="true" tabindex="-1"></a><span class="fu">### Questions</span></span>
 <span id="cb26-57"><a href="#cb26-57" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-58"><a href="#cb26-58" aria-hidden="true" tabindex="-1"></a>This is the last notebook built on the Italy family, so it brings back all</span>
-<span id="cb26-59"><a href="#cb26-59" aria-hidden="true" tabindex="-1"></a>three tables at once. <span class="in">`it_city`</span> is the 388-city point table (<span class="in">`city_name`</span>,</span>
-<span id="cb26-60"><a href="#cb26-60" aria-hidden="true" tabindex="-1"></a><span class="in">`lon`</span>, <span class="in">`lat`</span>, <span class="in">`pop`</span>); <span class="in">`prov`</span> is the 107-province polygon table (<span class="in">`province`</span>,</span>
-<span id="cb26-61"><a href="#cb26-61" aria-hidden="true" tabindex="-1"></a><span class="in">`geometry`</span>); <span class="in">`covid`</span> is the daily case series from notebook32, but today only</span>
-<span id="cb26-62"><a href="#cb26-62" aria-hidden="true" tabindex="-1"></a>its <span class="in">`region`</span> column matters. Every province in <span class="in">`covid`</span> carries a <span class="in">`region`</span></span>
-<span id="cb26-63"><a href="#cb26-63" aria-hidden="true" tabindex="-1"></a>name, one of Italy's 21 official statistical regions (21, not the usual 20,</span>
-<span id="cb26-64"><a href="#cb26-64" aria-hidden="true" tabindex="-1"></a>because Trentino-Alto Adige's two autonomous provinces, Trento and Bolzano,</span>
-<span id="cb26-65"><a href="#cb26-65" aria-hidden="true" tabindex="-1"></a>are tracked as their own regions). <span class="in">`covid`</span> has no polygon of its own, so</span>
-<span id="cb26-66"><a href="#cb26-66" aria-hidden="true" tabindex="-1"></a>region is a grouping that has to be joined onto <span class="in">`prov`</span> before it can be</span>
-<span id="cb26-67"><a href="#cb26-67" aria-hidden="true" tabindex="-1"></a>mapped. Print results unless a question says otherwise.</span>
+<span id="cb26-58"><a href="#cb26-58" aria-hidden="true" tabindex="-1"></a>This is the last notebook built on the Italy tables, so it brings back all</span>
+<span id="cb26-59"><a href="#cb26-59" aria-hidden="true" tabindex="-1"></a>three at once. <span class="in">`it_city`</span> is the 388-city point table (<span class="in">`city_name`</span>, <span class="in">`lon`</span>,</span>
+<span id="cb26-60"><a href="#cb26-60" aria-hidden="true" tabindex="-1"></a><span class="in">`lat`</span>, <span class="in">`pop`</span>); <span class="in">`prov`</span> is the 107-province polygon table (<span class="in">`province`</span>,</span>
+<span id="cb26-61"><a href="#cb26-61" aria-hidden="true" tabindex="-1"></a><span class="in">`geometry`</span>); <span class="in">`covid`</span> is the daily case series from notebook32, though today</span>
+<span id="cb26-62"><a href="#cb26-62" aria-hidden="true" tabindex="-1"></a>only its <span class="in">`region`</span> column matters. Every province in <span class="in">`covid`</span> carries a <span class="in">`region`</span></span>
+<span id="cb26-63"><a href="#cb26-63" aria-hidden="true" tabindex="-1"></a>name, one of Italy's 21 official statistical regions. There are 21 rather than</span>
+<span id="cb26-64"><a href="#cb26-64" aria-hidden="true" tabindex="-1"></a>the usual 20 because Trentino-Alto Adige's two autonomous provinces, Trento</span>
+<span id="cb26-65"><a href="#cb26-65" aria-hidden="true" tabindex="-1"></a>and Bolzano, are tracked as their own regions. <span class="in">`covid`</span> has no polygons, so the</span>
+<span id="cb26-66"><a href="#cb26-66" aria-hidden="true" tabindex="-1"></a>region has to be joined onto <span class="in">`prov`</span> before it can be mapped. Print results</span>
+<span id="cb26-67"><a href="#cb26-67" aria-hidden="true" tabindex="-1"></a>unless a question says otherwise.</span>
 <span id="cb26-68"><a href="#cb26-68" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb26-69"><a href="#cb26-69" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>In the first block, build a point <span class="in">`geometry`</span> for <span class="in">`it_city`</span>, then project</span>
 <span id="cb26-70"><a href="#cb26-70" aria-hidden="true" tabindex="-1"></a>both <span class="in">`it_city`</span> and <span class="in">`prov`</span> into EPSG:7791. In the second block, print</span>
@@ -1724,308 +1724,298 @@ document.addEventListener('DOMContentLoaded', function() {
 <span id="cb26-119"><a href="#cb26-119" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb26-120"><a href="#cb26-120" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb26-121"><a href="#cb26-121" aria-hidden="true" tabindex="-1"></a>**Answer**: The discs pile into solid, near-black clusters across the Po</span>
-<span id="cb26-122"><a href="#cb26-122" aria-hidden="true" tabindex="-1"></a>Valley in the north and the coastal stretch from Naples down toward Bari,</span>
-<span id="cb26-123"><a href="#cb26-123" aria-hidden="true" tabindex="-1"></a>while Sardinia and the mountainous interior of the south show mostly</span>
-<span id="cb26-124"><a href="#cb26-124" aria-hidden="true" tabindex="-1"></a>separate, barely touching circles. The 20-kilometer radius is fixed, so the</span>
-<span id="cb26-125"><a href="#cb26-125" aria-hidden="true" tabindex="-1"></a>darkness is really a map of how close together the cities themselves are,</span>
-<span id="cb26-126"><a href="#cb26-126" aria-hidden="true" tabindex="-1"></a>not of anything about the discs.</span>
-<span id="cb26-127"><a href="#cb26-127" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-128"><a href="#cb26-128" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Compare <span class="in">`it_city.geo.sjoin(prov)`</span> to `it_city.geo.buffer(20_000).geo.sjoin(</span>
-<span id="cb26-129"><a href="#cb26-129" aria-hidden="true" tabindex="-1"></a>prov)<span class="in">`. In the first block, print the row count of `</span>it_city.geo.sjoin(prov)`;</span>
-<span id="cb26-130"><a href="#cb26-130" aria-hidden="true" tabindex="-1"></a>in the second, print the row count of the buffered join. What does the jump</span>
-<span id="cb26-131"><a href="#cb26-131" aria-hidden="true" tabindex="-1"></a>mean?</span>
-<span id="cb26-132"><a href="#cb26-132" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-135"><a href="#cb26-135" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb26-136"><a href="#cb26-136" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb26-137"><a href="#cb26-137" aria-hidden="true" tabindex="-1"></a>    it_city</span>
-<span id="cb26-138"><a href="#cb26-138" aria-hidden="true" tabindex="-1"></a>    .geo.sjoin(prov)</span>
-<span id="cb26-139"><a href="#cb26-139" aria-hidden="true" tabindex="-1"></a>    .select(pl.<span class="bu">len</span>())</span>
-<span id="cb26-140"><a href="#cb26-140" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb26-141"><a href="#cb26-141" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb26-142"><a href="#cb26-142" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-145"><a href="#cb26-145" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb26-146"><a href="#cb26-146" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb26-147"><a href="#cb26-147" aria-hidden="true" tabindex="-1"></a>    it_city</span>
-<span id="cb26-148"><a href="#cb26-148" aria-hidden="true" tabindex="-1"></a>    .geo.<span class="bu">buffer</span>(<span class="dv">20_000</span>)</span>
-<span id="cb26-149"><a href="#cb26-149" aria-hidden="true" tabindex="-1"></a>    .geo.sjoin(prov)</span>
-<span id="cb26-150"><a href="#cb26-150" aria-hidden="true" tabindex="-1"></a>    .select(pl.<span class="bu">len</span>())</span>
-<span id="cb26-151"><a href="#cb26-151" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb26-152"><a href="#cb26-152" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb26-153"><a href="#cb26-153" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-154"><a href="#cb26-154" aria-hidden="true" tabindex="-1"></a>**Answer**: The plain join returns 388 rows, one per city, the same result as</span>
-<span id="cb26-155"><a href="#cb26-155" aria-hidden="true" tabindex="-1"></a>notebook33. The buffered join returns 1,110: once each city becomes a</span>
-<span id="cb26-156"><a href="#cb26-156" aria-hidden="true" tabindex="-1"></a>20-kilometer disc instead of a single point, thousands of cities near a</span>
-<span id="cb26-157"><a href="#cb26-157" aria-hidden="true" tabindex="-1"></a>province line now overlap two or more provinces at once, so they show up more</span>
-<span id="cb26-158"><a href="#cb26-158" aria-hidden="true" tabindex="-1"></a>than once in the result. Nothing here is wrong; a buffered join answers a</span>
-<span id="cb26-159"><a href="#cb26-159" aria-hidden="true" tabindex="-1"></a>different question ("which provinces are within 20 km of this city?") than a</span>
-<span id="cb26-160"><a href="#cb26-160" aria-hidden="true" tabindex="-1"></a>plain containment join does ("which province contains this city?"), and the</span>
-<span id="cb26-161"><a href="#cb26-161" aria-hidden="true" tabindex="-1"></a>two are not expected to agree.</span>
-<span id="cb26-162"><a href="#cb26-162" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-163"><a href="#cb26-163" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>Group the buffered join from question 3 by <span class="in">`city_name`</span> and print the five</span>
-<span id="cb26-164"><a href="#cb26-164" aria-hidden="true" tabindex="-1"></a>cities with the most province matches.</span>
-<span id="cb26-165"><a href="#cb26-165" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-168"><a href="#cb26-168" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb26-169"><a href="#cb26-169" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb26-170"><a href="#cb26-170" aria-hidden="true" tabindex="-1"></a>    it_city</span>
-<span id="cb26-171"><a href="#cb26-171" aria-hidden="true" tabindex="-1"></a>    .geo.<span class="bu">buffer</span>(<span class="dv">20_000</span>)</span>
-<span id="cb26-172"><a href="#cb26-172" aria-hidden="true" tabindex="-1"></a>    .geo.sjoin(prov)</span>
-<span id="cb26-173"><a href="#cb26-173" aria-hidden="true" tabindex="-1"></a>    .group_by(c.city_name)</span>
-<span id="cb26-174"><a href="#cb26-174" aria-hidden="true" tabindex="-1"></a>    .agg(n <span class="op">=</span> pl.<span class="bu">len</span>())</span>
-<span id="cb26-175"><a href="#cb26-175" aria-hidden="true" tabindex="-1"></a>    .sort(c.n, descending<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb26-176"><a href="#cb26-176" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">5</span>)</span>
-<span id="cb26-177"><a href="#cb26-177" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb26-178"><a href="#cb26-178" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb26-179"><a href="#cb26-179" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-180"><a href="#cb26-180" aria-hidden="true" tabindex="-1"></a>**Answer**: Rovereto, Brugherio, Cologno Monzese, and Vignola each land within</span>
-<span id="cb26-181"><a href="#cb26-181" aria-hidden="true" tabindex="-1"></a>20 km of eight different provinces, and Massa tops the list at ten. Rovereto,</span>
-<span id="cb26-182"><a href="#cb26-182" aria-hidden="true" tabindex="-1"></a>Brugherio, and Cologno Monzese all sit in the ring of small, tightly packed</span>
-<span id="cb26-183"><a href="#cb26-183" aria-hidden="true" tabindex="-1"></a>provinces around Milan and Trento, so a 20-kilometer disc genuinely reaches</span>
-<span id="cb26-184"><a href="#cb26-184" aria-hidden="true" tabindex="-1"></a>several neighbors there. Massa's count is inflated for a different reason:</span>
-<span id="cb26-185"><a href="#cb26-185" aria-hidden="true" tabindex="-1"></a>notebook33 found three separate cities named Massa in three different</span>
-<span id="cb26-186"><a href="#cb26-186" aria-hidden="true" tabindex="-1"></a>provinces, and grouping by name here quietly merges their match counts</span>
-<span id="cb26-187"><a href="#cb26-187" aria-hidden="true" tabindex="-1"></a>together, the same duplicate-name trap from last time showing up in a new</span>
-<span id="cb26-188"><a href="#cb26-188" aria-hidden="true" tabindex="-1"></a>spot.</span>
-<span id="cb26-189"><a href="#cb26-189" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-190"><a href="#cb26-190" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>In the first block, build a province-to-region lookup from <span class="in">`covid`</span> (<span class="in">`select`</span></span>
-<span id="cb26-191"><a href="#cb26-191" aria-hidden="true" tabindex="-1"></a><span class="in">`region`</span> and <span class="in">`province`</span>, then <span class="in">`.unique()`</span>) and check it is a clean key with</span>
-<span id="cb26-192"><a href="#cb26-192" aria-hidden="true" tabindex="-1"></a><span class="in">`.select(c.province.n_unique(), pl.len())`</span>. In the second block, join it onto</span>
-<span id="cb26-193"><a href="#cb26-193" aria-hidden="true" tabindex="-1"></a><span class="in">`prov`</span> and print how many provinces failed to match (<span class="in">`c.region.is_null().sum()`</span>)</span>
-<span id="cb26-194"><a href="#cb26-194" aria-hidden="true" tabindex="-1"></a>and how many distinct regions came through (<span class="in">`c.region.n_unique()`</span>).</span>
-<span id="cb26-195"><a href="#cb26-195" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-198"><a href="#cb26-198" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb26-199"><a href="#cb26-199" aria-hidden="true" tabindex="-1"></a>region_map <span class="op">=</span> (</span>
-<span id="cb26-200"><a href="#cb26-200" aria-hidden="true" tabindex="-1"></a>    covid</span>
-<span id="cb26-201"><a href="#cb26-201" aria-hidden="true" tabindex="-1"></a>    .select(c.region, c.province)</span>
-<span id="cb26-202"><a href="#cb26-202" aria-hidden="true" tabindex="-1"></a>    .unique()</span>
-<span id="cb26-203"><a href="#cb26-203" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb26-204"><a href="#cb26-204" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb26-205"><a href="#cb26-205" aria-hidden="true" tabindex="-1"></a>    region_map</span>
-<span id="cb26-206"><a href="#cb26-206" aria-hidden="true" tabindex="-1"></a>    .select(c.province.n_unique(), pl.<span class="bu">len</span>())</span>
-<span id="cb26-207"><a href="#cb26-207" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb26-208"><a href="#cb26-208" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb26-209"><a href="#cb26-209" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-212"><a href="#cb26-212" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb26-213"><a href="#cb26-213" aria-hidden="true" tabindex="-1"></a>prov <span class="op">=</span> (</span>
-<span id="cb26-214"><a href="#cb26-214" aria-hidden="true" tabindex="-1"></a>    prov</span>
-<span id="cb26-215"><a href="#cb26-215" aria-hidden="true" tabindex="-1"></a>    .join(region_map, on<span class="op">=</span><span class="st">"province"</span>, how<span class="op">=</span><span class="st">"left"</span>)</span>
-<span id="cb26-216"><a href="#cb26-216" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb26-217"><a href="#cb26-217" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb26-218"><a href="#cb26-218" aria-hidden="true" tabindex="-1"></a>    prov</span>
-<span id="cb26-219"><a href="#cb26-219" aria-hidden="true" tabindex="-1"></a>    .select(</span>
-<span id="cb26-220"><a href="#cb26-220" aria-hidden="true" tabindex="-1"></a>        n_missing <span class="op">=</span> c.region.is_null().<span class="bu">sum</span>(),</span>
-<span id="cb26-221"><a href="#cb26-221" aria-hidden="true" tabindex="-1"></a>        n_region <span class="op">=</span> c.region.n_unique()</span>
-<span id="cb26-222"><a href="#cb26-222" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb26-223"><a href="#cb26-223" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb26-224"><a href="#cb26-224" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb26-225"><a href="#cb26-225" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-226"><a href="#cb26-226" aria-hidden="true" tabindex="-1"></a>**Answer**: The lookup has exactly 107 rows for 107 distinct provinces, so it</span>
-<span id="cb26-227"><a href="#cb26-227" aria-hidden="true" tabindex="-1"></a>is a clean key with nothing to collapse. The join onto <span class="in">`prov`</span> leaves zero</span>
-<span id="cb26-228"><a href="#cb26-228" aria-hidden="true" tabindex="-1"></a>missing regions and recovers all 21, the same join-key discipline from</span>
-<span id="cb26-229"><a href="#cb26-229" aria-hidden="true" tabindex="-1"></a>earlier chapters applied before trusting a spatial grouping.</span>
-<span id="cb26-230"><a href="#cb26-230" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-231"><a href="#cb26-231" aria-hidden="true" tabindex="-1"></a><span class="ss">6. </span>Compute each province's area with <span class="in">`.geo.area`</span>, then `.geo.dissolve(</span>
-<span id="cb26-232"><a href="#cb26-232" aria-hidden="true" tabindex="-1"></a>by="region", aggfunc={"area": "sum"})` to merge the provinces into their 21</span>
-<span id="cb26-233"><a href="#cb26-233" aria-hidden="true" tabindex="-1"></a>regions. Print the regions sorted by total area (in square kilometers,</span>
-<span id="cb26-234"><a href="#cb26-234" aria-hidden="true" tabindex="-1"></a>dividing by 1e6), largest first.</span>
-<span id="cb26-235"><a href="#cb26-235" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-238"><a href="#cb26-238" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb26-239"><a href="#cb26-239" aria-hidden="true" tabindex="-1"></a>prov <span class="op">=</span> (</span>
-<span id="cb26-240"><a href="#cb26-240" aria-hidden="true" tabindex="-1"></a>    prov</span>
-<span id="cb26-241"><a href="#cb26-241" aria-hidden="true" tabindex="-1"></a>    .geo.area</span>
-<span id="cb26-242"><a href="#cb26-242" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb26-243"><a href="#cb26-243" aria-hidden="true" tabindex="-1"></a>region <span class="op">=</span> (</span>
-<span id="cb26-244"><a href="#cb26-244" aria-hidden="true" tabindex="-1"></a>    prov</span>
-<span id="cb26-245"><a href="#cb26-245" aria-hidden="true" tabindex="-1"></a>    .geo.dissolve(by<span class="op">=</span><span class="st">"region"</span>, aggfunc<span class="op">=</span>{<span class="st">"area"</span>: <span class="st">"sum"</span>})</span>
-<span id="cb26-246"><a href="#cb26-246" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb26-247"><a href="#cb26-247" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb26-248"><a href="#cb26-248" aria-hidden="true" tabindex="-1"></a>    region</span>
-<span id="cb26-249"><a href="#cb26-249" aria-hidden="true" tabindex="-1"></a>    .select(c.region, area_km2 <span class="op">=</span> (c.area <span class="op">/</span> <span class="fl">1e6</span>).<span class="bu">round</span>(<span class="dv">0</span>))</span>
-<span id="cb26-250"><a href="#cb26-250" aria-hidden="true" tabindex="-1"></a>    .sort(c.area_km2, descending<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb26-251"><a href="#cb26-251" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb26-252"><a href="#cb26-252" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb26-253"><a href="#cb26-253" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-254"><a href="#cb26-254" aria-hidden="true" tabindex="-1"></a>**Answer**: Sicilia comes out on top at roughly 25,800 square kilometers,</span>
-<span id="cb26-255"><a href="#cb26-255" aria-hidden="true" tabindex="-1"></a>just ahead of Piemonte, Sardegna, Lombardia, and Toscana, with Valle d'Aosta</span>
-<span id="cb26-256"><a href="#cb26-256" aria-hidden="true" tabindex="-1"></a>smallest at around 3,300. Sicily leading is a real fact about Italy, not an</span>
-<span id="cb26-257"><a href="#cb26-257" aria-hidden="true" tabindex="-1"></a>artifact of summing province areas: it is genuinely the largest of the 20</span>
-<span id="cb26-258"><a href="#cb26-258" aria-hidden="true" tabindex="-1"></a>traditional regions, and the sum here recovers that from 9 separate province</span>
-<span id="cb26-259"><a href="#cb26-259" aria-hidden="true" tabindex="-1"></a>polygons without ever being told the answer directly.</span>
-<span id="cb26-260"><a href="#cb26-260" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-261"><a href="#cb26-261" aria-hidden="true" tabindex="-1"></a><span class="ss">7. </span>In the first block, plot the dissolved <span class="in">`region`</span> table with `geom_map(fill=</span>
-<span id="cb26-262"><a href="#cb26-262" aria-hidden="true" tabindex="-1"></a>"white", color="black")<span class="in">` and `</span>coord_fixed()`. In the second block, print the</span>
-<span id="cb26-263"><a href="#cb26-263" aria-hidden="true" tabindex="-1"></a>row count of <span class="in">`region`</span> to compare against <span class="in">`prov`</span>'s. What happened to the</span>
-<span id="cb26-264"><a href="#cb26-264" aria-hidden="true" tabindex="-1"></a>province borders?</span>
-<span id="cb26-265"><a href="#cb26-265" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-268"><a href="#cb26-268" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb26-269"><a href="#cb26-269" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb26-270"><a href="#cb26-270" aria-hidden="true" tabindex="-1"></a>    region</span>
-<span id="cb26-271"><a href="#cb26-271" aria-hidden="true" tabindex="-1"></a>    .ggplot()</span>
-<span id="cb26-272"><a href="#cb26-272" aria-hidden="true" tabindex="-1"></a>    .geom_map(fill<span class="op">=</span><span class="st">"white"</span>, color<span class="op">=</span><span class="st">"black"</span>)</span>
-<span id="cb26-273"><a href="#cb26-273" aria-hidden="true" tabindex="-1"></a>    .coord_fixed()</span>
-<span id="cb26-274"><a href="#cb26-274" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb26-275"><a href="#cb26-275" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb26-276"><a href="#cb26-276" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-279"><a href="#cb26-279" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb26-280"><a href="#cb26-280" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb26-281"><a href="#cb26-281" aria-hidden="true" tabindex="-1"></a>    region</span>
-<span id="cb26-282"><a href="#cb26-282" aria-hidden="true" tabindex="-1"></a>    .select(pl.<span class="bu">len</span>())</span>
-<span id="cb26-283"><a href="#cb26-283" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb26-284"><a href="#cb26-284" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb26-285"><a href="#cb26-285" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-286"><a href="#cb26-286" aria-hidden="true" tabindex="-1"></a>**Answer**: <span class="in">`region`</span> has 21 rows against <span class="in">`prov`</span>'s 107, and the plot shows why:</span>
-<span id="cb26-287"><a href="#cb26-287" aria-hidden="true" tabindex="-1"></a>the lines separating provinces inside the same region are gone, leaving only</span>
-<span id="cb26-288"><a href="#cb26-288" aria-hidden="true" tabindex="-1"></a>the 21 regional outlines. <span class="in">`dissolve`</span> did to the polygons what a <span class="in">`group_by`</span></span>
-<span id="cb26-289"><a href="#cb26-289" aria-hidden="true" tabindex="-1"></a>does to a table, merging every row that shares a key into one and discarding</span>
-<span id="cb26-290"><a href="#cb26-290" aria-hidden="true" tabindex="-1"></a>the internal structure that key no longer distinguishes.</span>
-<span id="cb26-291"><a href="#cb26-291" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-292"><a href="#cb26-292" aria-hidden="true" tabindex="-1"></a><span class="ss">8. </span>In the first block, print the row count of <span class="in">`prov`</span>. In the second block,</span>
-<span id="cb26-293"><a href="#cb26-293" aria-hidden="true" tabindex="-1"></a>explode the full <span class="in">`prov`</span> table with <span class="in">`.geo.explode()`</span> and print the new row</span>
-<span id="cb26-294"><a href="#cb26-294" aria-hidden="true" tabindex="-1"></a>count. In the third block, group the exploded table by <span class="in">`province`</span>, count</span>
-<span id="cb26-295"><a href="#cb26-295" aria-hidden="true" tabindex="-1"></a>the parts, and print the five provinces with the most.</span>
-<span id="cb26-296"><a href="#cb26-296" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-299"><a href="#cb26-299" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb26-300"><a href="#cb26-300" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb26-301"><a href="#cb26-301" aria-hidden="true" tabindex="-1"></a>    prov</span>
-<span id="cb26-302"><a href="#cb26-302" aria-hidden="true" tabindex="-1"></a>    .select(pl.<span class="bu">len</span>())</span>
-<span id="cb26-303"><a href="#cb26-303" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb26-304"><a href="#cb26-304" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb26-305"><a href="#cb26-305" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-308"><a href="#cb26-308" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb26-309"><a href="#cb26-309" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb26-310"><a href="#cb26-310" aria-hidden="true" tabindex="-1"></a>    prov</span>
-<span id="cb26-311"><a href="#cb26-311" aria-hidden="true" tabindex="-1"></a>    .geo.explode()</span>
-<span id="cb26-312"><a href="#cb26-312" aria-hidden="true" tabindex="-1"></a>    .select(pl.<span class="bu">len</span>())</span>
-<span id="cb26-313"><a href="#cb26-313" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb26-314"><a href="#cb26-314" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb26-315"><a href="#cb26-315" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-318"><a href="#cb26-318" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb26-319"><a href="#cb26-319" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb26-320"><a href="#cb26-320" aria-hidden="true" tabindex="-1"></a>    prov</span>
-<span id="cb26-321"><a href="#cb26-321" aria-hidden="true" tabindex="-1"></a>    .geo.explode()</span>
-<span id="cb26-322"><a href="#cb26-322" aria-hidden="true" tabindex="-1"></a>    .group_by(c.province)</span>
-<span id="cb26-323"><a href="#cb26-323" aria-hidden="true" tabindex="-1"></a>    .agg(n <span class="op">=</span> pl.<span class="bu">len</span>())</span>
-<span id="cb26-324"><a href="#cb26-324" aria-hidden="true" tabindex="-1"></a>    .sort(c.n, descending<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb26-325"><a href="#cb26-325" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">5</span>)</span>
-<span id="cb26-326"><a href="#cb26-326" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb26-327"><a href="#cb26-327" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb26-328"><a href="#cb26-328" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-329"><a href="#cb26-329" aria-hidden="true" tabindex="-1"></a>**Answer**: 107 rows become 526, so on average each province is made of about</span>
-<span id="cb26-330"><a href="#cb26-330" aria-hidden="true" tabindex="-1"></a>five separate polygon pieces even though most provinces are a single solid</span>
-<span id="cb26-331"><a href="#cb26-331" aria-hidden="true" tabindex="-1"></a>shape. Sassari leads with 124 parts, followed by Trieste, Sud Sardegna,</span>
-<span id="cb26-332"><a href="#cb26-332" aria-hidden="true" tabindex="-1"></a>Livorno, and Trapani, all provinces whose coastline includes islands or</span>
-<span id="cb26-333"><a href="#cb26-333" aria-hidden="true" tabindex="-1"></a>scattered offshore rock.</span>
-<span id="cb26-334"><a href="#cb26-334" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-335"><a href="#cb26-335" aria-hidden="true" tabindex="-1"></a><span class="ss">9. </span>Filter the exploded table to <span class="in">`province == "Napoli"`</span>, recompute <span class="in">`.geo.area`</span>,</span>
-<span id="cb26-336"><a href="#cb26-336" aria-hidden="true" tabindex="-1"></a>and print the four largest parts in square kilometers. Do the sizes match</span>
-<span id="cb26-337"><a href="#cb26-337" aria-hidden="true" tabindex="-1"></a>what is known about Naples's islands?</span>
-<span id="cb26-338"><a href="#cb26-338" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-341"><a href="#cb26-341" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb26-342"><a href="#cb26-342" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb26-343"><a href="#cb26-343" aria-hidden="true" tabindex="-1"></a>    prov</span>
-<span id="cb26-344"><a href="#cb26-344" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.province <span class="op">==</span> <span class="st">"Napoli"</span>)</span>
-<span id="cb26-345"><a href="#cb26-345" aria-hidden="true" tabindex="-1"></a>    .geo.explode()</span>
-<span id="cb26-346"><a href="#cb26-346" aria-hidden="true" tabindex="-1"></a>    .geo.area</span>
-<span id="cb26-347"><a href="#cb26-347" aria-hidden="true" tabindex="-1"></a>    .select((c.area <span class="op">/</span> <span class="fl">1e6</span>).<span class="bu">round</span>(<span class="dv">1</span>).alias(<span class="st">"area_km2"</span>))</span>
-<span id="cb26-348"><a href="#cb26-348" aria-hidden="true" tabindex="-1"></a>    .sort(c.area_km2, descending<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb26-349"><a href="#cb26-349" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">4</span>)</span>
-<span id="cb26-350"><a href="#cb26-350" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb26-351"><a href="#cb26-351" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb26-352"><a href="#cb26-352" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-353"><a href="#cb26-353" aria-hidden="true" tabindex="-1"></a>**Answer**: The largest part is about 1,115 square kilometers, the mainland</span>
-<span id="cb26-354"><a href="#cb26-354" aria-hidden="true" tabindex="-1"></a>province itself. The next three, at roughly 46, 11, and 3 square kilometers,</span>
-<span id="cb26-355"><a href="#cb26-355" aria-hidden="true" tabindex="-1"></a>line up almost exactly with the real areas of Ischia (about 46 km²), Capri</span>
-<span id="cb26-356"><a href="#cb26-356" aria-hidden="true" tabindex="-1"></a>(about 10 km²), and Procida (about 4 km²), the three inhabited islands in the</span>
-<span id="cb26-357"><a href="#cb26-357" aria-hidden="true" tabindex="-1"></a>Bay of Naples. Exploding turned a single "Napoli" row into pieces small</span>
-<span id="cb26-358"><a href="#cb26-358" aria-hidden="true" tabindex="-1"></a>enough to check against places most people have actually heard of.</span>
-<span id="cb26-359"><a href="#cb26-359" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-360"><a href="#cb26-360" aria-hidden="true" tabindex="-1"></a><span class="ss">10. </span>Filter the exploded table to <span class="in">`province == "Trieste"`</span> instead, recompute</span>
-<span id="cb26-361"><a href="#cb26-361" aria-hidden="true" tabindex="-1"></a><span class="in">`.geo.area`</span>, and print the five largest parts. Does a high part count always</span>
-<span id="cb26-362"><a href="#cb26-362" aria-hidden="true" tabindex="-1"></a>mean real islands, the way it did for Naples?</span>
-<span id="cb26-363"><a href="#cb26-363" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-366"><a href="#cb26-366" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb26-367"><a href="#cb26-367" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb26-368"><a href="#cb26-368" aria-hidden="true" tabindex="-1"></a>    prov</span>
-<span id="cb26-369"><a href="#cb26-369" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.province <span class="op">==</span> <span class="st">"Trieste"</span>)</span>
-<span id="cb26-370"><a href="#cb26-370" aria-hidden="true" tabindex="-1"></a>    .geo.explode()</span>
-<span id="cb26-371"><a href="#cb26-371" aria-hidden="true" tabindex="-1"></a>    .geo.area</span>
-<span id="cb26-372"><a href="#cb26-372" aria-hidden="true" tabindex="-1"></a>    .select((c.area <span class="op">/</span> <span class="fl">1e6</span>).<span class="bu">round</span>(<span class="dv">2</span>).alias(<span class="st">"area_km2"</span>))</span>
-<span id="cb26-373"><a href="#cb26-373" aria-hidden="true" tabindex="-1"></a>    .sort(c.area_km2, descending<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb26-374"><a href="#cb26-374" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">5</span>)</span>
-<span id="cb26-375"><a href="#cb26-375" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb26-376"><a href="#cb26-376" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb26-377"><a href="#cb26-377" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-378"><a href="#cb26-378" aria-hidden="true" tabindex="-1"></a>**Answer**: No. The mainland part is about 212 square kilometers, and every</span>
-<span id="cb26-379"><a href="#cb26-379" aria-hidden="true" tabindex="-1"></a>other part is a sliver of two hundredths of a square kilometer or smaller,</span>
-<span id="cb26-380"><a href="#cb26-380" aria-hidden="true" tabindex="-1"></a>too small to be a real offshore island. Trieste has no islands at all. The</span>
-<span id="cb26-381"><a href="#cb26-381" aria-hidden="true" tabindex="-1"></a>41 parts question 8 found for Trieste are almost entirely digitization noise</span>
-<span id="cb26-382"><a href="#cb26-382" aria-hidden="true" tabindex="-1"></a>in the boundary file, not geography. Part count alone cannot tell the two</span>
-<span id="cb26-383"><a href="#cb26-383" aria-hidden="true" tabindex="-1"></a>situations apart; only looking at the actual areas, as Naples's answer just</span>
-<span id="cb26-384"><a href="#cb26-384" aria-hidden="true" tabindex="-1"></a>did, can. This is the polygon-validity caution from the chapter's Best</span>
-<span id="cb26-385"><a href="#cb26-385" aria-hidden="true" tabindex="-1"></a>Practices section in concrete form: an operation like <span class="in">`explode`</span> can run</span>
-<span id="cb26-386"><a href="#cb26-386" aria-hidden="true" tabindex="-1"></a>cleanly and still hand back results that need a second look before they are</span>
-<span id="cb26-387"><a href="#cb26-387" aria-hidden="true" tabindex="-1"></a>trusted.</span>
-<span id="cb26-388"><a href="#cb26-388" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-389"><a href="#cb26-389" aria-hidden="true" tabindex="-1"></a><span class="ss">11. </span>In the first block, count total vertices in <span class="in">`prov`</span> with</span>
-<span id="cb26-390"><a href="#cb26-390" aria-hidden="true" tabindex="-1"></a><span class="in">`.geo.count_coordinates()`</span> (<span class="in">`.select(c.count_coordinates.sum())`</span>). In the</span>
-<span id="cb26-391"><a href="#cb26-391" aria-hidden="true" tabindex="-1"></a>second block, repeat the count after <span class="in">`.geo.simplify(5_000)`</span>. In the third</span>
-<span id="cb26-392"><a href="#cb26-392" aria-hidden="true" tabindex="-1"></a>block, plot the simplified provinces with `geom_map(fill="white", color=</span>
-<span id="cb26-393"><a href="#cb26-393" aria-hidden="true" tabindex="-1"></a>"black")<span class="in">` and `</span>coord_fixed()`.</span>
-<span id="cb26-394"><a href="#cb26-394" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-397"><a href="#cb26-397" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb26-398"><a href="#cb26-398" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb26-399"><a href="#cb26-399" aria-hidden="true" tabindex="-1"></a>    prov</span>
-<span id="cb26-400"><a href="#cb26-400" aria-hidden="true" tabindex="-1"></a>    .geo.count_coordinates()</span>
-<span id="cb26-401"><a href="#cb26-401" aria-hidden="true" tabindex="-1"></a>    .select(c.count_coordinates.<span class="bu">sum</span>())</span>
-<span id="cb26-402"><a href="#cb26-402" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb26-403"><a href="#cb26-403" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb26-404"><a href="#cb26-404" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-407"><a href="#cb26-407" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb26-408"><a href="#cb26-408" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb26-409"><a href="#cb26-409" aria-hidden="true" tabindex="-1"></a>    prov</span>
-<span id="cb26-410"><a href="#cb26-410" aria-hidden="true" tabindex="-1"></a>    .geo.simplify(<span class="dv">5_000</span>)</span>
-<span id="cb26-411"><a href="#cb26-411" aria-hidden="true" tabindex="-1"></a>    .geo.count_coordinates()</span>
-<span id="cb26-412"><a href="#cb26-412" aria-hidden="true" tabindex="-1"></a>    .select(c.count_coordinates.<span class="bu">sum</span>())</span>
-<span id="cb26-413"><a href="#cb26-413" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb26-414"><a href="#cb26-414" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb26-415"><a href="#cb26-415" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-418"><a href="#cb26-418" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb26-419"><a href="#cb26-419" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb26-420"><a href="#cb26-420" aria-hidden="true" tabindex="-1"></a>    prov</span>
-<span id="cb26-421"><a href="#cb26-421" aria-hidden="true" tabindex="-1"></a>    .geo.simplify(<span class="dv">5_000</span>)</span>
-<span id="cb26-422"><a href="#cb26-422" aria-hidden="true" tabindex="-1"></a>    .ggplot()</span>
-<span id="cb26-423"><a href="#cb26-423" aria-hidden="true" tabindex="-1"></a>    .geom_map(fill<span class="op">=</span><span class="st">"white"</span>, color<span class="op">=</span><span class="st">"black"</span>)</span>
-<span id="cb26-424"><a href="#cb26-424" aria-hidden="true" tabindex="-1"></a>    .coord_fixed()</span>
-<span id="cb26-425"><a href="#cb26-425" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb26-426"><a href="#cb26-426" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb26-427"><a href="#cb26-427" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-428"><a href="#cb26-428" aria-hidden="true" tabindex="-1"></a>**Answer**: The unsimplified boundaries carry 147,591 vertices; a 5-kilometer</span>
-<span id="cb26-429"><a href="#cb26-429" aria-hidden="true" tabindex="-1"></a>tolerance cuts that to 3,346, a 44-fold reduction. The map is still</span>
-<span id="cb26-430"><a href="#cb26-430" aria-hidden="true" tabindex="-1"></a>recognizably Italy, with every region and every named island from earlier in</span>
-<span id="cb26-431"><a href="#cb26-431" aria-hidden="true" tabindex="-1"></a>the notebook still in place, but the coastlines have visibly straightened</span>
-<span id="cb26-432"><a href="#cb26-432" aria-hidden="true" tabindex="-1"></a>into short, angular segments. Real work would use a tolerance closer to the</span>
-<span id="cb26-433"><a href="#cb26-433" aria-hidden="true" tabindex="-1"></a>width of a plotted line rather than one deliberately this coarse, but the</span>
-<span id="cb26-434"><a href="#cb26-434" aria-hidden="true" tabindex="-1"></a>same trade (fewer vertices for a small, controlled loss of detail) is what</span>
-<span id="cb26-435"><a href="#cb26-435" aria-hidden="true" tabindex="-1"></a><span class="in">`simplify`</span> is doing either way.</span>
-<span id="cb26-436"><a href="#cb26-436" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-437"><a href="#cb26-437" aria-hidden="true" tabindex="-1"></a><span class="ss">12. </span>Check that every polygon in <span class="in">`prov`</span> is actually valid with <span class="in">`.geo.is_valid`</span></span>
-<span id="cb26-438"><a href="#cb26-438" aria-hidden="true" tabindex="-1"></a>before trusting anything computed above. Print how many are not.</span>
-<span id="cb26-439"><a href="#cb26-439" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-442"><a href="#cb26-442" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb26-443"><a href="#cb26-443" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb26-444"><a href="#cb26-444" aria-hidden="true" tabindex="-1"></a>    prov</span>
-<span id="cb26-445"><a href="#cb26-445" aria-hidden="true" tabindex="-1"></a>    .geo.is_valid</span>
-<span id="cb26-446"><a href="#cb26-446" aria-hidden="true" tabindex="-1"></a>    .select(n_invalid <span class="op">=</span> (<span class="op">~</span>c.is_valid).<span class="bu">sum</span>())</span>
-<span id="cb26-447"><a href="#cb26-447" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb26-448"><a href="#cb26-448" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb26-449"><a href="#cb26-449" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-450"><a href="#cb26-450" aria-hidden="true" tabindex="-1"></a>**Answer**: Zero. Every one of the 107 province polygons is topologically</span>
-<span id="cb26-451"><a href="#cb26-451" aria-hidden="true" tabindex="-1"></a>valid, which is worth confirming rather than assuming: an invalid polygon</span>
-<span id="cb26-452"><a href="#cb26-452" aria-hidden="true" tabindex="-1"></a>(one with a self-intersection or a similar defect) can make <span class="in">`area`</span>,</span>
-<span id="cb26-453"><a href="#cb26-453" aria-hidden="true" tabindex="-1"></a><span class="in">`dissolve`</span>, or <span class="in">`explode`</span> silently return wrong numbers instead of raising an</span>
-<span id="cb26-454"><a href="#cb26-454" aria-hidden="true" tabindex="-1"></a>error, the same way the CRS mismatch in notebook33 and the empty-buffer trap</span>
-<span id="cb26-455"><a href="#cb26-455" aria-hidden="true" tabindex="-1"></a>in question 3 above could both run without complaint while quietly answering</span>
-<span id="cb26-456"><a href="#cb26-456" aria-hidden="true" tabindex="-1"></a>the wrong question. A dataset earns the right to be trusted at this scale</span>
-<span id="cb26-457"><a href="#cb26-457" aria-hidden="true" tabindex="-1"></a>only after a check like this one comes back clean.</span>
+<span id="cb26-122"><a href="#cb26-122" aria-hidden="true" tabindex="-1"></a>Valley in the north and along the coast from Naples down toward Bari.</span>
+<span id="cb26-123"><a href="#cb26-123" aria-hidden="true" tabindex="-1"></a>Sardinia and the mountainous interior of the south show mostly separate</span>
+<span id="cb26-124"><a href="#cb26-124" aria-hidden="true" tabindex="-1"></a>circles that barely touch. Because the 20-kilometer radius is fixed, the</span>
+<span id="cb26-125"><a href="#cb26-125" aria-hidden="true" tabindex="-1"></a>darkness maps how close together the cities are.</span>
+<span id="cb26-126"><a href="#cb26-126" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-127"><a href="#cb26-127" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Compare <span class="in">`it_city.geo.sjoin(prov)`</span> to `it_city.geo.buffer(20_000).geo.sjoin(</span>
+<span id="cb26-128"><a href="#cb26-128" aria-hidden="true" tabindex="-1"></a>prov)<span class="in">`. In the first block, print the row count of `</span>it_city.geo.sjoin(prov)`;</span>
+<span id="cb26-129"><a href="#cb26-129" aria-hidden="true" tabindex="-1"></a>in the second, print the row count of the buffered join. What does the jump</span>
+<span id="cb26-130"><a href="#cb26-130" aria-hidden="true" tabindex="-1"></a>mean?</span>
+<span id="cb26-131"><a href="#cb26-131" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-134"><a href="#cb26-134" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-135"><a href="#cb26-135" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb26-136"><a href="#cb26-136" aria-hidden="true" tabindex="-1"></a>    it_city</span>
+<span id="cb26-137"><a href="#cb26-137" aria-hidden="true" tabindex="-1"></a>    .geo.sjoin(prov)</span>
+<span id="cb26-138"><a href="#cb26-138" aria-hidden="true" tabindex="-1"></a>    .select(pl.<span class="bu">len</span>())</span>
+<span id="cb26-139"><a href="#cb26-139" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-140"><a href="#cb26-140" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-141"><a href="#cb26-141" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-144"><a href="#cb26-144" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-145"><a href="#cb26-145" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb26-146"><a href="#cb26-146" aria-hidden="true" tabindex="-1"></a>    it_city</span>
+<span id="cb26-147"><a href="#cb26-147" aria-hidden="true" tabindex="-1"></a>    .geo.<span class="bu">buffer</span>(<span class="dv">20_000</span>)</span>
+<span id="cb26-148"><a href="#cb26-148" aria-hidden="true" tabindex="-1"></a>    .geo.sjoin(prov)</span>
+<span id="cb26-149"><a href="#cb26-149" aria-hidden="true" tabindex="-1"></a>    .select(pl.<span class="bu">len</span>())</span>
+<span id="cb26-150"><a href="#cb26-150" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-151"><a href="#cb26-151" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-152"><a href="#cb26-152" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-153"><a href="#cb26-153" aria-hidden="true" tabindex="-1"></a>**Answer**: The plain join returns 388 rows, one per city, the same result as</span>
+<span id="cb26-154"><a href="#cb26-154" aria-hidden="true" tabindex="-1"></a>notebook33. The buffered join returns 1,110. Once each city becomes a</span>
+<span id="cb26-155"><a href="#cb26-155" aria-hidden="true" tabindex="-1"></a>20-kilometer disc, many cities near a province line overlap two or more</span>
+<span id="cb26-156"><a href="#cb26-156" aria-hidden="true" tabindex="-1"></a>provinces and show up more than once. A buffered join answers a different</span>
+<span id="cb26-157"><a href="#cb26-157" aria-hidden="true" tabindex="-1"></a>question ("which provinces are within 20 km of this city?") from a plain</span>
+<span id="cb26-158"><a href="#cb26-158" aria-hidden="true" tabindex="-1"></a>containment join ("which province contains this city?"), so the two counts</span>
+<span id="cb26-159"><a href="#cb26-159" aria-hidden="true" tabindex="-1"></a>should not agree.</span>
+<span id="cb26-160"><a href="#cb26-160" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-161"><a href="#cb26-161" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>Group the buffered join from question 3 by <span class="in">`city_name`</span> and print the five</span>
+<span id="cb26-162"><a href="#cb26-162" aria-hidden="true" tabindex="-1"></a>cities with the most province matches.</span>
+<span id="cb26-163"><a href="#cb26-163" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-166"><a href="#cb26-166" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-167"><a href="#cb26-167" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb26-168"><a href="#cb26-168" aria-hidden="true" tabindex="-1"></a>    it_city</span>
+<span id="cb26-169"><a href="#cb26-169" aria-hidden="true" tabindex="-1"></a>    .geo.<span class="bu">buffer</span>(<span class="dv">20_000</span>)</span>
+<span id="cb26-170"><a href="#cb26-170" aria-hidden="true" tabindex="-1"></a>    .geo.sjoin(prov)</span>
+<span id="cb26-171"><a href="#cb26-171" aria-hidden="true" tabindex="-1"></a>    .group_by(c.city_name)</span>
+<span id="cb26-172"><a href="#cb26-172" aria-hidden="true" tabindex="-1"></a>    .agg(n <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb26-173"><a href="#cb26-173" aria-hidden="true" tabindex="-1"></a>    .sort(c.n, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb26-174"><a href="#cb26-174" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">5</span>)</span>
+<span id="cb26-175"><a href="#cb26-175" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-176"><a href="#cb26-176" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-177"><a href="#cb26-177" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-178"><a href="#cb26-178" aria-hidden="true" tabindex="-1"></a>**Answer**: Rovereto, Brugherio, Cologno Monzese, and Vignola each land within</span>
+<span id="cb26-179"><a href="#cb26-179" aria-hidden="true" tabindex="-1"></a>20 km of eight different provinces, and Massa tops the list at ten. Rovereto,</span>
+<span id="cb26-180"><a href="#cb26-180" aria-hidden="true" tabindex="-1"></a>Brugherio, and Cologno Monzese sit in the ring of small, tightly packed</span>
+<span id="cb26-181"><a href="#cb26-181" aria-hidden="true" tabindex="-1"></a>provinces around Milan and Trento, where a 20-kilometer disc reaches several</span>
+<span id="cb26-182"><a href="#cb26-182" aria-hidden="true" tabindex="-1"></a>neighbors. Massa's count is inflated for another reason. Notebook33 found</span>
+<span id="cb26-183"><a href="#cb26-183" aria-hidden="true" tabindex="-1"></a>three separate cities named Massa in three different provinces, and grouping</span>
+<span id="cb26-184"><a href="#cb26-184" aria-hidden="true" tabindex="-1"></a>by name merges their match counts: the duplicate-name problem from last time,</span>
+<span id="cb26-185"><a href="#cb26-185" aria-hidden="true" tabindex="-1"></a>in a new place.</span>
+<span id="cb26-186"><a href="#cb26-186" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-187"><a href="#cb26-187" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>In the first block, build a province-to-region lookup from <span class="in">`covid`</span> (<span class="in">`select`</span></span>
+<span id="cb26-188"><a href="#cb26-188" aria-hidden="true" tabindex="-1"></a><span class="in">`region`</span> and <span class="in">`province`</span>, then <span class="in">`.unique()`</span>) and check it is a clean key with</span>
+<span id="cb26-189"><a href="#cb26-189" aria-hidden="true" tabindex="-1"></a><span class="in">`.select(c.province.n_unique(), pl.len())`</span>. In the second block, join it onto</span>
+<span id="cb26-190"><a href="#cb26-190" aria-hidden="true" tabindex="-1"></a><span class="in">`prov`</span> and print how many provinces failed to match (<span class="in">`c.region.is_null().sum()`</span>)</span>
+<span id="cb26-191"><a href="#cb26-191" aria-hidden="true" tabindex="-1"></a>and how many distinct regions came through (<span class="in">`c.region.n_unique()`</span>).</span>
+<span id="cb26-192"><a href="#cb26-192" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-195"><a href="#cb26-195" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-196"><a href="#cb26-196" aria-hidden="true" tabindex="-1"></a>region_map <span class="op">=</span> (</span>
+<span id="cb26-197"><a href="#cb26-197" aria-hidden="true" tabindex="-1"></a>    covid</span>
+<span id="cb26-198"><a href="#cb26-198" aria-hidden="true" tabindex="-1"></a>    .select(c.region, c.province)</span>
+<span id="cb26-199"><a href="#cb26-199" aria-hidden="true" tabindex="-1"></a>    .unique()</span>
+<span id="cb26-200"><a href="#cb26-200" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-201"><a href="#cb26-201" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb26-202"><a href="#cb26-202" aria-hidden="true" tabindex="-1"></a>    region_map</span>
+<span id="cb26-203"><a href="#cb26-203" aria-hidden="true" tabindex="-1"></a>    .select(c.province.n_unique(), pl.<span class="bu">len</span>())</span>
+<span id="cb26-204"><a href="#cb26-204" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-205"><a href="#cb26-205" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-206"><a href="#cb26-206" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-209"><a href="#cb26-209" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-210"><a href="#cb26-210" aria-hidden="true" tabindex="-1"></a>prov <span class="op">=</span> (</span>
+<span id="cb26-211"><a href="#cb26-211" aria-hidden="true" tabindex="-1"></a>    prov</span>
+<span id="cb26-212"><a href="#cb26-212" aria-hidden="true" tabindex="-1"></a>    .join(region_map, on<span class="op">=</span><span class="st">"province"</span>, how<span class="op">=</span><span class="st">"left"</span>)</span>
+<span id="cb26-213"><a href="#cb26-213" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-214"><a href="#cb26-214" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb26-215"><a href="#cb26-215" aria-hidden="true" tabindex="-1"></a>    prov</span>
+<span id="cb26-216"><a href="#cb26-216" aria-hidden="true" tabindex="-1"></a>    .select(</span>
+<span id="cb26-217"><a href="#cb26-217" aria-hidden="true" tabindex="-1"></a>        n_missing <span class="op">=</span> c.region.is_null().<span class="bu">sum</span>(),</span>
+<span id="cb26-218"><a href="#cb26-218" aria-hidden="true" tabindex="-1"></a>        n_region <span class="op">=</span> c.region.n_unique()</span>
+<span id="cb26-219"><a href="#cb26-219" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb26-220"><a href="#cb26-220" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-221"><a href="#cb26-221" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-222"><a href="#cb26-222" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-223"><a href="#cb26-223" aria-hidden="true" tabindex="-1"></a>**Answer**: The lookup has exactly 107 rows for 107 distinct provinces, so it</span>
+<span id="cb26-224"><a href="#cb26-224" aria-hidden="true" tabindex="-1"></a>is a clean key. The join onto <span class="in">`prov`</span> leaves zero missing regions and recovers</span>
+<span id="cb26-225"><a href="#cb26-225" aria-hidden="true" tabindex="-1"></a>all 21. This is the same join-key check from earlier chapters, done before</span>
+<span id="cb26-226"><a href="#cb26-226" aria-hidden="true" tabindex="-1"></a>trusting a spatial grouping.</span>
+<span id="cb26-227"><a href="#cb26-227" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-228"><a href="#cb26-228" aria-hidden="true" tabindex="-1"></a><span class="ss">6. </span>Compute each province's area with <span class="in">`.geo.area`</span>, then `.geo.dissolve(</span>
+<span id="cb26-229"><a href="#cb26-229" aria-hidden="true" tabindex="-1"></a>by="region", aggfunc={"area": "sum"})` to merge the provinces into their 21</span>
+<span id="cb26-230"><a href="#cb26-230" aria-hidden="true" tabindex="-1"></a>regions. Print the regions sorted by total area (in square kilometers,</span>
+<span id="cb26-231"><a href="#cb26-231" aria-hidden="true" tabindex="-1"></a>dividing by 1e6), largest first.</span>
+<span id="cb26-232"><a href="#cb26-232" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-235"><a href="#cb26-235" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-236"><a href="#cb26-236" aria-hidden="true" tabindex="-1"></a>prov <span class="op">=</span> (</span>
+<span id="cb26-237"><a href="#cb26-237" aria-hidden="true" tabindex="-1"></a>    prov</span>
+<span id="cb26-238"><a href="#cb26-238" aria-hidden="true" tabindex="-1"></a>    .geo.area</span>
+<span id="cb26-239"><a href="#cb26-239" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-240"><a href="#cb26-240" aria-hidden="true" tabindex="-1"></a>region <span class="op">=</span> (</span>
+<span id="cb26-241"><a href="#cb26-241" aria-hidden="true" tabindex="-1"></a>    prov</span>
+<span id="cb26-242"><a href="#cb26-242" aria-hidden="true" tabindex="-1"></a>    .geo.dissolve(by<span class="op">=</span><span class="st">"region"</span>, aggfunc<span class="op">=</span>{<span class="st">"area"</span>: <span class="st">"sum"</span>})</span>
+<span id="cb26-243"><a href="#cb26-243" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-244"><a href="#cb26-244" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb26-245"><a href="#cb26-245" aria-hidden="true" tabindex="-1"></a>    region</span>
+<span id="cb26-246"><a href="#cb26-246" aria-hidden="true" tabindex="-1"></a>    .select(c.region, area_km2 <span class="op">=</span> (c.area <span class="op">/</span> <span class="fl">1e6</span>).<span class="bu">round</span>(<span class="dv">0</span>))</span>
+<span id="cb26-247"><a href="#cb26-247" aria-hidden="true" tabindex="-1"></a>    .sort(c.area_km2, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb26-248"><a href="#cb26-248" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-249"><a href="#cb26-249" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-250"><a href="#cb26-250" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-251"><a href="#cb26-251" aria-hidden="true" tabindex="-1"></a>**Answer**: Sicilia comes out on top at roughly 25,800 square kilometers,</span>
+<span id="cb26-252"><a href="#cb26-252" aria-hidden="true" tabindex="-1"></a>just ahead of Piemonte, Sardegna, Lombardia, and Toscana, and Valle d'Aosta is</span>
+<span id="cb26-253"><a href="#cb26-253" aria-hidden="true" tabindex="-1"></a>smallest at around 3,300. Sicily really is the largest of the 20 traditional</span>
+<span id="cb26-254"><a href="#cb26-254" aria-hidden="true" tabindex="-1"></a>regions, and the sum recovers that from 9 separate province polygons without</span>
+<span id="cb26-255"><a href="#cb26-255" aria-hidden="true" tabindex="-1"></a>being told.</span>
+<span id="cb26-256"><a href="#cb26-256" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-257"><a href="#cb26-257" aria-hidden="true" tabindex="-1"></a><span class="ss">7. </span>In the first block, plot the dissolved <span class="in">`region`</span> table with `geom_map(fill=</span>
+<span id="cb26-258"><a href="#cb26-258" aria-hidden="true" tabindex="-1"></a>"white", color="black")<span class="in">` and `</span>coord_fixed()`. In the second block, print the</span>
+<span id="cb26-259"><a href="#cb26-259" aria-hidden="true" tabindex="-1"></a>row count of <span class="in">`region`</span> to compare against <span class="in">`prov`</span>'s. What happened to the</span>
+<span id="cb26-260"><a href="#cb26-260" aria-hidden="true" tabindex="-1"></a>province borders?</span>
+<span id="cb26-261"><a href="#cb26-261" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-264"><a href="#cb26-264" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-265"><a href="#cb26-265" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb26-266"><a href="#cb26-266" aria-hidden="true" tabindex="-1"></a>    region</span>
+<span id="cb26-267"><a href="#cb26-267" aria-hidden="true" tabindex="-1"></a>    .ggplot()</span>
+<span id="cb26-268"><a href="#cb26-268" aria-hidden="true" tabindex="-1"></a>    .geom_map(fill<span class="op">=</span><span class="st">"white"</span>, color<span class="op">=</span><span class="st">"black"</span>)</span>
+<span id="cb26-269"><a href="#cb26-269" aria-hidden="true" tabindex="-1"></a>    .coord_fixed()</span>
+<span id="cb26-270"><a href="#cb26-270" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-271"><a href="#cb26-271" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-272"><a href="#cb26-272" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-275"><a href="#cb26-275" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-276"><a href="#cb26-276" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb26-277"><a href="#cb26-277" aria-hidden="true" tabindex="-1"></a>    region</span>
+<span id="cb26-278"><a href="#cb26-278" aria-hidden="true" tabindex="-1"></a>    .select(pl.<span class="bu">len</span>())</span>
+<span id="cb26-279"><a href="#cb26-279" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-280"><a href="#cb26-280" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-281"><a href="#cb26-281" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-282"><a href="#cb26-282" aria-hidden="true" tabindex="-1"></a>**Answer**: <span class="in">`region`</span> has 21 rows against <span class="in">`prov`</span>'s 107, and the plot shows why.</span>
+<span id="cb26-283"><a href="#cb26-283" aria-hidden="true" tabindex="-1"></a>The lines separating provinces inside the same region are gone, leaving only</span>
+<span id="cb26-284"><a href="#cb26-284" aria-hidden="true" tabindex="-1"></a>the 21 regional outlines. <span class="in">`dissolve`</span> does to polygons what <span class="in">`group_by`</span> does to</span>
+<span id="cb26-285"><a href="#cb26-285" aria-hidden="true" tabindex="-1"></a>a table: it merges every row that shares a key into one and discards the</span>
+<span id="cb26-286"><a href="#cb26-286" aria-hidden="true" tabindex="-1"></a>internal structure the key no longer distinguishes.</span>
+<span id="cb26-287"><a href="#cb26-287" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-288"><a href="#cb26-288" aria-hidden="true" tabindex="-1"></a><span class="ss">8. </span>In the first block, print the row count of <span class="in">`prov`</span>. In the second block,</span>
+<span id="cb26-289"><a href="#cb26-289" aria-hidden="true" tabindex="-1"></a>explode the full <span class="in">`prov`</span> table with <span class="in">`.geo.explode()`</span> and print the new row</span>
+<span id="cb26-290"><a href="#cb26-290" aria-hidden="true" tabindex="-1"></a>count. In the third block, group the exploded table by <span class="in">`province`</span>, count</span>
+<span id="cb26-291"><a href="#cb26-291" aria-hidden="true" tabindex="-1"></a>the parts, and print the five provinces with the most.</span>
+<span id="cb26-292"><a href="#cb26-292" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-295"><a href="#cb26-295" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-296"><a href="#cb26-296" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb26-297"><a href="#cb26-297" aria-hidden="true" tabindex="-1"></a>    prov</span>
+<span id="cb26-298"><a href="#cb26-298" aria-hidden="true" tabindex="-1"></a>    .select(pl.<span class="bu">len</span>())</span>
+<span id="cb26-299"><a href="#cb26-299" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-300"><a href="#cb26-300" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-301"><a href="#cb26-301" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-304"><a href="#cb26-304" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-305"><a href="#cb26-305" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb26-306"><a href="#cb26-306" aria-hidden="true" tabindex="-1"></a>    prov</span>
+<span id="cb26-307"><a href="#cb26-307" aria-hidden="true" tabindex="-1"></a>    .geo.explode()</span>
+<span id="cb26-308"><a href="#cb26-308" aria-hidden="true" tabindex="-1"></a>    .select(pl.<span class="bu">len</span>())</span>
+<span id="cb26-309"><a href="#cb26-309" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-310"><a href="#cb26-310" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-311"><a href="#cb26-311" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-314"><a href="#cb26-314" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-315"><a href="#cb26-315" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb26-316"><a href="#cb26-316" aria-hidden="true" tabindex="-1"></a>    prov</span>
+<span id="cb26-317"><a href="#cb26-317" aria-hidden="true" tabindex="-1"></a>    .geo.explode()</span>
+<span id="cb26-318"><a href="#cb26-318" aria-hidden="true" tabindex="-1"></a>    .group_by(c.province)</span>
+<span id="cb26-319"><a href="#cb26-319" aria-hidden="true" tabindex="-1"></a>    .agg(n <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb26-320"><a href="#cb26-320" aria-hidden="true" tabindex="-1"></a>    .sort(c.n, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb26-321"><a href="#cb26-321" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">5</span>)</span>
+<span id="cb26-322"><a href="#cb26-322" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-323"><a href="#cb26-323" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-324"><a href="#cb26-324" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-325"><a href="#cb26-325" aria-hidden="true" tabindex="-1"></a>**Answer**: 107 rows become 526, an average of about five polygon pieces per</span>
+<span id="cb26-326"><a href="#cb26-326" aria-hidden="true" tabindex="-1"></a>province, even though most provinces are a single solid shape. Sassari leads</span>
+<span id="cb26-327"><a href="#cb26-327" aria-hidden="true" tabindex="-1"></a>with 124 parts, followed by Trieste, Sud Sardegna, Livorno, and Trapani, all</span>
+<span id="cb26-328"><a href="#cb26-328" aria-hidden="true" tabindex="-1"></a>coastal provinces.</span>
+<span id="cb26-329"><a href="#cb26-329" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-330"><a href="#cb26-330" aria-hidden="true" tabindex="-1"></a><span class="ss">9. </span>Filter the exploded table to <span class="in">`province == "Napoli"`</span>, recompute <span class="in">`.geo.area`</span>,</span>
+<span id="cb26-331"><a href="#cb26-331" aria-hidden="true" tabindex="-1"></a>and print the four largest parts in square kilometers. Do the sizes match</span>
+<span id="cb26-332"><a href="#cb26-332" aria-hidden="true" tabindex="-1"></a>what is known about Naples's islands?</span>
+<span id="cb26-333"><a href="#cb26-333" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-336"><a href="#cb26-336" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-337"><a href="#cb26-337" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb26-338"><a href="#cb26-338" aria-hidden="true" tabindex="-1"></a>    prov</span>
+<span id="cb26-339"><a href="#cb26-339" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.province <span class="op">==</span> <span class="st">"Napoli"</span>)</span>
+<span id="cb26-340"><a href="#cb26-340" aria-hidden="true" tabindex="-1"></a>    .geo.explode()</span>
+<span id="cb26-341"><a href="#cb26-341" aria-hidden="true" tabindex="-1"></a>    .geo.area</span>
+<span id="cb26-342"><a href="#cb26-342" aria-hidden="true" tabindex="-1"></a>    .select((c.area <span class="op">/</span> <span class="fl">1e6</span>).<span class="bu">round</span>(<span class="dv">1</span>).alias(<span class="st">"area_km2"</span>))</span>
+<span id="cb26-343"><a href="#cb26-343" aria-hidden="true" tabindex="-1"></a>    .sort(c.area_km2, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb26-344"><a href="#cb26-344" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">4</span>)</span>
+<span id="cb26-345"><a href="#cb26-345" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-346"><a href="#cb26-346" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-347"><a href="#cb26-347" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-348"><a href="#cb26-348" aria-hidden="true" tabindex="-1"></a>**Answer**: The largest part, about 1,115 square kilometers, is the mainland</span>
+<span id="cb26-349"><a href="#cb26-349" aria-hidden="true" tabindex="-1"></a>province. The next three, at roughly 46, 11, and 3 square kilometers, line up</span>
+<span id="cb26-350"><a href="#cb26-350" aria-hidden="true" tabindex="-1"></a>almost exactly with the real areas of Ischia (about 46 km²), Capri (about</span>
+<span id="cb26-351"><a href="#cb26-351" aria-hidden="true" tabindex="-1"></a>10 km²), and Procida (about 4 km²), the three inhabited islands in the Bay of</span>
+<span id="cb26-352"><a href="#cb26-352" aria-hidden="true" tabindex="-1"></a>Naples. Exploding turned a single "Napoli" row into pieces you can check</span>
+<span id="cb26-353"><a href="#cb26-353" aria-hidden="true" tabindex="-1"></a>against places most people have heard of.</span>
+<span id="cb26-354"><a href="#cb26-354" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-355"><a href="#cb26-355" aria-hidden="true" tabindex="-1"></a><span class="ss">10. </span>Filter the exploded table to <span class="in">`province == "Trieste"`</span> instead, recompute</span>
+<span id="cb26-356"><a href="#cb26-356" aria-hidden="true" tabindex="-1"></a><span class="in">`.geo.area`</span>, and print the five largest parts. Does a high part count always</span>
+<span id="cb26-357"><a href="#cb26-357" aria-hidden="true" tabindex="-1"></a>mean real islands, the way it did for Naples?</span>
+<span id="cb26-358"><a href="#cb26-358" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-361"><a href="#cb26-361" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-362"><a href="#cb26-362" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb26-363"><a href="#cb26-363" aria-hidden="true" tabindex="-1"></a>    prov</span>
+<span id="cb26-364"><a href="#cb26-364" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.province <span class="op">==</span> <span class="st">"Trieste"</span>)</span>
+<span id="cb26-365"><a href="#cb26-365" aria-hidden="true" tabindex="-1"></a>    .geo.explode()</span>
+<span id="cb26-366"><a href="#cb26-366" aria-hidden="true" tabindex="-1"></a>    .geo.area</span>
+<span id="cb26-367"><a href="#cb26-367" aria-hidden="true" tabindex="-1"></a>    .select((c.area <span class="op">/</span> <span class="fl">1e6</span>).<span class="bu">round</span>(<span class="dv">2</span>).alias(<span class="st">"area_km2"</span>))</span>
+<span id="cb26-368"><a href="#cb26-368" aria-hidden="true" tabindex="-1"></a>    .sort(c.area_km2, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb26-369"><a href="#cb26-369" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">5</span>)</span>
+<span id="cb26-370"><a href="#cb26-370" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-371"><a href="#cb26-371" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-372"><a href="#cb26-372" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-373"><a href="#cb26-373" aria-hidden="true" tabindex="-1"></a>**Answer**: No. The mainland part is about 212 square kilometers, and every</span>
+<span id="cb26-374"><a href="#cb26-374" aria-hidden="true" tabindex="-1"></a>other part is two hundredths of a square kilometer or smaller, too small to be</span>
+<span id="cb26-375"><a href="#cb26-375" aria-hidden="true" tabindex="-1"></a>an offshore island. Trieste has no islands. The 41 parts question 8 found for</span>
+<span id="cb26-376"><a href="#cb26-376" aria-hidden="true" tabindex="-1"></a>Trieste are almost entirely digitization noise in the boundary file. The part</span>
+<span id="cb26-377"><a href="#cb26-377" aria-hidden="true" tabindex="-1"></a>count alone cannot separate the two cases; you have to look at the areas, as</span>
+<span id="cb26-378"><a href="#cb26-378" aria-hidden="true" tabindex="-1"></a>the Naples answer did. This is the polygon-validity caution from the chapter's</span>
+<span id="cb26-379"><a href="#cb26-379" aria-hidden="true" tabindex="-1"></a>Best Practices section: an operation like <span class="in">`explode`</span> can run cleanly and still</span>
+<span id="cb26-380"><a href="#cb26-380" aria-hidden="true" tabindex="-1"></a>return results that need a second look.</span>
+<span id="cb26-381"><a href="#cb26-381" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-382"><a href="#cb26-382" aria-hidden="true" tabindex="-1"></a><span class="ss">11. </span>In the first block, count total vertices in <span class="in">`prov`</span> with</span>
+<span id="cb26-383"><a href="#cb26-383" aria-hidden="true" tabindex="-1"></a><span class="in">`.geo.count_coordinates()`</span> (<span class="in">`.select(c.count_coordinates.sum())`</span>). In the</span>
+<span id="cb26-384"><a href="#cb26-384" aria-hidden="true" tabindex="-1"></a>second block, repeat the count after <span class="in">`.geo.simplify(5_000)`</span>. In the third</span>
+<span id="cb26-385"><a href="#cb26-385" aria-hidden="true" tabindex="-1"></a>block, plot the simplified provinces with `geom_map(fill="white", color=</span>
+<span id="cb26-386"><a href="#cb26-386" aria-hidden="true" tabindex="-1"></a>"black")<span class="in">` and `</span>coord_fixed()`.</span>
+<span id="cb26-387"><a href="#cb26-387" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-390"><a href="#cb26-390" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-391"><a href="#cb26-391" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb26-392"><a href="#cb26-392" aria-hidden="true" tabindex="-1"></a>    prov</span>
+<span id="cb26-393"><a href="#cb26-393" aria-hidden="true" tabindex="-1"></a>    .geo.count_coordinates()</span>
+<span id="cb26-394"><a href="#cb26-394" aria-hidden="true" tabindex="-1"></a>    .select(c.count_coordinates.<span class="bu">sum</span>())</span>
+<span id="cb26-395"><a href="#cb26-395" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-396"><a href="#cb26-396" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-397"><a href="#cb26-397" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-400"><a href="#cb26-400" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-401"><a href="#cb26-401" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb26-402"><a href="#cb26-402" aria-hidden="true" tabindex="-1"></a>    prov</span>
+<span id="cb26-403"><a href="#cb26-403" aria-hidden="true" tabindex="-1"></a>    .geo.simplify(<span class="dv">5_000</span>)</span>
+<span id="cb26-404"><a href="#cb26-404" aria-hidden="true" tabindex="-1"></a>    .geo.count_coordinates()</span>
+<span id="cb26-405"><a href="#cb26-405" aria-hidden="true" tabindex="-1"></a>    .select(c.count_coordinates.<span class="bu">sum</span>())</span>
+<span id="cb26-406"><a href="#cb26-406" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-407"><a href="#cb26-407" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-408"><a href="#cb26-408" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-411"><a href="#cb26-411" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-412"><a href="#cb26-412" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb26-413"><a href="#cb26-413" aria-hidden="true" tabindex="-1"></a>    prov</span>
+<span id="cb26-414"><a href="#cb26-414" aria-hidden="true" tabindex="-1"></a>    .geo.simplify(<span class="dv">5_000</span>)</span>
+<span id="cb26-415"><a href="#cb26-415" aria-hidden="true" tabindex="-1"></a>    .ggplot()</span>
+<span id="cb26-416"><a href="#cb26-416" aria-hidden="true" tabindex="-1"></a>    .geom_map(fill<span class="op">=</span><span class="st">"white"</span>, color<span class="op">=</span><span class="st">"black"</span>)</span>
+<span id="cb26-417"><a href="#cb26-417" aria-hidden="true" tabindex="-1"></a>    .coord_fixed()</span>
+<span id="cb26-418"><a href="#cb26-418" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-419"><a href="#cb26-419" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-420"><a href="#cb26-420" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-421"><a href="#cb26-421" aria-hidden="true" tabindex="-1"></a>**Answer**: The unsimplified boundaries carry 147,591 vertices, and a</span>
+<span id="cb26-422"><a href="#cb26-422" aria-hidden="true" tabindex="-1"></a>5-kilometer tolerance cuts that to 3,346, a 44-fold reduction. The map is</span>
+<span id="cb26-423"><a href="#cb26-423" aria-hidden="true" tabindex="-1"></a>still recognizably Italy, with every region and every named island from</span>
+<span id="cb26-424"><a href="#cb26-424" aria-hidden="true" tabindex="-1"></a>earlier in the notebook in place, but the coastlines have straightened into</span>
+<span id="cb26-425"><a href="#cb26-425" aria-hidden="true" tabindex="-1"></a>short, angular segments. Real work would use a tolerance closer to the width</span>
+<span id="cb26-426"><a href="#cb26-426" aria-hidden="true" tabindex="-1"></a>of a plotted line. The trade is the same at any tolerance: fewer vertices for</span>
+<span id="cb26-427"><a href="#cb26-427" aria-hidden="true" tabindex="-1"></a>a small, controlled loss of detail.</span>
+<span id="cb26-428"><a href="#cb26-428" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-429"><a href="#cb26-429" aria-hidden="true" tabindex="-1"></a><span class="ss">12. </span>Check that every polygon in <span class="in">`prov`</span> is actually valid with <span class="in">`.geo.is_valid`</span></span>
+<span id="cb26-430"><a href="#cb26-430" aria-hidden="true" tabindex="-1"></a>before trusting anything computed above. Print how many are not.</span>
+<span id="cb26-431"><a href="#cb26-431" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-434"><a href="#cb26-434" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-435"><a href="#cb26-435" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb26-436"><a href="#cb26-436" aria-hidden="true" tabindex="-1"></a>    prov</span>
+<span id="cb26-437"><a href="#cb26-437" aria-hidden="true" tabindex="-1"></a>    .geo.is_valid</span>
+<span id="cb26-438"><a href="#cb26-438" aria-hidden="true" tabindex="-1"></a>    .select(n_invalid <span class="op">=</span> (<span class="op">~</span>c.is_valid).<span class="bu">sum</span>())</span>
+<span id="cb26-439"><a href="#cb26-439" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-440"><a href="#cb26-440" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-441"><a href="#cb26-441" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-442"><a href="#cb26-442" aria-hidden="true" tabindex="-1"></a>**Answer**: Zero. All 107 province polygons are topologically valid. Check</span>
+<span id="cb26-443"><a href="#cb26-443" aria-hidden="true" tabindex="-1"></a>this instead of assuming it: an invalid polygon (one with a self-intersection</span>
+<span id="cb26-444"><a href="#cb26-444" aria-hidden="true" tabindex="-1"></a>or a similar defect) can make <span class="in">`area`</span>, <span class="in">`dissolve`</span>, or <span class="in">`explode`</span> return wrong</span>
+<span id="cb26-445"><a href="#cb26-445" aria-hidden="true" tabindex="-1"></a>numbers without raising an error, just as the CRS mismatch in notebook33 ran</span>
+<span id="cb26-446"><a href="#cb26-446" aria-hidden="true" tabindex="-1"></a>without complaint while answering the wrong question. Trust results at this</span>
+<span id="cb26-447"><a href="#cb26-447" aria-hidden="true" tabindex="-1"></a>scale only after a check like this one comes back clean.</span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->

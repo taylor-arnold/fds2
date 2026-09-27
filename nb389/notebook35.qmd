@@ -51,20 +51,18 @@ headers = {
 
 ### Questions
 
-This notebook does not read a table from `data/`; it builds one, over the
-network, the same way the chapter itself does. The population is every
-direct member of `Category:Turing Award laureates` on English Wikipedia: the
-recipients of the ACM's annual computing prize, which one of their own
-Wikipedia articles describes as "informally considered the Nobel Prize of
-computer science." That gives a population small enough to collect politely
-in one sitting and, unlike the chapter's own novelist categories, drawn from
-a single official award list with essentially no ambiguity about who
-belongs. Two tables come out of this notebook: `laureates`, a spine with a
-`page_id` and a `doc_id` for every recipient, and `texts`, each laureate's
-article body. Notebook36 reuses both to collect the links, revision
-histories, page views, and language links the rest of the chapter covers, so
-nothing here is thrown away once the notebook ends. Print results unless a
-question says otherwise.
+This notebook builds its table over the network instead of reading one from
+`data/`, the same way the chapter does. The population is every direct member
+of `Category:Turing Award laureates` on English Wikipedia: the recipients of
+the ACM's annual computing prize, which one of their own Wikipedia articles
+describes as "informally considered the Nobel Prize of computer science." The
+population is small enough to collect politely in one sitting. Unlike the
+chapter's novelist categories, it comes from a single official award list, so
+there is essentially no ambiguity about who belongs. The notebook produces two
+tables: `laureates`, a spine with a `page_id` and a `doc_id` for every
+recipient, and `texts`, each laureate's article body. Notebook36 reuses both
+to collect the links, revision histories, page views, and language links the
+rest of the chapter covers. Print results unless a question says otherwise.
 
 1. In the first block, send a single request for `"Donald Knuth"`'s page
 info (`action="query"`, `prop="info"`) with `session.get()` and print the
@@ -94,14 +92,14 @@ pl.DataFrame([{
 ```
 
 2. Wikimedia asks clients to send a descriptive `User-Agent`, request
-serially, and cache what comes back; clearing `session.cookies` before every
-request matters too, since Wikimedia's `Vary: Cookie` header means a
-leftover cookie would quietly defeat the cache on every rerun. In the first
-block, write a `polite_get(url, params)` helper that clears cookies, calls
-`session.get()`, raises on a bad status with `.raise_for_status()`, and
-sleeps 0.2 seconds only when the response did not come from the cache. In
-the second block, call it twice in a row for `"Barbara Liskov"`'s page info
-and print `.from_cache` for both calls.
+serially, and cache what comes back. Also clear `session.cookies` before every
+request: Wikimedia sends a `Vary: Cookie` header, so a leftover cookie would
+defeat the cache on every rerun. In the first block, write a
+`polite_get(url, params)` helper that clears cookies, calls `session.get()`,
+raises on a bad status with `.raise_for_status()`, and sleeps 0.2 seconds only
+when the response did not come from the cache. In the second block, call it
+twice in a row for `"Barbara Liskov"`'s page info and print `.from_cache` for
+both calls.
 
 ```{python}
 def polite_get(url, params=None):
@@ -126,9 +124,9 @@ r1.from_cache, r2.from_cache
 ```
 
 **Answer**: The first call reaches the network (`False`); the second, sent
-with identical parameters, is answered entirely out of the local SQLite
-cache (`True`). This is what lets the whole notebook re-run in seconds
-instead of minutes once the cache is warm.
+with identical parameters, is answered from the local SQLite cache (`True`).
+Once the cache is warm, the whole notebook re-runs in seconds instead of
+minutes.
 
 3. In the first block, write `category_members(category)`: loop over
 `list="categorymembers"` with `cmtype="page"` (excludes subcategories and
@@ -190,9 +188,9 @@ laureates = (
 )
 ```
 
-**Answer**: 81 laureates, and deduplicating on `page_id` did not drop a
-single row; a single category, unlike the chapter's two overlapping ones,
-lists each person once.
+**Answer**: 81 laureates. Deduplicating on `page_id` dropped no rows, because
+a single category lists each person once; the chapter's two categories
+overlapped.
 
 4. Filter `laureates` to titles containing a parenthesis with
 `.filter(c.doc_id.str.contains(r"\("))`. Print the result. Why would
@@ -206,12 +204,12 @@ other 75?
 )
 ```
 
-**Answer**: The parenthetical is a Wikipedia disambiguator, added whenever
-the plain form of a name is already taken by some other notable person:
-`John McCarthy` alone belongs to more than one person with a Wikipedia
-article, so the laureate's page lives at `John McCarthy (computer
-scientist)` instead. The other 75 laureates have names specific enough that
-no such collision exists, so nothing needs to be added to theirs.
+**Answer**: The parenthetical is a Wikipedia disambiguator, added when the
+plain form of a name is already taken by another notable person. More than one
+person named John McCarthy has a Wikipedia article, so the laureate's page
+lives at `John McCarthy (computer scientist)`. The other 75 laureates have
+names that collide with no other article, so their titles need nothing
+added.
 
 5. Someone typing this population from memory would not always type the
 canonical title. In the first block, send one `prop="info"` request with
@@ -236,12 +234,11 @@ data["query"]["redirects"]
 {k: v for k, v in data["query"]["pages"].items() if "missing" in v}
 ```
 
-**Answer**: All three informal names resolve through a genuine redirect page
+**Answer**: All three informal names resolve through a redirect page
 (`Vinton Cerf` to `Vint Cerf`, `Ronald Rivest` to `Ron Rivest`, `Edsger
 Dijkstra` to `Edsger W. Dijkstra`), and the fake title comes back flagged
-`missing` with no crash. These are exactly the two outcomes the chapter's
-own redirect section describes, landing on this corpus's names instead of
-the book's.
+`missing` without an error. These are the two outcomes the chapter's redirect
+section describes, applied to this population's names.
 
 6. Two of question 4's disambiguated laureates, `John McCarthy (computer
 scientist)` and `David Patterson (computer scientist)`, are also the
@@ -289,19 +286,18 @@ for page in data["query"]["pages"].values():
     print(page["title"], "->", page["extract"][:60])
 ```
 
-**Answer**: The plain titles resolve to page IDs 58841 and 811552, neither
-of which matches the corpus's own 308362 (`John McCarthy (computer
-scientist)`) or 816239 (`David Patterson (computer scientist)`). Nothing
-raised an error and nothing came back `missing`; both are real, live
-Wikipedia pages, just not the ones this population means. The extracts show
-why: both open with "X may refer to:", which marks a disambiguation page
-listing several unrelated people who share the name. Question 5's check
-would not have caught this, because a disambiguation page is neither a
-redirect nor a `missing` page. A collection loop that only screens for
-those two failure modes would silently pull disambiguation-page metadata
-into the corpus under an innocent-looking title. Requesting the exact
-titles the category itself supplied, the way `laureates` already does,
-sidesteps the trap entirely.
+**Answer**: The plain titles resolve to page IDs 58841 and 811552, neither of
+which matches the corpus's 308362 (`John McCarthy (computer scientist)`) or
+816239 (`David Patterson (computer scientist)`). Nothing raised an error and
+nothing came back `missing`, because both are real Wikipedia pages, just not
+the ones this population means. The extracts show why: both open with "X may
+refer to:", which marks a disambiguation page listing several people who share
+the name. Question 5's check would not have caught this, because a
+disambiguation page is neither a redirect nor `missing`. A collection loop
+that screens only for those two failures would pull disambiguation-page
+metadata into the corpus under an innocent-looking title. Requesting the exact
+titles the category supplied, as `laureates` already does, avoids the
+problem.
 
 7. In the first block, loop over every `page_id` in `laureates`, request
 `prop="extracts"` with `explaintext=1`, collect each `page_id` with its
@@ -343,9 +339,9 @@ texts = (
 )
 ```
 
-**Answer**: 81 rows in, 81 rows of text out, and zero of them empty; every
-laureate in the population has a real article body, so this table needs no
-second pass the way an unmatched spatial join or a broken key would.
+**Answer**: 81 rows in, 81 rows of text out, and none empty. Every laureate
+in the population has an article body, so this table needs no second pass of
+the kind an unmatched spatial join or a broken key would.
 
 8. Print the first 300 characters of Donald Knuth's collected text and
 check it against what you already know about him.
@@ -354,13 +350,12 @@ check it against what you already know about him.
 print(texts.filter(c.doc_id == "Donald Knuth")["text"].item()[:300])
 ```
 
-**Answer**: The opening lines match the standard biographical summary,
-Stanford professor emeritus and 1974 Turing Award recipient, and the
-extract even states outright that the award is "informally considered the
-Nobel Prize of computer science," the same framing this notebook's
-introduction used. That line was recovered from the API, not typed by us,
-which is itself a small check that the collection pipeline is pulling real
-article content.
+**Answer**: The opening lines match the standard biographical summary:
+Stanford professor emeritus and 1974 Turing Award recipient. The extract also
+calls the award "informally considered the Nobel Prize of computer science,"
+the phrase this notebook's introduction quoted. We did not type that line; it
+came back from the API, which is a small check that the pipeline is pulling
+real article content.
 
 9. In the first block, add an `n_chars` column to `texts` with
 `.str.len_chars()`, then sort descending and print the 5 laureates with the
@@ -392,16 +387,16 @@ texts = (
 
 **Answer**: Herbert A. Simon's article leads at roughly 31,000 characters,
 well clear of Edsger W. Dijkstra, Douglas Engelbart, Kenneth E. Iverson, and
-Geoffrey Hinton. The shortest, around 2,000 to 3,000 characters apiece,
-belong to Richard E. Stearns, John Cocke, Amir Pnueli, Manuel Blum, and E.
-Allen Emerson. Article length here is not a ranking of computer-science
-importance; it tracks how much biographical and popular-press material
-exists to write about someone. Simon crosses into economics (he won a Nobel
-there too) and organizational theory, which pulls in more editors and more
-sources, and Hinton's place near the top owes as much to the attention his
-recent 2024 Nobel Prize in Physics brought his page as to the Turing Award
-itself. The laureates at the bottom did foundational, frequently cited work
-that most Wikipedia readers never go looking for by name.
+Geoffrey Hinton. The shortest, around 2,000 to 3,000 characters apiece, belong
+to Richard E. Stearns, John Cocke, Amir Pnueli, Manuel Blum, and E. Allen
+Emerson. Article length is not a ranking of importance in computer science. It
+tracks how much biographical and popular-press material exists about someone.
+Simon's work extends into economics (he also won the 1978 Nobel Memorial Prize
+in Economic Sciences) and organizational theory, which brings in more editors
+and more sources. Hinton's place near the top owes as much to the attention
+from his 2024 Nobel Prize in Physics as to the Turing Award. The laureates at
+the bottom did foundational, frequently cited work that most Wikipedia readers
+never look up by name.
 
 10. Filter `texts` to rows whose `text` contains `"Bell Labs"` with
 `.str.contains()`. In the first block, print the matching `doc_id` values;
@@ -425,14 +420,13 @@ bell_labs = (
 )
 ```
 
-**Answer**: 12 laureates' articles mention Bell Labs, including Dennis
-Ritchie and Ken Thompson, who built Unix there, and Richard Hamming, who
-spent his whole research career at Bell Labs, exactly the names a search
-like this ought to surface if the collected text is trustworthy. It also
-catches laureates whose Bell Labs connection is a smaller detail in a much
-longer career, such as Yann LeCun's early research post there, which is why
-a keyword search over the full article text is worth running instead of
-relying on a mental list of who worked where.
+**Answer**: 12 laureates' articles mention Bell Labs. They include Dennis
+Ritchie and Ken Thompson, who built Unix there, and Richard Hamming, who spent
+thirty years there, the names you would expect a search like this to surface
+if the collected text is trustworthy. The search also catches laureates for
+whom Bell Labs is a smaller detail in a long career, such as Yann LeCun's early
+research post there. A keyword search over the full text finds these, where a
+mental list of who worked where would miss them.
 
 11. Request `prop="info"` for every `page_id` in `laureates`, batching up to
 50 IDs per request with `"|".join()`, and collect each page's `length` (the
@@ -464,10 +458,10 @@ lengths = pl.DataFrame(rows)
 )
 ```
 
-**Answer**: A correlation of about 0.88. The two numbers come from
-completely different requests, one measuring the plain-text extract we
-built and the other the raw wiki markup size the server reports for the
-same page, so this is not a circular check; it is a second, independent
-measurement agreeing with the first, which is the same kind of
-spot-checking question 9's word counts and question 10's keyword search
-already relied on, applied here as a number instead of a name.
+**Answer**: A correlation of about 0.88. The two numbers come from separate
+requests: one is the length of the plain-text extract we collected, and the
+other is the raw markup size the server reports for the same page. The check
+is not circular, since the server's count is a second, independent
+measurement that agrees with ours. Question 8's quote and question 10's
+keyword search checked the collected text by content; this one checks it with
+a number.

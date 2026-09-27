@@ -91,10 +91,10 @@ its history. Follow Detroit down the column.
 ```
 
 Detroit is the 13th largest city in the table in 1900, the 4th largest by 1920, and
-the 18th in 2010. Two things to notice. The ranks come back as floats rather than
-integers, because tied values are given the average of the positions they span, and
-the early ranks are enormous and slightly wrong for that reason: 73 cities are
-recorded as `0` in 1900, they tie with each other, and all 73 of them get rank 253.
+the 18th in 2010. The ranks come back as floats rather than integers, because tied
+values are given the average of the positions they span. The early ranks are
+enormous and slightly wrong for the same reason: 73 cities are recorded as `0` in
+1900, they tie with each other, and all 73 of them get rank 253.
 A rank computed over a column full of placeholder zeros ranks the placeholders too.
 
 3. Ranks are more interesting as movement. Rank the cities within each year, keep
@@ -127,9 +127,8 @@ the other. Sort so the biggest climbers come first.
 
 Virginia Beach climbed 214 places, followed by Aurora, Anchorage, Henderson, and
 Mesa. The falls are just as orderly: Fall River, Lynn, and New Bedford are all
-Massachusetts mill towns, and Duluth, Albany, and Cambridge are in among them. The
-century moved the country to the Sun Belt and the numbers say so without being asked.
-Note the order the two windows run in. The rank is computed over the whole table
+Massachusetts mill towns, and Duluth, Albany, and Cambridge are in among them. Over
+the century, the country's growth moved to the Sun Belt. Note the order the two windows run in. The rank is computed over the whole table
 first, so it means "position among all 289 cities that year," and only then does the
 filter cut the table down to two years. Compute the rank after the filter and it
 would mean "position among these two years," which is not a thing anyone wants.
@@ -176,9 +175,8 @@ state, and within state from largest to smallest, then accumulate within the sta
 Both states are done in one screen and they could not look less alike. New York has
 six cities in the table and the running total is essentially finished on its first
 row: New York City is 90 percent of the state. California has 71 cities, starts with
-Los Angeles at 21 percent, and needs ten of them to pass half. One state has a single
-city with its own gravity and the other has a coastline of them, and the cumulative
-column says so more clearly than either total does.
+Los Angeles at 21 percent, and needs ten of them to pass half. The cumulative column
+shows that difference more clearly than either total does.
 
 6. `.rolling_mean()` averages each row with its neighbors to smooth out the noise.
 It is an ordered function like the others, so it needs a sort, and it needs an
@@ -201,11 +199,10 @@ from 1900 on.
 
 The raw change column bounces: Detroit adds 575,000 people in the 1920s, then 55,000
 in the 1930s, then 226,000 in the 1940s. Wars and depressions land on the decade they
-land on. The smoothed column does what smoothing is for and shows one shape instead:
-it peaks at the 1930 row, falls away across the next three censuses, turns negative at
-the 1970 row, and never comes back. Smoothing does not add any information to the table.
-It removes some, and the argument for doing it is that what it removes was noise, an
-argument you have to make each time rather than assume.
+land on. The smoothed column shows one shape instead: it peaks at the 1930 row,
+falls away across the next three censuses, turns negative at the 1970 row, and
+never comes back. Smoothing removes information from the table. The case for doing
+it is that what it removes was noise, and you have to make that case each time.
 
 7. Close with a picture. Give every city its share of the census-year total, then
 keep six cities and draw their shares over time with `.geom_line()`.
@@ -224,20 +221,19 @@ keep six cities and draw their shares over time with `.geom_line()`.
 )
 ```
 
-The lines cross in the order the century did. Chicago peaks in 1900 at 9.5 percent and
-Detroit in 1930 at 3.9, and both of them are falling by the time Los Angeles passes
-Detroit in 1950 and Chicago in the 1980s. Houston and Phoenix spend a hundred years on
-the floor of the chart and then climb. This figure is why `.over()` exists: it needs one point per city per
-year, so an aggregated table could not have drawn it, because aggregation would have
-collapsed the very rows the lines are made of.
+Chicago peaks in 1900 at 9.5 percent and Detroit in 1930 at 3.9, and both of them
+are falling by the time Los Angeles passes Detroit in 1950 and Chicago in the 1980s.
+Houston and Phoenix spend a hundred years on the floor of the chart and then climb.
+The figure needs one point per city per year. An aggregated table could not have
+drawn it, because aggregation collapses the rows the lines are made of, and `.over()`
+keeps them.
 
-Two more things about it. The `.with_columns()` comes before the `.filter()`, so the
-denominator is all 289 cities and a share means a share of urban America. Filter first
-and the denominator becomes the six cities you kept, New York starts the chart at 100
-percent, and the plot answers a question nobody asked. And look at New York between
+The `.with_columns()` comes before the `.filter()`, so the denominator is all 289
+cities and a share means a share of urban America. Filter first and the denominator
+becomes the six cities you kept, and New York starts the chart at 100 percent. Look
+also at New York between
 1890 and 1900, where the line jumps from 12 percent to 19. New York did not grow by
 half in ten years. It annexed Brooklyn, which was a separate city until 1898 and is
 not a separate row in this table. Every window function in this chapter did its
-arithmetic on a definition of "New York City" that changed underneath it in 1898, and
-no amount of `.over()` will tell you that. Only knowing something about the cities
-will.
+arithmetic on a definition of "New York City" that changed underneath it in 1898.
+No window function can tell you that; only knowing something about the cities can.

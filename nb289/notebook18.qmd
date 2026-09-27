@@ -61,54 +61,7 @@ the weather was doing when they took off.
 
 Unless a question says otherwise, print the result of each block; do not save it.
 
-1. Before joining anything, check that the three lookup tables are what we think they are. A
-table is safe to use on the right side of a join when its key has one row per value. Run the
-chapter's test on `faa` in `airport`, `carrier` in `airline`, and `tailnum` in `plane`. Then
-run the same test on `carrier` in `rva`.
-
-```{python}
-(
-    airport
-    .select(c.faa)
-    .n_unique() == len(airport)
-)
-```
-
-```{python}
-(
-    airline
-    .select(c.carrier)
-    .n_unique() == len(airline)
-)
-```
-
-```{python}
-(
-    plane
-    .select(c.tailnum)
-    .n_unique() == len(plane)
-)
-```
-
-```{python}
-(
-    rva
-    .select(c.carrier)
-    .n_unique() == len(rva)
-)
-```
-
-**Answer**: The first three come back `True` and the fourth comes back `False`, which is
-exactly the arrangement we want. `faa`, `carrier`, and `tailnum` are primary keys in their
-own tables: one airport per code, one airline per code, one aircraft per tail number. In
-`rva`, `carrier` is a foreign key. There are 24,808 rows and 14 carriers, so a code repeats
-thousands of times.
-
-That difference is the whole idea. The same column is a primary key in one table and a
-foreign key in another, and which one it is depends on the table you are looking at, not on
-the values.
-
-2. Join the airline names onto the flights, then report the mean departure delay for each
+1. Join the airline names onto the flights, then report the mean departure delay for each
 airline, worst first. Print all 14 rows.
 
 ```{python}
@@ -133,7 +86,7 @@ Note the order of operations. The join runs on all 24,808 rows and the grouping 
 afterward. You could group first and join the 14-row summary to `airline` instead, and get
 the same answer with less work.
 
-3. The flights table records a destination code and nothing else about it. Join `airport` to
+2. The flights table records a destination code and nothing else about it. Join `airport` to
 get the real names. The key has a different name in each table: it is `dest` in `rva` and
 `faa` in `airport`. Count the flights to each destination, add the mean arrival delay, and
 sort by the number of flights.
@@ -161,7 +114,7 @@ needed, so the mean arrival delay is telling you about the timetable as much as 
 Here the summary is computed first and the join runs on the 22-row result. That is the right
 way around when the lookup adds nothing the grouping needs.
 
-4. The flights table has no coordinates in it. `airport` does. Draw the 22 destinations on a
+3. The flights table has no coordinates in it. `airport` does. Draw the 22 destinations on a
 map: longitude on the x-axis, latitude on the y-axis, sized by the number of flights and
 colored by the mean arrival delay.
 
@@ -184,21 +137,22 @@ colored by the mean arrival delay.
 )
 ```
 
-**Answer**: The eastern United States, drawn out of two columns you did not have twenty
-minutes ago. Atlanta is the big dark circle in the middle. Denver sits alone on the far left,
+**Answer**: The map is the eastern United States, drawn from two columns the flights table
+did not have. Atlanta is the big dark circle in the middle. Denver sits alone on the far left,
 the only real western destination. The scatter along the bottom is Florida, which is where a
 mid-sized airport sends its leisure traffic. The brightest dots, meaning the latest arrivals,
-are Dulles and O'Hare, with the New York and Boston airports a shade behind them.
+are two small Florida airports, Sarasota and St Petersburg, followed by Dulles, O'Hare, and
+Newark.
 
 Look at the two tiny dots almost on top of each other at the left edge of the Florida group.
 That is Tampa, the darkest point on the whole map at 7.5 minutes early, sitting fifteen miles
-from St Petersburg, which is one of the brightest at 15.3 minutes late. Same metro area, two
-airports, and no airline flies to both.
+from St Petersburg, which is one of the brightest at 15.3 minutes late. The two airports
+serve the same metro area, and no airline flies to both.
 
-This is the ordinary use of a join rather than the exciting one, and it is most of what joins
-are for: the coordinates were sitting in a table you were not using.
+This is the ordinary use of a join, and most joins are like it: the coordinates were sitting
+in a table you were not using.
 
-5. Now use the aircraft registry. Join `plane` to the flights, then report the mean number of
+4. Now use the aircraft registry. Join `plane` to the flights, then report the mean number of
 seats per carrier, largest first. Print the whole result.
 
 ```{python}
@@ -219,12 +173,12 @@ seats per carrier, largest first. Print the whole result.
 ranking is sensible, and it splits the carriers neatly into mainline airlines and regional
 operators flying 50-to-90-seat jets on their behalf.
 
-Count the rows. There are 13, and question 2 said there were 14 airlines. An entire airline
+Count the rows. There are 13, and question 1 said there were 14 airlines. An entire airline
 has gone missing from the table, and Polars did not raise an error or print a warning about
 it. The join returned 24,346 of the 24,808 flights, and the summary you would have pasted
 into a report was computed on the ones that survived.
 
-6. Find out what happened. Use an anti-join to get the flights that have no matching row in
+5. Find out what happened. Use an anti-join to get the flights that have no matching row in
 `plane`, and count them by carrier.
 
 ```{python}
@@ -246,11 +200,10 @@ join too.
 
 An anti-join is the right tool here because it hands you the failures themselves. A row count
 tells you how many rows you lost. The anti-join tells you which ones, and lets you group them
-to find out what they have in common. Here they had one thing in common, and it was an
-airline.
+to find out what they have in common. Here what they had in common was an airline.
 
-7. Two things to check about Allegiant. First, look at the tail numbers `G4` uses. Second,
-ask how much of the registry we are actually using: count the planes in `plane` that flew out
+6. Two things to check about Allegiant. First, look at the tail numbers `G4` uses. Second,
+ask how much of the registry we are using: count the planes in `plane` that flew out
 of Richmond at least once, with a semi-join.
 
 ```{python}
@@ -259,6 +212,8 @@ of Richmond at least once, with a semi-join.
     .filter(c.carrier == "G4")
     .select(c.tailnum)
     .unique()
+    .drop_nulls()
+    .sort(c.tailnum)
     .head(5)
 )
 ```
@@ -271,21 +226,11 @@ of Richmond at least once, with a semi-join.
 )
 ```
 
-**Answer**: Allegiant's tail numbers are stored as `330NV`, `215NV`, `319NV`. Every other tail
+**Answer**: Allegiant's tail numbers are stored as `215NV`, `217NV`, `218NV`. Every other tail
 number in both tables begins with `N`, because every civil aircraft registered in the United
 States does. Allegiant's are missing the letter, in 395 of their 396 rows.
 
-So the obvious fix is to put the `N` back and join again. It matches nothing:
-
-```{python}
-(
-    rva
-    .filter(c.carrier == "G4")
-    .with_columns(tail_fixed = pl.lit("N") + c.tailnum)
-    .join(plane, left_on=c.tail_fixed, right_on=c.tailnum)
-    .height
-)
-```
+So the obvious fix would be to put the `N` back and join again, but that matches nothing either.
 
 The malformed key is a real clue and it is not the cause. Allegiant's aircraft are not in the
 registry under any spelling. The semi-join says why that is strange: all 3,120 rows of `plane`
@@ -295,11 +240,11 @@ tail-number formatting with it.
 
 The cost of that inner join is worse than one missing airline. Allegiant is the only carrier
 flying to Orlando Sanford, St Petersburg, Sarasota, and Nashville, so an analysis built on
-the joined table has four fewer destinations in it. Redraw the map from question 4 that way
+the joined table has four fewer destinations in it. Redraw the map from question 3 that way
 and four dots vanish, including the bright one next to Tampa. It would still look like a
 perfectly good map.
 
-8. Fix the join. Keep every flight by making it a left join, and give the plane's columns a
+7. Fix the join. Keep every flight by making it a left join, and give the plane's columns a
 suffix so that `year` (the year of the flight) and `year` (the year the aircraft was built)
 do not collide. Then report the mean seats and the mean age of the fleet each carrier flew.
 
@@ -333,7 +278,7 @@ United (`UA`) flies the oldest fleet at 18 years and PSA (`OH`) the newest at 4.
 (`NK`) flies the largest aircraft and some of the youngest, which is more or less the
 low-cost business model written into a table.
 
-9. On to the weather. Both tables carry a `time_hour` column, which is plainly the intended
+8. On to the weather. Both tables carry a `time_hour` column, which is plainly the intended
 way to connect them. The description of this dataset in the book says that `time_hour`
 "allows this data to be precisely joined with flight departures." Use it to ask whether
 flights leave late when visibility is poor. Then run the same question again, joining on
@@ -377,7 +322,7 @@ under five miles and puts their mean delay at 16.4 minutes. The four-column join
 of them and puts the delay at 15.1. One of these is wrong, and the code gives you no way to
 tell which.
 
-10. Work out which key is correct. Print the first scheduled departure of the year and the
+9. Work out which key is correct. Print the first scheduled departure of the year and the
 weather rows for that morning.
 
 ```{python}
@@ -427,5 +372,5 @@ built an analysis on it. The table is mostly empty. `temp`, `dewp`, and `humid` 
 8,678 of the 8,735 rows and `precip` is `null` in 8,467 of them, so wind and visibility are
 about all this station recorded. Had we asked our question about temperature instead, the
 join would have matched every row it was asked to match and handed back a column of nulls.
-That is a quieter failure than the one in question 5 and it comes from the same place: the
+That is a quieter failure than the one in question 4 and it comes from the same place: the
 join tells you the keys lined up, and nothing else at all.

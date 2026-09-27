@@ -44,21 +44,20 @@ the hold time in between, and `dur_after` is the hold time of the next key
 press. `input` is the resulting character, `null` for space and every other
 key that produces no character, and `code` is the physical key. `meta`
 carries three facts about each of the 823 people behind `id`: `age`, native
-`lang`, and `cefr`, a proficiency band for English (`A1/A2` weakest,
-`C1/C2` strongest). One thing to know before question 1: `t0` and `t1` are
-milliseconds elapsed since each person's recording started, not a wall-clock
-time, so there is no year, month, or day hiding in them anywhere. Print
-results unless a question says otherwise.
+`lang`, and `cefr`, a proficiency band for English (`A1/A2` weakest, `C1/C2`
+strongest). `t0` and `t1` are milliseconds elapsed since each person's
+recording started, not wall-clock times, so they contain no year, month, or
+day. Print results unless a question says otherwise.
 
 1. `t0` and `t1` cannot become real dates, since no calendar sits behind
-them, but they can still become real `Datetime` objects: casting elapsed
-milliseconds to an integer and then to `pl.Datetime("ms")` is exactly how a
-Unix timestamp already works, it just anchors the clock at 1970-01-01
-instead of the moment recording began. Add `press` and `release` columns to
-`klog` this way, from `t0` and `t1`, and overwrite `klog` with the result.
-Then filter to the one session stored in `klog["id"][0]`, truncate `press`
-to 10-second bins with `.dt.truncate("10s")`, group by the bucket, count the
-keystrokes in each one, and sort by bucket.
+them, but they can still become `Datetime` values. Casting the elapsed
+milliseconds to an integer and then to `pl.Datetime("ms")` reads them as a
+Unix timestamp, so the clock is anchored at 1970-01-01 instead of at the
+moment recording began. Add `press` and `release` columns to `klog` this way,
+from `t0` and `t1`, and overwrite `klog` with the result. Then filter to the
+one session stored in `klog["id"][0]`, truncate `press` to 10-second bins
+with `.dt.truncate("10s")`, group by the bucket, count the keystrokes in each
+one, and sort by bucket.
 
 ```{python}
 klog = (
@@ -86,12 +85,12 @@ q1 = (
 q1
 ```
 
-**Answer**: This one session runs 57 ten-second bins. Counts swing from 1
-key in the quietest bin up to 39 in the busiest one, which falls in the
-second bucket of the session (`00:00:30`, ten to twenty seconds after the
-first keystroke), an opening burst before the pace settles down. The 1970
-date on every bucket is not a typo; it is the anchor, and the only part of
-`bucket` worth reading is the time of day.
+**Answer**: This session spans 57 ten-second bins. Counts range from 1 key in
+the quietest bin to 39 in the busiest, the session's second bin (`00:00:30`,
+roughly ten to twenty seconds after the first keystroke), an opening burst
+before the pace settles. The 1970 date on every bucket is the anchor, not a
+typo; the only part of `bucket` worth reading is the clock time, which here
+means time elapsed since recording began.
 
 2. The anchor in question 1 is arbitrary, but it is the *same* arbitrary
 moment for all 823 sessions, so a bucket built the same way pools everyone's
@@ -119,13 +118,13 @@ q2 = (
 )
 ```
 
-**Answer**: 595 sessions are still going in minute 0, rising to a peak of
-770 in minute 3 as slower typists catch up to the same elapsed-time bucket,
-then falling off as people finish. Average hold time climbs the whole way
-across these 15 minutes, from 73.7 to 81.7 milliseconds, a small but steady
-slowdown as the session wears on. Past roughly minute 20 the bucket holds
-fewer than 100 sessions, and by minute 40 barely a handful, so any trend out
-there is a handful of stragglers, not a corpus-wide pattern.
+**Answer**: 595 sessions have keystrokes in minute 0, rising to a peak of 770
+in minute 3 as people who started typing later join in, then falling off as
+people finish. Average hold time climbs almost steadily across these 15
+minutes, from 73.7 to 81.7 milliseconds, a small slowdown as the session
+wears on. Past minute 20 the bucket holds fewer than 100 sessions, and by
+minute 40 only a handful, so a trend that far out reflects a few stragglers,
+not the whole corpus.
 
 3. Sort `klog` by `id` and `press`, then build a `gap` column: the time
 between when the previous key was released and this one was pressed,
@@ -158,9 +157,8 @@ pauses = (
 )
 ```
 
-38,324 pauses turn up across the corpus, a median of well under a hundred
-per person, so the busiest pauser above (176) is a genuine outlier, not the
-typical rhythm of even a hesitant typist.
+The corpus has 38,324 pauses, a median of 41 per person, so the busiest
+pauser above (176) is an outlier even among hesitant typists.
 
 4. Compute each person's average `gap` in milliseconds
 (`.dt.total_milliseconds()`), join the result onto `meta`, group by `cefr`,
@@ -189,17 +187,16 @@ avg_gap = (
 )
 ```
 
-**Answer**: The gap rises exactly as CEFR falls: 402.1 ms for the 550 people
-at `C1/C2`, 585.9 ms for the 260 at `B1/B2`, and 667.4 ms for the 13 at
-`A1/A2`. Milliseconds is the right unit here, since most gaps are well under
-a second; asking for `.dt.total_seconds()` instead would floor almost every
-one of them to 0 and erase this pattern entirely, the same truncation trap
-the book raises for day-scale durations. The `A1/A2` row is worth a second
-look regardless: 13 people is a thin group to average, and the true weakest
-tier could look quite different with a few more participants in it.
+**Answer**: The gap rises as CEFR level falls: 402.1 ms for the 550 people at
+`C1/C2`, 585.9 ms for the 260 at `B1/B2`, and 667.4 ms for the 13 at `A1/A2`.
+Milliseconds is the right unit because most gaps are well under a second.
+`.dt.total_seconds()` would floor almost every gap to 0 and erase the
+pattern, the same truncation trap the book raises for day-scale durations.
+Treat the `A1/A2` row with caution: 13 people is a thin group to average, and
+the weakest tier could look quite different with more participants.
 
-5. `.rolling_mean_by()` smooths a series by a span of time rather than a
-count of rows, the right tool here since keystrokes are not evenly spaced.
+5. `.rolling_mean_by()` smooths a series over a span of time instead of a
+count of rows, which suits keystrokes because they are not evenly spaced.
 For the session from question 1, compute `gap` in milliseconds and a 15-second
 rolling mean of it with `by=c.press`. Plot the raw values in grey and the
 smoothed line in red against `press`.
@@ -230,18 +227,18 @@ one = (
 )
 ```
 
-The red line surfaces the handful of real hesitations inside all the grey
-jitter, the same way the book's rolling mean pulled Chaucer's trajectory out
-of a jagged edit history.
+The red line picks out the handful of real hesitations from the grey jitter,
+the way the book's rolling mean pulled Chaucer's trajectory out of a jagged
+edit history.
 
 6. `.join_asof()` matches each row to the nearest value in another table
-rather than an exact one. Build a table of "resume" moments: every row from
+instead of an exact one. Build a table of "resume" moments: every row from
 question 3's pause filter, keeping only `id` and `press` (renamed
 `pause_press`). Asof-join all of `klog` to it, backward, matched by `id`,
 and compute `since_pause`, the milliseconds between each keystroke and the
 most recent pause that preceded it. Group by whether `since_pause` is under
 1000 (recently resumed) and compare the average `dur` and count in each
-group, including the group where no pause has happened yet at all.
+group, including the group where no pause has happened yet.
 
 ```{python}
 resumes = (
@@ -272,15 +269,14 @@ with_resume = (
 )
 ```
 
-**Answer**: `just_resumed` comes back with three groups, not two, since
-`since_pause` is `null` for the 42,678 keystrokes typed before anyone's
-first pause. Those `null` rows hold the shortest average, 74.2 ms, keys
-typed within a second of resuming hold the longest, 80.8 ms, and everything
-typed a full second or more after resuming sits in between at 76.9 ms. That
-ordering is suggestive of a real restart cost, but read it cautiously:
-question 2 already showed hold times climbing as a session goes on, and by
-the time most people have hit even one 2-second pause they are already well
-past their first minute, so part of this gap could be question 2's slowdown
-showing up again rather than a genuine cost of resuming. Separating the two
-would need controlling for elapsed time directly, which is more than this
-question asks for.
+**Answer**: `just_resumed` has three groups, not two, because `since_pause`
+is `null` for the 42,678 keystrokes typed before each person's first pause.
+Those `null` rows have the shortest average hold, 74.2 ms. Keys typed within
+a second of resuming hold the longest, 80.8 ms, and keys typed a second or
+more after resuming sit in between at 76.9 ms. The ordering suggests a real
+restart cost, but read it cautiously. Question 2 showed hold times climbing
+as a session goes on, and the `null` rows all come from the opening stretch
+of each session, where holds are shortest. Part of the gap could be that
+slowdown again instead of a cost of resuming. Separating the two would
+require controlling for elapsed time directly, which is beyond this
+question.

@@ -225,13 +225,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="setup" class="level3">
 <h3 class="anchored" data-anchor-id="setup">Setup</h3>
 <p>Run all of the following before starting the notebook.</p>
-<div id="d54bdae6" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="1">
+<div id="d8a0d40d" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="1">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span> wget <span class="op">-</span>q <span class="op">-</span>nc https:<span class="op">//</span>raw.githubusercontent.com<span class="op">/</span>taylor<span class="op">-</span>arnold<span class="op">/</span>fds2<span class="op">/</span>refs<span class="op">/</span>heads<span class="op">/</span>main<span class="op">/</span>funs.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<div id="f93b4fac" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="2">
+<div id="f1a5a651" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="2">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
@@ -243,7 +243,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>ub <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<div id="284e7117" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="4">
+<div id="2c4ca9c4" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="4">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>rva <span class="op">=</span> pl.read_csv(ub <span class="op">+</span> <span class="st">"data/flightsrva_flights.csv.gz"</span>, null_values<span class="op">=</span>[<span class="st">"NA"</span>])</span>
@@ -259,7 +259,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol type="1">
 <li>Sort <code>rva</code> by distance, longest flight first. Select just <code>carrier</code>, <code>dest</code>, and <code>distance</code>, and print the top 5.</li>
 </ol>
-<div id="bedf93bf" class="cell" data-execution_count="5">
+<div id="ae320850" class="cell" data-execution_count="5">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -326,7 +326,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="2" type="1">
 <li>Filter to flights headed to Atlanta (<code>ATL</code>) or Chicago O’Hare (<code>ORD</code>) using <code>.is_in()</code>. Print how many there are with <code>.select(pl.len())</code>.</li>
 </ol>
-<div id="518aa56b" class="cell" data-execution_count="6">
+<div id="65d05f52" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -365,7 +365,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="3" type="1">
 <li>How many distinct aircraft, by <code>tailnum</code>, flew out of Richmond in 2019? Use <code>.select()</code> with <code>c.tailnum.n_unique()</code>.</li>
 </ol>
-<div id="61122814" class="cell" data-execution_count="7">
+<div id="be31290e" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -403,7 +403,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="4" type="1">
 <li>In the first block, add a <code>delay_total</code> column (<code>dep_delay</code> plus <code>arr_delay</code>), and a <code>status</code> column built with a chained <code>pl.when().then().otherwise()</code>: <code>"cancelled"</code> when <code>dep_delay</code> is null, <code>"delayed"</code> when <code>dep_delay</code> is over 15, and <code>"on time"</code> otherwise; then print <code>carrier</code>, <code>dep_delay</code>, <code>delay_total</code>, and <code>status</code> for 5 rows. In the second block, count how many flights fall into each status.</li>
 </ol>
-<div id="9d968052" class="cell" data-execution_count="8">
+<div id="1314542f" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>q4 <span class="op">=</span> (</span>
@@ -483,7 +483,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<div id="122ee8a9" class="cell" data-execution_count="9">
+<div id="ca772964" class="cell" data-execution_count="9">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -534,7 +534,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="5" type="1">
 <li>Count the nulls in <code>dep_time</code> and in <code>dep_delay</code> and check that the two counts match.</li>
 </ol>
-<div id="806d2283" class="cell" data-execution_count="10">
+<div id="4c86d834" class="cell" data-execution_count="10">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -579,7 +579,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="6" type="1">
 <li>Plot <code>dep_delay</code> against <code>arr_delay</code> with <code>geom_point()</code>, using <code>alpha=0.1</code> so the overplotting is readable, and add a <code>geom_smooth()</code> trend line with <code>method="lm"</code> and <code>se=False</code>.</li>
 </ol>
-<div id="5dbf2ad9" class="cell" data-execution_count="11">
+<div id="d7b6405b" class="cell" data-execution_count="11">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -603,7 +603,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="7" type="1">
 <li>Count flights per carrier, sort ascending, and plot as a bar chart with <code>geom_col()</code> and <code>coord_flip()</code>.</li>
 </ol>
-<div id="774dcc91" class="cell" data-execution_count="12">
+<div id="dd75b310" class="cell" data-execution_count="12">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -627,7 +627,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="8" type="1">
 <li>Group by <code>month</code>, count the flights in each, sort by month, and plot the monthly count with <code>geom_line()</code>.</li>
 </ol>
-<div id="62c15348" class="cell" data-execution_count="13">
+<div id="7a64b7c5" class="cell" data-execution_count="13">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -650,7 +650,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="9" type="1">
 <li>Group by <code>carrier</code> and compute the mean and median <code>dep_delay</code>, plus a count, sorted by the mean, worst first.</li>
 </ol>
-<div id="c10903e3" class="cell" data-execution_count="14">
+<div id="2c1a6782" class="cell" data-execution_count="14">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -764,7 +764,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="10" type="1">
 <li>Group by <code>carrier</code> and <code>month</code> together. In each group, count the flights and count how many had <code>dep_delay</code> over 15. Add a <code>prop_delayed</code> column (the second count divided by the first) and sort by it, worst first.</li>
 </ol>
-<div id="eb4f1a13" class="cell" data-execution_count="15">
+<div id="460cb9ef" class="cell" data-execution_count="15">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -849,7 +849,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="11" type="1">
 <li>Without any grouping, use <code>.select()</code> with aggregating expressions to find the minimum, mean, and maximum <code>distance</code>, along with the number of distinct destinations.</li>
 </ol>
-<div id="09f5b4dc" class="cell" data-execution_count="16">
+<div id="4c9e5d14" class="cell" data-execution_count="16">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -901,7 +901,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="12" type="1">
 <li>Cancelled flights have no delay to speak of, so drop the rows where <code>dep_delay</code> is null first. Then add a <code>delay_dev</code> column: each flight’s <code>dep_delay</code> minus its own carrier’s mean <code>dep_delay</code>, computed with <code>.over()</code>. Sort descending and print the 5 flights that ran latest relative to their own carrier’s usual performance.</li>
 </ol>
-<div id="96a68137" class="cell" data-execution_count="17">
+<div id="0e018b12" class="cell" data-execution_count="17">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -978,7 +978,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="13" type="1">
 <li>In the first block, sort <code>rva</code> by <code>dep_delay</code>, descending, and print the top 5. Then explain what went wrong. In the second block (below the answer), filter out the null <code>dep_delay</code> values before sorting the same way, and print the top 5 again.</li>
 </ol>
-<div id="7e377302" class="cell" data-execution_count="18">
+<div id="56f48475" class="cell" data-execution_count="18">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -1042,7 +1042,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p><strong>Answer</strong>: Every row is a cancelled flight with a null <code>dep_delay</code>, not the latest flight of the year. A descending sort puts nulls first, the same trap as <code>notebook09</code>’s <code>.max()</code> versus <code>.sort()</code> mismatch. Filter the nulls out before sorting to get a real answer.</p>
-<div id="c5b2e9a2" class="cell" data-execution_count="19">
+<div id="08897e8d" class="cell" data-execution_count="19">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -1110,7 +1110,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="14" type="1">
 <li>In the first block, build the same monthly table as question 8, but keep <code>dep_delay</code>’s mean as well as the count; sort by month, then add an <code>n_cum</code> column with <code>.cum_sum()</code> on the monthly count, and print it. In the second block, plot <code>n_cum</code> against <code>month</code> with <code>geom_line()</code>.</li>
 </ol>
-<div id="5149800a" class="cell" data-execution_count="20">
+<div id="6979dfaa" class="cell" data-execution_count="20">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>q14 <span class="op">=</span> (</span>
@@ -1218,7 +1218,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<div id="9686ec62" class="cell" data-execution_count="21">
+<div id="3cf73acc" class="cell" data-execution_count="21">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -1238,7 +1238,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="15" type="1">
 <li>Plot a histogram of <code>dep_delay</code> with <code>geom_histogram()</code>, <code>binwidth=10</code> and <code>boundary=0</code>.</li>
 </ol>
-<div id="029f9b22" class="cell" data-execution_count="22">
+<div id="8303362d" class="cell" data-execution_count="22">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -1259,9 +1259,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <ol start="16" type="1">
-<li>Plot <code>dep_delay</code> by <code>carrier</code> with <code>geom_boxplot()</code>. The worst outliers stretch the y-axis until the boxes themselves are unreadable, so crop the view with <code>.coord_cartesian(ylim=(-30, 60))</code> rather than filtering the data or setting scale limits, both of which would throw out the extreme flights before the boxes are even computed.</li>
+<li>Plot <code>dep_delay</code> by <code>carrier</code> with <code>geom_boxplot()</code>. The worst outliers stretch the y-axis until the boxes are unreadable, so crop the view with <code>.coord_cartesian(ylim=(-30, 60))</code>. Filtering the data or setting scale limits would drop the extreme flights before the boxes are computed.</li>
 </ol>
-<div id="20584188" class="cell" data-execution_count="23">
+<div id="ccb6f18f" class="cell" data-execution_count="23">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -1285,13 +1285,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="17" type="1">
 <li>Facet the same histogram from question 15 by <code>carrier</code> with <code>.facet_wrap("carrier")</code>.</li>
 </ol>
-<div id="f14803d5" class="cell" data-execution_count="24">
+<div id="95b1f30b" class="cell" data-execution_count="24">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    rva</span>
 <span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(c.dep_delay))</span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>    .geom_histogram(binwidth<span class="op">=</span><span class="dv">15</span>, boundary<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>    .geom_histogram(binwidth<span class="op">=</span><span class="dv">10</span>, boundary<span class="op">=</span><span class="dv">0</span>)</span>
 <span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>    .facet_wrap(<span class="st">"carrier"</span>)</span>
 <span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
@@ -1309,7 +1309,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="18" type="1">
 <li>Join <code>rva</code> to <code>airline</code> on <code>carrier</code>, and print <code>carrier</code>, <code>name</code>, and <code>dest</code> for 5 rows.</li>
 </ol>
-<div id="5e94bfdd" class="cell" data-execution_count="25">
+<div id="11737a53" class="cell" data-execution_count="25">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -1375,7 +1375,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="19" type="1">
 <li>Join <code>rva</code> to <code>airport</code> with <code>left_on="dest"</code> and <code>right_on="faa"</code>, group by the airport <code>name</code>, count the flights to each, and print the 10 busiest destinations.</li>
 </ol>
-<div id="99aedeaf" class="cell" data-execution_count="26">
+<div id="2242ad37" class="cell" data-execution_count="26">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -1456,7 +1456,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="20" type="1">
 <li>In the first block, drop cancelled flights, then <code>.unpivot()</code> <code>dep_delay</code> and <code>arr_delay</code> into a <code>delay_type</code>/<code>minutes</code> pair, keeping <code>carrier</code> as the index, and print the first 5 rows. In the second block, plot <code>minutes</code> by <code>delay_type</code> with <code>geom_boxplot()</code>, cropped the same way as question 16. In the third block, group the long table by <code>carrier</code> and <code>delay_type</code>, take the mean <code>minutes</code>, and <code>.pivot()</code> it back to one row per carrier with a column for each delay type.</li>
 </ol>
-<div id="56b8d7c8" class="cell" data-execution_count="27">
+<div id="c76e9ed3" class="cell" data-execution_count="27">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>q20 <span class="op">=</span> (</span>
@@ -1527,7 +1527,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<div id="1e865178" class="cell" data-execution_count="28">
+<div id="ee32649e" class="cell" data-execution_count="28">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -1548,7 +1548,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<div id="c11c1f64" class="cell" data-execution_count="29">
+<div id="209540e4" class="cell" data-execution_count="29">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -2458,101 +2458,100 @@ document.addEventListener('DOMContentLoaded', function() {
 <span id="cb34-368"><a href="#cb34-368" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb34-369"><a href="#cb34-369" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb34-370"><a href="#cb34-370" aria-hidden="true" tabindex="-1"></a><span class="ss">16. </span>Plot <span class="in">`dep_delay`</span> by <span class="in">`carrier`</span> with <span class="in">`geom_boxplot()`</span>. The worst outliers</span>
-<span id="cb34-371"><a href="#cb34-371" aria-hidden="true" tabindex="-1"></a>stretch the y-axis until the boxes themselves are unreadable, so crop the</span>
-<span id="cb34-372"><a href="#cb34-372" aria-hidden="true" tabindex="-1"></a>view with <span class="in">`.coord_cartesian(ylim=(-30, 60))`</span> rather than filtering the</span>
-<span id="cb34-373"><a href="#cb34-373" aria-hidden="true" tabindex="-1"></a>data or setting scale limits, both of which would throw out the extreme</span>
-<span id="cb34-374"><a href="#cb34-374" aria-hidden="true" tabindex="-1"></a>flights before the boxes are even computed.</span>
-<span id="cb34-375"><a href="#cb34-375" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-378"><a href="#cb34-378" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb34-379"><a href="#cb34-379" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb34-380"><a href="#cb34-380" aria-hidden="true" tabindex="-1"></a>    rva</span>
-<span id="cb34-381"><a href="#cb34-381" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(c.carrier, c.dep_delay))</span>
-<span id="cb34-382"><a href="#cb34-382" aria-hidden="true" tabindex="-1"></a>    .geom_boxplot()</span>
-<span id="cb34-383"><a href="#cb34-383" aria-hidden="true" tabindex="-1"></a>    .coord_cartesian(ylim<span class="op">=</span>(<span class="op">-</span><span class="dv">30</span>, <span class="dv">60</span>))</span>
-<span id="cb34-384"><a href="#cb34-384" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb34-385"><a href="#cb34-385" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb34-386"><a href="#cb34-386" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-387"><a href="#cb34-387" aria-hidden="true" tabindex="-1"></a><span class="ss">17. </span>Facet the same histogram from question 15 by <span class="in">`carrier`</span> with</span>
-<span id="cb34-388"><a href="#cb34-388" aria-hidden="true" tabindex="-1"></a><span class="in">`.facet_wrap("carrier")`</span>.</span>
-<span id="cb34-389"><a href="#cb34-389" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-392"><a href="#cb34-392" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb34-393"><a href="#cb34-393" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb34-394"><a href="#cb34-394" aria-hidden="true" tabindex="-1"></a>    rva</span>
-<span id="cb34-395"><a href="#cb34-395" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(c.dep_delay))</span>
-<span id="cb34-396"><a href="#cb34-396" aria-hidden="true" tabindex="-1"></a>    .geom_histogram(binwidth<span class="op">=</span><span class="dv">15</span>, boundary<span class="op">=</span><span class="dv">0</span>)</span>
-<span id="cb34-397"><a href="#cb34-397" aria-hidden="true" tabindex="-1"></a>    .facet_wrap(<span class="st">"carrier"</span>)</span>
-<span id="cb34-398"><a href="#cb34-398" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb34-399"><a href="#cb34-399" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb34-400"><a href="#cb34-400" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-401"><a href="#cb34-401" aria-hidden="true" tabindex="-1"></a><span class="ss">18. </span>Join <span class="in">`rva`</span> to <span class="in">`airline`</span> on <span class="in">`carrier`</span>, and print <span class="in">`carrier`</span>, <span class="in">`name`</span>, and</span>
-<span id="cb34-402"><a href="#cb34-402" aria-hidden="true" tabindex="-1"></a><span class="in">`dest`</span> for 5 rows.</span>
-<span id="cb34-403"><a href="#cb34-403" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-406"><a href="#cb34-406" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb34-407"><a href="#cb34-407" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb34-408"><a href="#cb34-408" aria-hidden="true" tabindex="-1"></a>    rva</span>
-<span id="cb34-409"><a href="#cb34-409" aria-hidden="true" tabindex="-1"></a>    .join(airline, on<span class="op">=</span><span class="st">"carrier"</span>, how<span class="op">=</span><span class="st">"left"</span>)</span>
-<span id="cb34-410"><a href="#cb34-410" aria-hidden="true" tabindex="-1"></a>    .select(c.carrier, c.name, c.dest)</span>
-<span id="cb34-411"><a href="#cb34-411" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">5</span>)</span>
-<span id="cb34-412"><a href="#cb34-412" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb34-413"><a href="#cb34-413" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb34-414"><a href="#cb34-414" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-415"><a href="#cb34-415" aria-hidden="true" tabindex="-1"></a><span class="ss">19. </span>Join <span class="in">`rva`</span> to <span class="in">`airport`</span> with <span class="in">`left_on="dest"`</span> and <span class="in">`right_on="faa"`</span>,</span>
-<span id="cb34-416"><a href="#cb34-416" aria-hidden="true" tabindex="-1"></a>group by the airport <span class="in">`name`</span>, count the flights to each, and print the 10</span>
-<span id="cb34-417"><a href="#cb34-417" aria-hidden="true" tabindex="-1"></a>busiest destinations.</span>
-<span id="cb34-418"><a href="#cb34-418" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-421"><a href="#cb34-421" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb34-422"><a href="#cb34-422" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb34-423"><a href="#cb34-423" aria-hidden="true" tabindex="-1"></a>    rva</span>
-<span id="cb34-424"><a href="#cb34-424" aria-hidden="true" tabindex="-1"></a>    .join(airport, left_on<span class="op">=</span><span class="st">"dest"</span>, right_on<span class="op">=</span><span class="st">"faa"</span>, how<span class="op">=</span><span class="st">"left"</span>)</span>
-<span id="cb34-425"><a href="#cb34-425" aria-hidden="true" tabindex="-1"></a>    .group_by(c.name, maintain_order<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb34-426"><a href="#cb34-426" aria-hidden="true" tabindex="-1"></a>    .agg(n <span class="op">=</span> pl.<span class="bu">len</span>())</span>
-<span id="cb34-427"><a href="#cb34-427" aria-hidden="true" tabindex="-1"></a>    .sort(c.n, descending<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb34-428"><a href="#cb34-428" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">10</span>)</span>
-<span id="cb34-429"><a href="#cb34-429" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb34-430"><a href="#cb34-430" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb34-431"><a href="#cb34-431" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-432"><a href="#cb34-432" aria-hidden="true" tabindex="-1"></a><span class="ss">20. </span>In the first block, drop cancelled flights, then <span class="in">`.unpivot()`</span></span>
-<span id="cb34-433"><a href="#cb34-433" aria-hidden="true" tabindex="-1"></a><span class="in">`dep_delay`</span> and <span class="in">`arr_delay`</span> into a <span class="in">`delay_type`</span>/<span class="in">`minutes`</span> pair, keeping</span>
-<span id="cb34-434"><a href="#cb34-434" aria-hidden="true" tabindex="-1"></a><span class="in">`carrier`</span> as the index, and print the first 5 rows. In the second block,</span>
-<span id="cb34-435"><a href="#cb34-435" aria-hidden="true" tabindex="-1"></a>plot <span class="in">`minutes`</span> by <span class="in">`delay_type`</span> with <span class="in">`geom_boxplot()`</span>, cropped the same way</span>
-<span id="cb34-436"><a href="#cb34-436" aria-hidden="true" tabindex="-1"></a>as question 16. In the third block, group the long table by <span class="in">`carrier`</span> and</span>
-<span id="cb34-437"><a href="#cb34-437" aria-hidden="true" tabindex="-1"></a><span class="in">`delay_type`</span>, take the mean <span class="in">`minutes`</span>, and <span class="in">`.pivot()`</span> it back to one row per</span>
-<span id="cb34-438"><a href="#cb34-438" aria-hidden="true" tabindex="-1"></a>carrier with a column for each delay type.</span>
-<span id="cb34-439"><a href="#cb34-439" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-442"><a href="#cb34-442" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb34-443"><a href="#cb34-443" aria-hidden="true" tabindex="-1"></a>q20 <span class="op">=</span> (</span>
-<span id="cb34-444"><a href="#cb34-444" aria-hidden="true" tabindex="-1"></a>    rva</span>
-<span id="cb34-445"><a href="#cb34-445" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.dep_delay.is_not_null())</span>
-<span id="cb34-446"><a href="#cb34-446" aria-hidden="true" tabindex="-1"></a>    .unpivot(</span>
-<span id="cb34-447"><a href="#cb34-447" aria-hidden="true" tabindex="-1"></a>        on<span class="op">=</span>[<span class="st">"dep_delay"</span>, <span class="st">"arr_delay"</span>],</span>
-<span id="cb34-448"><a href="#cb34-448" aria-hidden="true" tabindex="-1"></a>        index<span class="op">=</span><span class="st">"carrier"</span>,</span>
-<span id="cb34-449"><a href="#cb34-449" aria-hidden="true" tabindex="-1"></a>        variable_name<span class="op">=</span><span class="st">"delay_type"</span>,</span>
-<span id="cb34-450"><a href="#cb34-450" aria-hidden="true" tabindex="-1"></a>        value_name<span class="op">=</span><span class="st">"minutes"</span></span>
-<span id="cb34-451"><a href="#cb34-451" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb34-452"><a href="#cb34-452" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb34-453"><a href="#cb34-453" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb34-454"><a href="#cb34-454" aria-hidden="true" tabindex="-1"></a>    q20</span>
-<span id="cb34-455"><a href="#cb34-455" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">5</span>)</span>
-<span id="cb34-456"><a href="#cb34-456" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb34-457"><a href="#cb34-457" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb34-458"><a href="#cb34-458" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-461"><a href="#cb34-461" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb34-462"><a href="#cb34-462" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb34-463"><a href="#cb34-463" aria-hidden="true" tabindex="-1"></a>    q20</span>
-<span id="cb34-464"><a href="#cb34-464" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(c.delay_type, c.minutes))</span>
-<span id="cb34-465"><a href="#cb34-465" aria-hidden="true" tabindex="-1"></a>    .geom_boxplot()</span>
-<span id="cb34-466"><a href="#cb34-466" aria-hidden="true" tabindex="-1"></a>    .coord_cartesian(ylim<span class="op">=</span>(<span class="op">-</span><span class="dv">30</span>, <span class="dv">60</span>))</span>
-<span id="cb34-467"><a href="#cb34-467" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb34-468"><a href="#cb34-468" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb34-469"><a href="#cb34-469" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-472"><a href="#cb34-472" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb34-473"><a href="#cb34-473" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb34-474"><a href="#cb34-474" aria-hidden="true" tabindex="-1"></a>    q20</span>
-<span id="cb34-475"><a href="#cb34-475" aria-hidden="true" tabindex="-1"></a>    .group_by(c.carrier, c.delay_type, maintain_order<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb34-476"><a href="#cb34-476" aria-hidden="true" tabindex="-1"></a>    .agg(delay_avg <span class="op">=</span> c.minutes.mean())</span>
-<span id="cb34-477"><a href="#cb34-477" aria-hidden="true" tabindex="-1"></a>    .pivot(index<span class="op">=</span><span class="st">"carrier"</span>, on<span class="op">=</span><span class="st">"delay_type"</span>, values<span class="op">=</span><span class="st">"delay_avg"</span>)</span>
-<span id="cb34-478"><a href="#cb34-478" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb34-479"><a href="#cb34-479" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb34-371"><a href="#cb34-371" aria-hidden="true" tabindex="-1"></a>stretch the y-axis until the boxes are unreadable, so crop the view with</span>
+<span id="cb34-372"><a href="#cb34-372" aria-hidden="true" tabindex="-1"></a><span class="in">`.coord_cartesian(ylim=(-30, 60))`</span>. Filtering the data or setting scale</span>
+<span id="cb34-373"><a href="#cb34-373" aria-hidden="true" tabindex="-1"></a>limits would drop the extreme flights before the boxes are computed.</span>
+<span id="cb34-374"><a href="#cb34-374" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-377"><a href="#cb34-377" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb34-378"><a href="#cb34-378" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb34-379"><a href="#cb34-379" aria-hidden="true" tabindex="-1"></a>    rva</span>
+<span id="cb34-380"><a href="#cb34-380" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(c.carrier, c.dep_delay))</span>
+<span id="cb34-381"><a href="#cb34-381" aria-hidden="true" tabindex="-1"></a>    .geom_boxplot()</span>
+<span id="cb34-382"><a href="#cb34-382" aria-hidden="true" tabindex="-1"></a>    .coord_cartesian(ylim<span class="op">=</span>(<span class="op">-</span><span class="dv">30</span>, <span class="dv">60</span>))</span>
+<span id="cb34-383"><a href="#cb34-383" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb34-384"><a href="#cb34-384" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb34-385"><a href="#cb34-385" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-386"><a href="#cb34-386" aria-hidden="true" tabindex="-1"></a><span class="ss">17. </span>Facet the same histogram from question 15 by <span class="in">`carrier`</span> with</span>
+<span id="cb34-387"><a href="#cb34-387" aria-hidden="true" tabindex="-1"></a><span class="in">`.facet_wrap("carrier")`</span>.</span>
+<span id="cb34-388"><a href="#cb34-388" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-391"><a href="#cb34-391" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb34-392"><a href="#cb34-392" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb34-393"><a href="#cb34-393" aria-hidden="true" tabindex="-1"></a>    rva</span>
+<span id="cb34-394"><a href="#cb34-394" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(c.dep_delay))</span>
+<span id="cb34-395"><a href="#cb34-395" aria-hidden="true" tabindex="-1"></a>    .geom_histogram(binwidth<span class="op">=</span><span class="dv">10</span>, boundary<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb34-396"><a href="#cb34-396" aria-hidden="true" tabindex="-1"></a>    .facet_wrap(<span class="st">"carrier"</span>)</span>
+<span id="cb34-397"><a href="#cb34-397" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb34-398"><a href="#cb34-398" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb34-399"><a href="#cb34-399" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-400"><a href="#cb34-400" aria-hidden="true" tabindex="-1"></a><span class="ss">18. </span>Join <span class="in">`rva`</span> to <span class="in">`airline`</span> on <span class="in">`carrier`</span>, and print <span class="in">`carrier`</span>, <span class="in">`name`</span>, and</span>
+<span id="cb34-401"><a href="#cb34-401" aria-hidden="true" tabindex="-1"></a><span class="in">`dest`</span> for 5 rows.</span>
+<span id="cb34-402"><a href="#cb34-402" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-405"><a href="#cb34-405" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb34-406"><a href="#cb34-406" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb34-407"><a href="#cb34-407" aria-hidden="true" tabindex="-1"></a>    rva</span>
+<span id="cb34-408"><a href="#cb34-408" aria-hidden="true" tabindex="-1"></a>    .join(airline, on<span class="op">=</span><span class="st">"carrier"</span>, how<span class="op">=</span><span class="st">"left"</span>)</span>
+<span id="cb34-409"><a href="#cb34-409" aria-hidden="true" tabindex="-1"></a>    .select(c.carrier, c.name, c.dest)</span>
+<span id="cb34-410"><a href="#cb34-410" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">5</span>)</span>
+<span id="cb34-411"><a href="#cb34-411" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb34-412"><a href="#cb34-412" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb34-413"><a href="#cb34-413" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-414"><a href="#cb34-414" aria-hidden="true" tabindex="-1"></a><span class="ss">19. </span>Join <span class="in">`rva`</span> to <span class="in">`airport`</span> with <span class="in">`left_on="dest"`</span> and <span class="in">`right_on="faa"`</span>,</span>
+<span id="cb34-415"><a href="#cb34-415" aria-hidden="true" tabindex="-1"></a>group by the airport <span class="in">`name`</span>, count the flights to each, and print the 10</span>
+<span id="cb34-416"><a href="#cb34-416" aria-hidden="true" tabindex="-1"></a>busiest destinations.</span>
+<span id="cb34-417"><a href="#cb34-417" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-420"><a href="#cb34-420" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb34-421"><a href="#cb34-421" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb34-422"><a href="#cb34-422" aria-hidden="true" tabindex="-1"></a>    rva</span>
+<span id="cb34-423"><a href="#cb34-423" aria-hidden="true" tabindex="-1"></a>    .join(airport, left_on<span class="op">=</span><span class="st">"dest"</span>, right_on<span class="op">=</span><span class="st">"faa"</span>, how<span class="op">=</span><span class="st">"left"</span>)</span>
+<span id="cb34-424"><a href="#cb34-424" aria-hidden="true" tabindex="-1"></a>    .group_by(c.name, maintain_order<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb34-425"><a href="#cb34-425" aria-hidden="true" tabindex="-1"></a>    .agg(n <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb34-426"><a href="#cb34-426" aria-hidden="true" tabindex="-1"></a>    .sort(c.n, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb34-427"><a href="#cb34-427" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">10</span>)</span>
+<span id="cb34-428"><a href="#cb34-428" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb34-429"><a href="#cb34-429" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb34-430"><a href="#cb34-430" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-431"><a href="#cb34-431" aria-hidden="true" tabindex="-1"></a><span class="ss">20. </span>In the first block, drop cancelled flights, then <span class="in">`.unpivot()`</span></span>
+<span id="cb34-432"><a href="#cb34-432" aria-hidden="true" tabindex="-1"></a><span class="in">`dep_delay`</span> and <span class="in">`arr_delay`</span> into a <span class="in">`delay_type`</span>/<span class="in">`minutes`</span> pair, keeping</span>
+<span id="cb34-433"><a href="#cb34-433" aria-hidden="true" tabindex="-1"></a><span class="in">`carrier`</span> as the index, and print the first 5 rows. In the second block,</span>
+<span id="cb34-434"><a href="#cb34-434" aria-hidden="true" tabindex="-1"></a>plot <span class="in">`minutes`</span> by <span class="in">`delay_type`</span> with <span class="in">`geom_boxplot()`</span>, cropped the same way</span>
+<span id="cb34-435"><a href="#cb34-435" aria-hidden="true" tabindex="-1"></a>as question 16. In the third block, group the long table by <span class="in">`carrier`</span> and</span>
+<span id="cb34-436"><a href="#cb34-436" aria-hidden="true" tabindex="-1"></a><span class="in">`delay_type`</span>, take the mean <span class="in">`minutes`</span>, and <span class="in">`.pivot()`</span> it back to one row per</span>
+<span id="cb34-437"><a href="#cb34-437" aria-hidden="true" tabindex="-1"></a>carrier with a column for each delay type.</span>
+<span id="cb34-438"><a href="#cb34-438" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-441"><a href="#cb34-441" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb34-442"><a href="#cb34-442" aria-hidden="true" tabindex="-1"></a>q20 <span class="op">=</span> (</span>
+<span id="cb34-443"><a href="#cb34-443" aria-hidden="true" tabindex="-1"></a>    rva</span>
+<span id="cb34-444"><a href="#cb34-444" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.dep_delay.is_not_null())</span>
+<span id="cb34-445"><a href="#cb34-445" aria-hidden="true" tabindex="-1"></a>    .unpivot(</span>
+<span id="cb34-446"><a href="#cb34-446" aria-hidden="true" tabindex="-1"></a>        on<span class="op">=</span>[<span class="st">"dep_delay"</span>, <span class="st">"arr_delay"</span>],</span>
+<span id="cb34-447"><a href="#cb34-447" aria-hidden="true" tabindex="-1"></a>        index<span class="op">=</span><span class="st">"carrier"</span>,</span>
+<span id="cb34-448"><a href="#cb34-448" aria-hidden="true" tabindex="-1"></a>        variable_name<span class="op">=</span><span class="st">"delay_type"</span>,</span>
+<span id="cb34-449"><a href="#cb34-449" aria-hidden="true" tabindex="-1"></a>        value_name<span class="op">=</span><span class="st">"minutes"</span></span>
+<span id="cb34-450"><a href="#cb34-450" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb34-451"><a href="#cb34-451" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb34-452"><a href="#cb34-452" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb34-453"><a href="#cb34-453" aria-hidden="true" tabindex="-1"></a>    q20</span>
+<span id="cb34-454"><a href="#cb34-454" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">5</span>)</span>
+<span id="cb34-455"><a href="#cb34-455" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb34-456"><a href="#cb34-456" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb34-457"><a href="#cb34-457" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-460"><a href="#cb34-460" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb34-461"><a href="#cb34-461" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb34-462"><a href="#cb34-462" aria-hidden="true" tabindex="-1"></a>    q20</span>
+<span id="cb34-463"><a href="#cb34-463" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(c.delay_type, c.minutes))</span>
+<span id="cb34-464"><a href="#cb34-464" aria-hidden="true" tabindex="-1"></a>    .geom_boxplot()</span>
+<span id="cb34-465"><a href="#cb34-465" aria-hidden="true" tabindex="-1"></a>    .coord_cartesian(ylim<span class="op">=</span>(<span class="op">-</span><span class="dv">30</span>, <span class="dv">60</span>))</span>
+<span id="cb34-466"><a href="#cb34-466" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb34-467"><a href="#cb34-467" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb34-468"><a href="#cb34-468" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-471"><a href="#cb34-471" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb34-472"><a href="#cb34-472" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb34-473"><a href="#cb34-473" aria-hidden="true" tabindex="-1"></a>    q20</span>
+<span id="cb34-474"><a href="#cb34-474" aria-hidden="true" tabindex="-1"></a>    .group_by(c.carrier, c.delay_type, maintain_order<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb34-475"><a href="#cb34-475" aria-hidden="true" tabindex="-1"></a>    .agg(delay_avg <span class="op">=</span> c.minutes.mean())</span>
+<span id="cb34-476"><a href="#cb34-476" aria-hidden="true" tabindex="-1"></a>    .pivot(index<span class="op">=</span><span class="st">"carrier"</span>, on<span class="op">=</span><span class="st">"delay_type"</span>, values<span class="op">=</span><span class="st">"delay_avg"</span>)</span>
+<span id="cb34-477"><a href="#cb34-477" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb34-478"><a href="#cb34-478" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->

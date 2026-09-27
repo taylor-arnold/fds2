@@ -53,12 +53,12 @@ previous notebook. A row of `case` is one decided case, keyed by its reporter
 `cite` is one precedent link: `citing_case` refers to the earlier `cited_case`
 somewhere in its opinion. Last time we built one network, the direct-citation
 network of the 80 most-cited cases, and measured its centrality. This time we
-build three *other* kinds of network from the same edge list — a co-citation
-network, a directed network, and a nearest-neighbor network — and see what each
-one shows that the direct network could not. The book's own examples for these
+build three *other* kinds of network from the same edge list (a co-citation
+network, a directed network, and a nearest-neighbor network) and see what
+each shows that the direct network could not. The book's examples for these
 sections use a Wikipedia author corpus, which it warns is too small and too
-temporally scrambled to bring out the differences; a court is neither. Print
-your results unless a question says to save them.
+temporally scrambled to bring out the differences; a court record is neither.
+Print your results unless a question says to save them.
 
 We start, as before, by fixing the 80 most-cited cases so every network below
 is built on the same set of nodes.
@@ -120,17 +120,17 @@ cocite = (
 ```
 
 The top pair is *Schneider v. State* and *Cantwell v. Connecticut*, cited
-together 84 times, two 1939 decisions at the root of modern free-speech and
-free-exercise doctrine. The rest of the list is the same kind of thing: the
-leafleting and speech cases (*Lovell*, *Thornhill*) that later First Amendment
-opinions reach for as a block, and the death-penalty pair *Furman* and *Gregg*.
-This is a self-join on a shared value, the join-chapter pattern, used here to
-turn "who cites whom" into "who gets cited alongside whom." The chapter notes
-that on
-Wikipedia the citation and co-citation networks look nearly the same, because
-its pages are edited continually and link freely in both directions; on a court
-record, where an opinion can only cite backward and never forward, the two are
-genuinely different objects.
+together 84 times, two cases from the 1939 term at the root of modern
+free-speech and free-exercise doctrine. The rest of the list follows the same
+pattern: the leafleting and speech cases (*Lovell*, *Thornhill*) that later
+First Amendment opinions cite as a block, the death-penalty pair *Furman* and
+*Gregg*, and doctrinal pairs such as *Meyer* and *Pierce* or *Boyd* and
+*Weeks*. This is a self-join on a shared value, the pattern from the joins
+chapter, used here to turn "who cites whom" into "who gets cited alongside
+whom." The chapter notes that on Wikipedia the citation and co-citation
+networks look nearly the same, because its pages are edited continually and
+link freely in both directions. In a court record, where an opinion can only
+cite backward, the two are different objects.
 
 2. Build an undirected network from the co-citation edges. As with any weighted
 edge list, weak links are mostly noise, so first keep only the pairs cited
@@ -166,18 +166,18 @@ co_node = (
 )
 ```
 
-Unlike the direct-citation network, which came back as one connected piece, the
-co-citation network splits into three components: a core of 68 cases and two
-tiny islands of two cases each. Filtering to `count >= 15` is what separates
-them — a pair of cases only reaches the core if it shares a citer with the rest
-of the set that often. The two islands are worth reading: one is *Furman v.
-Georgia* and *Gregg v. Georgia*, the pair that struck down and then restored the
-death penalty, and the other is *Standard Oil* and *Socony-Vacuum*, two
-antitrust decisions. Both pairs are heavily co-cited *with each other* and
-almost never co-cited with the constitutional-rights core, so they float off on
-their own. The component check is the same discipline from last notebook: a
-network can quietly fall apart, and you want to know that before you read a
-centrality score off it.
+Unlike the direct-citation network, which came back as one connected piece,
+the co-citation network splits into three components: a core of 68 cases and
+two islands of two cases each. The `count >= 15` filter separates them, since
+a case only joins the core if it is co-cited that often with a case already
+in it. The two islands are worth reading. One is *Furman v. Georgia* and
+*Gregg v. Georgia*, the pair that struck down and then restored the death
+penalty; the other is *Standard Oil* and *Socony-Vacuum*, two antitrust
+decisions. Each pair is heavily co-cited with its partner and rarely with
+the constitutional-rights core, so both float off on their own. This is the
+component check from last notebook: a network can fall apart without any
+warning, and you want to know that before you read a centrality score off
+it.
 
 3. Compute eigenvalue centrality on the core. Because centrality is only defined
 within a component, filter to `component == 1` first, then print the 10 cases
@@ -195,16 +195,15 @@ crowned *Palko v. Connecticut* and the criminal-procedure cases).
 )
 ```
 
-The co-citation core is a different neighborhood of law entirely. Its center is
-*Cantwell v. Connecticut*, then *Schneider v. State*, *Whitney v. California*,
-*New York Times v. Sullivan*, *Thornhill v. Alabama* — the free-speech and
-First Amendment cases, not the criminal-procedure cases the direct network put
-in the middle. The reason is what co-citation measures: these cases keep getting
-cited *together* because later free-speech opinions reach for a whole line of
-precedent at once. Direct citation rewarded *Palko* for being pointed at often;
-co-citation rewards a case for being pointed at in company. They are two honest
-answers to "which case is central," and they disagree because they are asking
-different questions.
+The co-citation core is a different area of law. Its center is *Cantwell v.
+Connecticut*, then *Schneider v. State*, *Whitney v. California*, *New York
+Times v. Sullivan*, and *Thornhill v. Alabama*: free-speech and First
+Amendment cases, where the direct network put criminal procedure in the
+middle. These cases keep getting cited *together* because later free-speech
+opinions cite a whole line of precedent at once. Direct citation rewarded
+*Palko* for being cited often; co-citation rewards a case for being cited in
+company. The two rankings disagree because they answer different versions of
+"which case is central."
 
 4. Now change the other axis: instead of a different *definition* of an edge,
 keep the direct-citation edges but respect their *direction*. Rebuild the
@@ -233,17 +232,17 @@ di_node = (
 di_node
 ```
 
-A directed network reports a different set of measurements. Closeness centrality
-is gone (it is not well defined once edges point one way), and in place of the
-single `degree` column there are now three: `degree_out`, the number of
+A directed network reports a different set of measurements. Closeness
+centrality is gone (it is not well defined once edges point one way), and the
+single `degree` column is replaced by three: `degree_out`, the number of
 landmark cases this case cites; `degree_in`, the number of landmark cases that
-cite it; and `degree_total`, their sum. On an undirected network these two
-directions were blurred together into one number.
+cite it; and `degree_total`, their sum. The undirected network merged the two
+directions into one number.
 
-5. Plot in-degree against out-degree, following the chapter's own directed
-example. Highlight a handful of well-known cases so the plot has some labels, and
-add a diagonal line where in-degree equals out-degree. Save the plot and look at
-it before reading the description.
+5. Plot in-degree against out-degree, following the chapter's directed
+example. Highlight a handful of well-known cases so the plot has some labels,
+and add a diagonal line where in-degree equals out-degree. Look at the plot
+before reading the description.
 
 ```{python}
 highlight = [
@@ -280,14 +279,15 @@ di_highlight = (
 ```
 
 The middle of the cloud is balanced, but the corners are pulled apart by era.
-The oldest foundational cases sit at the top-left, cited by many later landmarks
-but citing almost none: *McCulloch* (1819) cites none of the others while eight
-cite it, and *Palko* (1937) cites five while eighteen cite it. The most recent
-cases sit at the bottom-right: *Buckley v. Valeo* (1976) cites twelve other
-landmarks and is cited by none. A citation can only point backward in time, so
-on a set of cases spanning 150 years a case's drift off the diagonal tracks when
-it was decided. The chapter's Wikipedia version showed no such tilt, because its
-pages carry no fixed order to cite in.
+The oldest foundational cases sit at the top-left, cited by many later
+landmarks but citing few or none: *McCulloch* (1819) cites none of the others
+while eight cite it, and *Palko* (1937) cites five while eighteen cite it.
+Recent cases sit at the bottom-right: *Buckley v. Valeo* (1975 term) cites
+twelve other landmarks and is cited by none. A citation can only point
+backward in time, so in a set of cases spanning nearly two centuries a case's
+drift off the diagonal tracks when it was decided. The chapter's Wikipedia
+version showed no such tilt, because its pages have no fixed order to cite
+in.
 
 6. Put a number on that. Compute the correlation between a case's `term` and
 its out-degree, and between its `term` and its in-degree. Then count how many
@@ -306,13 +306,15 @@ cases have an out-degree of exactly zero.
 
 Term and out-degree correlate at 0.63: the later a case, the more earlier
 landmarks it can and does cite. Term and in-degree correlate at −0.25, the
-opposite sign, for the same reason in reverse — an old case has had a century to
-accumulate citations from the rest of the set. Ten cases cite none of the other
-79, and reading them back they are the oldest in the corpus, decided before
-there was a landmark canon to cite. This is the property the chapter says its
-Wikipedia network cannot show, because "there is no clear temporal ordering of
-the pages." A court has nothing *but* temporal ordering, and it falls straight
-out of the degree counts.
+opposite sign, for the same reason in reverse, since an old case has had
+longer to collect citations from the rest of the set. Ten cases cite none of
+the other 79. Most are the oldest in the set (*Marbury*, *McCulloch*,
+*Cohens*, *Osborn*, *Gibbons*), decided before there was a landmark canon to
+cite, though *Erie* (1937) and *Johnson v. United States* (1947) also cite
+none, and one is the `"75 U.S. 168"` node with no metadata. This is the
+property the chapter says its Wikipedia network cannot show, because "there
+is no clear temporal ordering of the pages." A court record is ordered in
+time, and the ordering shows up directly in the degree counts.
 
 7. The last two networks come from *distances* rather than citations. We have no
 text for these cases, so we build a distance from the citation structure itself:
@@ -367,14 +369,15 @@ dist = (
 )
 ```
 
-The closest pairs are ones a reader can check by eye. *Furman* and *Gregg*, the
-death-penalty pair again, are nearest of all at 0.85. Next are *Meyer v.
-Nebraska* and *Pierce v. Society of Sisters*, the two 1920s substantive-due-
-process cases about parents' control over their children's schooling, and then
-a run of the free-speech leafleting cases (*Lovell*, *Schneider*, *Cantwell*).
-The distance found real doctrinal pairs without ever being told what any case is
-about, only who cites it — which is exactly the spot-check-against-something-you-
-know the chapter asks for before trusting an embedding or a distance.
+The closest pairs are ones a reader can check by eye. *Furman* and *Gregg*,
+the death-penalty pair again, are nearest of all at 0.85. Next are *Meyer v.
+Nebraska* and *Pierce v. Society of Sisters*, the two 1920s
+substantive-due-process cases about parents' control over their children's
+schooling, and then a run of the free-speech leafleting cases (*Lovell*,
+*Schneider*, *Cantwell*). The distance found real doctrinal pairs knowing
+only who cites each case, not what it is about. That is the kind of spot
+check against something you know that the chapter asks for before trusting
+an embedding or a distance.
 
 8. Before building a network from these distances, look at the distances
 themselves. Print the smallest and mean distance, and count how many of the
@@ -393,17 +396,17 @@ pairs sit at the maximum possible angle distance of π/2 (use
 )
 ```
 
-The mean distance is 1.53, almost the π/2 maximum, and 829 of the 3,160 pairs —
-better than a quarter — sit *exactly* at π/2, meaning they share no citer at
-all. This is the same crowding-against-the-maximum we saw with sparse text
-vectors: when each case has hundreds of citers spread across thousands of
-possible citing cases, almost any two of them are nearly orthogonal. That makes
-a fixed distance cutoff, the way the chapter describes building a distance
-network, a blunt instrument here. With the distances all bunched at one end,
-tiny changes to the cutoff reshape the whole network: keeping pairs closer
-than 1.4 leaves it in 11 disconnected pieces, while 1.52 already joins
-everything into one. The next question ranks neighbors instead of
-thresholding them.
+The mean distance is 1.53, almost the π/2 maximum, and 829 of the 3,160
+pairs, better than a quarter, sit *exactly* at π/2, meaning they share no
+citer at all. This is the same crowding against the maximum we saw with
+sparse text vectors: each case has a hundred or more citers spread across
+nearly 4,800 possible citing cases, so almost any two of them are nearly
+orthogonal. That makes a fixed distance cutoff, the way the chapter describes
+building a distance network, a blunt instrument here. With the distances
+bunched at one end, small changes to the cutoff reshape the whole network:
+keeping pairs closer than 1.4 leaves it in 11 disconnected pieces, while 1.52
+already joins everything into one. The next question ranks neighbors
+instead of thresholding them.
 
 9. A *symmetric nearest-neighbor* network sidesteps the cutoff problem. For each
 case, take its k closest neighbors, and keep an edge only when two cases are
@@ -468,9 +471,9 @@ nn_node = (
 ```
 
 Where the fixed cutoff either fragmented or overconnected the network, the
-nearest-neighbor rule lands on a single connected component of all 77 cases with
-a maximum degree of exactly 5 — no case, however heavily cited, is allowed more
-than its five mutual neighbors. The `mutual == 2` filter is the "each direction
+nearest-neighbor rule gives a single connected component of all 77 cases with
+a maximum degree of exactly 5. No case, however heavily cited, can have more
+than five mutual neighbors. The `mutual == 2` filter is the "each direction
 counts once" trick: a pair survives only if it turned up when we took *A*'s
 neighbors and again when we took *B*'s.
 
@@ -497,15 +500,15 @@ print("nearest-neighbor:", nn_node.filter(c.component == 1).select(pl.corr(c.eig
 ```
 
 On the direct-citation network the two measures correlate at 0.37; on the
-nearest-neighbor network they correlate at −0.14, effectively unrelated. The top
-of the betweenness list shows why. *Brown v. Board of Education* has the highest
-betweenness in the whole network but an eigenvalue near zero — it has only four
-neighbors, and none of them is central, yet it sits on the shortest path between
-whole regions of the network. These are the gatekeeper nodes the chapter
-describes: cases that bridge otherwise separate lines of doctrine without being
-deeply embedded in any one of them. The direct-citation network could not show
-this because its most-bridging cases were also its most-cited; balancing the
-degree pulls the two apart.
+nearest-neighbor network they correlate at −0.14, effectively unrelated. The
+top of the betweenness list shows why. *Brown v. Board of Education* has the
+highest betweenness in the network but an eigenvalue near zero. It has only
+four neighbors, none of them central, yet it sits on the shortest path
+between whole regions of the network. These are the gatekeeper nodes the
+chapter describes: cases that bridge otherwise separate lines of doctrine
+without being deeply embedded in any one of them. In the direct-citation
+network the top bridging cases were mostly the heavily cited hubs
+themselves; balancing the degree pulls the two measures apart.
 
 11. Finally, read the communities the nearest-neighbor network found. In the
 first block, color the network by `cluster`. In the second block, group by
@@ -537,33 +540,33 @@ arbitrarily.
 )
 ```
 
-The clusters are cleaner and more even in size than the direct network's, which
-is the payoff the chapter promises for balancing the degree. One cluster is the
-Fourth Amendment search-and-seizure line (*Weeks*, *Carroll*, *Olmstead*,
-*Katz*, *Mapp*); another is the incorporation cases that asked which parts of
-the Bill of Rights bind the states (*Hurtado*, *Palko*, *Malloy*, *Duncan*);
-another the free-speech leafleting cases; the antitrust pair and the death-
-penalty pair each hold together as their own small groups. None of this was
-labeled — the network was handed nothing but who cites whom — yet the walktrap
-communities recover the syllabus of a constitutional-law course.
+The clusters are cleaner and more even in size than the direct network's,
+which is the payoff the chapter promises for balancing the degree. One
+cluster is the Fourth Amendment search-and-seizure line (*Weeks*, *Carroll*,
+*Olmstead*, *Katz*, *Mapp*); another holds the incorporation cases that asked
+which parts of the Bill of Rights bind the states (*Hurtado*, *Palko*,
+*Malloy*, *Duncan*); another the free-speech leafleting cases; and the
+antitrust pair and the death-penalty pair each form their own small group.
+The network was given nothing but who cites whom, yet the walktrap
+communities recover the outline of a constitutional-law course.
 
 12. **Written question.** This notebook built four different networks from one
 edge list: last notebook's direct-citation network and this notebook's
 co-citation, directed, and nearest-neighbor networks. In two or three sentences,
 say which network you would reach for to answer each of these questions, and
 why: (a) which case is the single most influential precedent; (b) which two
-doctrines a court treats as related; (c) which case quietly bridges otherwise
-separate lines of law. Note that the same 80 cases gave a different answer under
-each network, which is the chapter's real point: the network you build is a
-choice, and it decides what you are able to see.
+doctrines a court treats as related; (c) which case bridges otherwise separate
+lines of law. The same 80 cases gave a different answer under each network,
+which is the chapter's main point: the network you build is a choice, and it
+decides what you are able to see.
 
-The direct-citation network answers (a): raw and eigenvalue centrality on who
-cites whom is the natural measure of a precedent's pull. The co-citation network
-answers (b), since its whole construction is "cited together," and its
-components landed exactly on doctrinal families like the death-penalty and
-antitrust pairs. The nearest-neighbor network answers (c): only after balancing
-the degree did betweenness separate from eigenvalue and surface bridge cases like
-*Brown v. Board* that every other network buried among the hubs. The directed
-network, meanwhile, added the one thing none of the undirected versions could —
-the arrow of time, which on a court record is legible in the degree counts
-alone.
+The direct-citation network answers (a): degree and eigenvalue centrality on
+who cites whom measure a precedent's pull most directly. The co-citation
+network answers (b), since it is built from "cited together," and its
+components landed on doctrinal families like the death-penalty and antitrust
+pairs. The nearest-neighbor network answers (c): only after balancing the
+degree did betweenness separate from eigenvalue and surface bridge cases
+like *Brown v. Board* that the other networks ranked among or below the
+hubs. The directed network added what none of the undirected versions could
+show, the direction of time, which in a court record is visible in the
+degree counts alone.

@@ -171,9 +171,9 @@ icu_busy = c.reanimation > 20
 )
 ```
 
-The expression never changes. What changes is the context it is given to:
-`.select()` turns it into a column of `True` and `False` values, while
-`.filter()` uses those same values to decide which rows to keep.
+The same expression works in both places. `.select()` turns it into a column of
+`True` and `False` values, and `.filter()` uses those values to decide which
+rows to keep.
 
 8. The `departement` column holds codes such as `"01"` and `"75"`, which look
 like numbers. Cast the column to `pl.Int64` with `strict=False` and print it
@@ -194,8 +194,8 @@ next to the original along with the département name. What two things go wrong?
 number `1`. Worse, Corsica is divided into two départements whose codes are
 `"2A"` and `"2B"`; those are not numbers at all, so `strict=False` quietly
 converts them to `null` and Corsica drops out of the data entirely. Département
-codes are labels that happen to be mostly digits, which is exactly why the file
-stores them as text.
+codes are labels that happen to be mostly digits, so the file stores them as
+text.
 
 9. Build a column `icu_share` equal to `reanimation` divided by `hospitalised`:
 the share of hospitalised patients who were in intensive care. Then filter to
@@ -214,9 +214,8 @@ common.
 
 Every one of these rows has zero patients in the hospital, mostly in the first
 days of the pandemic. Zero divided by zero has no answer, so the division
-produces a `NaN`. Note that this is not the same thing as the nulls in question
-4: nothing is missing from these rows. We asked the data a question that has no
-answer, and got one back.
+produces a `NaN`. These are not the same thing as the nulls in question 4,
+because nothing is missing from these rows.
 
 10. Removing the invalid rows is the job of `.drop_nans()`. Add it to the
 previous answer, in place of the filter, to see how many rows survive.
@@ -232,11 +231,11 @@ previous answer, in place of the filter, to see how many rows survive.
 ```
 
 The `icu_share` column also holds fifteen values printed as `inf`, which
-`.drop_nans()` leaves behind: they come from the handful of days that record ICU
-patients while the hospital count is zero, and dividing a positive number by
-zero gives infinity rather than `NaN`. Swap `.is_nan()` for `.is_infinite()` in
-the previous question if you want to see them. Those days are a reporting
-inconsistency, not a computation that broke.
+`.drop_nans()` leaves behind. They come from the handful of days that record ICU
+patients while the hospital count is zero; dividing a positive number by zero
+gives infinity, not `NaN`. Swap `.is_nan()` for `.is_infinite()` in the previous
+question if you want to see them. Those days are a reporting inconsistency, not
+a computation that broke.
 
 11. Finally, put the chapter together. Build a table of the pandemic in Paris
 (département `"75"`) that has a real date column, parsed from the text with
@@ -259,6 +258,5 @@ hospital admissions. Sort the result by date and print the first rows.
 Check the type under `date`: it is now `date` rather than `str`. Sorting these
 particular strings happened to give the right answer even before we parsed them,
 because a date written year-month-day sorts alphabetically in the same order it
-sorts chronologically. That is a lucky property of the format, not a fact about
-dates. Written `24/06/1626`, the same trick would fail badly, and a real date
-column would not care.
+sorts chronologically. Dates written like `24/06/1626` would sort wrongly as
+text, but a real date column sorts them correctly.

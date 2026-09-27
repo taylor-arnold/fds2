@@ -55,8 +55,8 @@ without changing anything in it, and `.explode()` gives every element of a packe
 own row. You also have joins now, which we did not have last time, so the tables can finally
 talk to each other.
 
-What comes out at the end is not a tidier table. It is a fact about this corpus that we had
-no way of reaching before today, and once you see it you cannot unsee it.
+What comes out at the end is a fact about this corpus that we had no way of reaching before
+today.
 
 Unless a question says otherwise, just print the result of each block; do not save it to a
 variable.
@@ -121,7 +121,7 @@ mac_big = (
 combinations of speaker and act never occur in the long table, and Polars fills those cells
 with `null`.
 
-Read the nulls, because they are the play. Duncan speaks 69 lines in act 1 and then nothing,
+The nulls follow the plot. Duncan speaks 69 lines in act 1 and then nothing,
 which is correct: he is murdered in act 2. Banquo goes quiet after act 3, having been
 murdered in 3.3, and Macduff has nothing in act 1 because he has not arrived yet. A pivot
 that is full of holes is often telling you something true about the world.
@@ -130,50 +130,10 @@ Then there is Lady Macbeth, who has 113 lines in act 1 and nothing at all in act
 to that. She is alive in act 5 and she has the most famous scene in the play, the one where
 she walks in her sleep and cannot wash her hands. Her cell says `null`.
 
-3. Sometimes a hole means zero and sometimes it means something else, and a pivot cannot
-tell you which. Fill them with zero and then undo the entire reshape, returning the table to
-the shape it had before question 2.
-
-```{python}
-mac_wide = (
-    line
-    .filter(c.play_id == "mac")
-    .join(mac_big, on=c.character_id, how="semi")
-    .group_by(c.character_id, c.act)
-    .agg(n_lines = pl.len())
-    .sort(c.act)
-    .pivot(index=c.character_id, on=c.act, values=c.n_lines)
-    .fill_null(0)
-)
-
-(
-    mac_wide
-    .unpivot(index="character_id", variable_name="act", value_name="n_lines")
-    .filter(c.character_id == "Duncan_Mac")
-)
-```
-
-**Answer**: `.fill_null(0)` sets every empty cell to zero, and `.unpivot()` folds the act
-columns back into a single `act` column and a single `n_lines` column, which is exactly the
-layout we pivoted away from. Give it `index` to say which column stays put, and
-`variable_name` and `value_name` to name the two columns it creates, or you get `variable`
-and `value`.
-
-This is a round trip. Pivot moved values from cells into column names, unpivot moved them
-back, and no number changed on the way. That is the whole promise of these two methods, and
-it is worth stating plainly: **they rearrange, they do not compute**.
-
-The `fill_null(0)` did change something, though. Duncan now comes back with four rows of
-zero that were never in the original table, and they are correct, because Duncan really does
-speak zero lines in acts 2 through 5. Lady Macbeth also comes back with a zero for act 5,
-and that zero is a lie. We will find out what it is covering up in question 7.
-
-Notice also that `act` came back as a string. It went into the column names, and column
-names are text.
-
-4. A wide table is easy to read and hard to plot. Take the play × act counts from question
-1, keep the four great tragedies, and draw one line per play showing how the number of lines
-moves across the five acts.
+3. A wide table is easy to read and hard to plot. Take the play × act table from question
+1 and keep the four great tragedies. To draw one line per play showing how the number of lines
+moves across the five acts, first fold the act columns back into rows with `.unpivot()`,
+giving it `index="play_id"`, `variable_name="act"`, and `value_name="n_lines"`.
 
 ```{python}
 act_wide = (
@@ -211,11 +171,14 @@ no way to write "one line per play across the acts", because acts are not a vari
 table. They are column names.
 
 Unpivot puts act back into the data as a column and the plot becomes one line of aesthetics.
-This is the general rule: before you plot, check that every variable you want to map to an
-aesthetic has a column of its own. If it does not, unpivot first.
+It is the exact reverse of the pivot in question 1: the values move from column names back
+into cells, and no number changes on the way. Pivot and unpivot rearrange; they do not
+compute. Before you plot, check that every variable you want to map to an aesthetic has a
+column of its own. If it does not, unpivot first.
 
-The `.cast(pl.Int64)` is there because `act` came back as text, and a text axis would draw
-five categories rather than a numeric line.
+The `.cast(pl.Int64)` is there because `act` came back as text (it had been a column name,
+and column names are text), and a text axis would draw five categories rather than a numeric
+line.
 
 Now read the plot, because one of these lines is strange. *Othello* peaks in act 3, the long
 scene where Iago talks Othello into it, and *Lear* is flat, and both of those are reasonable.
@@ -225,12 +188,13 @@ of Rosencrantz and Guildenstern, and "What a piece of work is a man". On the pag
 nearly as long as act 1.
 
 Something is missing from act 2, and this chart cannot tell you what. Remember the shape of
-that line. Question 8 explains it.
+that line. Question 7 explains it.
 
-5. On to `.explode()` and the second IOU. Some cells of `character_id` hold more than one
+4. On to `.explode()` and the second IOU. Some cells of `character_id` hold more than one
 speaker, joined with a hash, which is how the Folger records characters speaking in unison.
-Split those cells apart, give each speaker their own row, and recount the speakers of
-*Macbeth*.
+Split those cells apart with `.str.split(" #")`, give each speaker their own row with
+`.explode()`, and save the result as `speak`. Then count the distinct speakers of *Macbeth*
+in `speak`, and the lines each witch speaks.
 
 ```{python}
 speak = (
@@ -239,26 +203,14 @@ speak = (
     .explode(c.speaker)
 )
 
-print(
-    line
-    .select(rows = pl.len())
-)
-print(
-    speak
-    .select(rows = pl.len())
-)
-
-print(
-    line
-    .filter(c.play_id == "mac")
-    .select(mac_speakers = c.character_id.n_unique())
-)
-print(
+(
     speak
     .filter(c.play_id == "mac")
     .select(mac_speakers = c.speaker.n_unique())
 )
+```
 
+```{python}
 (
     speak
     .filter(c.play_id == "mac")
@@ -275,7 +227,7 @@ alongside it. The table grows from 80,592 rows to 80,968, which is 376 extra row
 177 lines that had more than one speaker in them.
 
 The Witches are the payoff. Before the explode, the lines table had four witch-shaped
-speakers: three witches with 59, 25, and 24 lines, and a phantom fourth called
+speakers: three witches with 59, 24, and 25 lines, and a phantom fourth called
 `WITCHES.1_Mac #WITCHES.2_Mac #WITCHES.3_Mac` with 21 more. Afterwards there are three, with
 80, 45, and 46, and the unison lines have been credited to all three of the characters who
 actually say them. *Macbeth* goes from 49 distinct speakers to 44, and the 49 was never a
@@ -284,7 +236,7 @@ real number.
 This is what `.explode()` is for: a cell that holds a *set* of values of the same kind. It
 undoes the packing without deciding anything.
 
-6. Now draw the twelve biggest parts in Shakespeare, using the speakers you just unpacked
+5. Now draw the twelve biggest parts in Shakespeare, using the speakers you just unpacked
 and the compound key from last time, and label the bars with the characters' real names from
 `char`.
 
@@ -327,31 +279,17 @@ One more thing about this chart, and it is a name that is *not* on it. Falstaff 
 comic part Shakespeare ever wrote and he does not make the top twelve. Keep that in your pocket
 too.
 
-7. The last IOU, and the hardest. `line_number` holds `"3.1.64"`: three variables glued into
-one cell with periods. Split it and explode it, and see what you get.
+6. The last IOU, and the hardest. `line_number` holds `"3.1.64"`: three variables glued into
+one cell with periods. `.explode()` is the wrong tool here. It was right for the multi-speaker
+cells, where a cell held several values of the *same* variable; this cell holds one value
+each of *three different* variables, and what we need is for those pieces to become three
+columns. Turning rows into columns is a pivot, so the given block below splits and explodes
+`line_number`, numbers the pieces within each line, and pivots them back out into columns. It
+keeps the in-scene line number as an integer column `num` and joins it onto `line` as a new
+table, `lines`. Use `lines` to print the first four lines of *Hamlet* 3.1, sorted by `num`.
 
 ```{python}
-(
-    line
-    .select(c.line_id, c.line_number)
-    .with_columns(piece = c.line_number.str.split("."))
-    .explode(c.piece)
-    .head(6)
-)
-```
-
-**Answer**: Three rows per line, and they are useless. Explode was the right tool for the
-multi-speaker cells, where a cell held three values of the *same* variable, and it is the
-wrong tool here, where a cell holds one value each of *three different* variables. Stacking
-act, scene, and line number into a column called `piece` is not a repair. It is a worse
-packing.
-
-What we need is for those three pieces to become three columns, and turning rows into
-columns is a pivot. So: explode to get one piece per row, number the pieces within each line
-so the pivot knows which column each one belongs in, then pivot them back out. Use
-`.cum_count()`, which is `.cum_sum()`'s sibling and counts rows rather than adding them up.
-
-```{python}
+#| tags: [noclear]
 line_num = (
     line
     .select(c.line_id, c.line_number)
@@ -368,7 +306,9 @@ lines = (
     line
     .join(line_num, on=c.line_id)
 )
+```
 
+```{python}
 (
     lines
     .filter(c.play_id == "ham", c.act == 3, c.scene == 1)
@@ -382,19 +322,9 @@ The scene now sorts. Last time this block gave us 3.1.1, then 3.1.10, then 3.1.1
 `line_number` was text and text sorts alphabetically. Now `num` is an `i64` and the lines
 come out in the order they are spoken.
 
-And the line we went looking for is exactly where the packed string said it was:
-
-```{python}
-(
-    lines
-    .filter(c.play_id == "ham", c.act == 3, c.scene == 1, c.num == 64)
-    .select(c.text)
-)
-```
-
-8. Now use the column we just built to ask a question we could not even phrase last class.
+7. Now use the column we just built to ask a question we could not even phrase last class.
 Every scene numbers its lines from 1, so the highest number in a scene tells you how many
-lines that scene has. Compare that with how many lines the table actually holds.
+lines that scene has. Compare that with how many lines the table holds.
 
 ```{python}
 (
@@ -426,7 +356,7 @@ complete.
 
 Go and look at the worst one. *1 Henry IV* 2.4 is numbered up to 545 and the table has 24 of
 them. That is the tavern scene at the Boar's Head, and it is Falstaff's scene, and Falstaff
-speaks prose. That is why he was not on the chart in question 6: he has **eight** lines in
+speaks prose. That is why he was not on the chart in question 5: he has **eight** lines in
 *1 Henry IV*.
 
 Once you know what you are looking for, the corpus is full of it. Macbeth 5.1 starts at line
@@ -434,17 +364,16 @@ Once you know what you are looking for, the corpus is full of it. Macbeth 5.1 st
 this corpus at all, which is why Lady Macbeth had a `null` in act 5 back in question 2.
 Macbeth 2.3 starts at line 22, because the Porter's speech is prose, and `Porter_Mac` has a
 row in `char` and zero lines in `line`. And *Hamlet* act 2, the line on the chart in question
-4 that fell off a cliff, is numbered up to 768 and keeps 423, because act 2 is where Hamlet
+3 that fell off a cliff, is numbered up to 768 and keeps 423, because act 2 is where Hamlet
 starts talking to people in prose.
 
-So go back and look at `line_type` one more time. Every one of the 80,592 rows says `verse`,
-and last class we called that a broken label on a column that could not vary. It was not
-broken. It was telling the truth. This table holds the verse and nothing else, and the prose
-was never in it. The column with one value was not a useless column. It was a decision
-somebody made, recorded honestly, and we could not read it until we had prised a variable out
+Look at `line_type` one more time. Every one of the 80,592 rows says `verse`, and last class
+that looked like a broken label on a column that could not vary. The label is accurate: this
+table holds the verse and nothing else, and the prose was never in it. The one-value column
+records a decision somebody made, and we could not read it until we had prised a variable out
 of a packed cell.
 
-9. Draw it. Compute, for each play, the share of its numbered lines that the table actually
+8. Draw it. Compute, for each play, the share of its numbered lines that the table
 holds, and plot the twelve plays that come off worst.
 
 ```{python}
@@ -479,25 +408,25 @@ know about the plays. It is.
 At the bottom is *The Merry Wives of Windsor*, which keeps 30 percent of its lines and is the
 most prose-heavy thing Shakespeare wrote. Above it come *Twelfth Night*, *Much Ado About
 Nothing*, *All's Well*, *1 Henry IV* and *As You Like It*: the comedies and the Falstaff
-plays, which is exactly where the prose lives. Run the same chain sorted the other way and
+plays, which is where the prose lives. Run the same chain sorted the other way and
 the top of the list is *1 Henry VI*, *King John*, *3 Henry VI* and *Richard II*, all of them
 at 97 percent or better, and *Richard II* is famous for being written entirely in verse.
 
-Two honest notes. The share is approximate, since even the all-verse plays come in a point or
+The share is approximate, since even the all-verse plays come in a point or
 two below 100, so a line goes missing here and there for reasons that have nothing to do with
 prose. And no amount of reshaping will get the prose back. Everything else in this notebook
 was a change of shape; this is a hole in the data.
 
-10. Last question, and it is a written one. We used four methods today. `.pivot()` and
+9. Last question, and it is a written one. We used four methods today. `.pivot()` and
 `.unpivot()` are reversible, and `.explode()` is close to it. `.group_by()` and `.agg()`,
 which we have had since chapter 5, are not. Why does that difference matter, and what does it
 tell you about how to store a table?
 
 **Answer**: A pivot moves values between cells and column names and invents nothing, so an
-unpivot puts them back. Question 3 did the round trip and every number survived it.
-Aggregation is not a reshape. When we counted lines per act in question 1 we destroyed 80,592
-rows of text to make 185 numbers, and there is no method that gives the text back. Aggregation
-runs downhill only.
+unpivot puts them back. Question 3 unpivoted what question 1 pivoted, and every number
+survived it. Aggregation is not a reshape. When we counted lines per act in question 1 we
+destroyed 80,592 rows of text to make 185 numbers, and there is no method that gives the text
+back.
 
 That is the argument for storing data long. A long table can be pivoted into any wide shape an
 analysis wants and pivoted back afterwards, so the wide table costs nothing and commits you to
@@ -505,8 +434,7 @@ nothing. A table that has already been aggregated is a decision that somebody el
 behalf, permanently. The Folger stored the lines and let us count them; had they stored the
 counts, this notebook would have been one question long.
 
-Which is the right note to end the semester on, because the corpus turns out to prove the point
-against itself. Somebody, somewhere upstream, ran a filter and kept the verse. It was not
+The corpus itself makes the same point. Somebody, somewhere upstream, ran a filter and kept the verse. It was not
 recorded as a decision. It was recorded as a column called `line_type` with one value in it,
 and a set of line numbers that no longer added up, and it took a pivot, an explode, and another
 pivot to notice. Every table you are ever handed is the output of choices like that one. Your

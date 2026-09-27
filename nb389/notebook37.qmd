@@ -41,17 +41,17 @@ storm_type = pl.read_csv(ub + "data/storm_codes.csv")
 `storm` is NOAA's best-track history of North Atlantic tropical cyclones, one
 row per observation logged roughly every six hours since 1950 (more often
 around landfall, as you will see). `year`, `month`, `day`, and `hour` split
-the observation time into separate numeric components, the same way the
-book recommends recording dates. `name` is the storm's common name, `letter`
-its single-letter season code, and `doy` the day of the year. `lon` and `lat`
+the observation time into separate numeric components, the way the book
+recommends recording dates. `name` is the storm's common name, `letter` its
+single-letter season code, and `doy` the day of the year. `lon` and `lat`
 give the storm center's position, `status` a two-letter code for its phase
 (tropical depression, tropical storm, hurricane, and so on), `category` its
-Saffir-Simpson category (-1 for anything below hurricane strength, 0 for a
-tropical storm, 1 through 5 for a hurricane), and `wind` its maximum
+Saffir-Simpson category (-1 for anything below tropical-storm strength, 0 for
+a tropical storm, 1 through 5 for a hurricane), and `wind` its maximum
 sustained wind in knots. `storm_type` maps each `status` code to a readable
-name. One thing worth knowing before question 1: Atlantic storm names are
-recycled on a six-year rotation, so `name` alone does not pick out a single
-storm. Print results unless a question says otherwise.
+name. Atlantic storm names are recycled on a six-year rotation, so `name`
+alone does not pick out a single storm. Print results unless a question says
+otherwise.
 
 1. In the first block, filter `storm` to rows where `name` is `"Katrina"`,
 without filtering on `year` yet, add a row number with
@@ -82,13 +82,12 @@ q1 = (
 ```
 
 **Answer**: Three different years come back: 1981, 1999, and 2005. This
-"Katrina" is really three unrelated storms, eighteen and then six years
-apart, stitched together end to end by the row number. The plot reads as
-one storm's continuous life cycle, building to a single dramatic peak, but
-that is an illusion the row number manufactures. Nothing about it hints
-that the first bump and the second, far larger one are separated by two
-full decades. `name` is not a key here, the same problem a join on an
-unchecked column would have run into.
+"Katrina" is three unrelated storms, eighteen and then six years apart,
+stitched together end to end by the row number. The plot reads as one
+storm's continuous life cycle building to a single dramatic peak, but the
+row number manufactures that. Nothing in the plot hints that the 1981 bump
+and the far larger 2005 peak are 24 years apart. `name` is not a key here,
+the same problem a join on an unchecked column would have run into.
 
 2. Filter `storm` to the real 2005 storm (`name == "Katrina"` and
 `year == 2005`), add a `date` column with `pl.date(c.year, c.month, c.day)`,
@@ -113,9 +112,9 @@ kat = (
 )
 ```
 
-Notice the staircase shape in the plot. It comes from days that hold more
-than one observation stacked at the same x position, a hint that `date` is
-coarser than the data actually is.
+The plot has a staircase shape. Days that hold more than one observation
+stack them at the same x position, a hint that `date` is coarser than the
+data.
 
 3. In the first block, build a `moment` column on `kat` with
 `pl.datetime(c.year, c.month, c.day, c.hour)`, overwrite `kat` with it, and
@@ -148,10 +147,11 @@ kat = (
 ```
 
 The staircase from question 2 is gone, because `moment` carries the hour
-that `date` threw away. And the six-hour rhythm is not perfectly steady:
-one off-cycle fix shows up on August 25, and two more cluster on August 29,
-right when Katrina was making landfall. That is exactly when forecasters
-most need an observation between the routine ones.
+that `date` threw away. The six-hour rhythm is not perfectly steady, though.
+One off-cycle fix appears late on August 25, when Katrina made landfall in
+Florida, and two more on August 29, around its landfalls in Louisiana and
+Mississippi, when forecasters most need observations between the routine
+ones.
 
 4. NOAA reports these timestamps in UTC. In the first block, attach that zone
 to `moment` with `.dt.replace_time_zone("UTC")`, then convert to
@@ -189,12 +189,12 @@ kat = (
 
 **Answer**: Katrina peaked at 150 knots, a category 5, at 18:00 UTC on
 August 28. `central` reads 13:00 and `central_wrong` reads 18:00, a
-five-hour gap, exactly the CDT offset. `.dt.convert_time_zone()` did
-arithmetic, shifting the clock reading to express the same instant in a new
-zone. `.dt.replace_time_zone()` just overwrote the label on an
-already-aware column, leaving the clock reading untouched, so it silently
-relabeled 18:00 UTC as if it had always been 18:00 Chicago time. The two
-methods look interchangeable and are not.
+five-hour gap that equals the CDT offset. `.dt.convert_time_zone()` shifts
+the clock reading to express the same instant in a new zone.
+`.dt.replace_time_zone()` overwrites the zone label on an already-aware
+column and leaves the clock reading untouched, so it relabeled 18:00 UTC as
+18:00 Chicago time without any warning. The two methods look
+interchangeable, but only the first keeps the instant the same.
 
 5. Join `kat` to `storm_type` on `status` and group by `status_name` to
 count how many of Katrina's 34 observations fall in each phase, sorted
@@ -210,8 +210,8 @@ descending.
 )
 ```
 
-Nineteen of the thirty-four observations, just over half, were logged
-while Katrina was already a hurricane, not just approaching one.
+Nineteen of the thirty-four observations, just over half, were logged while
+Katrina was a hurricane.
 
 6. Across the full `storm` table, in the first block count the distinct storm
 `name`s per `year`, bucket the years into decades, and compute the average
@@ -240,11 +240,11 @@ q6
 )
 ```
 
-The average climbs from under 9 storms a year in the 1950s to over 15 by
-the 2010s, with 2020 alone averaging 21. Before reading this as storms
-getting more frequent, recall the same observation-window caution the
-chapter raised for Wikipedia's revision counts: satellite coverage of the
+The average climbs from under 9 storms a year in the 1950s to over 15 in the
+2010s, and the 2020s bar, which holds only 2020, reaches 21. Before reading
+this as storms getting more frequent, recall the observation-window caution
+the chapter raised for Wikipedia's revision counts. Satellite coverage of the
 Atlantic did not begin until the mid-1960s, and tracking methods kept
-improving for decades after that. Some of this rise is real. Some of it is
-that the 1950s could only record what a ship or a plane happened to sail
-through.
+improving for decades after that. Some of the rise is real, and some of it
+comes from the 1950s recording only the storms that ships and aircraft
+happened to encounter.

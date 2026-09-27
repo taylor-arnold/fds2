@@ -60,13 +60,12 @@ nlp = spacy.load("en_core_web_sm")
 
 `docs_raw` holds 200 IMDb movie reviews, 100 labeled `"positive"` and 100
 labeled `"negative"`, each with a `doc_id` and the raw `text` of the review.
-This is a different, smaller corpus than the one the chapter itself uses for
-its Wikipedia author pages, and it comes with a mess of its own: IMDb's
-reviews were originally scraped from a web page, and the literal characters
-`<br />` (an HTML line break) are still sitting inside the text of many
-reviews. The first few questions deal with that mess directly, in the same
-spirit as the chapter's warning that the wrapper functions are not magic.
-Print results unless a question says otherwise.
+This is a smaller corpus than the Wikipedia author pages the chapter uses,
+and it has a mess of its own. The reviews were scraped from web pages, and
+many still contain the literal characters `<br />` (an HTML line break). The
+first few questions deal with that mess directly, in the spirit of the
+chapter's warning that the wrapper functions are not magic. Print results
+unless a question says otherwise.
 
 1. In the first block, count how many reviews fall into each `label`. In the
 second block, count how many of the 200 reviews contain the literal string
@@ -106,13 +105,12 @@ example = DSText.process(
 ```
 
 Every one of these tokens has `is_alpha` equal to `False`, but four of them
-still get labeled `NOUN` by the tagger, and the same string, `"/><br"`,
-comes back tagged three different ways (`PUNCT`, `NOUN`, `NUM`) depending on
-what happens to sit next to it. None of this is the tagger's fault; it is
-being handed text that was never a real sentence to begin with. Because the
-chapter's own noun-frequency query in the next section filters only on
-`upos`, these contaminated tokens would sneak into a noun count without
-`is_alpha` ever being checked.
+still get tagged `NOUN`, and the same string, `"/><br"`, comes back tagged
+three different ways (`PUNCT`, `NOUN`, `NUM`) depending on its neighbors.
+The tagger is being handed text that was never a real sentence. The
+chapter's noun-frequency query in the next section filters only on `upos`,
+so these tokens would get into a noun count because `is_alpha` is never
+checked.
 
 3. Build `docs` from `docs_raw` by replacing every `"<br />"` with a single
 space. Then run `DSText.process()` on the full, cleaned `docs` table to build
@@ -168,11 +166,11 @@ top_nouns
 )
 ```
 
-Unlike the chapter's biography pages, where the most common nouns spread
-across a handful of different themes, this list is dominated by the two
-words for the thing being reviewed. `movie` and `film` alone account for
-more mentions than the next four nouns combined, a reminder that the most
-frequent word in a collection is not always the most informative one.
+In the chapter's biography pages the most common nouns spread across a
+handful of themes. This list is dominated by the two words for the thing
+being reviewed: `movie` and `film` together account for more mentions than
+the next four nouns combined. The most frequent word in a collection is not
+always the most informative one.
 
 6. In the first block, find the 10 most frequent adjectives within each
 `label`. Join `anno` to the `doc_id`/`label` pairs in `docs`, filter to
@@ -207,12 +205,11 @@ adj_by_label = (
 )
 ```
 
-**Answer**: `bad` is heavily one-sided, 86 uses in negative reviews against
-only 17 in positive ones. `good`, on the other hand, shows up 80 times in
-positive reviews but still 65 times in negative ones, nearly as often. The
-sentence pulled out in question 4, "this movie is not good," is exactly why:
-a negation flips the sentiment of a sentence without removing the positive
-word that carries it. The chapter's own introduction makes the same point
-about "not bad" being a mild compliment. A raw adjective count has no way to
-see the "not" sitting three tokens away; it would need the dependency
-information from later in the chapter to catch it.
+**Answer**: `bad` is heavily one-sided, with 86 uses in negative reviews
+against 17 in positive ones. `good` shows up 80 times in positive reviews
+but still 65 times in negative ones. The sentence from question 4, "this
+movie is not good," shows why: a negation flips the sentiment of a sentence
+without removing the positive word. The chapter's introduction makes the
+same point about "not bad" being a mild compliment. A raw adjective count
+ignores the "not" in front of "good"; catching it takes word-order or
+dependency information from later in the chapter.

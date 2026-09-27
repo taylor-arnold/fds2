@@ -324,10 +324,9 @@ and `boundary=0`.
 ```
 
 16. Plot `dep_delay` by `carrier` with `geom_boxplot()`. The worst outliers
-stretch the y-axis until the boxes themselves are unreadable, so crop the
-view with `.coord_cartesian(ylim=(-30, 60))` rather than filtering the
-data or setting scale limits, both of which would throw out the extreme
-flights before the boxes are even computed.
+stretch the y-axis until the boxes are unreadable, so crop the view with
+`.coord_cartesian(ylim=(-30, 60))`. Filtering the data or setting scale
+limits would drop the extreme flights before the boxes are computed.
 
 ```{python}
 (
@@ -345,7 +344,7 @@ flights before the boxes are even computed.
 (
     rva
     .ggplot(aes(c.dep_delay))
-    .geom_histogram(binwidth=15, boundary=0)
+    .geom_histogram(binwidth=10, boundary=0)
     .facet_wrap("carrier")
 )
 ```

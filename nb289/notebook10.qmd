@@ -96,9 +96,9 @@ that state, and compute the share. Sort by share, largest first.
 
 The top of the result is a column of 100.0. Anchorage is 100 percent of Alaska,
 Little Rock is 100 percent of Arkansas, and so on down a list of states that
-contribute exactly one city to the table. This is not a finding about Alaska. It
-is question 1's `n` column coming back to haunt you: the share is a share of the
-cities in *this table*, and for those states the table holds one city.
+contribute exactly one city to the table. The share is a share of the cities in
+*this table*, and question 1's `n` column showed that for those states the table
+holds one city.
 
 3. So look at the states that have enough cities for the share to mean anything.
 Keep only the states with at least five cities in the table, then compute the same
@@ -138,8 +138,8 @@ population is above the mean city population of their own state.
 Seventy-six cities of 289, which is barely a quarter of them. That is what a mean
 does when one city in the state is enormous: Los Angeles drags California's average
 up past most of the state, and the average stops describing a typical city. Swap
-`.mean()` for `.median()` and 132 cities come back instead, which is much nearer to
-half, because that is what a median is for.
+`.mean()` for `.median()` and 132 cities come back instead, much nearer to half, as
+you would expect from a median.
 
 5. Every window so far has grouped by state and stayed inside one year. Turn it
 around: group by *year* and look across the states. Give each city its share of all
@@ -176,14 +176,14 @@ sort by the change, and see which decade of which city added the most people.
 )
 ```
 
-The first census of every city now has a `null` change instead of a nonsense one,
-because there is no row above it to subtract, and that is why the `.drop_nulls()` is
-there: without it Polars sorts those nulls to the top of a descending sort and you
-read a screen of blanks. What is left is New York City adding 1.9 million people
+The first census of every city now has a `null` change, because there is no row
+above it to subtract. That is why the `.drop_nulls()` is there: without it Polars
+sorts those nulls to the top of a descending sort and you read a screen of blanks.
+What is left is New York City adding 1.9 million people
 between 1890 and 1900, then 1.3 million more in the next ten years, with Chicago,
 Los Angeles, and Detroit arriving in the 1920s. Nine of the ten largest gains happen
-between 1880 and 1930. The tenth is New York again, in the 1990s, which is the only
-row in the top of this list that is not the story of the industrial city.
+between 1880 and 1930, when the industrial cities were growing. The tenth is New
+York again, in the 1990s.
 
 7. Sort the other way and you get the second half of that story. Keep only the 2010
 rows with a negative change, so the question becomes: which cities lost people
@@ -200,10 +200,10 @@ between 2000 and 2010?
 ```
 
 Sixty-one cities shrank in that decade. Detroit lost 237,000 people and Chicago
-200,000, which is the long story. New Orleans lost 141,000, which is not: that is
-one hurricane, in August 2005, landing in a column of census counts taken five years
-on either side of it. A decade is a coarse instrument and it does not tell you which
-of these two kinds of loss you are looking at.
+200,000, part of a long decline. New Orleans lost 141,000 to a single hurricane in
+August 2005, which falls between two census counts taken five years on either side
+of it. A decade is a coarse instrument, and the column does not tell you which of
+these two kinds of loss you are looking at.
 
 8. Absolute change favors big cities, so try growth as a percentage instead. In
 the first block, use the same shifted column as a denominator, drop the nulls, and
@@ -235,14 +235,14 @@ then compute the growth and sort again.
 ```
 
 **Answer**: In the first block the fastest growing city in America is `NaN`. A city
-that did not exist yet has a population of 0, and dividing by that 0 is the problem:
-0 divided by 0 is `NaN`, and any real population divided by 0 is `inf`. Both are
-floats, so neither is a `null`, so `.drop_nulls()` did not touch them, and Polars
-sorts `NaN` above every real number in a descending sort. There are 2,296 `NaN`
+that did not exist yet has a population of 0, and the growth divides by it: 0
+divided by 0 is `NaN`, and any real population divided by 0 is `inf`. Both are
+floats, not `null`, so `.drop_nulls()` did not touch them. Polars sorts `NaN` above
+every real number in a descending sort. There are 2,296 `NaN`
 values, one for every pair of consecutive censuses that both recorded a zero, and
 316 `inf` values, one for every time a city goes from a zero count to a real one.
-This is the distinction from Chapter 3 arriving with a bill: missing and
-not-a-number are different things, and only one of them is a `null`.
+This is the distinction from Chapter 3: missing and not-a-number are different
+things, and only one of them is a `null`.
 
 The second block drops only the rows with a zero denominator, and every remaining
 row still compares itself to the census immediately before it. At the top is Warren,
@@ -274,8 +274,8 @@ from below, and look at Portland from 1830 to 1870.
 
 Forward fill copies 1840 down and says Portland had nobody in it. Backward fill
 copies 1860 up and says it had 2,874 people. The census counted 821. Both fills are
-guesses, they are wrong in opposite directions, and the true value sits between them,
-which is the most you can generally expect from a fill. Note also that the `.over()`
+guesses, wrong in opposite directions, with the true value between them. That is
+generally the most you can expect from a fill. Note also that the `.over()`
 changed nothing here, since the row above Portland's gap happens to be Portland. It
 would have changed everything if the gap had landed on a city's first row, and you do
 not get to know that in advance.

@@ -37,9 +37,8 @@ fsac_url = ub + "data/fsac_export.csv"
 
 ### Questions
 
-Notice that the setup did not load a table. It loaded a *path*. That is the whole point of
-this notebook: getting the file into Python is the assignment, not the thing you do before
-the assignment starts.
+Notice that the setup did not load a table. It loaded a *path*. In this notebook, getting
+the file into Python is the assignment, not the thing you do before the assignment starts.
 
 The file is a metadata export from the Library of Congress, covering 500 color photographs
 taken between 1939 and 1943 for the Farm Security Administration and its successor, the
@@ -69,20 +68,20 @@ pl.read_csv(fsac_url)
 
 **Answer**: `ComputeError: invalid utf-8 sequence`.
 
-That is a good error, and worth a moment. Polars is not saying the file is bad. It is saying
-that somewhere in these bytes is a sequence that is not valid UTF-8, and UTF-8 is what
+That is a good error. Polars is not saying the file is bad. It is saying that somewhere in these bytes is a sequence that is not valid UTF-8, and UTF-8 is what
 `read_csv` assumes unless you tell it otherwise. The file was written by some other program,
 years ago, under some other assumption, and nothing in a CSV records which one.
 
-Note also what the error does *not* tell you. It stops at the first problem it hits. There
-may be others behind it.
+The error also stops at the first problem it hits, so there may be others behind it.
 
-2. Before guessing at arguments, look at the file. You can make `read_csv` hand you the raw
-lines by giving it a separator the file does not contain (there are no tabs in this one),
-turning off the header, and reading with `encoding="utf8-lossy"`, which replaces any byte it
-cannot decode instead of raising. Every line then comes back as a single string.
+2. Before guessing at arguments, look at the file. The block below is given: it makes
+`read_csv` hand back the raw lines of the file, one string per line, by giving it a separator
+the file does not contain (there are no tabs in this one), turning off the header, and
+reading with `encoding="utf8-lossy"`, which replaces any byte it cannot decode instead of
+raising. Run it and read the first three lines.
 
 ```{python}
+#| tags: [noclear]
 raw = pl.read_csv(
     fsac_url,
     separator="\t",
@@ -152,9 +151,8 @@ apostrophe used to be. `utf8-lossy` did exactly what it promised. It did not dec
 it threw the byte away and put a marker in the hole, and it did that in 98 of the 500
 captions without a word of complaint.
 
-This is the trap worth remembering. The error is gone and the data is worse than it was when
-the error was there, because now nothing is going to tell you. A fix that silences a symptom
-is not the same thing as a fix that gets the right answer.
+The error is gone and the data is worse than it was when the error was there, because now
+nothing is going to tell you.
 
 4. Now decode the bytes properly. The file was written in `windows-1252`, the default
 encoding of Windows text editors for about twenty years. Read it again, save the result as
@@ -177,12 +175,12 @@ photos = pl.read_csv(
 ```
 
 **Answer**: `Tracks at C &amp; NW RR’s Proviso yard, Chicago, Ill.` The apostrophe is back,
-and it is a typographic one, which is what the archive actually typed.
+and it is a typographic one, which is what the archive typed.
 
 How would you have known to try `windows-1252`? By trying it. It and `latin1` cover most of
 what you will meet from an American or Western European source, and the way you check is by
-reading a value you can recognize. That last step is not optional. An encoding argument that
-loads without an error has proved nothing except that it did not raise one.
+reading a value you can recognize. Do not skip that step: an encoding argument that loads
+without an error has proved only that it did not raise one.
 
 5. The apostrophe is fixed and the caption is still wrong. `&amp;` is HTML for `&`, and it
 has survived into the data as five literal characters. Count how many captions carry it,
@@ -215,7 +213,7 @@ photos = (
 
 **Answer**: 45 captions, and no `read_csv` argument would have touched them.
 
-The distinction is worth being precise about. `encoding=` tells Polars how to turn *bytes*
+`encoding=` tells Polars how to turn *bytes*
 into characters. `&amp;` is not an encoding problem; the bytes are fine, and they spell an
 ampersand the long way round. Some pipeline between the archive and this file decoded the
 quotes and the apostrophes and then stopped, which is what a half-finished unescaping looks
@@ -257,7 +255,7 @@ with `LC-DIG-fsac-1a35430`, `1a35431` with `...1a35431`, `1a35432` with `...1a35
 filename digit for digit. Then `1a35434v.jpg` arrives carrying `LC-DIG-fsac-1a35424`, and it
 arrives twice.
 
-So this is not one error, it is two. The row was entered twice, and on the way in somebody
+There are two errors here. The row was entered twice, and on the way in somebody
 transposed the third and fourth digits of the call number. And you can say *which* field is
 wrong, which you almost never can: the pattern of the neighbors, plus the fact that a file
 named `1a35434v.jpg` exists and one named `1a35424v.jpg` does not, puts the error in the
@@ -298,10 +296,10 @@ a point on an axis. That is fine for a chart and would be a lie in a data file. 
 underneath both of the chapter's options is the same: store the precision you have, not the
 precision your date library wants.
 
-The chart itself is worth reading. From 1939 through the first half of 1942 the counts sit in
-the single digits and low teens, and then from mid-1942 the line swings violently between 1
-and 61 from one month to the next. That is the FSA becoming the OWI, and rural poverty giving
-way to war production.
+The chart itself is worth reading. From 1939 into 1942 most months sit in the single digits
+and low teens, with one exception we will come back to, and then from mid-1942 the line
+swings violently between 1 and 61 from one month to the next. That is the FSA becoming the
+OWI, and rural poverty giving way to war production.
 
 The two tallest points are not trends, though, and it is worth knowing why before you say
 anything about them. October 1940 is 49 photographs, and 39 of them are Russell Lee in Pie
@@ -407,7 +405,7 @@ The California table is the one that should worry you. Ten rows, and three count
 Angeles County**, and 40 photographs are filed under a county that has never existed.
 
 `San County` is not a place either. Cajon, Redlands, Cadiz, Alray, and Bagdad are all in
-**San Bernardino County**, and there are 11 more.
+**San Bernardino County**, and 11 more photographs are filed under it.
 
 Put the three side by side and the rule falls out. Every value in this column is exactly two
 words long, all 495 of them, and that is not a fact about American county names. Shasta
@@ -418,8 +416,7 @@ Now look back at the first test, the one that passed. `Los County` ends in the w
 It has the right shape, it has no nulls, it sorts and groups without complaint, and it is
 false. A format check cannot catch this, because the format is fine.
 
-This is the argument for section 10.3's rule about standards, and it is not a matter of
-tidiness. Had the archive recorded the county FIPS code, Los Angeles County would be `06037`,
+This is the argument for section 10.3's rule about standards. Had the archive recorded the county FIPS code, Los Angeles County would be `06037`,
 and `06037` has no first word to be sheared down to. The English name would then have lived
 in another table, one row per county, where getting it wrong costs you one row instead of 40.
 
@@ -440,9 +437,8 @@ column: what it holds, what type it is, and what decision or defect a reader has
 about.
 
 **Answer**: The test returns nothing. Not one of the 108 cities in this file has two
-coordinates, so `longitude` and `latitude` do not vary within a city. They are not the
-position of the camera. They are the centroid of the town, copied onto every photograph taken
-there, and the dictionary has to say so, because a map of these points is a map of where the
+coordinates, so `longitude` and `latitude` do not vary within a city. They are the centroid
+of the town, not the position of the camera, copied onto every photograph taken there, and the dictionary has to say so, because a map of these points is a map of where the
 towns are.
 
 That is the same test we ran on the Paris Métro, and it comes out the other way. There,
@@ -480,9 +476,8 @@ is longer than that. Do not group on it.
 Every line of that took a query to find and one sentence to write down, and together they
 would have saved you an afternoon.
 
-That asymmetry is the argument for the data dictionary, and it is why the chapter gives it a
-section rather than a footnote. Not one of those facts is recoverable from the file. The file
-can tell you that `county` holds two words; it cannot
+That asymmetry is the argument for the data dictionary. Not one of those facts is
+recoverable from the file. The file can tell you that `county` holds two words; it cannot
 tell you that two words is wrong. It can tell you there is no `day` column; it cannot tell
 you whether that is because the day is unknown or because somebody forgot. The collector knew
 all of it and wrote none of it down, and you have just spent ten questions reconstructing

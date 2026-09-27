@@ -59,8 +59,8 @@ out of a hundred; `mpa` is the rating label (G, PG, R, and so on) and `runtime`
 is in minutes.
 
 Last time the table was complete and every group had something in it. This one is
-full of holes, which is the point: this notebook is mostly about counting, and the
-interesting thing about a count is what it does not include. Several questions
+full of holes. This notebook is mostly about counting, and the interesting thing
+about a count is what it does not include. Several questions
 below group by decade, which is not a column in the data. Build it with integer
 division, as in `(c.year // 10) * 10`.
 
@@ -155,8 +155,7 @@ distinct titles in each decade side by side.
 ```
 
 The 1970s have 1,000 films and 997 titles, so three titles appear twice. Titles
-are not unique, and a film is identified by its title and year together, not by
-its title. Across the whole table it happens 98 times: there are three films
+are not unique; a film is identified by its title and year together. Across the whole table it happens 98 times: there are three films
 called `Halloween` here, from 1978, 2007, and 2018.
 
 4. To summarize the whole table rather than each group, use `.select()` with
@@ -204,9 +203,9 @@ $5 million to $60 million, most of which is inflation and ticket prices rather
 than audiences. Then read the minimum column, which is where the data stops making
 sense. The smallest gross in the 1970s is 0.000005, which is five dollars. A film
 that took five dollars is not among the hundred highest grossing films of its year,
-so that number is not a small gross; it is a missing gross wearing a disguise. The
-minimum and the maximum are the cheapest data check you own, and they are worth
-running on any column before you trust anything else about it.
+so that number is a missing gross recorded as a tiny one. Looking at the minimum
+and the maximum is the cheapest data check you have; run it on any column before
+you trust anything else about it.
 
 6. `pl.corr()` takes two columns instead of one and measures how tightly they move
 together, on a scale from -1 to 1. Do critics and audiences agree? Correlate
@@ -272,13 +271,13 @@ chain with `.drop_nulls(c.gross)` at the start. Why do the two answers differ?
 ```
 
 **Answer**: The first block claims the biggest film of the 1980s was `Secret of
-Bigfoot`, and the two columns in it disagree with each other, which is the tell:
-`.max()` skips nulls and `.sort()` does not. There are 495 films with no recorded
-gross at all, Polars sorts nulls to the *top* of a descending sort, and so
-`.first()` handed us a film with no box office rather than the largest one. (The
+Bigfoot`, and its two columns disagree with each other because `.max()` skips
+nulls and `.sort()` does not. There are 495 films with no recorded gross at all.
+Polars sorts nulls to the *top* of a descending sort, so `.first()` handed us a
+film with no box office instead of the largest one. (The
 1970s answer, a 1971 film called `Grease` with a 4.6 rating, is not the musical. It
 is a different film that happens to share the name, which is question 3 coming back
 to bite.) Dropping the missing grosses first gives Star Wars, E.T., Titanic, Avatar,
 and The Force Awakens, and now the two columns agree. The bug was easy to catch only
-because the right answer was famous enough to make the wrong one obvious, and most
-wrong answers are not so considerate.
+because the right answers are famous enough to make the wrong ones obvious. Most
+bugs will not give themselves away like that.

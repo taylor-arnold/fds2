@@ -64,10 +64,9 @@ effort; these are its less-famous color frames, shot on early Kodachrome
 film. Each row is one photograph. `filepath` points to a `.jpg` file on disk,
 and `photographer`, `caption`, `year`, `month`, `state`, `city`, `county`,
 and `longitude`/`latitude` describe it. `call_number` is the Library's own
-identifier. Two things are worth knowing before we start: these images are
-*not* resized to a common shape the way a benchmark dataset would be, and
-OpenCV reads pixels in blue-green-red (BGR) order rather than RGB. Print all
-results unless a question says otherwise.
+identifier. These images are *not* resized to a common shape the way a
+benchmark dataset would be, and OpenCV reads pixels in blue-green-red (BGR)
+order instead of RGB. Print all results unless a question says otherwise.
 
 1. In the first block, read the first image in `fsac` into a NumPy array with
 `cv2.imread`, and print the array's `.shape`. In the second block, print its
@@ -120,10 +119,10 @@ sizes = pl.DataFrame(sizes)
 )
 ```
 
-The 500 images come in 105 different sizes, mostly landscape. Every image
-here has 640 pixels on its long side but a different short side, so any
-analysis has to be size-independent: a mean over all pixels is fine, but a
-rule that reached for a fixed pixel location would mean a different thing in
+The 500 images come in 105 different sizes, 394 landscape and 106 portrait.
+Every image has 640 pixels on its long side but a different short side, so
+any analysis has to be size-independent. A mean over all pixels is fine, but
+a rule that used a fixed pixel location would mean something different in
 each frame.
 
 3. Compute the mean brightness of every image. Loop over the rows, read each
@@ -173,10 +172,11 @@ common.
 ```
 
 The darkest images are night and interior shots: Jack Delano's photographs
-of a Chicago railroad yard working around the clock, and Alfred Palmer's
-frame taken inside a tank at Fort Knox. The brightness score is being driven
-by the dark background, not by the subject. A brightly lit tank photographed
-against a black night would score lower than a dull object in a sunlit field.
+of Chicago-area railroad yards and roundhouses, including one of a yard
+working around the clock, and Alfred Palmer's portrait of a tank driver at
+Fort Knox. The dark background drives the brightness score more than the
+subject does, so a brightly lit tank photographed against a black night would
+score lower than a dull object in a sunlit field.
 
 5. Draw a boxplot of `brightness` by `photographer`, but only for the
 photographers who contributed at least 20 images (filter on
@@ -195,12 +195,12 @@ do you see?
 )
 ```
 
-Alfred Palmer and Howard Hollem are the darkest on average (both around 60),
+Alfred Palmer and Howard Hollem are the darkest on average (about 60 and 64),
 and both spent the war shooting inside aircraft factories and defense plants,
-where the light is artificial and controlled. John Collier and Jack Delano
-are the brightest, with more outdoor and daylight frames. As with the birds
-in the chapter, brightness is tracking each photographer's assignment and
-setting, not anything about the photographs' merit.
+where the light is artificial. John Collier and Jack Delano are the brightest,
+with more outdoor and daylight frames. As with the birds in the chapter,
+brightness tracks each photographer's assignments and settings, not the
+photographs' merit.
 
 6. Convert the first image from BGR to HSV color space with `cv2.cvtColor`
 and `cv2.COLOR_BGR2HSV`, and run `DSImage.compute_colors` on the result. How
@@ -239,11 +239,10 @@ fsac = pl.concat([fsac, results], how="horizontal")
 )
 ```
 
-Two-thirds of the average frame is neutral, which fits the muted look of aged
-Kodachrome. Among the actual hues, orange dominates at about 16% — the color
-of skin, wood, brick, and dirt in these documentary scenes — while blue
-(sky) is a distant second and red is under 3%. This is a collection with a
-strong warm cast.
+Two-thirds of the average frame is neutral, a muted palette overall. Among
+the hues, orange dominates at about 16%, the color of skin, wood, brick, and
+dirt in these documentary scenes. Blue (mostly sky) is a distant second at
+about 8%, and red is under 3%. The collection has a strong warm cast.
 
 8. In the first block, show the twelve reddest images in a grid. In the
 second block, print the caption of the six reddest. Does "red" find red
@@ -267,10 +266,10 @@ second block, print the caption of the six reddest. Does "red" find red
 )
 ```
 
-Red finds red *things*, but not a single subject: schoolchildren's clothing,
-a crowded courthouse square, a scrap-and-salvage depot, a tractor in a field.
-Like brightness, the color proportion describes whatever fills the frame —
-clothes, machinery, a painted wall — rather than the photograph's ostensible
+Red finds red *things*, but no single kind of subject: schoolchildren's
+clothing, a crowd on court day, a scrap-and-salvage depot, a tractor in a
+field. Like brightness, the color proportion describes whatever fills the
+frame (clothes, machinery, a painted wall), not the photograph's ostensible
 topic.
 
 9. Close with a short pipeline that pulls brightness and color together.
@@ -294,13 +293,13 @@ cannot tell us.
 )
 ```
 
-Every number here is a real, stable difference between photographers: Marion
-Post Wolcott's rural frames are the most orange and almost never blue, while
-Palmer's and Hollem's factory work carries more blue and less orange. But
-notice what these features cannot do. They separate a sunlit wheat field from
-a dim factory floor easily, because those differ in light and color, yet they
-have no way to tell two differently-lit photographs of the *same* subject
-apart, or to recognize that two frames both show a tractor. Brightness and
-hue describe the whole frame — its lighting, its background, its film stock —
-and never the subject as such. Closing that gap is exactly what the image
-embeddings in the next sections are for.
+The photographers differ clearly on these features. Marion Post Wolcott's
+rural frames are the most orange and almost never blue, while Palmer's and
+Hollem's factory work carries more blue and less orange than hers or Russell
+Lee's. But these features have limits. They separate a sunlit wheat field
+from a dim factory floor easily, because those differ in light and color, yet
+they cannot tell that two differently lit photographs show the *same*
+subject, or recognize that two frames both show a tractor. Brightness and hue
+describe the whole frame (its lighting, background, and film stock), never
+the subject itself. The image embeddings in the next sections are meant to
+close that gap.

@@ -47,16 +47,15 @@ covid = pl.read_csv(ub + "data/it_province_covid.csv")
 This notebook uses two tables. `prov` is a GeoJSON file of Italy's 107
 provinces, the administrative unit roughly equivalent to a US county. It has
 one row per province with a `province` name, a `geometry` column, and the
-`_crs` helper column; the geometries are polygons, not the points from last
-time, so each one traces a whole boundary rather than marking a single spot.
+`_crs` helper column. The geometries are polygons: each one traces a whole
+boundary, where the city table in the last notebook had single points.
 `covid` is a daily record of new COVID-19 cases per province from February
 2020 through November 2021, with columns `date`, `region`, `province`, and
 `cases`. The `province` column is the shared key between the two tables.
 
-As in the last notebook, a few answers get saved back into `prov` — the
-projection step and the metric columns built on top of it — because later
-questions reuse them. Anything that is not a geometry- or column-building
-step should just be printed.
+As in the last notebook, save a few answers back into `prov` because later
+questions reuse them: the projection step and the metric columns built on it.
+Print anything that does not build a geometry or a column.
 
 1. In the first block, print `prov`. In the second block, select `province` and
 the first 15 characters of each `geometry` string (`c.geometry.str.slice(0, 15)`)
@@ -75,13 +74,12 @@ prov
 )
 ```
 
-**Answer**: Every string starts with `MULTIPOLYGON`, not `POINT`. A point is
-two numbers, so `geom_point()` has an x and a y to place; a polygon is an
-ordered list of many coordinate pairs tracing a closed boundary, and some
-provinces are made of several disconnected pieces (the *multi* part), like a
-mainland province plus its offshore islands. There is no single (x, y) to
-scatter. Drawing these needs `geom_map()`, which knows how to follow the
-vertices around each shape.
+**Answer**: Every string starts with `MULTIPOLYGON`. A point is two numbers,
+so `geom_point()` has an x and a y to place. A polygon is an ordered list of
+many coordinate pairs tracing a closed boundary, and some provinces are made
+of several disconnected pieces (the *multi* part), such as a mainland province
+plus its offshore islands. With no single (x, y) to scatter, drawing these
+needs `geom_map()`, which follows the vertices around each shape.
 
 2. Draw the provinces with `geom_map(fill="white", color="black")` and
 `coord_fixed()`, in the raw coordinates the file loaded in.
@@ -95,13 +93,12 @@ vertices around each shape.
 )
 ```
 
-The file loaded in EPSG:4326, plain longitude and latitude, which you can see
-in the `_crs` column from question 1. The outline is recognizably Italy, but
-the axis numbers are degrees, and with `coord_fixed()` locking one degree of
-longitude to the same length as one degree of latitude, the boot comes out a
-little wider and flatter than it should be — at 42°N a degree of longitude
-covers noticeably less ground than a degree of latitude, and this plot
-pretends they are equal.
+The file loaded in EPSG:4326, plain longitude and latitude, as the `_crs`
+column from question 1 shows. The outline is recognizably Italy, with axes in
+degrees. `coord_fixed()` draws one degree of longitude the same length as one
+degree of latitude, but at 42°N a degree of longitude covers noticeably less
+ground. The boot therefore comes out a little wider and flatter than it
+should.
 
 3. Before projecting, try to compute each province's area with `prov.geo.area`
 while it is still in EPSG:4326. Sort by the new `area` column, smallest first,
@@ -118,12 +115,11 @@ and print `province` and `area`. Do the numbers make sense as areas?
 ```
 
 **Answer**: No. The smallest "area" comes out around 0.02, and the largest is
-only a few units. These are squared *degrees* of longitude and latitude, not a
-real surface area, and a degree is not even a fixed distance — it shrinks as
-you move north. Computed this way the numbers are meaningless for comparing
-provinces, exactly the trap the chapter warns about: area and distance only
-make sense in a projected CRS. Nothing raised an error, though; `geo.area`
-happily returned nonsense, which is why the next step projects first.
+only a few units. These are squared *degrees*, and a degree of longitude is not
+even a fixed distance; it shrinks as you move north. The numbers are
+meaningless for comparing provinces. As the chapter warns, area and distance
+only make sense in a projected CRS. `geo.area` returned these numbers without
+raising an error, so the next step projects first.
 
 4. In the first block, project `prov` into EPSG:7791, Italy's national reference
 system, and save the result back into `prov`. In the second block, draw it again
@@ -146,12 +142,12 @@ prov = (
 )
 ```
 
-**Answer**: The peninsula now stands more upright and slightly narrower; the
-flattening from question 2 is gone. The axis numbers are meters instead of
+**Answer**: The peninsula now stands more upright and slightly narrower, and
+the flattening from question 2 is gone. The axes are in meters instead of
 degrees. Projection reshapes polygons more visibly than it moved the city
-points in the last notebook, because a polygon's whole outline gets bent, not
-just a scatter of dots — the change is most noticeable across the wide
-northern provinces, where lines of longitude are converging fastest.
+points in the last notebook because the whole outline of each polygon bends.
+The change is most noticeable across the wide northern provinces, where lines
+of longitude converge fastest.
 
 5. Make an interactive map of the provinces with `.geo.explore(tooltip=
 ["province"])`. Zoom in on a province you can place from memory and check that
@@ -186,11 +182,11 @@ prov = (
 ```
 
 **Answer**: The numbers are now in square meters, the default for a projected
-CRS; dividing by 1,000,000 gives square kilometers, so Sassari's roughly
+CRS. Dividing by 1,000,000 gives square kilometers, so Sassari's roughly
 7.7 billion m² is about 7,700 km². The largest provinces are Sassari (northern
-Sardinia), Bolzano/Bozen (the Alpine north), and Foggia (in Puglia) — all
-sparsely settled and rural. The biggest province is not a big city; that turns
-out to matter in the choropleth section below.
+Sardinia), Bolzano/Bozen (the Alpine north), and Foggia (in Puglia), all
+sparsely settled and rural. The biggest province is not a big city, which
+matters for the choropleths below.
 
 7. Print the five *smallest* provinces by area the same way. These are the
 ones a national map will barely show.
@@ -206,12 +202,12 @@ ones a national map will barely show.
 
 **Answer**: Trieste, at about 212 km², is the smallest, followed by Prato and
 Monza e della Brianza. These are dense urban provinces carved out around a
-single city, physically tiny but heavily populated — the mirror image of
-Sassari. On a map of the whole country they shrink to a speck, which is the
-first hint that visual area and importance can pull in opposite directions.
+single city, physically tiny but heavily populated, the mirror image of
+Sassari. On a map of the whole country they shrink to a speck, a first hint
+that visual area and importance can pull in opposite directions.
 
 8. Replace each province's polygon with its centroid using the `centroid`
-property (`prov.geo.centroid` — a property, so no parentheses), and print
+property (`prov.geo.centroid`, a property, so no parentheses), and print
 `province` and the first 12 characters of the new `geometry`. What kind of
 geometry is the result now?
 
@@ -224,16 +220,16 @@ geometry is the result now?
 )
 ```
 
-**Answer**: The `geometry` strings now start with `POINT`: each polygon has
+**Answer**: The `geometry` strings now start with `POINT`; each polygon has
 been collapsed to a single point at its geometric center. We did not assign
 this back, so `prov` still holds the full polygons. For a compact, roughly
-convex province the centroid lands near the middle; for a province shaped like
-a crescent or split across islands it can fall outside the province entirely,
-which is worth remembering before using a centroid to stand in for a region.
+convex province the centroid lands near the middle. For a province shaped like
+a crescent or split across islands, it can fall outside the province entirely,
+so keep the shape in mind before using a centroid to stand in for a region.
 
 9. In the first block, confirm `province` is a clean key in the polygon table
 with `.select(c.province.n_unique(), pl.len())`. In the second block, build a
-`total` column — the sum of `cases` per province over the whole period — and
+`total` column (the sum of `cases` per province over the whole period) and
 join it onto `prov`. In the third block, make a choropleth with
 `geom_map(color="white")`, `coord_fixed()`, and `fill=c.total`.
 
@@ -266,8 +262,8 @@ prov = (
 
 **Answer**: The key check returns 107 and 107, so every province name is
 unique and the left join can match at most one total to each polygon. The map
-lights up over Rome, Milan, Turin, and Naples: the totals are dominated by a
-handful of big-city provinces, as `total`'s own top rows confirm (Roma
+is brightest over Rome, Milan, Turin, and Naples. A handful of big-city
+provinces dominate the totals, as the top rows of `total` confirm (Roma
 ≈305,000, Milano ≈299,000, Napoli ≈288,000).
 
 10. Total cases is an absolute count, and the chapter warns that choropleths of
@@ -293,16 +289,16 @@ prov = (
 ```
 
 **Answer**: The two maps tell different stories. A choropleth fills each
-province with a flat color, so a physically large province like Sassari
-occupies a lot of the reader's eye no matter how few cases it had, while tiny
-Trieste is almost invisible even if it was hit hard. Dividing by area removes
-that bias: the density map collapses the big rural south into near-darkness and
-makes Naples — small and dense — the brightest region, with the compact
-northern provinces around Milan and Monza close behind. The density map is the
-more honest one for reading intensity off the page, which is the chapter's rule
-of thumb: colors should encode an area-based rate, not a raw total. (The truly
-correct normalization for disease would be cases *per person*, but these tables
-carry no province population, so per-area is as far as we can honestly go here.)
+province with a flat color, so a physically large province like Sassari takes
+up much of the reader's eye however few cases it had, while tiny Trieste is
+almost invisible even if it was hit hard. Dividing by area removes that bias.
+The density map turns the big rural south nearly dark and makes Naples, small
+and dense, the brightest region, with the compact northern provinces around
+Milan and Monza close behind. The density map is the more honest one for
+reading intensity off the page, following the chapter's rule of thumb that
+colors should encode an area-based rate, not a raw total. (The correct
+normalization for disease would be cases *per person*, but these tables carry
+no province population, so per-area is the best we can do here.)
 
 11. Confirm the density story numerically: sort `prov` by `dens`, descending,
 and print the five densest provinces (`province` and `dens`). Does the top of
@@ -317,10 +313,9 @@ this list match the bright spots on the map from question 10?
 )
 ```
 
-**Answer**: Naples leads at about 245 cases per km², then Monza e della
-Brianza, Milano, Trieste, and Varese — every one of them a small, dense,
-urban province, and every one a bright cell on the density map. Naples was only
-third by raw total but jumps to first once area is taken out, and Sassari, the
-single largest province by area, appears nowhere near the top. That gap between
-the two rankings is the whole lesson of the section: on a choropleth, *what you
+**Answer**: Naples leads at about 245 cases per km², followed by Monza e della
+Brianza, Milano, Trieste, and Varese. All five are small, dense, urban
+provinces, and each is a bright cell on the density map. Naples was only third
+by raw total but moves to first once area is taken out, while Sassari, the
+largest province by area, is nowhere near the top. On a choropleth, *what you
 divide by* decides what the reader sees.

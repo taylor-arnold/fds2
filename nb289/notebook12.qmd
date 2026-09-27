@@ -113,8 +113,8 @@ readable.
 ```
 
 The sort is on a number that does not exist in the table: `pl.len().over(c.meal_name)`
-writes each category's size onto every row of that category, which is last chapter's
-window function earning its keep in a bar chart. You could also have counted the rows
+writes each category's size onto every row of that category, using the window function
+from last chapter. You could also have counted the rows
 yourself with `group_by`, sorted the 20-row result, and drawn it with `geom_col`; the
 picture is the same. The long tail of small categories is easier to see here than in the
 table: `Dinner`, `Lunch`, `Breakfast`, and `Snack` dwarf everything else.
@@ -124,6 +124,7 @@ drawing is not always a count. Draw the average calories per item by `food_sourc
 `geom_col`. Drop the rows where the source was not recorded, and keep only sources with
 at least 500 items, since a mean over a handful of rows is not a number anyone should
 plot.
+
 ```{python}
 (
     food
@@ -140,11 +141,10 @@ plot.
 
 Thirteen sources survive the filter. A fast food or pizza item averages 210 calories, a
 convenience store item 182, and a supermarket item 133. The lightest sources are mail
-order, at 76, and a child or adult care center, at 104. `geom_bar` cannot draw this plot
-at all: it has one trick, and that trick is counting rows. A mean has to be computed
-before it can be drawn.
+order, at 76, and a child or adult care center, at 104. `geom_bar` cannot draw this plot,
+because all it does is count rows; a mean has to be computed before it can be drawn.
 
-Note also what the bars are not saying. The mean is per *item*, not per meal or per day,
+The mean is per *item*, not per meal or per day,
 so this is a statement about how calorically dense a single recorded item tends to be.
 Fast food arrives in bigger units, and one of the reasons the supermarket bar is low is
 that a glass of water from your own kitchen is an item too.
@@ -179,12 +179,11 @@ water: 11,069 bottled and 10,111 from the tap. Nearly half of everything filed u
 food, and while they are in the frame they set the y-axis and flatten everything else.
 
 In the second plot the shape is visible: a peak in the smallest bin and a long, steady
-decline. The median item in the whole table is 79 calories. Be honest with yourself about what those two
-filters did, though. They did not fix the plot; they chose a subset of the data and
-plotted that. The 23,132 zeros and the 4,862 calorie item are still out there, and a
+decline. The median item in the whole table is 79 calories. The two filters did not fix
+the plot, though; they chose a subset of the data and plotted that. The 23,132 zeros and the 4,862 calorie item are still out there, and a
 reader looking at the second histogram cannot see either one.
 
-6. Items are not the unit anyone actually cares about. Add up each person's day and look
+6. Items are rarely the unit you care about. Add up each person's day and look
 at the distribution of daily totals instead. Save this one as `person`, since we use it
 again below.
 
@@ -262,8 +261,7 @@ cast it to a string before plotting.
 3, 4, 5, 6, 7 by luck here, but 1, 10, 11, 2 the moment there are more than nine
 categories. The medians barely move, from 1,744 on day 1 to 1,898 on day 6.
 
-The boxes are also not what they look like. They appear to be seven comparable groups,
-and they are not: day 1 holds 942 people, while days 5, 6, and 7 hold 3,149, 2,797, and
+The seven boxes are not comparable groups: day 1 holds 942 people, while days 5, 6, and 7 hold 3,149, 2,797, and
 2,005. That imbalance is a fact about when the survey scheduled its interviews, not about
 when America eats, and no plot of this column will tell you which day is which.
 
@@ -288,8 +286,7 @@ relationship this obvious is remarkably weak. Mass is not energy. The 39 people 
 reported came from items with zero calories, and most of it is logged under
 `Extended consumption`, which is the survey's word for sipping something all day.
 
-Two things to take from the picture. The `alpha=0.05` is doing real work; at full opacity
-the 11,925 points are a black wall and you cannot see where the bulk of people actually
-sit. And the left end of that line, sitting at roughly 1,000 calories, describes a person
-who ate no food at all. The lightest day in the data is 55 grams. A fitted line will
-extend itself anywhere you let it, and it has no idea when it has left the data behind.
+The `alpha=0.05` is doing real work; at full opacity the 11,925 points are a black wall
+and you cannot see where most people sit. The left end of the line, at roughly 1,000
+calories, describes a person who ate no food at all, yet the lightest day in the data is
+55 grams. A fitted line extends past the edge of the data without any warning.
