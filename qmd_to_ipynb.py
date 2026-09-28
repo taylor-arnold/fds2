@@ -16,6 +16,8 @@ Behavior:
 - In kept code cells, ALL lines starting with '#|' are removed
 - Markdown text is preserved as markdown cells, with each paragraph
   (text separated by blank lines) becoming a separate cell
+- Dollar signs in markdown prose are escaped as '\\$' so Colab does not
+  treat them as LaTeX math (inline code and fenced blocks are left alone)
 - Lines starting with '**Answer**:' have everything after '**Answer**:' removed,
   including any continuation lines of a multi-line answer
 - Parses Quarto YAML headers, transforming the `title` into a markdown cell
@@ -112,6 +114,22 @@ def _strip_answer_content(lines):
             result.append(ln)
     return result
 
+_CODE_SPAN_RE = re.compile(r"(`+).*?\1", re.DOTALL)
+_BARE_DOLLAR_RE = re.compile(r"(?<!\\)\$")
+
+def _escape_dollars(lines):
+    """Escape '$' as '\\$' in markdown prose so Colab does not read it as the
+    start of LaTeX math. Dollars inside inline code spans, and ones that are
+    already escaped, are left alone."""
+    text = "".join(lines)
+    out, pos = [], 0
+    for m in _CODE_SPAN_RE.finditer(text):
+        out.append(_BARE_DOLLAR_RE.sub(r"\\$", text[pos:m.start()]))
+        out.append(m.group(0))
+        pos = m.end()
+    out.append(_BARE_DOLLAR_RE.sub(r"\\$", text[pos:]))
+    return "".join(out).splitlines(keepends=True)
+
 def _split_into_paragraphs(text: str) -> list:
     """Split text into paragraphs (separated by one or more blank lines)."""
     paragraphs = re.split(r'\n\s*\n', text)
@@ -167,7 +185,7 @@ def _build_cells(content: str, noclear_all: bool = False) -> list:
                 cells.append({
                     "cell_type": "markdown",
                     "metadata": {},
-                    "source": _strip_answer_content(para.splitlines(keepends=True))
+                    "source": _escape_dollars(_strip_answer_content(para.splitlines(keepends=True)))
                 })
 
         if _is_executable_chunk(langspec):
@@ -212,7 +230,7 @@ def _build_cells(content: str, noclear_all: bool = False) -> list:
             cells.append({
                 "cell_type": "markdown",
                 "metadata": {},
-                "source": _strip_answer_content(para.splitlines(keepends=True))
+                "source": _escape_dollars(_strip_answer_content(para.splitlines(keepends=True)))
             })
 
     return cells
