@@ -49,107 +49,140 @@ strongest). `t0` and `t1` are milliseconds elapsed since each person's
 recording started, not wall-clock times, so they contain no year, month, or
 day. Print results unless a question says otherwise.
 
-1. `t0` and `t1` cannot become real dates, since no calendar sits behind
-them, but they can still become `Datetime` values. Casting the elapsed
-milliseconds to an integer and then to `pl.Datetime("ms")` reads them as a
-Unix timestamp, so the clock is anchored at 1970-01-01 instead of at the
-moment recording began. Add `press` and `release` columns to `klog` this way,
-from `t0` and `t1`, and overwrite `klog` with the result. Then filter to the
-one session stored in `klog["id"][0]`, truncate `press` to 10-second bins
-with `.dt.truncate("10s")`, group by the bucket, count the keystrokes in each
-one, and sort by bucket.
+1. Using `meta`, draw a bar plot with `.geom_bar()` showing how many people
+fall in each `cefr` band.
 
 ```{python}
+(
+    meta
+    .ggplot(aes(c.cefr))
+    .geom_bar()
+    .labs(title="Participants by CEFR Band", x="CEFR Band", y="Count")
+)
+```
+
+2. Using `meta`, draw a histogram of `age` with `.geom_histogram(bins=30)`.
+
+```{python}
+(
+    meta
+    .ggplot(aes(c.age))
+    .geom_histogram(bins=30)
+    .labs(title="Participant Age", x="Age (years)", y="Count")
+)
+```
+
+3. Using `klog`, filter to key presses with `dur` under 300 milliseconds and
+draw a histogram of `dur` with `.geom_histogram(bins=60)`.
+
+```{python}
+(
+    klog
+    .filter(c.dur < 300)
+    .ggplot(aes(c.dur))
+    .geom_histogram(bins=60)
+    .labs(title="Key Hold Time", x="Hold Time (ms)", y="Count")
+)
+```
+
+4. The block below is given. It sorts `klog` by person and press time, then
+adds three columns. `press` and `release` turn `t0` and `t1` into `Datetime`
+values by casting the milliseconds to an integer and then to
+`pl.Datetime("ms")`. That reads them as a Unix timestamp, so every session's
+clock starts at 1970-01-01 00:00:00 instead of a real date; only the clock
+time matters, and it means time elapsed since recording began. `gap` is a
+`Duration`: the time between the release of the previous key and the press
+of this one, computed within each person with `.over(c.id)`. The first key
+of each session has no previous key, so its `gap` is `null`. Run the block
+and look at the new columns.
+
+```{python}
+#| tags: [noclear]
 klog = (
     klog
+    .sort(c.id, c.t0)
     .with_columns(
         press = c.t0.cast(pl.Int64).cast(pl.Datetime("ms")),
         release = c.t1.cast(pl.Int64).cast(pl.Datetime("ms"))
     )
-)
-
-one_id = klog["id"][0]
-
-q1 = (
-    klog
-    .filter(c.id == one_id)
-    .with_columns(
-        bucket = c.press.dt.truncate("10s")
-    )
-    .group_by(c.bucket)
-    .agg(
-        n_keys = pl.len()
-    )
-    .sort(c.bucket)
-)
-q1
-```
-
-**Answer**: This session spans 57 ten-second bins. Counts range from 1 key in
-the quietest bin to 39 in the busiest, the session's second bin (`00:00:30`,
-roughly ten to twenty seconds after the first keystroke), an opening burst
-before the pace settles. The 1970 date on every bucket is the anchor, not a
-typo; the only part of `bucket` worth reading is the clock time, which here
-means time elapsed since recording began.
-
-2. The anchor in question 1 is arbitrary, but it is the *same* arbitrary
-moment for all 823 sessions, so a bucket built the same way pools everyone's
-first minute together, everyone's second minute together, and so on. Truncate
-the full `klog` (not just one session) to 1-minute bins, group by the
-bucket, and compute the number of distinct sessions still active and the
-average `dur` in each one. Sort by bucket and print the first 15 rows.
-
-```{python}
-q2 = (
-    klog
-    .with_columns(
-        bucket = c.press.dt.truncate("1m")
-    )
-    .group_by(c.bucket)
-    .agg(
-        n_sessions = c.id.n_unique(),
-        avg_dur = c.dur.mean().round(1)
-    )
-    .sort(c.bucket)
-)
-(
-    q2
-    .head(15)
-)
-```
-
-**Answer**: 595 sessions have keystrokes in minute 0, rising to a peak of 770
-in minute 3 as people who started typing later join in, then falling off as
-people finish. Average hold time climbs almost steadily across these 15
-minutes, from 73.7 to 81.7 milliseconds, a small slowdown as the session
-wears on. Past minute 20 the bucket holds fewer than 100 sessions, and by
-minute 40 only a handful, so a trend that far out reflects a few stragglers,
-not the whole corpus.
-
-3. Sort `klog` by `id` and `press`, then build a `gap` column: the time
-between when the previous key was released and this one was pressed,
-`c.press - c.release.shift(1).over(c.id)`. Overwrite `klog` with the result.
-Then filter `klog` to rows where `gap` exceeds 2 seconds, a real pause in
-typing rather than ordinary key-to-key rhythm, and save it as `pauses`. Group
-`pauses` by `id`, count the pauses per person, and print the 5 people with
-the most.
-
-```{python}
-klog = (
-    klog
-    .sort(c.id, c.press)
     .with_columns(
         gap = c.press - c.release.shift(1).over(c.id)
     )
 )
+klog
+```
 
-pauses = (
+5. Filter `klog` to the first person in the table (`c.id == klog["id"][0]`),
+add a `bucket` column that truncates `press` to 10-second bins with
+`.dt.truncate("10s")`, group by `bucket`, count the key presses in each bin
+as `n_keys`, and sort by `bucket`.
+
+```{python}
+(
+    klog
+    .filter(c.id == klog["id"][0])
+    .with_columns(bucket = c.press.dt.truncate("10s"))
+    .group_by(c.bucket)
+    .agg(n_keys = pl.len())
+    .sort(c.bucket)
+)
+```
+
+**Answer**: This session spans 57 ten-second bins. The busiest is the second
+bin (`00:00:30`) with 39 keys, and the quietest bins hold only 1 or 2.
+
+6. Repeat question 5 and plot the result as a line, with `bucket` on the
+x-axis and `n_keys` on the y-axis. Add
+`.scale_x_datetime(date_labels="%M:%S")` so the axis shows minutes and
+seconds instead of the 1970 date.
+
+```{python}
+(
+    klog
+    .filter(c.id == klog["id"][0])
+    .with_columns(bucket = c.press.dt.truncate("10s"))
+    .group_by(c.bucket)
+    .agg(n_keys = pl.len())
+    .sort(c.bucket)
+    .ggplot(aes(c.bucket, c.n_keys))
+    .geom_line()
+    .scale_x_datetime(date_labels="%M:%S")
+    .labs(title="Typing Pace of One Session", x="Time (mm:ss)", y="Keys per 10 Seconds")
+)
+```
+
+7. Every session starts at the same 1970 anchor, so a bin built from all of
+`klog` pools everyone's first minute together, everyone's second minute
+together, and so on. Truncate `press` to 1-minute bins with
+`.dt.truncate("1m")`, group by the bin, compute the number of distinct people
+(`c.id.n_unique()`) and the average `dur` in each one, sort by the bin, and
+print the first 15 rows.
+
+```{python}
+(
+    klog
+    .with_columns(bucket = c.press.dt.truncate("1m"))
+    .group_by(c.bucket)
+    .agg(n_people = c.id.n_unique(), avg_dur = c.dur.mean().round(1))
+    .sort(c.bucket)
+    .head(15)
+)
+```
+
+**Answer**: 595 people have key presses in minute 0, rising to 770 in minute
+3 as people who started typing later join in, then falling as people finish.
+Average hold time climbs steadily, from 73.7 to 81.7 milliseconds, so people
+hold keys a little longer as a session goes on.
+
+8. A `gap` longer than 2 seconds is a real pause in typing rather than
+ordinary key-to-key rhythm. Filter `klog` to rows where `gap` is greater than
+`pl.duration(seconds=2)`, group by `id`, count the pauses per person as
+`n_pauses`, and print the 5 people with the most.
+
+```{python}
+(
     klog
     .filter(c.gap > pl.duration(seconds=2))
-)
-
-(
-    pauses
     .group_by(c.id)
     .agg(n_pauses = pl.len())
     .sort(c.n_pauses, descending=True)
@@ -157,126 +190,82 @@ pauses = (
 )
 ```
 
-The corpus has 38,324 pauses, a median of 41 per person, so the busiest
-pauser above (176) is an outlier even among hesitant typists.
+**Answer**: The person with the most pauses has 176. Across everyone the
+median is 41 pauses per person, so the top five are well above typical.
 
-4. Compute each person's average `gap` in milliseconds
-(`.dt.total_milliseconds()`), join the result onto `meta`, group by `cefr`,
-and compute the number of participants and the average gap per group. Sort
-by average gap.
+9. Group `klog` by `id` and compute each person's average gap in
+milliseconds as `avg_gap_ms`, using `c.gap.dt.total_milliseconds().mean()`.
+Then join `meta` onto the result by `id`.
 
 ```{python}
-avg_gap = (
-    klog
-    .drop_nulls(c.gap)
-    .group_by(c.id)
-    .agg(
-        avg_gap_ms = c.gap.dt.total_milliseconds().mean()
-    )
-)
-
 (
-    avg_gap
+    klog
+    .group_by(c.id)
+    .agg(avg_gap_ms = c.gap.dt.total_milliseconds().mean())
+    .join(meta, on="id")
+)
+```
+
+10. Repeat question 9, then group by `cefr` and compute the number of people
+and the mean of `avg_gap_ms` in each band. Sort by the average gap.
+
+```{python}
+(
+    klog
+    .group_by(c.id)
+    .agg(avg_gap_ms = c.gap.dt.total_milliseconds().mean())
     .join(meta, on="id")
     .group_by(c.cefr)
-    .agg(
-        participants = pl.len(),
-        avg_gap_ms = c.avg_gap_ms.mean().round(1)
-    )
+    .agg(n_people = pl.len(), avg_gap_ms = c.avg_gap_ms.mean().round(1))
     .sort(c.avg_gap_ms)
 )
 ```
 
-**Answer**: The gap rises as CEFR level falls: 402.1 ms for the 550 people at
-`C1/C2`, 585.9 ms for the 260 at `B1/B2`, and 667.4 ms for the 13 at `A1/A2`.
-Milliseconds is the right unit because most gaps are well under a second.
-`.dt.total_seconds()` would floor almost every gap to 0 and erase the
-pattern, the same truncation trap the book raises for day-scale durations.
-Treat the `A1/A2` row with caution: 13 people is a thin group to average, and
-the weakest tier could look quite different with more participants.
+**Answer**: The gap rises as the CEFR band falls: 402.1 ms for the 550
+people at `C1/C2`, 585.9 ms for the 260 at `B1/B2`, and 667.4 ms for the 13
+at `A1/A2`. Only 13 people sit in `A1/A2`, so that average is less reliable
+than the other two.
 
-5. `.rolling_mean_by()` smooths a series over a span of time instead of a
-count of rows, which suits keystrokes because they are not evenly spaced.
-For the session from question 1, compute `gap` in milliseconds and a 15-second
-rolling mean of it with `by=c.press`. Plot the raw values in grey and the
-smoothed line in red against `press`.
+11. Repeat question 9 and draw a scatter plot with `age` on the x-axis,
+`avg_gap_ms` on the y-axis, and points colored by `cefr`.
 
 ```{python}
-one = (
-    klog
-    .filter(c.id == one_id)
-    .with_columns(
-        gap_ms = c.gap.dt.total_milliseconds()
-    )
-    .with_columns(
-        gap_smooth = c.gap_ms.rolling_mean_by(by=c.press, window_size="15s")
-    )
-)
-
 (
-    one
+    klog
+    .group_by(c.id)
+    .agg(avg_gap_ms = c.gap.dt.total_milliseconds().mean())
+    .join(meta, on="id")
+    .ggplot(aes(c.age, c.avg_gap_ms, color=c.cefr))
+    .geom_point()
+    .labs(title="Average Gap by Age", x="Age (years)", y="Average Gap (ms)", color="CEFR Band")
+)
+```
+
+**Answer**: Age shows no clear trend: most people are in their twenties and
+their average gaps spread from about 100 to 1,500 ms. The `C1/C2` points sit
+lower on the plot than the `B1/B2` points at every age.
+
+12. `.rolling_mean_by()` smooths a column over a span of time instead of a
+count of rows, which suits keystrokes because they are not evenly spaced.
+Filter `klog` to the same person as question 5, add `gap_ms` with
+`.dt.total_milliseconds()`, then add `gap_smooth`, a 15-second rolling mean of
+`gap_ms` with `by=c.press`. Plot `gap_ms` as a grey line and `gap_smooth` as
+a red line against `press`.
+
+```{python}
+(
+    klog
+    .filter(c.id == klog["id"][0])
+    .with_columns(gap_ms = c.gap.dt.total_milliseconds())
+    .with_columns(gap_smooth = c.gap_ms.rolling_mean_by(by=c.press, window_size="15s"))
     .ggplot(aes(c.press, c.gap_ms))
     .geom_line(color="grey")
     .geom_line(aes(y=c.gap_smooth), color="red")
     .scale_x_datetime(date_labels="%M:%S")
-    .labs(
-        title="Inter-Key Gap, Raw and 15-Second Rolling Mean",
-        x="Press Time (mm:ss)",
-        y="Gap (ms)"
-    )
+    .labs(title="Inter-Key Gap, Raw and 15-Second Rolling Mean", x="Press Time (mm:ss)", y="Gap (ms)")
 )
 ```
 
-The red line picks out the handful of real hesitations from the grey jitter,
-the way the book's rolling mean pulled Chaucer's trajectory out of a jagged
-edit history.
-
-6. `.join_asof()` matches each row to the nearest value in another table
-instead of an exact one. Build a table of "resume" moments: every row from
-question 3's pause filter, keeping only `id` and `press` (renamed
-`pause_press`). Asof-join all of `klog` to it, backward, matched by `id`,
-and compute `since_pause`, the milliseconds between each keystroke and the
-most recent pause that preceded it. Group by whether `since_pause` is under
-1000 (recently resumed) and compare the average `dur` and count in each
-group, including the group where no pause has happened yet.
-
-```{python}
-resumes = (
-    pauses
-    .select(c.id, pause_press = c.press)
-    .sort(c.id, c.pause_press)
-)
-
-with_resume = (
-    klog
-    .sort(c.id, c.press)
-    .join_asof(resumes, left_on="press", right_on="pause_press", by="id", strategy="backward")
-    .with_columns(
-        since_pause = (c.press - c.pause_press).dt.total_milliseconds()
-    )
-)
-
-(
-    with_resume
-    .with_columns(
-        just_resumed = c.since_pause < 1000
-    )
-    .group_by(c.just_resumed)
-    .agg(
-        n = pl.len(),
-        avg_dur = c.dur.mean().round(1)
-    )
-)
-```
-
-**Answer**: `just_resumed` has three groups, not two, because `since_pause`
-is `null` for the 42,678 keystrokes typed before each person's first pause.
-Those `null` rows have the shortest average hold, 74.2 ms. Keys typed within
-a second of resuming hold the longest, 80.8 ms, and keys typed a second or
-more after resuming sit in between at 76.9 ms. The ordering suggests a real
-restart cost, but read it cautiously. Question 2 showed hold times climbing
-as a session goes on, and the `null` rows all come from the opening stretch
-of each session, where holds are shortest. Part of the gap could be that
-slowdown again instead of a cost of resuming. Separating the two would
-require controlling for elapsed time directly, which is beyond this
-question.
+**Answer**: The grey line jumps up and down from key to key, while the red
+line stays low for most of the session and rises in a few places where the
+person paused for several seconds, such as around 6:30, 8:30, and 10:00.
