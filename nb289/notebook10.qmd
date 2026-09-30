@@ -34,7 +34,7 @@ ub = ""
 #| tags: [noclear]
 us_pop = (
     pl.read_csv(ub + "data/us_city_population.csv")
-    .select(c.city, c.state, c.year, c.population)
+    .select(c.city, c.state, c.year, c.population, c.lon, c.lat)
     .filter(c.population.null_count().over(c.city) <= 1)
 )
 ```
@@ -42,240 +42,296 @@ us_pop = (
 ### Questions
 
 This week's data is the population of 289 American cities at every census from
-1790 to 2010, which makes 6,647 rows. Each row is one city in one census year.
-The `population` column is in thousands, so New York City in 2010 is 8175.133 and
-not 8,175,133. A city that did not exist yet has a population of 0 rather than a
-missing value, which matters more than it sounds like it should.
-
-The cities are roughly the largest ones in the country today, traced backward
-through time. That means the table is not a sample of American cities and it is
-certainly not all of them: 46 states appear, some of them with a single city.
-Keep that in mind whenever you compute a total, because the total is over the
-cities that happen to be here.
+1790 to 2010. Each row is one city in one census year. The `population` column is
+in thousands, so New York City in 2010 is 8175.133 and not 8,175,133. A city that
+did not exist yet has a population of 0. The columns `lon` and `lat` give the
+location of each city.
 
 Unless a question says otherwise, just print the result of each block; do not save
 it to a variable.
 
-1. Start with the tools you already have. For the 2010 census only, compute each
-state's total city population and the number of cities it contributes, and sort
-the states from largest to smallest.
+1. Filter the data to keep only the rows from the 2010 census.
+
+```{python}
+(
+    us_pop
+    .filter(c.year == 2010)
+)
+```
+
+There are 289 rows, one for each city.
+
+2. Take the 2010 rows again and sort them by population, largest first.
+
+```{python}
+(
+    us_pop
+    .filter(c.year == 2010)
+    .sort(c.population, descending=True)
+)
+```
+
+3. Draw a map of the 2010 cities: a point geometry with longitude on the x-axis and
+latitude on the y-axis.
+
+```{python}
+(
+    us_pop
+    .filter(c.year == 2010)
+    .ggplot(aes(c.lon, c.lat))
+    .geom_point()
+)
+```
+
+The outline of the country appears from the cities alone. The points far to the
+left are Anchorage and Honolulu.
+
+4. Filter the data to New York City (the city is called `"New York City, NY"`) and
+draw a line plot of its population against the year.
+
+```{python}
+(
+    us_pop
+    .filter(c.city == "New York City, NY")
+    .ggplot(aes(c.year, c.population))
+    .geom_line()
+)
+```
+
+5. Group the data by year and compute the total population of all the cities in
+each census year. Sort the result by year.
+
+```{python}
+(
+    us_pop
+    .group_by(c.year)
+    .agg(pop_total = c.population.sum())
+    .sort(c.year)
+)
+```
+
+6. Take the code from the previous question and draw the total as a line plot
+against the year.
+
+```{python}
+(
+    us_pop
+    .group_by(c.year)
+    .agg(pop_total = c.population.sum())
+    .sort(c.year)
+    .ggplot(aes(c.year, c.pop_total))
+    .geom_line()
+)
+```
+
+7. For the 2010 census only, count the number of cities in each state with
+`pl.len()`. Sort the states from the most cities to the fewest.
 
 ```{python}
 (
     us_pop
     .filter(c.year == 2010)
     .group_by(c.state)
-    .agg(
-        pop_total = c.population.sum(),
-        n = pl.len()
-    )
-    .sort(c.pop_total, descending=True)
+    .agg(n = pl.len())
+    .sort(c.n, descending=True)
 )
 ```
 
-California leads with 71 cities and 18.2 million people in them. Now suppose you
-want each city's share of its own state's total. The share needs two numbers on
-the same row: the city's population, which you have, and the state total, which is
-sitting in a different table with one row per state. Aggregation put it there and
-aggregation cannot get it back.
+California has 71 cities in the table. Many states have only one.
 
-2. `.over()` can. Take the 2010 census, write each state's total onto every city in
-that state, and compute the share. Sort by share, largest first.
+8. Aggregation gives one row per state. A window function computes the same
+number but writes it onto every row of the group instead. For the 2010 census, add
+a column `state_total` equal to `c.population.sum().over(c.state)`.
+
+```{python}
+(
+    us_pop
+    .filter(c.year == 2010)
+    .with_columns(state_total = c.population.sum().over(c.state))
+)
+```
+
+The result still has all 289 cities. Every city in the same state has the same
+value of `state_total`.
+
+9. Now compute each 2010 city's share of its state's total, as a percentage, and
+sort by the share, largest first. Why do so many cities have a share of exactly
+100?
 
 ```{python}
 (
     us_pop
     .filter(c.year == 2010)
     .with_columns(
-        state_total = c.population.sum().over(c.state),
         share = c.population / c.population.sum().over(c.state) * 100
     )
     .sort(c.share, descending=True)
 )
 ```
 
-The top of the result is a column of 100.0. Anchorage is 100 percent of Alaska,
-Little Rock is 100 percent of Arkansas, and so on down a list of states that
-contribute exactly one city to the table. The share is a share of the cities in
-*this table*, and question 1's `n` column showed that for those states the table
-holds one city.
+**Answer**: These are cities in states that have only one city in the table
+(question 7). A city is always 100 percent of a total that includes nothing but
+itself.
 
-3. So look at the states that have enough cities for the share to mean anything.
-Keep only the states with at least five cities in the table, then compute the same
-share. The count is itself a window: `pl.len().over(c.state)` gives every row the
-number of rows in its state, and a window expression can go straight inside a
-`.filter()`.
+10. A window expression can also go inside `.filter()`. For the 2010 census, keep
+only the cities in states that have at least five cities in the table. Use
+`pl.len().over(c.state)` to count the cities in each state.
 
 ```{python}
 (
     us_pop
     .filter(c.year == 2010)
     .filter(pl.len().over(c.state) >= 5)
-    .with_columns(
-        share = c.population / c.population.sum().over(c.state) * 100
-    )
-    .sort(c.share, descending=True)
 )
 ```
 
-New York City is 90 percent of New York's urban population and Chicago is 72
-percent of Illinois's. Nothing is added to the table in the filter and nothing is
-removed from it in the `with_columns`. The same expression does different work
-depending on which context you drop it into.
-
-4. Here is a comparison that needs the rows preserved. Keep the 2010 cities whose
-population is above the mean city population of their own state.
+11. For the 2010 census, keep only the cities whose population is larger than the
+mean population of the cities in their own state.
 
 ```{python}
 (
     us_pop
     .filter(c.year == 2010)
     .filter(c.population > c.population.mean().over(c.state))
-    .sort(c.state)
 )
 ```
 
-Seventy-six cities of 289, which is barely a quarter of them. That is what a mean
-does when one city in the state is enormous: Los Angeles drags California's average
-up past most of the state, and the average stops describing a typical city. Swap
-`.mean()` for `.median()` and 132 cities come back instead, much nearer to half, as
-you would expect from a median.
+Only 76 of the 289 cities are above their state's mean. One very large city, such
+as Los Angeles in California, pulls the mean above most of the other cities.
 
-5. Every window so far has grouped by state and stayed inside one year. Turn it
-around: group by *year* and look across the states. Give each city its share of all
-289 cities' population in its census year, then follow New York City down the
-column.
+12. For the 2010 census, keep only the largest city in each state. Use
+`c.population.rank(descending=True).over(c.state)` inside the filter, and sort the
+result by population.
+
+```{python}
+(
+    us_pop
+    .filter(c.year == 2010)
+    .filter(c.population.rank(descending=True).over(c.state) == 1)
+    .sort(c.population)
+)
+```
+
+There is one row for each of the 46 states. The smallest is Billings, the largest
+city in Montana, with about 104,000 people.
+
+13. A window does not have to be over states. Add a column `share` giving each
+city's share of the total population of all the cities in the same census year.
+Then filter to New York City.
 
 ```{python}
 (
     us_pop
     .with_columns(share = c.population / c.population.sum().over(c.year) * 100)
     .filter(c.city == "New York City, NY")
-    .sort(c.year)
-    .select(c.year, c.population, c.share)
 )
 ```
 
-New York in 2010 is nearly twice the size it was in 1910, yet its share peaked at
-19.2 percent of these cities in 1910 and has fallen to 9.6 percent since. Both
-statements come from the same two columns. The city got bigger; the country's other
-cities got bigger faster.
-
-6. Now for the ordered windows. Sort the table by city and year and compute how
-much each city gained since the previous census by subtracting the shifted column,
-with `.over(c.city)` so that the shift restarts at each city. Then drop the nulls,
-sort by the change, and see which decade of which city added the most people.
+14. Take the code from the previous question and draw New York City's share as a
+line plot against the year.
 
 ```{python}
 (
     us_pop
-    .sort(c.city, c.year)
-    .with_columns(change = c.population - c.population.shift(1).over(c.city))
-    .drop_nulls(c.change)
-    .sort(c.change, descending=True)
+    .with_columns(share = c.population / c.population.sum().over(c.year) * 100)
+    .filter(c.city == "New York City, NY")
+    .ggplot(aes(c.year, c.share))
+    .geom_line()
 )
 ```
 
-The first census of every city now has a `null` change, because there is no row
-above it to subtract. That is why the `.drop_nulls()` is there: without it Polars
-sorts those nulls to the top of a descending sort and you read a screen of blanks.
-What is left is New York City adding 1.9 million people
-between 1890 and 1900, then 1.3 million more in the next ten years, with Chicago,
-Los Angeles, and Detroit arriving in the 1920s. Nine of the ten largest gains happen
-between 1880 and 1930, when the industrial cities were growing. The tenth is New
-York again, in the 1990s.
+Compare this with the plot in question 4. New York's population has kept growing,
+but its share of the total has mostly fallen since the early 1800s, because the
+other cities have grown faster. The jump in 1900 comes from Brooklyn becoming part
+of New York City in 1898.
 
-7. Sort the other way and you get the second half of that story. Keep only the 2010
-rows with a negative change, so the question becomes: which cities lost people
-between 2000 and 2010?
-
-```{python}
-(
-    us_pop
-    .sort(c.city, c.year)
-    .with_columns(change = c.population - c.population.shift(1).over(c.city))
-    .filter(c.year == 2010, c.change < 0)
-    .sort(c.change)
-)
-```
-
-Sixty-one cities shrank in that decade. Detroit lost 237,000 people and Chicago
-200,000, part of a long decline. New Orleans lost 141,000 to a single hurricane in
-August 2005, which falls between two census counts taken five years on either side
-of it. A decade is a coarse instrument, and the column does not tell you which of
-these two kinds of loss you are looking at.
-
-8. Absolute change favors big cities, so try growth as a percentage instead. In
-the first block, use the same shifted column as a denominator, drop the nulls, and
-sort with the fastest growth first. Look at what comes back. In the second block,
-save the shifted column as `prev` first, keep only the rows where `prev > 0`, and
-then compute the growth and sort again.
-
-```{python}
-(
-    us_pop
-    .sort(c.city, c.year)
-    .with_columns(
-        growth = (c.population / c.population.shift(1).over(c.city) - 1) * 100
-    )
-    .drop_nulls(c.growth)
-    .sort(c.growth, descending=True)
-)
-```
+15. Now for the shift. Sort the data by city and year, then add a column `prev`
+equal to `c.population.shift(1).over(c.city)`. Filter to Detroit (`"Detroit, MI"`)
+to look at the result.
 
 ```{python}
 (
     us_pop
     .sort(c.city, c.year)
     .with_columns(prev = c.population.shift(1).over(c.city))
-    .filter(c.prev > 0)
-    .with_columns(growth = (c.population / c.prev - 1) * 100)
-    .sort(c.growth, descending=True)
+    .filter(c.city == "Detroit, MI")
 )
 ```
 
-**Answer**: In the first block the fastest growing city in America is `NaN`. A city
-that did not exist yet has a population of 0, and the growth divides by it: 0
-divided by 0 is `NaN`, and any real population divided by 0 is `inf`. Both are
-floats, not `null`, so `.drop_nulls()` did not touch them. Polars sorts `NaN` above
-every real number in a descending sort. There are 2,296 `NaN`
-values, one for every pair of consecutive censuses that both recorded a zero, and
-316 `inf` values, one for every time a city goes from a zero count to a real one.
-This is the distinction from Chapter 3: missing and not-a-number are different
-things, and only one of them is a `null`.
+Each row of `prev` holds the population from the census before. The first row is
+`null` because there is no census before 1790.
 
-The second block drops only the rows with a zero denominator, and every remaining
-row still compares itself to the census immediately before it. At the top is Warren,
-Michigan: 700 people in 1950, 89,246 in 1960, a 12,649 percent decade. That one is
-real, and it is what a Detroit suburb looked like when Detroit was still growing.
-Percent growth rewards a small denominator, so it hands you villages that became
-suburbs and it will never once mention New York, while question 6 hands you nothing
-but New York. Both are correct. Choose the one that matches the question you were
-asked. Notice too that the filter comes after the window: filtering out the zeros
-first would change what "the row above" means, and the shift would silently compare
-censuses decades apart.
-
-9. One city in this table has an actual hole in it. Portland, Oregon has no
-population recorded for 1850. Sort by city and year, then use `.forward_fill()` and
-`.backward_fill()`, both scoped with `.over(c.city)`, to fill the gap from above and
-from below, and look at Portland from 1830 to 1870.
+16. Add a second column `change` equal to `c.population - c.prev`. Then keep only
+the 2010 rows and sort by `change`, smallest first, to find the cities that lost
+the most people between 2000 and 2010.
 
 ```{python}
 (
     us_pop
     .sort(c.city, c.year)
-    .with_columns(
-        fill_fwd = c.population.forward_fill().over(c.city),
-        fill_bwd = c.population.backward_fill().over(c.city)
-    )
-    .filter(c.city == "Portland, OR", c.year.is_between(1830, 1870))
+    .with_columns(prev = c.population.shift(1).over(c.city))
+    .with_columns(change = c.population - c.prev)
+    .filter(c.year == 2010)
+    .sort(c.change)
 )
 ```
 
-Forward fill copies 1840 down and says Portland had nobody in it. Backward fill
-copies 1860 up and says it had 2,874 people. The census counted 821. Both fills are
-guesses, wrong in opposite directions, with the true value between them. That is
-generally the most you can expect from a fill. Note also that the `.over()`
-changed nothing here, since the row above Portland's gap happens to be Portland. It
-would have changed everything if the gap had landed on a city's first row, and you do
-not get to know that in advance.
+Detroit lost 237,000 people and Chicago 200,000. New Orleans lost 141,000, mostly
+after Hurricane Katrina in 2005.
+
+17. Compute the same `change` column, filter to Detroit, and draw a bar plot with
+`geom_col`, with the year on the x-axis and the change on the y-axis.
+
+```{python}
+(
+    us_pop
+    .sort(c.city, c.year)
+    .with_columns(prev = c.population.shift(1).over(c.city))
+    .with_columns(change = c.population - c.prev)
+    .filter(c.city == "Detroit, MI")
+    .ggplot(aes(c.year, c.change))
+    .geom_col()
+)
+```
+
+Detroit grew in every decade up to 1950 and has lost people in every decade
+since.
+
+18. One value in the table is missing. Filter the data to the rows where
+`population` is null.
+
+```{python}
+(
+    us_pop
+    .filter(c.population.is_null())
+)
+```
+
+It is Portland, Oregon, in 1850.
+
+19. Sort by city and year, then replace the missing value with the one above it
+using `c.population.forward_fill().over(c.city)`. Then filter to Portland
+(`"Portland, OR"`) in 1850.
+
+```{python}
+(
+    us_pop
+    .sort(c.city, c.year)
+    .with_columns(population = c.population.forward_fill().over(c.city))
+    .filter(c.city == "Portland, OR", c.year == 1850)
+)
+```
+
+20. Do the same with `.backward_fill()`, which uses the value below instead. What
+do the two fills say about Portland in 1850?
+
+```{python}
+(
+    us_pop
+    .sort(c.city, c.year)
+    .with_columns(population = c.population.backward_fill().over(c.city))
+    .filter(c.city == "Portland, OR", c.year == 1850)
+)
+```
+
+**Answer**: The forward fill copies the 1840 value and says Portland had nobody in it in 1850. The backward fill copies the 1860 value and says it had 2,874 people. The census actually counted 821. Both fills are guesses, and here they are wrong in opposite directions.
