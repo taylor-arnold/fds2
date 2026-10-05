@@ -145,25 +145,7 @@ cities in each state.
 )
 ```
 
-8. Take the code from the previous question and draw it as a bar plot with
-`geom_col`, with the state on the x-axis and the total on the y-axis. Add
-`coord_flip()` so the bars run horizontally.
-
-```{python}
-(
-    us_pop
-    .filter(c.year == 2010)
-    .group_by(c.state)
-    .agg(pop_total = c.population.sum())
-    .ggplot(aes(c.state, c.pop_total))
-    .geom_col()
-    .coord_flip()
-)
-```
-
-California, Texas, and New York have the longest bars.
-
-9. Group by year and count the number of cities with a population above zero in each
+8. Group by year and count the number of cities with a population above zero in each
 census. Use `(c.population > 0).sum()` inside of `.agg`. Sort by year.
 
 ```{python}
@@ -177,7 +159,7 @@ census. Use `(c.population > 0).sum()` inside of `.agg`. Sort by year.
 
 Only 16 of the cities had any population in 1790. By 1900 there were 216.
 
-10. Take the code from the previous question and draw it as a line plot against the
+9. Take the code from the previous question and draw it as a line plot against the
 year.
 
 ```{python}
@@ -191,7 +173,7 @@ year.
 )
 ```
 
-11. Filter to three states, California, Texas, and New York, using
+10. Filter to three states, California, Texas, and New York, using
 `c.state.is_in(["CA", "TX", "NY"])`. Then group by both state and year and compute
 the total population.
 
@@ -204,7 +186,7 @@ the total population.
 )
 ```
 
-12. Take the code from the previous question and draw a line plot of the total
+11. Take the code from the previous question and draw a line plot of the total
 against the year, with one color for each state.
 
 ```{python}
@@ -218,7 +200,7 @@ against the year, with one color for each state.
 )
 ```
 
-13. For the 2010 census, sort by population from largest to smallest, and then use
+12. For the 2010 census, sort by population from largest to smallest, and then use
 `.group_by(c.state).head(n=1)` to keep the largest city in each state.
 
 ```{python}
@@ -231,7 +213,7 @@ against the year, with one color for each state.
 )
 ```
 
-14. For the 2010 census, add a column `state_mean` giving the mean population of the
+13. For the 2010 census, add a column `state_mean` giving the mean population of the
 cities in the same state. Use `.over(c.state)`.
 
 ```{python}
@@ -242,7 +224,7 @@ cities in the same state. Use `.over(c.state)`.
 )
 ```
 
-15. Now compute the same state means with `.group_by` and `.agg`. How is the result
+14. Now compute the same state means with `.group_by` and `.agg`. How is the result
 different from the previous question?
 
 ```{python}
@@ -257,7 +239,7 @@ different from the previous question?
 **Answer**: `.group_by` and `.agg` give one row per state, so there are 46 rows.
 `.over` keeps all 289 cities and writes the state's mean onto each of them.
 
-16. For the 2010 census, keep only the cities whose population is larger than the
+15. For the 2010 census, keep only the cities whose population is larger than the
 mean population of the cities in their own state.
 
 ```{python}
@@ -268,7 +250,7 @@ mean population of the cities in their own state.
 )
 ```
 
-17. For the 2010 census, add a column `rank` giving each city's rank within its state,
+16. For the 2010 census, add a column `rank` giving each city's rank within its state,
 with 1 for the largest. Use `c.population.rank(descending=True).over(c.state)`.
 
 ```{python}
@@ -279,7 +261,7 @@ with 1 for the largest. Use `c.population.rank(descending=True).over(c.state)`.
 )
 ```
 
-18. Sort by city and year, add a column `change` equal to
+17. Sort by city and year, add a column `change` equal to
 `c.population - c.population.shift(1).over(c.city)`, and filter to Richmond.
 
 ```{python}
@@ -293,23 +275,7 @@ with 1 for the largest. Use `c.population.rank(descending=True).over(c.state)`.
 
 The first row is `null` because there is no census before 1790 to subtract.
 
-19. Take the code from the previous question and draw a bar plot of `change` against
-the year with `geom_col`.
-
-```{python}
-(
-    us_pop
-    .sort(c.city, c.year)
-    .with_columns(change = c.population - c.population.shift(1).over(c.city))
-    .filter(c.city == "Richmond, VA")
-    .ggplot(aes(c.year, c.change))
-    .geom_col()
-)
-```
-
-Richmond grew in every decade until 1950 and has gone up and down since.
-
-20. For the 2010 census, sort the cities from largest to smallest and add a column
+18. For the 2010 census, sort the cities from largest to smallest and add a column
 `running` equal to `c.population.cum_sum()`.
 
 ```{python}
@@ -323,7 +289,7 @@ Richmond grew in every decade until 1950 and has gone up and down since.
 
 Each row adds its population to everything above it, so the sort matters.
 
-21. Sort by city and year and add a column `pop_smooth` equal to
+19. Sort by city and year and add a column `pop_smooth` equal to
 `c.population.rolling_mean(window_size=3).over(c.city)`. Filter to Detroit
 (`"Detroit, MI"`). Which rows are missing, and why?
 
@@ -340,7 +306,7 @@ Each row adds its population to everything above it, so the sort matters.
 censuses, that one and the two before it, and the first two censuses do not have two
 earlier rows to average with.
 
-22. Last one. Compute `change` as in question 18, and then, in a second
+20. Last one. Compute `change` as in question 17, and then, in a second
 `.with_columns`, add `change_smooth` equal to
 `c.change.rolling_mean(window_size=3).over(c.city)`. Filter to Detroit.
 
