@@ -34,157 +34,315 @@ ub = ""
 #| tags: [noclear]
 us_pop = (
     pl.read_csv(ub + "data/us_city_population.csv")
-    .select(c.city, c.state, c.year, c.population)
+    .select(c.city, c.state, c.year, c.population, c.lon, c.lat)
     .filter(c.population.null_count().over(c.city) <= 1)
 )
 ```
 
 ### Questions
 
-Same table as last time: 289 American cities, one row per city per census from 1790
-to 2010, population in thousands. A city that did not exist yet is recorded as `0`,
-and since the counts are rounded to one decimal in thousands, a village of forty
-people is also recorded as `0`. That is still true and it will still cost you
-something.
+This is the same table as last week: 289 American cities, one row per city per
+census from 1790 to 2010, with the population in thousands. A city that did not
+exist yet has a population of 0. The columns `lon` and `lat` give the location of
+each city.
 
-Last week's windows were built from `.sum()` and `.mean()`, which do not care how
-the rows are arranged, and from `.shift()`, which cares about nothing else. This
-week's tools are all in the second family. Keep an eye on the sort.
+Today is a review for the exam on Wednesday. The questions go back over plots,
+grouping, and window functions from the last few weeks, one step at a time.
 
 Unless a question says otherwise, just print the result of each block; do not save
 it to a variable.
 
-1. `.rank()` gives each value its position within the column, and `.over()` scopes
-that position to a group. By default it counts from the smallest value, so rank 1
-would be the smallest city; pass `descending=True` to make rank 1 the largest. Rank
-the 2010 cities within their own state, then keep only the rank 1 rows to get the
-largest city in each of the 46 states, sorted by population.
+1. Filter the data to the 2010 census and draw a scatterplot with longitude on the
+x-axis and latitude on the y-axis.
+
+```{python}
+(
+    us_pop
+    .filter(c.year == 2010)
+    .ggplot(aes(c.lon, c.lat))
+    .geom_point()
+)
+```
+
+2. Draw the same plot, but make all of the points red.
+
+```{python}
+(
+    us_pop
+    .filter(c.year == 2010)
+    .ggplot(aes(c.lon, c.lat))
+    .geom_point(color="red")
+)
+```
+
+The color is fixed, so it goes inside `geom_point` but outside of `aes`.
+
+3. Draw the same plot again, but now make the size of each point show the city's
+population.
+
+```{python}
+(
+    us_pop
+    .filter(c.year == 2010)
+    .ggplot(aes(c.lon, c.lat))
+    .geom_point(aes(size=c.population))
+)
+```
+
+The size now comes from a column, so it goes inside `aes`.
+
+4. Filter to the 2010 cities in Virginia (`"VA"`) and draw a text plot with longitude
+on the x-axis, latitude on the y-axis, and the city name as the label.
+
+```{python}
+(
+    us_pop
+    .filter(c.year == 2010, c.state == "VA")
+    .ggplot(aes(c.lon, c.lat))
+    .geom_text(aes(label=c.city))
+)
+```
+
+5. Filter to Richmond (`"Richmond, VA"`) and draw a line plot of its population
+against the year.
+
+```{python}
+(
+    us_pop
+    .filter(c.city == "Richmond, VA")
+    .ggplot(aes(c.year, c.population))
+    .geom_line()
+)
+```
+
+6. Summarize the whole dataset in a single row. Give the number of rows with
+`pl.len()`, the number of different cities with `c.city.n_unique()`, and the number
+of different states with `c.state.n_unique()`.
+
+```{python}
+(
+    us_pop
+    .select(
+        n = pl.len(),
+        n_city = c.city.n_unique(),
+        n_state = c.state.n_unique()
+    )
+)
+```
+
+There are 6,647 rows but only 289 cities, because each city appears once for every
+census. We use `.select` here because `.agg` only works after a `.group_by`.
+
+7. For the 2010 census, group by state and compute the total population of the
+cities in each state.
+
+```{python}
+(
+    us_pop
+    .filter(c.year == 2010)
+    .group_by(c.state)
+    .agg(pop_total = c.population.sum())
+)
+```
+
+8. Take the code from the previous question and draw it as a bar plot with
+`geom_col`, with the state on the x-axis and the total on the y-axis. Add
+`coord_flip()` so the bars run horizontally.
+
+```{python}
+(
+    us_pop
+    .filter(c.year == 2010)
+    .group_by(c.state)
+    .agg(pop_total = c.population.sum())
+    .ggplot(aes(c.state, c.pop_total))
+    .geom_col()
+    .coord_flip()
+)
+```
+
+California, Texas, and New York have the longest bars.
+
+9. Group by year and count the number of cities with a population above zero in each
+census. Use `(c.population > 0).sum()` inside of `.agg`. Sort by year.
+
+```{python}
+(
+    us_pop
+    .group_by(c.year)
+    .agg(n_cities = (c.population > 0).sum())
+    .sort(c.year)
+)
+```
+
+Only 16 of the cities had any population in 1790. By 1900 there were 216.
+
+10. Take the code from the previous question and draw it as a line plot against the
+year.
+
+```{python}
+(
+    us_pop
+    .group_by(c.year)
+    .agg(n_cities = (c.population > 0).sum())
+    .sort(c.year)
+    .ggplot(aes(c.year, c.n_cities))
+    .geom_line()
+)
+```
+
+11. Filter to three states, California, Texas, and New York, using
+`c.state.is_in(["CA", "TX", "NY"])`. Then group by both state and year and compute
+the total population.
+
+```{python}
+(
+    us_pop
+    .filter(c.state.is_in(["CA", "TX", "NY"]))
+    .group_by(c.state, c.year)
+    .agg(pop_total = c.population.sum())
+)
+```
+
+12. Take the code from the previous question and draw a line plot of the total
+against the year, with one color for each state.
+
+```{python}
+(
+    us_pop
+    .filter(c.state.is_in(["CA", "TX", "NY"]))
+    .group_by(c.state, c.year)
+    .agg(pop_total = c.population.sum())
+    .ggplot(aes(c.year, c.pop_total))
+    .geom_line(aes(color=c.state))
+)
+```
+
+13. For the 2010 census, sort by population from largest to smallest, and then use
+`.group_by(c.state).head(n=1)` to keep the largest city in each state.
+
+```{python}
+(
+    us_pop
+    .filter(c.year == 2010)
+    .sort(c.population, descending=True)
+    .group_by(c.state)
+    .head(n=1)
+)
+```
+
+14. For the 2010 census, add a column `state_mean` giving the mean population of the
+cities in the same state. Use `.over(c.state)`.
+
+```{python}
+(
+    us_pop
+    .filter(c.year == 2010)
+    .with_columns(state_mean = c.population.mean().over(c.state))
+)
+```
+
+15. Now compute the same state means with `.group_by` and `.agg`. How is the result
+different from the previous question?
+
+```{python}
+(
+    us_pop
+    .filter(c.year == 2010)
+    .group_by(c.state)
+    .agg(state_mean = c.population.mean())
+)
+```
+
+**Answer**: `.group_by` and `.agg` give one row per state, so there are 46 rows.
+`.over` keeps all 289 cities and writes the state's mean onto each of them.
+
+16. For the 2010 census, keep only the cities whose population is larger than the
+mean population of the cities in their own state.
+
+```{python}
+(
+    us_pop
+    .filter(c.year == 2010)
+    .filter(c.population > c.population.mean().over(c.state))
+)
+```
+
+17. For the 2010 census, add a column `rank` giving each city's rank within its state,
+with 1 for the largest. Use `c.population.rank(descending=True).over(c.state)`.
 
 ```{python}
 (
     us_pop
     .filter(c.year == 2010)
     .with_columns(rank = c.population.rank(descending=True).over(c.state))
-    .filter(c.rank == 1)
-    .sort(c.population, descending=True)
 )
 ```
 
-Forty-six rows, from New York City at 8.2 million down to Billings, Montana at
-104,170. Note that `.rank()` never looked at the order of the rows: it read the values
-and worked out the positions itself. The `.sort()` at the end only decides what you
-look at first. This is the opposite of `.shift()`, which has no opinion about values
-and does nothing but count rows.
-
-2. Now rank on the other axis. Instead of ranking cities within a state, rank them
-within a census year, which gives every city its national position at every point in
-its history. Follow Detroit down the column.
+18. Sort by city and year, add a column `change` equal to
+`c.population - c.population.shift(1).over(c.city)`, and filter to Richmond.
 
 ```{python}
 (
     us_pop
-    .with_columns(rank = c.population.rank(descending=True).over(c.year))
+    .sort(c.city, c.year)
+    .with_columns(change = c.population - c.population.shift(1).over(c.city))
+    .filter(c.city == "Richmond, VA")
+)
+```
+
+The first row is `null` because there is no census before 1790 to subtract.
+
+19. Take the code from the previous question and draw a bar plot of `change` against
+the year with `geom_col`.
+
+```{python}
+(
+    us_pop
+    .sort(c.city, c.year)
+    .with_columns(change = c.population - c.population.shift(1).over(c.city))
+    .filter(c.city == "Richmond, VA")
+    .ggplot(aes(c.year, c.change))
+    .geom_col()
+)
+```
+
+Richmond grew in every decade until 1950 and has gone up and down since.
+
+20. For the 2010 census, sort the cities from largest to smallest and add a column
+`running` equal to `c.population.cum_sum()`.
+
+```{python}
+(
+    us_pop
+    .filter(c.year == 2010)
+    .sort(c.population, descending=True)
+    .with_columns(running = c.population.cum_sum())
+)
+```
+
+Each row adds its population to everything above it, so the sort matters.
+
+21. Sort by city and year and add a column `pop_smooth` equal to
+`c.population.rolling_mean(window_size=3).over(c.city)`. Filter to Detroit
+(`"Detroit, MI"`). Which rows are missing, and why?
+
+```{python}
+(
+    us_pop
+    .sort(c.city, c.year)
+    .with_columns(pop_smooth = c.population.rolling_mean(window_size=3).over(c.city))
     .filter(c.city == "Detroit, MI")
-    .sort(c.year)
-    .select(c.year, c.population, c.rank)
 )
 ```
 
-Detroit is the 13th largest city in the table in 1900, the 4th largest by 1920, and
-the 18th in 2010. The ranks come back as floats rather than integers, because tied
-values are given the average of the positions they span. The early ranks are
-enormous and slightly wrong for the same reason: 73 cities are recorded as `0` in
-1900, they tie with each other, and all 73 of them get rank 253.
-A rank computed over a column full of placeholder zeros ranks the placeholders too.
+**Answer**: The 1790 and 1800 rows are `null`. Each value is the average of three
+censuses, that one and the two before it, and the first two censuses do not have two
+earlier rows to average with.
 
-3. Ranks are more interesting as movement. Rank the cities within each year, keep
-just 1900 and 2010, and then use `.shift()` from last week to subtract one rank from
-the other. Sort so the biggest climbers come first.
-
-```{python}
-(
-    us_pop
-    .with_columns(rank = c.population.rank(descending=True).over(c.year))
-    .filter(c.year.is_in([1900, 2010]))
-    .sort(c.city, c.year)
-    .with_columns(move = c.rank.shift(1).over(c.city) - c.rank)
-    .filter(c.year == 2010)
-    .sort(c.move, descending=True)
-)
-```
-
-```{python}
-(
-    us_pop
-    .with_columns(rank = c.population.rank(descending=True).over(c.year))
-    .filter(c.year.is_in([1900, 2010]))
-    .sort(c.city, c.year)
-    .with_columns(move = c.rank.shift(1).over(c.city) - c.rank)
-    .filter(c.year == 2010)
-    .sort(c.move)
-)
-```
-
-Virginia Beach climbed 214 places, followed by Aurora, Anchorage, Henderson, and
-Mesa. The falls are just as orderly: Fall River, Lynn, and New Bedford are all
-Massachusetts mill towns, and Duluth, Albany, and Cambridge are in among them. Over
-the century, the country's growth moved to the Sun Belt. Note the order the two windows run in. The rank is computed over the whole table
-first, so it means "position among all 289 cities that year," and only then does the
-filter cut the table down to two years. Compute the rank after the filter and it
-would mean "position among these two years," which is not a thing anyone wants.
-
-4. `.cum_sum()` is a running total: each row adds itself to everything above it. Take
-the 2010 census, sort the cities from largest to smallest, and compute the running
-share of the 289-city total.
-
-```{python}
-(
-    us_pop
-    .filter(c.year == 2010)
-    .sort(c.population, descending=True)
-    .select(
-        c.city,
-        c.population,
-        cum_share = c.population.cum_sum() / c.population.sum() * 100
-    )
-)
-```
-
-The ten largest cities are 29 percent of the total and it takes 40 of the 289 to pass
-half. There are two aggregations in that one expression doing different jobs:
-`.cum_sum()` changes on every row, and the plain `.sum()` next to it is a single fixed
-number, the same on all 289 rows. Also note that the `.sort()` is not cosmetic here.
-Sort the table differently and every number in the column changes, which was never
-true of `.rank()`.
-
-5. Add an `.over()` and the running total restarts in each group. Sort the cities by
-state, and within state from largest to smallest, then accumulate within the state.
-
-```{python}
-(
-    us_pop
-    .filter(c.year == 2010)
-    .sort(c.state, c.population, descending=[False, True])
-    .with_columns(
-        cum_share = c.population.cum_sum().over(c.state) / c.population.sum().over(c.state) * 100
-    )
-    .filter(c.state.is_in(["CA", "NY"]))
-)
-```
-
-Both states are done in one screen and they could not look less alike. New York has
-six cities in the table and the running total is essentially finished on its first
-row: New York City is 90 percent of the state. California has 71 cities, starts with
-Los Angeles at 21 percent, and needs ten of them to pass half. The cumulative column
-shows that difference more clearly than either total does.
-
-6. `.rolling_mean()` averages each row with its neighbors to smooth out the noise.
-It is an ordered function like the others, so it needs a sort, and it needs an
-`.over()` for exactly the same reason `.shift()` did: without it, the window would
-average the first rows of one city with the last rows of the city sorted before it.
-Compute each city's change since the previous census, as you did last week, then
-smooth that change over a three-census window, scoping both to the city. Read Detroit
-from 1900 on.
+22. Last one. Compute `change` as in question 18, and then, in a second
+`.with_columns`, add `change_smooth` equal to
+`c.change.rolling_mean(window_size=3).over(c.city)`. Filter to Detroit.
 
 ```{python}
 (
@@ -192,48 +350,9 @@ from 1900 on.
     .sort(c.city, c.year)
     .with_columns(change = c.population - c.population.shift(1).over(c.city))
     .with_columns(change_smooth = c.change.rolling_mean(window_size=3).over(c.city))
-    .filter(c.city == "Detroit, MI", c.year >= 1900)
-    .select(c.year, c.population, c.change, c.change_smooth)
+    .filter(c.city == "Detroit, MI")
 )
 ```
 
-The raw change column bounces: Detroit adds 575,000 people in the 1920s, then 55,000
-in the 1930s, then 226,000 in the 1940s. Wars and depressions land on the decade they
-land on. The smoothed column shows one shape instead: it peaks at the 1930 row,
-falls away across the next three censuses, turns negative at the 1970 row, and
-never comes back. Smoothing removes information from the table. The case for doing
-it is that what it removes was noise, and you have to make that case each time.
-
-7. Close with a picture. Give every city its share of the census-year total, then
-keep six cities and draw their shares over time with `.geom_line()`.
-
-```{python}
-(
-    us_pop
-    .with_columns(share = c.population / c.population.sum().over(c.year) * 100)
-    .filter(c.city.is_in([
-        "New York City, NY", "Chicago, IL", "Detroit, MI",
-        "Los Angeles, CA", "Phoenix, AZ", "Houston, TX"
-    ]))
-    .ggplot(aes(c.year, c.share, color="city"))
-    .geom_line()
-    .labs(x="Census year", y="Share of the 289 cities (%)", color="City")
-)
-```
-
-Chicago peaks in 1900 at 9.5 percent and Detroit in 1930 at 3.9, and both of them
-are falling by the time Los Angeles passes Detroit in 1950 and Chicago in the 1980s.
-Houston and Phoenix spend a hundred years on the floor of the chart and then climb.
-The figure needs one point per city per year. An aggregated table could not have
-drawn it, because aggregation collapses the rows the lines are made of, and `.over()`
-keeps them.
-
-The `.with_columns()` comes before the `.filter()`, so the denominator is all 289
-cities and a share means a share of urban America. Filter first and the denominator
-becomes the six cities you kept, and New York starts the chart at 100 percent. Look
-also at New York between
-1890 and 1900, where the line jumps from 12 percent to 19. New York did not grow by
-half in ten years. It annexed Brooklyn, which was a separate city until 1898 and is
-not a separate row in this table. Every window function in this chapter did its
-arithmetic on a definition of "New York City" that changed underneath it in 1898.
-No window function can tell you that; only knowing something about the cities can.
+The raw change jumps around: Detroit added 575,000 people in the 1920s and only
+55,000 in the 1930s. The smoothed column rises and falls more gradually.

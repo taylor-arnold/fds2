@@ -58,18 +58,15 @@ nlp = spacy.load("en_core_web_sm")
 
 ### Questions
 
-`docs_raw` holds 200 IMDb movie reviews, 100 labeled `"positive"` and 100
-labeled `"negative"`, each with a `doc_id` and the raw `text` of the review.
-This is a smaller corpus than the Wikipedia author pages the chapter uses,
-and it has a mess of its own. The reviews were scraped from web pages, and
-many still contain the literal characters `<br />` (an HTML line break). The
-first few questions deal with that mess directly, in the spirit of the
-chapter's warning that the wrapper functions are not magic. Print results
-unless a question says otherwise.
+`docs_raw` holds 200 IMDb movie reviews, 100 labeled `"positive"` and 100 labeled
+`"negative"`, each with a `doc_id` and the raw `text` of the review. Many of the
+reviews still contain the characters `<br />`, an HTML line break left over from
+the web pages they were scraped from.
 
-1. In the first block, count how many reviews fall into each `label`. In the
-second block, count how many of the 200 reviews contain the literal string
-`"<br />"` somewhere in their `text`.
+Unless a question says otherwise, just print the result of each block; do not save
+it to a variable.
+
+1. Using `docs_raw`, count the number of reviews with each `label`.
 
 ```{python}
 (
@@ -79,57 +76,49 @@ second block, count how many of the 200 reviews contain the literal string
 )
 ```
 
+2. Count how many reviews contain the string `"<br />"`. Use
+`c.text.str.contains("<br />").sum()` inside of `.select`.
+
 ```{python}
 (
     docs_raw
-    .select(c.text.str.contains("<br />").sum())
+    .select(n_br = c.text.str.contains("<br />").sum())
 )
 ```
 
-2. Before cleaning anything, see what the raw HTML does to the pipeline.
-Run `DSText.process()` on just review `doc0001`, then filter the result to
-tokens whose `token` contains `"<br"` and print `token`, `upos`, and
-`is_alpha`.
+More than half of them do: 105 of the 200.
+
+3. Replace every `"<br />"` in `text` with a single space, using
+`c.text.str.replace_all("<br />", " ")` inside of `.with_columns`.
 
 ```{python}
-example = DSText.process(
-    docs_raw.filter(c.doc_id == "doc0001").select(c.doc_id, c.text),
-    nlp
-)
-
 (
-    example
-    .filter(c.token.str.contains("<br"))
-    .select(c.token, c.upos, c.is_alpha)
+    docs_raw
+    .with_columns(text = c.text.str.replace_all("<br />", " "))
 )
 ```
 
-Every one of these tokens has `is_alpha` equal to `False`, but four of them
-still get tagged `NOUN`, and the same string, `"/><br"`, comes back tagged
-three different ways (`PUNCT`, `NOUN`, `NUM`) depending on its neighbors.
-The tagger is being handed text that was never a real sentence. The
-chapter's noun-frequency query in the next section filters only on `upos`,
-so these tokens would get into a noun count because `is_alpha` is never
-checked.
-
-3. Build `docs` from `docs_raw` by replacing every `"<br />"` with a single
-space. Then run `DSText.process()` on the full, cleaned `docs` table to build
-`anno` and print its shape.
+4. The block below is given. It saves the cleaned reviews as `docs` and then runs
+the spaCy pipeline over them with `DSText.process()`, which returns one row per
+token. The result is saved as `anno`. It takes a little while to run.
 
 ```{python}
+#| tags: [noclear]
 docs = (
     docs_raw
-    .with_columns(
-        text = c.text.str.replace_all("<br />", " ")
-    )
+    .with_columns(text = c.text.str.replace_all("<br />", " "))
 )
 
 anno = DSText.process(docs.select(c.doc_id, c.text), nlp)
-anno.shape
+anno
 ```
 
-4. Look at the first sentence of `doc0001` on its own: filter `anno` to
-`doc_id == "doc0001"` and `sid == 1`, and select `tid`, `token`, and `upos`.
+Each row is one token. `sid` is the sentence number within the review and `tid` is
+the token number within the sentence. `lemma` is the dictionary form of the token
+and `upos` is its part of speech.
+
+5. Filter `anno` to the first sentence of the first review (`doc_id` equal to
+`"doc0001"` and `sid` equal to 1) and select the columns `tid`, `token`, and `upos`.
 
 ```{python}
 (
@@ -139,77 +128,229 @@ anno.shape
 )
 ```
 
-5. In the first block, find the 10 most frequent nouns across the whole
-corpus: filter `anno` to `upos == "NOUN"`, group by `lemma`, count, and sort
-in descending order. In the second block, plot them as a bar chart with
-`geom_col()`, flipping the coordinates so the noun labels are readable.
+The sentence is "In my opinion, this movie is not good." Even the comma and the
+period are tokens, with the part of speech `PUNCT`.
+
+6. Use the same filter, but this time select `token` and `lemma`. Which token has a
+lemma that is different from the token itself?
 
 ```{python}
-top_nouns = (
+(
+    anno
+    .filter(c.doc_id == "doc0001", c.sid == 1)
+    .select(c.token, c.lemma)
+)
+```
+
+**Answer**: The token "is" has the lemma "be". The lemma is also lowercase, so "In"
+becomes "in".
+
+7. Count the number of tokens with each part of speech (`upos`) across the whole
+corpus. Sort from most to least common.
+
+```{python}
+(
+    anno
+    .group_by(c.upos)
+    .agg(n = pl.len())
+    .sort(c.n, descending=True)
+)
+```
+
+Nouns are the most common, followed by punctuation and verbs.
+
+8. Take the code from the previous question and draw it as a bar plot with
+`geom_col`, with `upos` on the x-axis and the count on the y-axis. Add
+`coord_flip()` so the labels are readable.
+
+```{python}
+(
+    anno
+    .group_by(c.upos)
+    .agg(n = pl.len())
+    .ggplot(aes(c.upos, c.n))
+    .geom_col()
+    .coord_flip()
+)
+```
+
+9. Filter to the nouns (`upos` equal to `"NOUN"`), count the number of times each
+`lemma` appears, sort from most to least common, and keep the first 10 rows with
+`.head(10)`.
+
+```{python}
+(
     anno
     .filter(c.upos == "NOUN")
     .group_by(c.lemma)
-    .agg(count = pl.len())
-    .sort(c.count, descending=True)
+    .agg(n = pl.len())
+    .sort(c.n, descending=True)
     .head(10)
 )
-top_nouns
 ```
+
+The top two are `movie` and `film`, which is not a surprise in a set of movie
+reviews.
+
+10. Take the code from the previous question and draw it as a bar plot with
+`geom_col` and `coord_flip()`.
 
 ```{python}
 (
-    top_nouns
-    .ggplot(aes(c.lemma, c.count))
+    anno
+    .filter(c.upos == "NOUN")
+    .group_by(c.lemma)
+    .agg(n = pl.len())
+    .sort(c.n, descending=True)
+    .head(10)
+    .ggplot(aes(c.lemma, c.n))
     .geom_col()
     .coord_flip()
-    .labs(title="Most Frequent Nouns", x="Noun", y="Count")
 )
 ```
 
-In the chapter's biography pages the most common nouns spread across a
-handful of themes. This list is dominated by the two words for the thing
-being reviewed: `movie` and `film` together account for more mentions than
-the next four nouns combined. The most frequent word in a collection is not
-always the most informative one.
-
-6. In the first block, find the 10 most frequent adjectives within each
-`label`. Join `anno` to the `doc_id`/`label` pairs in `docs`, filter to
-alphabetic adjectives, group by `label` and `lemma`, count, and take the top
-10 rows within each `label`. In the second block, filter `adj_by_label` to
-just the lemmas `"good"` and `"bad"` and print the count for each label.
-Sentiment labels aside, why doesn't a simple count of these two words cleanly
-separate the positive reviews from the negative ones?
+11. Do the same as question 9, but for verbs (`"VERB"`).
 
 ```{python}
-adj_by_label = (
-    anno
-    .join(docs.select(c.doc_id, c.label), on=c.doc_id)
-    .filter(c.upos == "ADJ", c.is_alpha)
-    .group_by(c.label, c.lemma)
-    .agg(count = pl.len())
-    .sort([c.label, c.count], descending=[False, True])
-)
-
 (
-    adj_by_label
-    .group_by(c.label, maintain_order=True)
+    anno
+    .filter(c.upos == "VERB")
+    .group_by(c.lemma)
+    .agg(n = pl.len())
+    .sort(c.n, descending=True)
     .head(10)
 )
 ```
 
+`see` and `watch` are near the top, which again fits the subject.
+
+12. Do the same as question 9, but for adjectives (`"ADJ"`).
+
 ```{python}
 (
-    adj_by_label
-    .filter(c.lemma.is_in(["good", "bad"]))
-    .sort(c.label, c.lemma)
+    anno
+    .filter(c.upos == "ADJ")
+    .group_by(c.lemma)
+    .agg(n = pl.len())
+    .sort(c.n, descending=True)
+    .head(10)
 )
 ```
 
-**Answer**: `bad` is heavily one-sided, with 86 uses in negative reviews
-against 17 in positive ones. `good` shows up 80 times in positive reviews
-but still 65 times in negative ones. The sentence from question 4, "this
-movie is not good," shows why: a negation flips the sentiment of a sentence
-without removing the positive word. The chapter's introduction makes the
-same point about "not bad" being a mild compliment. A raw adjective count
-ignores the "not" in front of "good"; catching it takes word-order or
-dependency information from later in the chapter.
+13. Instead of filtering on the part of speech, keep the tokens that are made of
+letters and are not stop words, using `.filter(c.is_alpha, ~c.is_stop)`. Then find
+the 10 most common lemmas.
+
+```{python}
+(
+    anno
+    .filter(c.is_alpha, ~c.is_stop)
+    .group_by(c.lemma)
+    .agg(n = pl.len())
+    .sort(c.n, descending=True)
+    .head(10)
+)
+```
+
+Stop words are very common words like "the" and "and". Removing them leaves a list
+that mixes nouns, verbs, and adjectives.
+
+14. Count the number of tokens in each review. Sort from longest to shortest.
+
+```{python}
+(
+    anno
+    .group_by(c.doc_id)
+    .agg(n = pl.len())
+    .sort(c.n, descending=True)
+)
+```
+
+15. Take the code from the previous question (without the sort) and draw a histogram
+of the number of tokens with `.geom_histogram(bins=30)`.
+
+```{python}
+(
+    anno
+    .group_by(c.doc_id)
+    .agg(n = pl.len())
+    .ggplot(aes(c.n))
+    .geom_histogram(bins=30)
+)
+```
+
+Half of the reviews are under 185 tokens, but two are over 1,000.
+
+16. Find the number of sentences in each review by taking the largest value of `sid`
+with `c.sid.max()`. Sort from most to fewest sentences.
+
+```{python}
+(
+    anno
+    .group_by(c.doc_id)
+    .agg(n_sent = c.sid.max())
+    .sort(c.n_sent, descending=True)
+)
+```
+
+17. `anno` does not have the `label` column, but `docs` does. Join `anno` to
+`docs.select(c.doc_id, c.label)` on `doc_id`.
+
+```{python}
+(
+    anno
+    .join(docs.select(c.doc_id, c.label), on=c.doc_id)
+)
+```
+
+18. Take the code from the previous question, filter to the adjectives, and count
+the number of times each `lemma` appears within each `label`. Sort by the count from
+largest to smallest.
+
+```{python}
+(
+    anno
+    .join(docs.select(c.doc_id, c.label), on=c.doc_id)
+    .filter(c.upos == "ADJ")
+    .group_by(c.label, c.lemma)
+    .agg(n = pl.len())
+    .sort(c.n, descending=True)
+)
+```
+
+19. Change the code from the previous question so that it keeps only the lemmas
+`"good"` and `"bad"`. Use `c.lemma.is_in(["good", "bad"])` inside of the filter.
+
+```{python}
+(
+    anno
+    .join(docs.select(c.doc_id, c.label), on=c.doc_id)
+    .filter(c.upos == "ADJ", c.lemma.is_in(["good", "bad"]))
+    .group_by(c.label, c.lemma)
+    .agg(n = pl.len())
+)
+```
+
+20. Take the code from the previous question and draw a bar plot with `geom_col`,
+with `lemma` on the x-axis, the count on the y-axis, and the fill color given by
+`label`. Pass `position="dodge"` to `geom_col` to put the bars side by side.
+
+```{python}
+(
+    anno
+    .join(docs.select(c.doc_id, c.label), on=c.doc_id)
+    .filter(c.upos == "ADJ", c.lemma.is_in(["good", "bad"]))
+    .group_by(c.label, c.lemma)
+    .agg(n = pl.len())
+    .ggplot(aes(c.lemma, c.n, fill=c.label))
+    .geom_col(position="dodge")
+)
+```
+
+21. "bad" is used mostly in negative reviews, but "good" shows up often in both.
+Look back at the sentence from question 5. Why does a count of "good" not separate
+the positive reviews from the negative ones?
+
+**Answer**: A review can say "not good," as in the first sentence of `doc0001`. The
+count only sees the word "good" and ignores the "not" in front of it. "good" appears
+80 times in positive reviews and 65 times in negative ones.
