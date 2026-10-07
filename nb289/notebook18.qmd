@@ -32,345 +32,284 @@ ub = ""
 
 ```{python}
 #| tags: [noclear]
-rva = pl.read_csv(ub + "data/flightsrva_flights.csv.gz", null_values=["NA"])
-airline = pl.read_csv(ub + "data/flightsrva_airlines.csv.gz", null_values=["NA"])
-airport = pl.read_csv(ub + "data/flightsrva_airports.csv.gz", null_values=["NA"])
-plane = pl.read_csv(ub + "data/flightsrva_planes.csv.gz", null_values=["NA"])
-weather = pl.read_csv(ub + "data/flightsrva_weather.csv.gz", null_values=["NA"])
+food = (
+    pl.read_csv(ub + "data/wweia_food.csv", ignore_errors=True)
+    .select(
+        c.id, c.day_of_week, c.time, c.meal_name, c.food_source,
+        c.at_home, c.grams, c.kcal, c.protein, c.carbs, c.sugar, c.fat
+    )
+)
 ```
 
 ### Questions
 
-Five tables this time, which is new. Every notebook so far has handed you one table and
-asked you to work inside it. This one hands you a small database and asks you to connect it.
+This is What We Eat in America, the dietary part of a national health survey. Each
+person was asked to recall everything they ate on the previous day. A row is one food
+item eaten by one person: 173,174 items reported by 11,925 people.
 
-`rva` is the table everything else hangs off. It has 24,808 rows, one per commercial flight
-that departed Richmond International Airport in 2019, with the scheduled and actual times,
-the delays in minutes, the `carrier` that operated it, the `tailnum` of the aircraft, the
-`dest` it flew to, and a `time_hour` giving the hour it was scheduled to leave.
+`id` is the person, `day_of_week` is an integer from 1 to 7, and `time` is the hour the
+item was eaten. `meal_name` is what the person called the meal, `food_source` is where
+the food came from, and `at_home` says whether it was eaten at home. `grams` is the mass
+of the item and `kcal` is its calories.
 
-The other four are lookup tables. `airline` maps each of the 14 two-letter carrier codes to
-a company name. `airport` maps three-letter FAA codes to a name, a latitude and a longitude.
-`plane` is a registry of aircraft, one row per tail number, with the manufacturer, the model,
-the number of seats and the year it was built. `weather` records conditions at the airport
-once an hour, all year.
+Unless a question says otherwise, just print the result of each block; do not save it
+to a variable.
 
-None of the interesting questions live in one table. The flights table records that 4,258
-flights left for `ATL` and has nothing to say about where Atlanta is, who flew there, or what
-the weather was doing when they took off.
-
-Unless a question says otherwise, print the result of each block; do not save it.
-
-1. Join the airline names onto the flights, then report the mean departure delay for each
-airline, worst first. Print all 14 rows.
+1. Start with a warm-up. Filter to the items with more than 2,000 calories and sort
+them from the most calories to the fewest.
 
 ```{python}
 (
-    rva
-    .join(airline, on=c.carrier)
-    .group_by(c.name)
-    .agg(
-        n = pl.len(),
-        mean_dep_delay = c.dep_delay.mean().round(1)
-    )
-    .sort(c.mean_dep_delay, descending=True)
-    .print(15)
+    food
+    .filter(c.kcal > 2000)
+    .sort(c.kcal, descending=True)
 )
 ```
 
-**Answer**: ExpressJet is worst by a distance, averaging 23 minutes late over 1,668 flights.
-Delta is best at 1.7 minutes over 3,220. The join added exactly one column and it is the
-column that makes the table worth showing anyone, because `EV` and `DL` are not answers.
-
-Note the order of operations. The join runs on all 24,808 rows and the grouping happens
-afterward. You could group first and join the 14-row summary to `airline` instead, and get
-the same answer with less work.
-
-2. The flights table records a destination code and nothing else about it. Join `airport` to
-get the real names. The key has a different name in each table: it is `dest` in `rva` and
-`faa` in `airport`. Count the flights to each destination, add the mean arrival delay, and
-sort by the number of flights.
+2. Count the number of items for each `meal_name` and sort from the most items to the
+fewest.
 
 ```{python}
 (
-    rva
-    .group_by(c.dest)
-    .agg(
-        n = pl.len(),
-        mean_arr_delay = c.arr_delay.mean().round(1)
-    )
-    .join(airport, left_on=c.dest, right_on=c.faa)
-    .sort(c.n, descending=True)
-    .select(c.dest, c.name, c.n, c.mean_arr_delay)
-    .print(25)
-)
-```
-
-**Answer**: Richmond flies to 22 places. Atlanta takes 4,258 of the flights and lands five
-minutes *early* on average. LaGuardia takes 3,093 and lands 11 minutes late. A negative delay
-does not mean the flight was fast. It means the schedule allowed more time than the flight
-needed, so the mean arrival delay is telling you about the timetable as much as the aircraft.
-
-Here the summary is computed first and the join runs on the 22-row result. That is the right
-way around when the lookup adds nothing the grouping needs.
-
-3. The flights table has no coordinates in it. `airport` does. Draw the 22 destinations on a
-map: longitude on the x-axis, latitude on the y-axis, sized by the number of flights and
-colored by the mean arrival delay.
-
-```{python}
-(
-    rva
-    .group_by(c.dest)
-    .agg(
-        n = pl.len(),
-        mean_arr_delay = c.arr_delay.mean()
-    )
-    .join(airport, left_on=c.dest, right_on=c.faa)
-    .ggplot(aes(c.lon, c.lat))
-    .geom_point(aes(color=c.mean_arr_delay, size=c.n))
-    .labs(
-        x = "Longitude",
-        y = "Latitude",
-        title = "Where Richmond flew in 2019"
-    )
-)
-```
-
-**Answer**: The map is the eastern United States, drawn from two columns the flights table
-did not have. Atlanta is the big dark circle in the middle. Denver sits alone on the far left,
-the only real western destination. The scatter along the bottom is Florida, which is where a
-mid-sized airport sends its leisure traffic. The brightest dots, meaning the latest arrivals,
-are two small Florida airports, Sarasota and St Petersburg, followed by Dulles, O'Hare, and
-Newark.
-
-Look at the two tiny dots almost on top of each other at the left edge of the Florida group.
-That is Tampa, the darkest point on the whole map at 7.5 minutes early, sitting fifteen miles
-from St Petersburg, which is one of the brightest at 15.3 minutes late. The two airports
-serve the same metro area, and no airline flies to both.
-
-This is the ordinary use of a join, and most joins are like it: the coordinates were sitting
-in a table you were not using.
-
-4. Now use the aircraft registry. Join `plane` to the flights, then report the mean number of
-seats per carrier, largest first. Print the whole result.
-
-```{python}
-(
-    rva
-    .join(plane, on=c.tailnum)
-    .group_by(c.carrier)
-    .agg(
-        n = pl.len(),
-        mean_seats = c.seats.mean().round(1)
-    )
-    .sort(c.mean_seats, descending=True)
-    .print(15)
-)
-```
-
-**Answer**: Spirit flies the biggest aircraft (190 seats), Envoy the smallest (54). The
-ranking is sensible, and it splits the carriers neatly into mainline airlines and regional
-operators flying 50-to-90-seat jets on their behalf.
-
-Count the rows. There are 13, and question 1 said there were 14 airlines. An entire airline
-has gone missing from the table, and Polars did not raise an error or print a warning about
-it. The join returned 24,346 of the 24,808 flights, and the summary you would have pasted
-into a report was computed on the ones that survived.
-
-5. Find out what happened. Use an anti-join to get the flights that have no matching row in
-`plane`, and count them by carrier.
-
-```{python}
-(
-    rva
-    .join(plane, on=c.tailnum, how="anti")
-    .group_by(c.carrier)
+    food
+    .group_by(c.meal_name)
     .agg(n = pl.len())
     .sort(c.n, descending=True)
-    .print(12)
 )
 ```
 
-**Answer**: 462 flights have no aircraft record, and 396 of them are `G4`, which is Allegiant
-Air. That is every Allegiant flight in the year. The other 66 are scattered across nine
-carriers, a handful each, plus 13 flights with a `null` tail number, which turn out to be the
-cancelled ones. A `null` key matches nothing, so cancellations quietly fall out of an inner
-join too.
+Dinner, lunch, breakfast, and snack are the four big categories. Further down are
+Spanish names such as `Cena` and `Almuerzo`, because some interviews were in Spanish.
 
-An anti-join is the right tool here because it hands you the failures themselves. A row count
-tells you how many rows you lost. The anti-join tells you which ones, and lets you group them
-to find out what they have in common. Here what they had in common was an airline.
-
-6. Two things to check about Allegiant. First, look at the tail numbers `G4` uses. Second,
-ask how much of the registry we are using: count the planes in `plane` that flew out
-of Richmond at least once, with a semi-join.
+3. Now let plotnine do the counting. Draw a bar plot of `meal_name` using `geom_bar`,
+and add `coord_flip` so the labels are readable.
 
 ```{python}
 (
-    rva
-    .filter(c.carrier == "G4")
-    .select(c.tailnum)
-    .unique()
-    .drop_nulls()
-    .sort(c.tailnum)
-    .head(5)
+    food
+    .ggplot(aes(c.meal_name))
+    .geom_bar()
+    .coord_flip()
 )
 ```
 
+4. The bars in the previous plot are in no useful order. Take the code from the previous
+question and sort the rows by `pl.len().over(c.meal_name)` before plotting.
+
 ```{python}
 (
-    plane
-    .join(rva, on=c.tailnum, how="semi")
-    .height
+    food
+    .sort(pl.len().over(c.meal_name))
+    .ggplot(aes(c.meal_name))
+    .geom_bar()
+    .coord_flip()
 )
 ```
 
-**Answer**: Allegiant's tail numbers are stored as `215NV`, `217NV`, `218NV`. Every other tail
-number in both tables begins with `N`, because every civil aircraft registered in the United
-States does. Allegiant's are missing the letter, in 395 of their 396 rows.
+`pl.len().over(c.meal_name)` writes the size of each meal onto every row of that meal,
+so sorting on it puts the bars in order of their counts.
 
-So the obvious fix would be to put the `N` back and join again, but that matches nothing either.
-
-The malformed key is a real clue and it is not the cause. Allegiant's aircraft are not in the
-registry under any spelling. The semi-join says why that is strange: all 3,120 rows of `plane`
-flew out of Richmond, so this is not a national registry that happens to have gaps. It was
-built from this very dataset, and Allegiant fell out of whatever process built it, taking its
-tail-number formatting with it.
-
-The cost of that inner join is worse than one missing airline. Allegiant is the only carrier
-flying to Orlando Sanford, St Petersburg, Sarasota, and Nashville, so an analysis built on
-the joined table has four fewer destinations in it. Redraw the map from question 3 that way
-and four dots vanish, including the bright one next to Tampa. It would still look like a
-perfectly good map.
-
-7. Fix the join. Keep every flight by making it a left join, and give the plane's columns a
-suffix so that `year` (the year of the flight) and `year` (the year the aircraft was built)
-do not collide. Then report the mean seats and the mean age of the fleet each carrier flew.
+5. Draw the same plot a second way. Use your code from question 2 to compute the
+counts, sort them from smallest to largest, and draw them with `geom_col`.
 
 ```{python}
 (
-    rva
-    .join(plane, on=c.tailnum, how="left", suffix="_plane")
-    .with_columns(age = 2019 - c.year_plane)
-    .group_by(c.carrier)
+    food
+    .group_by(c.meal_name)
+    .agg(n = pl.len())
+    .sort(c.n)
+    .ggplot(aes(c.meal_name, c.n))
+    .geom_col()
+    .coord_flip()
+)
+```
+
+The picture is the same. `geom_bar` counts the rows for you; `geom_col` draws a number
+you have already computed.
+
+6. Some numbers are not counts, so `geom_bar` cannot draw them. Remove the rows where
+`food_source` is the text `"NA"`, then compute the number of items and the mean
+calories for each `food_source`. Keep the sources with at least 500 items, sort by the
+mean, and draw the means with `geom_col` and `coord_flip`.
+
+```{python}
+(
+    food
+    .filter(c.food_source != "NA")
+    .group_by(c.food_source)
     .agg(
         n = pl.len(),
-        mean_seats = c.seats.mean().round(1),
-        mean_age = c.age.mean().round(1)
+        mean_kcal = c.kcal.mean()
     )
-    .sort(c.mean_age, descending=True)
-    .print(15)
+    .filter(c.n >= 500)
+    .sort(c.mean_kcal)
+    .ggplot(aes(c.food_source, c.mean_kcal))
+    .geom_col()
+    .coord_flip()
 )
 ```
 
-**Answer**: 24,808 rows, 14 carriers, and Allegiant is back with `null` in both of the
-columns that came from `plane`. That is the honest result: we know Allegiant flew 396 times
-and we do not know what it flew. An inner join asserts we have no such flights, which is
-false.
+An item from a fast food or pizza restaurant averages 210 calories. An item from a
+grocery store averages 133.
 
-The suffix matters more than it looks. Both tables have a column called `year`, and they are
-not the same variable: one is 2019 in every row, the other is 1998 or 2007. Without the
-suffix Polars still keeps them apart, but it names the second one `year_right`, and
-`year_right` is not a name anyone can read three weeks later.
-
-United (`UA`) flies the oldest fleet at 18 years and PSA (`OH`) the newest at 4.2. Spirit
-(`NK`) flies the largest aircraft and some of the youngest, which is more or less the
-low-cost business model written into a table.
-
-8. On to the weather. Both tables carry a `time_hour` column, which is plainly the intended
-way to connect them. The description of this dataset in the book says that `time_hour`
-"allows this data to be precisely joined with flight departures." Use it to ask whether
-flights leave late when visibility is poor. Then run the same question again, joining on
-`year`, `month`, `day`, and `hour` instead, which is a four-column key describing the same
-relation. Compare the two.
+7. Draw a histogram of `kcal` with `geom_histogram`, using `binwidth=25`.
 
 ```{python}
 (
-    rva
-    .join(weather.select(c.time_hour, c.visib), on=c.time_hour)
-    .with_columns(low_visib = c.visib < 5)
-    .group_by(c.low_visib)
+    food
+    .ggplot(aes(c.kcal))
+    .geom_histogram(binwidth=25)
+)
+```
+
+The plot is almost a single bar. A few items have thousands of calories, which
+stretches the x-axis, and 23,132 items have exactly zero calories, most of them glasses
+of water.
+
+8. Take the code from the previous question and filter to the items with more than 0
+and at most 600 calories before plotting.
+
+```{python}
+(
+    food
+    .filter(c.kcal > 0, c.kcal <= 600)
+    .ggplot(aes(c.kcal))
+    .geom_histogram(binwidth=25)
+)
+```
+
+The height of each bar is the number of items whose calories fall in that 25-calorie
+range. Most items are small, and the counts fall off steadily after the first few bins.
+
+9. Draw the same histogram again, but set `bins=10` instead of `binwidth`.
+
+```{python}
+(
+    food
+    .filter(c.kcal > 0, c.kcal <= 600)
+    .ggplot(aes(c.kcal))
+    .geom_histogram(bins=10)
+)
+```
+
+`binwidth` sets the width of each bar; `bins` sets how many bars there are. Ten bins
+hides most of the shape.
+
+10. Draw a density plot of the same filtered data with `geom_density`.
+
+```{python}
+(
+    food
+    .filter(c.kcal > 0, c.kcal <= 600)
+    .ggplot(aes(c.kcal))
+    .geom_density()
+)
+```
+
+11. Take the code from the previous question and set `adjust=3` inside `geom_density`.
+
+```{python}
+(
+    food
+    .filter(c.kcal > 0, c.kcal <= 600)
+    .ggplot(aes(c.kcal))
+    .geom_density(adjust=3)
+)
+```
+
+A larger `adjust` makes the curve smoother. A smaller one makes it follow the data more
+closely.
+
+12. Items are rarely what we care about. Group by `id` to add up each person's calories
+for the day, and draw a density plot of the totals.
+
+```{python}
+(
+    food
+    .group_by(c.id)
+    .agg(kcal = c.kcal.sum())
+    .ggplot(aes(c.kcal))
+    .geom_density()
+)
+```
+
+The curve peaks at around 1,600 calories and has a long tail to the right. Keep in mind
+that this is what people *remembered* eating, which is usually less than what they ate.
+
+13. Now compare meals. Filter to the four main meals with
+`c.meal_name.is_in(["Breakfast", "Lunch", "Dinner", "Snack"])`, add up each person's
+calories at each meal by grouping by `id` and `meal_name`, and draw a boxplot of the
+calories for each meal with `coord_flip`.
+
+```{python}
+(
+    food
+    .filter(c.meal_name.is_in(["Breakfast", "Lunch", "Dinner", "Snack"]))
+    .group_by(c.id, c.meal_name)
+    .agg(kcal = c.kcal.sum())
+    .ggplot(aes(c.meal_name, c.kcal))
+    .geom_boxplot()
+    .coord_flip()
+)
+```
+
+14. Take the code from the previous question and order the boxes by their medians, by
+sorting on `c.kcal.median().over(c.meal_name)` before plotting.
+
+```{python}
+(
+    food
+    .filter(c.meal_name.is_in(["Breakfast", "Lunch", "Dinner", "Snack"]))
+    .group_by(c.id, c.meal_name)
+    .agg(kcal = c.kcal.sum())
+    .sort(c.kcal.median().over(c.meal_name))
+    .ggplot(aes(c.meal_name, c.kcal))
+    .geom_boxplot()
+    .coord_flip()
+)
+```
+
+15. Compute by hand the three numbers that make up each box. Take the same per-person,
+per-meal totals and group by `meal_name`, computing `q1` with `c.kcal.quantile(0.25)`,
+`median` with `c.kcal.median()`, and `q3` with `c.kcal.quantile(0.75)`.
+
+```{python}
+(
+    food
+    .filter(c.meal_name.is_in(["Breakfast", "Lunch", "Dinner", "Snack"]))
+    .group_by(c.id, c.meal_name)
+    .agg(kcal = c.kcal.sum())
+    .group_by(c.meal_name)
     .agg(
-        n = pl.len(),
-        mean_dep_delay = c.dep_delay.mean().round(1)
+        q1 = c.kcal.quantile(0.25),
+        median = c.kcal.median(),
+        q3 = c.kcal.quantile(0.75)
     )
-    .sort(c.low_visib)
+    .sort(c.median)
 )
 ```
 
+The medians run from 347 calories at breakfast to 639 at dinner. The middle line of each
+box is the median, and the ends of the box are `q1` and `q3`.
+
+16. Last one. Add up each person's `grams` and `kcal` for the day, then draw a scatter
+plot of calories against grams with `alpha=0.05`, and add a straight line of best fit
+with `geom_smooth(method="lm", se=False)`.
+
 ```{python}
 (
-    rva
-    .join(
-        weather.select(c.year, c.month, c.day, c.hour, c.visib),
-        on=[c.year, c.month, c.day, c.hour]
-    )
-    .with_columns(low_visib = c.visib < 5)
-    .group_by(c.low_visib)
+    food
+    .group_by(c.id)
     .agg(
-        n = pl.len(),
-        mean_dep_delay = c.dep_delay.mean().round(1)
+        grams = c.grams.sum(),
+        kcal = c.kcal.sum()
     )
-    .sort(c.low_visib)
+    .ggplot(aes(c.grams, c.kcal))
+    .geom_point(alpha=0.05)
+    .geom_smooth(method="lm", se=False)
 )
 ```
 
-**Answer**: Both joins run without complaint and both say that poor visibility costs you time.
-They do not agree on anything else. The `time_hour` join finds 1,173 flights in visibility
-under five miles and puts their mean delay at 16.4 minutes. The four-column join finds 1,254
-of them and puts the delay at 15.1. One of these is wrong, and the code gives you no way to
-tell which.
-
-9. Work out which key is correct. Print the first scheduled departure of the year and the
-weather rows for that morning.
-
-```{python}
-(
-    rva
-    .filter((c.month == 1) & (c.day == 1))
-    .select(c.sched_dep_time, c.hour, c.time_hour)
-    .head(1)
-)
-```
-
-```{python}
-(
-    weather
-    .filter((c.month == 1) & (c.day == 1) & c.hour.is_in([0, 5]))
-    .select(c.hour, c.time_hour, c.visib)
-)
-```
-
-**Answer**: The four-column key is the correct one, and the two tables are keeping time
-differently.
-
-The first flight of 2019 is scheduled for 5:50 in the morning, local time, and its `time_hour`
-reads `2019-01-01T05:00:00Z`. In the weather table, local hour 5 has a `time_hour` of
-`2019-01-01T10:00:00Z`; the stamp reading `05:00:00Z` belongs to local hour **0**. Richmond is
-five hours behind UTC in January, so the weather table is doing the conversion correctly and
-the flights table is not: it wrote the local hour down and pasted a `Z` on the end.
-
-So joining on `time_hour` hands every departure the weather from five hours earlier. Our 5:50
-am flight was matched to a visibility of 1.0 miles, which was the fog at midnight. Visibility
-at 5 am was 10.0 miles. 4,835 of the 24,808 flights get a different visibility depending on
-which key you use.
-
-Nothing about this join failed. It matched 24,751 rows and produced a number you would have
-believed, in support of a conclusion that happens to be true anyway. The key has the same
-name in both tables, the same format and the same type, and the book's own description of the
-data recommends it. It is still the wrong key, and the only thing that ever said so was those
-two printed rows.
-
-The anti-join leaves the same fingerprint if you look. Under `time_hour`, 57 flights match no
-weather at all: 50 on December 31, because the weather feed stops on December 30, and 7 at
-6 am on November 3, which is the morning the clocks went back. The weather table's UTC index
-has no `06:00:00Z` that day, and the flights table, keeping local time, insists there is one.
-
-One last thing about `weather`, which is the sort of thing people discover after they have
-built an analysis on it. The table is mostly empty. `temp`, `dewp`, and `humid` are `null` in
-8,678 of the 8,735 rows and `precip` is `null` in 8,467 of them, so wind and visibility are
-about all this station recorded. Had we asked our question about temperature instead, the
-join would have matched every row it was asked to match and handed back a column of nulls.
-That is a quieter failure than the one in question 4 and it comes from the same place: the
-join tells you the keys lined up, and nothing else at all.
+People who eat more food by weight report more calories, but the points spread widely
+around the line. A lot of the weight people report is water and other drinks with no
+calories.
