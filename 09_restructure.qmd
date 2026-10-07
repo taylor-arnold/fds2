@@ -24,47 +24,21 @@ cellphone = pl.read_csv("data/countries_cellphone.csv")
 
 ## Introduction
 
-The previous chapter focused on combining information stored across multiple tables. This chapter turns to a different kind of transformation: reshaping a single table into a different layout without adding or removing information. We will see that the same set of values can be arranged in several different ways, and that picking the right arrangement, rather than the right values, is often what determines whether an analysis is easy or painful.
+@sec-collect introduced the unit of observation and the rules of tidy data, and showed that whether a table is tidy depends on the unit of observation an analysis needs. This chapter puts those ideas to work by reshaping a single table into a different layout without adding or removing information. We will see that the same set of values can be arranged in several different ways, and that picking the right arrangement, rather than the right values, is often what determines whether an analysis is easy or painful.
 
-We start by returning to the unit of observation, which determines how a table should be shaped. From there we introduce tidy data, a short set of rules that tells us when a table's shape matches its unit of observation. The rest of the chapter puts those rules to work: pivoting and unpivoting to move between wide and long layouts, reshaping data so that it plays well with plotnine, and exploding list columns so that multiple values packed into one cell get a row each. We close by noting the one restructuring operation that does not fit this chapter's theme, because it destroys information rather than merely rearranging it.
-
-## Units of Observation
-
-When designing a way to store tabular data, we often must decide whether to favor many rows and few columns or many columns and few rows. A related decision, particularly when choosing a format with more columns, is what information to store in columns versus rows. In some cases the answers are clear and obvious. In others, there are trade-offs about which types of analyses will be easiest or hardest to perform with the data. Let's work through an example.
-
-Assume that you are a biologist tracking the heights of 100 plants over the next 14 days. There are several different ways that this data could be collected. We could have each day's measurements in a column and each plant as a row. We could have each plant as a column and each day as a row. Or we could have a row for each combination of plant and day, with `100*14 = 1,400` rows and three columns (plant ID, day ID, and height).
-
-A core data-science concept will help us distinguish the three cases above. A *unit of observation* is the entity about which data are collected and recorded in a dataset. In other words, it is the "who" or "what" that each row of the table represents. In the example with one row for each plant and one column for each day, the unit of observation is a *plant*. In the example with one row for each day and one column for each plant, the unit of observation is a *day*. In the final example, the one with 1,400 rows, we call the unit of observation *plant × day* (read "plant crossed with day"), which means each row corresponds to a unique combination of one plant and one day. The key takeaway is that once we have picked the unit of observation, there is only a single way to construct our data table.
-
-Note that the concept of a unit of observation is closely linked to that of a primary key. By definition, a primary key must uniquely identify the "what" of the unit of observation. For example, a primary key for a table whose unit of observation is a plant must uniquely identify each plant. Likewise, a table with a *plant × day* unit of observation needs a key that uniquely identifies both the plant and the day.
-
-## Tidy Data
-
-None of the three layouts in the plant example is wrong. Each one is a complete, valid way to record the same 1,400 measurements. What differs is which unit of observation each layout is built around, and that difference has consequences for how easy the data is to work with.
-
-Hadley Wickham's "Tidy Data" gives a name to the layout that matches a chosen unit of observation, and a framework for recognizing it [@ch02:hadley2014tidy]. A dataset is *tidy* when three conditions hold:
-
-- every variable is a single column,
-- every observation is a single row,
-- every table holds a single unit of observation.
-
-The second and third rules restate what we already know from the previous section: rows correspond to a unit of observation, and a table should stick to one such unit. The first rule is the new piece. It says that a quantity we might want to filter on, group by, or plot should live in its own column, not be smuggled into a column name, split across several columns, or bundled together with another quantity in the same cell.
-
-The plant-by-day table with 1,400 rows is tidy for the *plant × day* unit of observation: `plant`, `day`, and `height` each get their own column, and each row is one measurement of one plant on one day. The plant-by-column table is not tidy for that same unit. Day is no longer a variable stored in a column; it has been scattered across fourteen column names, and a single observation (one plant's full trajectory) is spread across fourteen cells instead of appearing once.
-
-Tidiness is a property of a table *relative to a unit of observation*, not a property of the values themselves, which makes it easy to misjudge. The wide plant-by-day table is a tidy table for the unit of observation *plant*, if what you want is one row summarizing each plant's height over the two-week window. It is only untidy once you decide the unit of observation you need is *plant × day*.
-
-We will see this play out concretely later in the chapter with the `cellphone` dataset, shown below. Its unit of observation is *year × country*, and in this shape it is tidy: `year`, `iso`, and `cell` each get a column, and each row is one country's rate in one year.
+We will work throughout with the `cellphone` dataset, shown below. Its unit of observation is *year × country*, and in this shape it is tidy [@ch02:hadley2014tidy]: `year`, `iso`, and `cell` each get a column, and each row is one country's rate in one year.
 
 ```{python}
 cellphone
 ```
 
-Later in this chapter we will pivot this table into a wide frame with one column per country, a reasonable thing to do if the analysis calls for comparing countries directly. That wide frame will be tidy for questions about a single year, and untidy the moment we want to treat country as a variable, since at that point "country" is a set of column names rather than a column. Understanding why the same set of numbers can be tidy in one shape and untidy in another is most of what you need to know to decide when a pivot is the right move.
+In the next section we will pivot this table into a wide frame with one column per country, a reasonable thing to do if the analysis calls for comparing countries directly. That wide frame will be tidy for questions about a single year, and untidy the moment we want to treat country as a variable, since at that point "country" is a set of column names rather than a column. Understanding why the same set of numbers can be tidy in one shape and untidy in another is most of what you need to know to decide when a pivot is the right move.
+
+The chapter covers pivoting and unpivoting to move between wide and long layouts, reshaping data so that it plays well with plotnine, and exploding list columns so that multiple values packed into one cell get a row each. We close by noting the one restructuring operation that does not fit this chapter's theme, because it destroys information rather than merely rearranging it.
 
 ## Pivot and Unpivot
 
-Sometimes the unit of observation in which a data table is stored does not match the unit needed for our analysis. If the stored format uses a compound unit of observation, we can simplify it by using an aggregation to remove one or more components. For example, we could group a *plant × day* table by plant ID and calculate summary statistics (such as the maximum height over all days) to generate a dataset with *plant* as the unit of observation. While aggregations are useful, by design they remove information present in the original dataset. Other times, we want to restructure the unit of observation without losing or adding any information. We simply need the data in a different shape for a particular analysis or visualization. To do this, we can use one of two additional data manipulation functions.
+Sometimes the unit of observation in which a data table is stored does not match the unit needed for our analysis. If the stored format uses a compound unit of observation, we can simplify it by using an aggregation to remove one or more components. For example, we could group the *plant × day* table from @sec-collect by plant ID and calculate summary statistics (such as the maximum height over all days) to generate a dataset with *plant* as the unit of observation. While aggregations are useful, by design they remove information present in the original dataset. Other times, we want to restructure the unit of observation without losing or adding any information. We simply need the data in a different shape for a particular analysis or visualization. To do this, we can use one of two additional data manipulation functions.
 
 We could have stored the `cellphone` dataset in a format where the unit of observation was *year* and each country had its own column. What if we want to work with the data in that format? For example, if we wanted to compute the difference in cellphone ownership between the United States and Canada, we would need the data in this format. We can convert our dataset using the `.pivot()` method, which requires indicating which column will be used to index the output (this becomes the unit of observation), which column will be used to create the new columns, and which column contains the values that will fill the table.
 
@@ -76,7 +50,7 @@ cell_wide = (
 cell_wide
 ```
 
-This is the wide frame described in the tidy data section above. It is tidy for the unit of observation *year*, and it is the layout we would want if we were computing something like the gap between two specific countries. It is not tidy for the unit of observation *year × country*, since country has moved out of the data and into the column names.
+This is the wide frame described in the introduction. It is tidy for the unit of observation *year*, and it is the layout we would want if we were computing something like the gap between two specific countries. It is not tidy for the unit of observation *year × country*, since country has moved out of the data and into the column names.
 
 It is possible that some combinations of the new rows and columns do not exist in the original DataFrame. When this happens, Python will fill in `null` values for the missing combinations. Sometimes, particularly if these are counts that we are looking at, we may want to convert all of these missing values to zeros (or another default). To do that, we can call the method `.fill_null(0)`. The value zero can be changed to any other value that makes sense. This can also be used on individual columns as needed in other analyses.
 
@@ -161,6 +135,6 @@ The term "explode" warns us that the resulting dataset can become very large, pa
 
 ## Round Trips Versus Aggregation
 
-Pivoting and unpivoting are round trips: pivot a long table to wide, unpivot it back, and (aside from row and column ordering) you have the original table. No values are created or destroyed, only rearranged. Aggregation is not like this. Grouping a *plant × day* table down to a *plant* table by taking the maximum height, for instance, throws away every day's measurement except the one that set the maximum, and there is no operation that gets those measurements back. Pivoting and unpivoting change a table's shape; aggregation changes its unit of observation, and it does so in one direction only. Keep the distinction in mind, since it motivates the advice to prefer longer formats for storing data that we will develop in @sec-collect: a long table can always be pivoted into whatever wide shape an analysis needs, but a table that has already been aggregated cannot be un-aggregated back into it.
+Pivoting and unpivoting are round trips: pivot a long table to wide, unpivot it back, and (aside from row and column ordering) you have the original table. No values are created or destroyed, only rearranged. Aggregation is not like this. Grouping a *plant × day* table down to a *plant* table by taking the maximum height, for instance, throws away every day's measurement except the one that set the maximum, and there is no operation that gets those measurements back. Pivoting and unpivoting change a table's shape; aggregation changes its unit of observation, and it does so in one direction only. Keep the distinction in mind, since it is the reason behind the advice in @sec-collect to prefer longer formats for storing data: a long table can always be pivoted into whatever wide shape an analysis needs, but a table that has already been aggregated cannot be un-aggregated back into it.
 
 ## References {-}

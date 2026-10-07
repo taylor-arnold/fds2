@@ -66,97 +66,72 @@ anno = DSText.process(docs.select(c.doc_id, c.text), nlp)
 
 ### Questions
 
-`docs` and `anno` are the same 200 AG News articles from the last notebook,
-50 each labeled `"Business"`, `"Sci/Tech"`, `"Sports"`, or `"World"`. The
-last notebook counted words within each article; this one turns each article
-into a single point and asks how those points relate to one another. Print
-results unless a question says otherwise.
+`docs` and `anno` hold the same 200 AG News articles as the last notebook, 50 each
+labeled `"Business"`, `"Sci/Tech"`, `"Sports"`, and `"World"`.
 
-1. Compute the TF-IDF table with `DSText.compute_tfidf(anno, min_df=0.01,
-max_df=1.0)`, the same call from the last notebook. Print its shape and the
-number of distinct lemmas it covers.
+Unless a question says otherwise, just print the result of each block; do not save
+it to a variable.
+
+1. Compute the TF-IDF scores with
+`DSText.compute_tfidf(anno, min_df=0.01, max_df=0.5)` and print the result.
 
 ```{python}
-tfidf = DSText.compute_tfidf(anno, min_df=0.01, max_df=1.0)
-print(tfidf.shape)
+DSText.compute_tfidf(anno, min_df=0.01, max_df=0.5)
+```
+
+2. Take the code from the previous question and keep only the rows where `lemma` is
+`"olympic"`. Sort from the largest to the smallest `tfidf`.
+
+```{python}
 (
-    tfidf
-    .select(c.lemma.n_unique())
+    DSText.compute_tfidf(anno, min_df=0.01, max_df=0.5)
+    .filter(c.lemma == "olympic")
+    .sort(c.tfidf, descending=True)
 )
 ```
 
-2. In the first block, pick two lemmas, `"olympic"` and `"profit"`, pivot
-their TF-IDF scores into two columns, filling missing combinations with zero,
-join `label` on, and plot every document as its `doc_id`, positioned by these
-two scores and colored by `label`. In the second block, filter to the
-documents with a nonzero score for both terms. How many are there? Compare
-this to the book's `poem`/`novel` example, where authors who write in both
-forms show up in the upper-right corner of the plot.
+Only 11 of the 200 articles use the word "olympic". Most articles have no row
+here at all, because the TF-IDF table only stores the scores that are not zero.
+
+3. Change the code from the previous question to keep the lemmas `"olympic"` and
+`"profit"`. Then, as in the chapter, pivot the result so that each lemma is a
+column, using `.pivot(on="lemma", index="doc_id", values="tfidf")`, and fill the
+missing values with zero using `.fill_null(0)`.
 
 ```{python}
-scatter_df = (
-    tfidf
+(
+    DSText.compute_tfidf(anno, min_df=0.01, max_df=0.5)
     .filter(c.lemma.is_in(["olympic", "profit"]))
     .pivot(on="lemma", index="doc_id", values="tfidf")
     .fill_null(0)
-    .join(docs.select(c.doc_id, c.label), on="doc_id")
 )
+```
 
+4. Take the code from the previous question and draw a scatter plot with
+`geom_point`, with `olympic` on the x-axis and `profit` on the y-axis.
+
+```{python}
 (
-    scatter_df
+    DSText.compute_tfidf(anno, min_df=0.01, max_df=0.5)
+    .filter(c.lemma.is_in(["olympic", "profit"]))
+    .pivot(on="lemma", index="doc_id", values="tfidf")
+    .fill_null(0)
     .ggplot(aes(c.olympic, c.profit))
-    .geom_text(aes(label=c.doc_id, color=c.label), size=6)
+    .geom_point()
 )
 ```
+
+No article uses both words. The points lie along the two axes, and the other 178
+articles, which use neither word, are not in the table at all. `olympic` and
+`profit` come from unrelated topics, so no article has a reason to use both.
+
+5. Build a 2D UMAP projection of the articles, as in the chapter. Pipe `anno` into
+`umap_text` with `doc_id=c.doc_id`, `term_id=c.lemma`, `n_components=2`,
+`min_df=0.01`, `max_df=0.5`, and `random_state=42`, and then call
+`.predict(full=True)`.
 
 ```{python}
 (
-    scatter_df
-    .filter((c.olympic > 0) & (c.profit > 0))
-)
-```
-
-Zero. Eleven documents (all `Sports`) sit along the `olympic` axis with a
-`profit` score of exactly 0, and eleven more (all `Business`) sit along the
-`profit` axis with an `olympic` score of exactly 0. The other 178 sit at the
-origin, using neither word, and the upper-right corner is empty. The book's
-authors write poetry and prose in mixed proportions, so some of them land
-away from both axes. `olympic` and `profit` belong to two unrelated news
-beats, so no article in this corpus has a reason to use both.
-
-3. The TF-IDF matrix from question 1 has a row for every document and a
-column for every lemma, but `tfidf` only stores the nonzero entries, one per
-row. Use that to compute the size of the full matrix (documents times
-lemmas), the percentage of its entries that are exactly zero, and the
-average number of nonzero terms per document.
-
-```{python}
-(
-    tfidf
-    .select(
-        n_docs = c.doc_id.n_unique(),
-        n_lemmas = c.lemma.n_unique(),
-        n_nonzero = pl.len()
-    )
-    .with_columns(
-        pct_zero = (100 * (1 - c.n_nonzero / (c.n_docs * c.n_lemmas))).round(1),
-        avg_nonzero = (c.n_nonzero / c.n_docs).round(1)
-    )
-)
-```
-
-97.4% of the matrix is zero. On average each of these 200 short wire
-articles uses only about 24 of the corpus's 917 lemmas, a concrete number
-behind the chapter's description of a TF-IDF matrix as a *sparse
-embedding*.
-
-4. Build a 2D UMAP projection of the corpus with `umap_text`, using
-`min_df=0.01` and `max_df=0.5` as the chapter does, and plot each document's
-`label` at its projected position, colored by `label`. Does the plot show
-four clean, separated clusters the way the book's biography pages did?
-
-```{python}
-umap_full = (
     anno
     .pipe(
         umap_text,
@@ -168,41 +143,54 @@ umap_full = (
         random_state=42
     )
     .predict(full=True)
-    .join(docs.select(c.doc_id, c.label), on="doc_id")
-)
-
-(
-    umap_full
-    .ggplot(aes(c.dr0, c.dr1))
-    .geom_text(aes(label=c.label, color=c.label), size=6)
 )
 ```
 
-No. The four labels form loose, overlapping neighborhoods instead of four
-separate blobs. A `Sports` patch in the upper left sits right next to a
-`World` patch, and `Business` and `Sci/Tech` interleave through the middle of
-the plot, far from the clean separation of the chapter's biography pages.
-Question 7 measures this directly with the full-dimensional distances.
-
-5. Compute the pairwise angle distance between every pair of documents with
-`DSText.compute_distances(anno, min_df=0.01, max_df=0.5)` and save it as
-`text_dist`. Each pair is stored once, in `doc_id < doc_id2` order. Stack the
-table with a copy of itself with the two ID columns swapped, so that every
-document appears in the `doc_id` column with a row for every other document,
-and print the shape of the result.
+6. Take the code from the previous question, join it to
+`docs.select(c.doc_id, c.label)`, and draw a scatter plot with `dr0` on the x-axis
+and `dr1` on the y-axis, colored by `label`.
 
 ```{python}
+(
+    anno
+    .pipe(
+        umap_text,
+        doc_id=c.doc_id,
+        term_id=c.lemma,
+        n_components=2,
+        min_df=0.01,
+        max_df=0.5,
+        random_state=42
+    )
+    .predict(full=True)
+    .join(docs.select(c.doc_id, c.label), on=c.doc_id)
+    .ggplot(aes(c.dr0, c.dr1, color=c.label))
+    .geom_point()
+)
+```
+
+The labels form loose groups, such as the Sports articles near the top, but the
+four topics overlap a lot. The chapter's author pages separated much more cleanly.
+
+7. The block below is given. It computes the angle distance between every pair of
+articles with `DSText.compute_distances()` and then, as in the chapter, stacks the
+table with a copy of itself with the two ID columns swapped. The result is saved as
+`text_dist_both`. Run it and look at the table.
+
+```{python}
+#| tags: [noclear]
 text_dist = DSText.compute_distances(anno, min_df=0.01, max_df=0.5)
 
 text_dist_both = pl.concat([
     text_dist,
     text_dist.select(doc_id=c.doc_id2, doc_id2=c.doc_id, distance=c.distance)
 ])
-text_dist_both.shape
+text_dist_both
 ```
 
-6. The last notebook's `doc120027` was Michael Phelps's "Giddy Phelps
-Touches Gold" article. Find its five closest matches in `text_dist_both`.
+8. The article `doc120027` is about the swimmer Michael Phelps winning a gold medal.
+Filter `text_dist_both` to this article, sort by `distance`, and keep the five
+closest matches.
 
 ```{python}
 (
@@ -213,131 +201,49 @@ Touches Gold" article. Find its five closest matches in `text_dist_both`.
 )
 ```
 
-The closest match, `doc120159` at distance 1.04, is titled "Phelps Eyes
-Fourth Gold," a second wire article about the same swimmer at the same
-Olympics. It sits well ahead of the next four matches (all above 1.30),
-which are Olympic articles about other athletes and events.
+The closest match, `doc120159`, is another article about Phelps at the same
+Olympics. The other four are further away and are about other Olympic events.
 
-7. Find the single nearest neighbor of every document at once, and report
-what proportion of documents have a nearest neighbor sharing their own
-`label`, both overall and broken down by `label`.
+9. Find the nearest neighbor of every article, as in the chapter: sort by `doc_id`
+and `distance`, and keep the first row of each `doc_id` with
+`.group_by(c.doc_id, maintain_order=True).head(1)`.
 
 ```{python}
-nn = (
+(
     text_dist_both
     .sort(c.doc_id, c.distance)
     .group_by(c.doc_id, maintain_order=True)
     .head(1)
 )
+```
 
-nn_labeled = (
-    nn
-    .join(docs.select(c.doc_id, c.label), on=c.doc_id)
-    .join(
-        docs.select(pl.col("doc_id").alias("doc_id2"), pl.col("label").alias("label2")),
-        on=c.doc_id2
-    )
-)
+10. Sort `text_dist_both` from the smallest to the largest `distance` and keep the
+first four rows.
 
-print(
-    nn_labeled
-    .select((c.label == c.label2).mean())
-)
-
+```{python}
 (
-    nn_labeled
-    .group_by(c.label)
-    .agg(n=pl.len(), n_same=(c.label == c.label2).sum())
-)
-```
-
-70% of documents (140 of 200) have a same-topic nearest neighbor under the
-full-dimensional angle distance, well above the 25% expected from random
-guessing among four labels. That is a sharper picture than the loose
-neighborhoods of question 4's 2D projection, because collapsing hundreds of
-dimensions to two throws away some of the structure that separates the
-topics. `Sports` is easiest to match (80%, 40 of 50) and `Sci/Tech` hardest
-(56%, 28 of 50).
-
-8. In the first block, find the single closest pair of documents in the
-whole corpus under the angle distance. In the second block, print both
-articles' full text. What makes them so close?
-
-```{python}
-closest_pair = (
-    text_dist
-    .sort(c.distance)
-    .head(1)
-)
-closest_pair
-```
-
-```{python}
-print(
-    docs
-    .filter(c.doc_id == closest_pair.item(0, "doc_id"))
-    .item(0, "text")
-)
-print(
-    docs
-    .filter(c.doc_id == closest_pair.item(0, "doc_id2"))
-    .item(0, "text")
-)
-```
-
-At a distance of 0.37, by far the smallest in the corpus (the next-closest
-pair is at 0.77), `doc120195` and `doc120199` are two Reuters versions of the
-same story about Medtronic's quarterly earnings. Apart from the headline,
-their texts differ by a single word ("amid" against "on"). The angle
-distance has found a near-duplicate, not a coincidence of vocabulary.
-
-9. `text_dist_both` also contains pairs at the maximum possible distance,
-$\pi/2$, meaning the two documents share no filtered vocabulary at all. In
-the first block, find the document involved in the most such pairs. In the
-second block, print that document's text and look at its top TF-IDF terms to
-explain why.
-
-```{python}
-lonely = (
     text_dist_both
-    .filter((c.distance - np.pi / 2).abs() < 1e-9)
-    .group_by(c.doc_id)
-    .agg(n=pl.len())
-    .sort(c.n, descending=True)
-)
-(
-    lonely
-    .head(5)
+    .sort(c.distance)
+    .head(4)
 )
 ```
+
+Each pair appears twice, once in each direction. The closest pair, `doc120195`
+and `doc120199`, has a distance of 0.37, far below the next pair at 0.77.
+
+11. Filter `docs` to the two articles in the closest pair, `"doc120195"` and
+`"doc120199"`. Select the `text` column and print the full text with
+`.to_series().to_list()`.
 
 ```{python}
-loneliest = (
-    lonely
-    .item(0, "doc_id")
-)
-print(
-    docs
-    .filter(c.doc_id == loneliest)
-    .item(0, "text")
-)
-
 (
-    DSText.compute_tfidf(anno, min_df=0.01, max_df=0.5)
-    .filter(c.doc_id == loneliest)
-    .sort(c.tfidf, descending=True)
-    .head(5)
+    docs
+    .filter(c.doc_id.is_in(["doc120195", "doc120199"]))
+    .select(c.text)
+    .to_series()
+    .to_list()
 )
 ```
 
-`doc120178` shares no filtered vocabulary with 162 of the other 199
-documents, over 80% of the corpus. It is not a broken row. It is a short
-article (16 surviving terms) about the cyclist Leontien Zijlaard-van
-Moorsel, and spaCy's tokenizer splits her name into three tokens
-(`Zijlaard`, `van`, `Moorsel`), each of which appears in only one other
-document. Those rare tokens get the highest IDF weight the `min_df` filter
-allows and dominate the document's normalized direction. Unless another
-article mentions this cyclist by name, the angle between the two vectors
-lands at the maximum. A short document built around one uncommon proper name
-is an outlier almost by construction, so be careful about reading too much
-into any single document's distance to the rest of a corpus.
+The two articles are versions of the same Reuters story about Medtronic's
+earnings. Apart from the headline, they differ by a single word ("amid" and "on").

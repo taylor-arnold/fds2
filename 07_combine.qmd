@@ -91,7 +91,7 @@ Or, if the key has different names in the two tables, we can describe them with 
 )
 ```
 
-Note that Python will let you join on any set of columns that match between the two tables, whether or not either column is a primary key. When the join column is not unique in the right-hand table, the result can be surprising, and possibly very large. We'll see what that looks like, and how to catch it before it happens, in @sec-diagnosing-joins below. Avoid joins that do not follow the pattern here (foreign key in the left table and a primary key in the right table).
+Note that Python will let you join on any set of columns that match between the two tables, whether or not either column is a primary key. When the join column is not unique in the right-hand table, each row on the left is matched against every matching row on the right, and the result can be surprising, and possibly very large. Nothing in the code raises an error when this happens, so it is worth comparing the number of rows before and after a join. Avoid joins that do not follow the pattern here (foreign key in the left table and a primary key in the right table).
 
 ## Join Examples
 
@@ -162,50 +162,36 @@ Filtering joins are also a quick way to check data quality. Above, we saw that j
 
 Any rows that show up here are not explained by missing economic data. They are `iso` codes in the border dataset that don't correspond to any row in the country table at all. In a real project, you would want to chase these down: is `border` including dependent territories or disputed regions that `country` deliberately excludes, or is there a typo in one of the codes? A semi-join answers the mirror-image question. `border.join(country, on=c.iso, how="semi")` would keep only the rows of `border` whose `iso` value *does* have a match, without adding any of `country`'s columns. That is useful when you want to filter one table down to "things that exist elsewhere" and nothing more.
 
-## Diagnosing Bad Joins {#sec-diagnosing-joins}
+## Attaching a Group Summary
 
-We said above that joining on a column that isn't a primary key in the right table can produce surprising, and possibly very large, results. This is the join bug you are most likely to write yourself, so we look at it in detail.
+In @sec-group we saw how `.group_by()` and `.agg()` collapse a dataset down to one row per group, and how `.over()` computes a group-level statistic while keeping every original row. Using `.agg()` followed by a join gives us a second way to reach the same result as `.over()`, so it's worth comparing them directly.
 
-Suppose `c_sml` had gotten corrupted somewhere upstream, perhaps because two data sources were merged carelessly, and ended up with two rows for Afghanistan instead of one. We can simulate that here by adding a duplicate row.
-
-```{python}
-bad_c_sml = pl.concat([c_sml, c_sml.filter(c.iso == "AFG")])
-(
-    bad_c_sml
-    .filter(c.iso == "AFG")
-)
-```
-
-Now watch what happens when we join `border` to this corrupted table instead of the original.
+Suppose we want to attach each country's regional average Gini coefficient to every row of `country`, without collapsing the table. The `.over()` approach does this in a single step.
 
 ```{python}
 (
-    border
-    .join(bad_c_sml, on=c.iso)
+    country
+    .with_columns(
+        region_avg_gini = c.gini.mean().over(c.region)
+    )
 )
 ```
 
-Recall that the first rows of `border` all correspond to Afghanistan; there are six of them. Each one of those rows now matches *two* rows in `bad_c_sml` instead of one, so the join produces six extra rows, 647 instead of 641, all of them duplicate copies of Afghanistan's borders. Nothing in the code raised an error. Polars did exactly what we asked: it matched every row in the left table against every matching row in the right table, however many there were. If this had been a real dataset and we hadn't been watching the row count carefully, we might not have noticed the duplication at all, especially in a larger table where the extra rows blend in.
-
-It pays to check the key column *before* joining. Back in @sec-group we used `n_unique()` alongside `len()` to check whether a column had repeated values; the same check tells us immediately whether a table is safe to use as the right-hand side of a join.
+The agg-then-join approach reaches the same place in two steps: first collapse to one row per region, then join that summary back onto the original table using the shared `region` column as the key.
 
 ```{python}
+region_avg = (
+    country
+    .group_by(c.region)
+    .agg(region_avg_gini = c.gini.mean())
+)
 (
-    c_sml
-    .select(c.iso)
-    .n_unique() == len(c_sml)
+    country
+    .join(region_avg, on=c.region)
 )
 ```
 
-```{python}
-(
-    bad_c_sml
-    .select(c.iso)
-    .n_unique() == len(bad_c_sml)
-)
-```
-
-The first check passes: `iso` is a primary key in `c_sml`, one row per country. The second fails, which tells us, before we've joined anything, that `bad_c_sml` will multiply rows if we use it as the right table. Get in the habit of running this check on the right-hand table any time you're not certain the join key is unique. The check is short, and it catches the bug before a silently inflated row count can throw off every summary statistic you compute afterward.
+Both produce the same output column. `.over()` is more concise and is the natural choice when the summary is the only thing you need. The agg-then-join version is worth reaching for when you need the intermediate summary table for its own sake (to inspect it, plot it, or join it against something else), since `.group_by().agg()` gives you that table directly, while `.over()` never creates it.
 
 ## Conditional Joins
 
@@ -252,34 +238,3 @@ If we need to do more exotic joins between two tables, we can use the `.join_whe
 ```
 
 This method can be slow because it needs to manually check every combination of rows in the two datasets. However, it is very powerful and useful when combining two reasonably sized datasets in a complex way. Notice that we could obtain the same result by starting with a cross join (which returns every combination of rows) and then applying a filter. The benefit of the `.join_where` is that it avoids having to store in memory all combinations of non-matching rows by combining the cross join and filtering into a single step.
-
-## Attaching a Group Summary
-
-In @sec-group we saw how `.group_by()` and `.agg()` collapse a dataset down to one row per group, and how `.over()` computes a group-level statistic while keeping every original row. Using `.agg()` followed by a join gives us a second way to reach the same result as `.over()`, so it's worth comparing them directly.
-
-Suppose we want to attach each country's regional average Gini coefficient to every row of `country`, without collapsing the table. The `.over()` approach does this in a single step.
-
-```{python}
-(
-    country
-    .with_columns(
-        region_avg_gini = c.gini.mean().over(c.region)
-    )
-)
-```
-
-The agg-then-join approach reaches the same place in two steps: first collapse to one row per region, then join that summary back onto the original table using the shared `region` column as the key.
-
-```{python}
-region_avg = (
-    country
-    .group_by(c.region)
-    .agg(region_avg_gini = c.gini.mean())
-)
-(
-    country
-    .join(region_avg, on=c.region)
-)
-```
-
-Both produce the same output column. `.over()` is more concise and is the natural choice when the summary is the only thing you need. The agg-then-join version is worth reaching for when you need the intermediate summary table for its own sake (to inspect it, plot it, or join it against something else), since `.group_by().agg()` gives you that table directly, while `.over()` never creates it.

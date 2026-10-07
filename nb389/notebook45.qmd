@@ -45,23 +45,41 @@ cite = pl.read_csv(ub + "data/scotus_citation.csv")
 
 ### Questions
 
-This notebook works with a citation network drawn from the U.S. Supreme
-Court. A row of `case` is one decided case, identified by its official
-reporter `citation` (for example `"384 U.S. 436"`, which is *Miranda v.
-Arizona*). The other columns give the `case_name`, the `term` (the year the
-case was argued), the `chief` justice, the majority and minority vote counts,
-an `issue_description`, and whether the decision's direction was coded
-`liberal` or `conservative` in `lean`. A row of `cite` is one precedent link:
-the case in `citing_case` refers to the earlier case in `cited_case` somewhere
-in its opinion. There are 231,775 such links across more than two centuries of
-decisions, far too many to draw as a single network, so most of this notebook
-builds a small, readable subnetwork of the most-cited cases and then measures
-it. Print your results unless a question says to save them.
+This notebook works with a citation network from the U.S. Supreme Court. Each row
+of `case` is one decided case, identified by its `citation` (for example
+`"384 U.S. 436"` is *Miranda v. Arizona*), with columns such as `case_name`, `term`
+(the year), and `chief` (the chief justice). Each row of `cite` is one link: the
+case in `citing_case` cites the earlier case in `cited_case`.
 
-1. As a first look at the raw edge list, count how many times each case is
-cited by another. Group `cite` by `cited_case`, count the rows in each group
-with `pl.len()`, sort with the largest count first, and join the case names in
-from `case` so the result is readable. Print the top 10.
+Unless a question says otherwise, just print the result of each block; do not save
+it to a variable.
+
+1. Using `case`, count the number of cases decided under each `chief` justice.
+Sort from most to fewest cases.
+
+```{python}
+(
+    case
+    .group_by(c.chief)
+    .agg(n = pl.len())
+    .sort(c.n, descending=True)
+)
+```
+
+2. Filter `cite` to the rows where `citing_case` is `"384 U.S. 436"`
+(*Miranda v. Arizona*). These are the cases that *Miranda* cites.
+
+```{python}
+(
+    cite
+    .filter(c.citing_case == "384 U.S. 436")
+)
+```
+
+*Miranda* cites 81 earlier cases.
+
+3. Count the number of times each case is cited by grouping `cite` by
+`cited_case`. Sort from most to least cited and keep the first 10 rows.
 
 ```{python}
 (
@@ -70,31 +88,38 @@ from `case` so the result is readable. Print the top 10.
     .agg(n_in = pl.len())
     .sort(c.n_in, descending=True)
     .head(10)
-    .join(
-        case.select(c.citation, c.case_name, c.term),
-        left_on="cited_case",
-        right_on="citation",
-        how="left"
-    )
 )
 ```
 
-The top of the list is a run of cases most people recognize: *McCulloch v.
-Maryland* with 255 citations into it, then *Miranda*, *Boyd v. United States*,
-and *Gibbons v. Ogden*. Counting the links *into* a case measures how often it
-is used as precedent. Counting links out would reward a case for having a
-long opinion that cites many others.
-
-2. To get a network small enough to draw, restrict attention to the 80
-most-cited cases and the links among them. First build the list of the 80
-citations. Sort by the citation count, but add `cited_case` as a second sort
-key so that ties at the boundary are broken the same way every time; without
-it the 80th slot is filled arbitrarily and every number later in the notebook
-can shift between runs. Then filter `cite` to the edges whose endpoints are
-both in that set, and rename the two columns to the `doc_id` and `doc_id2`
-names that `DSNetwork.process` expects. Print how many edges are left.
+4. Take the code from the previous question and, before sorting, join it to
+`case.select(c.citation, c.case_name, c.term)` using `left_on="cited_case"` and
+`right_on="citation"`, so that we can see the names of the cases.
 
 ```{python}
+(
+    cite
+    .group_by(c.cited_case)
+    .agg(n_in = pl.len())
+    .join(
+        case.select(c.citation, c.case_name, c.term),
+        left_on="cited_case",
+        right_on="citation"
+    )
+    .sort(c.n_in, descending=True)
+    .head(10)
+)
+```
+
+The most-cited case is *McCulloch v. Maryland* (1819), with 255 citations,
+followed by *Miranda* and *Boyd v. United States*.
+
+5. The full network is too big to draw, so the block below is given. It keeps the 80
+most-cited cases and the citations among them, builds an undirected network with
+`DSNetwork.process()`, and joins the case information onto the node table. The
+results are saved as `node` and `edge`. Run it and look at `node`.
+
+```{python}
+#| tags: [noclear]
 top = (
     cite
     .group_by(c.cited_case)
@@ -107,28 +132,16 @@ top = (
 
 edges = (
     cite
-    .filter(c.citing_case.is_in(top) & c.cited_case.is_in(top))
+    .filter(c.citing_case.is_in(top), c.cited_case.is_in(top))
     .rename({"citing_case": "doc_id", "cited_case": "doc_id2"})
 )
-(
-    edges
-    .select(pl.len())
-)
-```
 
-3. In the first block, build an undirected network from this edge list with
-`DSNetwork.process(directed=False)`, join the case metadata onto the node
-table so the nodes are readable later, and print the node table. In the second
-block, compare the number of nodes to the 80 cases you selected, using an
-anti-join to find the ones that are missing.
-
-```{python}
 node, edge, G = DSNetwork.process(edges, directed=False)
 
 node = (
     node
     .join(
-        case.select(c.citation, c.case_name, c.term, c.issue_description, c.lean),
+        case.select(c.citation, c.case_name, c.term),
         left_on="id",
         right_on="citation",
         how="left"
@@ -137,30 +150,9 @@ node = (
 node
 ```
 
-```{python}
-(
-    case
-    .filter(c.citation.is_in(top))
-    .join(node.select(c.id), left_on="citation", right_on="id", how="anti")
-    .select(c.case_name, c.term)
-)
-```
-
-The network has only 77 nodes, not 80. The three missing cases are *Pennoyer
-v. Neff*, *Mathews v. Eldridge*, and *Chevron v. Natural Resources Defense
-Council*. All three are cited heavily across the whole corpus, which is how
-they reached the top 80, but they belong to other areas of law (civil
-procedure and administrative deference, not constitutional rights), and none
-of them cites or is cited by another case in this set. An edge list only
-contains nodes that appear in an edge, so an isolated case drops out without
-an error or a warning. This is the network version of the row-count check:
-confirm how many nodes survived before trusting anything computed from
-them.
-
-4. Draw the network. Put the edges down first as a `geom_segment` layer using
-the `edge` table, with a low `alpha` so the lines do not overwhelm the plot,
-then add the nodes as points on top. Use `theme_void()` since the axes carry
-no meaning.
+6. Draw the network, as in the chapter. Start with `node`, add the edges with
+`.geom_segment(aes(x=c.x, y=c.y, xend=c.xend, yend=c.yend), data=edge, alpha=0.1)`,
+then add the nodes with `.geom_point()`. Finish with `.theme_void()`.
 
 ```{python}
 (
@@ -171,21 +163,16 @@ no meaning.
         data=edge,
         alpha=0.1
     )
-    .geom_point(alpha=0.5)
+    .geom_point()
     .theme_void()
-    .labs(title="Supreme Court Landmark Citation Network")
 )
 ```
 
-The layout pushes the densely cross-cited cases toward the center and leaves
-the more isolated ones on the rim. There are too many cases with names too
-long to label every point, so from here on tables will do more of the work
-than the picture.
+The network has 77 nodes, not 80. Three of the most-cited cases do not cite, and
+are not cited by, any of the other cases in the set, so they drop out.
 
-5. The first centrality measure is degree, the number of edges a node has,
-which the `node` table already carries in the `degree` column. In the first
-block, sort the nodes by degree and print the top 10 names. In the second
-block, redraw the network coloring the points by degree.
+7. Sort `node` by `degree` from largest to smallest, keep the first 10 rows, and
+select `case_name`, `term`, and `degree`.
 
 ```{python}
 (
@@ -195,6 +182,13 @@ block, redraw the network coloring the points by degree.
     .select(c.case_name, c.term, c.degree)
 )
 ```
+
+The case with the highest degree is *Palko v. Connecticut*, with 23 links,
+followed by *Gideon v. Wainwright*. *McCulloch*, the most-cited case overall, is not
+in the top 10, because most of the cases that cite it are not in the network.
+
+8. Take the code from question 6 and color the points by `degree`. Use
+`.geom_point(aes(color=c.degree), size=3)`.
 
 ```{python}
 (
@@ -206,26 +200,12 @@ block, redraw the network coloring the points by degree.
         alpha=0.1
     )
     .geom_point(aes(color=c.degree), size=3)
-    .scale_color_cmap(cmap_name="viridis")
     .theme_void()
-    .labs(title="Network Colored by Degree", color="Degree")
 )
 ```
 
-The most connected case is *Palko v. Connecticut* with 23 links, followed by
-*Gideon* and a cluster of criminal-procedure and free-speech cases.
-*McCulloch*, which led the raw citation count in question 1, is nowhere near
-the top here. Degree in this network counts only ties to the other landmark
-cases. *Palko* (the case that framed how the Bill of Rights applies to the
-states) is cited by many of the later rights cases, while most of
-*McCulloch*'s citations come from ordinary cases outside the set. The center
-of the network is not the leader of the raw count.
-
-6. Eigenvalue centrality scores a node by the scores of its neighbors, so that
-being cited by central cases counts for more than being cited by peripheral
-ones. It is in the `eigen` column, scaled so the largest score is 1. In the
-first block, print the top 10 by `eigen`. In the second block, color the
-network by it.
+9. Do the same as question 7, but sort by the eigenvector centrality `eigen`. Select
+`case_name`, `term`, `eigen`, and `degree`.
 
 ```{python}
 (
@@ -236,34 +216,11 @@ network by it.
 )
 ```
 
-```{python}
-(
-    node
-    .ggplot(aes(c.x, c.y))
-    .geom_segment(
-        aes(x=c.x, y=c.y, xend=c.xend, yend=c.yend),
-        data=edge,
-        alpha=0.1
-    )
-    .geom_point(aes(color=c.eigen), size=3)
-    .scale_color_cmap(cmap_name="viridis")
-    .theme_void()
-    .labs(title="Network Colored by Eigenvalue Centrality", color="Eigenvalue")
-)
-```
+The top of the list is almost the same as for degree. Most of these are
+criminal-procedure and free-speech cases from the twentieth century.
 
-The eigenvalue ranking concentrates even more on the incorporation and
-free-speech core: *Palko* at 1.0, then *Gideon*, *Near v. Minnesota*, one of
-the *NAACP* cases, and *Malloy v. Hogan*. As the chapter notes, the color
-scale is linear, so most of the network reads as dark, and the gradient
-across the less central cases only becomes visible if the scores are
-transformed first.
-
-7. Betweenness centrality, in the `between` column, counts how many of the
-shortest paths between other cases run through a given node. In the first
-block, print the top 10, this time showing `between` next to `degree` and
-`eigen` so the three can be compared. In the second block, color the network by
-`between`.
+10. Do the same as question 7, but sort by the betweenness centrality `between`.
+Select `case_name`, `between`, `degree`, and `eigen`.
 
 ```{python}
 (
@@ -274,52 +231,12 @@ block, print the top 10, this time showing `between` next to `degree` and
 )
 ```
 
-```{python}
-(
-    node
-    .ggplot(aes(c.x, c.y))
-    .geom_segment(
-        aes(x=c.x, y=c.y, xend=c.xend, yend=c.yend),
-        data=edge,
-        alpha=0.1
-    )
-    .geom_point(aes(color=c.between), size=3)
-    .scale_color_cmap(cmap_name="viridis")
-    .theme_void()
-    .labs(title="Network Colored by Betweenness Centrality", color="Betweenness")
-)
-```
+*Ashwander v. TVA* and *McCulloch* have a degree of only 8 and a low `eigen`
+score, but they are in the top 6 for betweenness. They are bridges between
+different parts of the network.
 
-The first four places on the betweenness list go to the same hubs that led on
-degree and eigenvalue. The next two do not: *Ashwander v. TVA* and *McCulloch
-v. Maryland* each have a degree of only 8 and an eigenvalue near 0.1, yet both
-score almost as high on betweenness as *Gideon*. These are bridge cases. They
-sit between the commerce and federalism cases on one side and the rights
-cases on the other, so the shortest path from one region to the other runs
-through them even though neither is deeply embedded in a single cluster. The
-chapter says its author network was too small to separate betweenness from
-the other centrality measures; this network, which spans several distinct
-areas of law, shows the difference plainly.
-
-8. The `cluster` column holds a community label assigned when the network was
-built. In the first block, color the network by `cluster`. In the second block,
-print each cluster's members by grouping on `cluster` and concatenating the
-case names.
-
-```{python}
-(
-    node
-    .ggplot(aes(c.x, c.y))
-    .geom_segment(
-        aes(x=c.x, y=c.y, xend=c.xend, yend=c.yend),
-        data=edge,
-        alpha=0.1
-    )
-    .geom_point(aes(color=c.cluster), size=3)
-    .theme_void()
-    .labs(title="Network Colored by Cluster", color="Cluster")
-)
-```
+11. Group `node` by `cluster` and list the members of each cluster with
+`members = c.case_name.str.join("; ")` inside of `.agg`.
 
 ```{python}
 (
@@ -329,42 +246,7 @@ case names.
 )
 ```
 
-The clusters line up with recognizable areas of law. One cluster is made up
-entirely of Fourth Amendment search-and-seizure cases: *Boyd*, *Weeks*,
-*Carroll*, *Olmstead*, *Katz*, *Terry*, and *Bivens*. Another gathers the
-federalism and federal-jurisdiction cases around *McCulloch* and *ex parte
-Young*. A pair of antitrust decisions, *Standard Oil* and *Socony*, forms its
-own two-node cluster, connected to the rest but outside the
-constitutional-law core.
-
-One cluster prints with no names at all. It holds a single node, `"75 U.S.
-168"`, which was cited often enough to reach the top 80 but has no row in the
-`case` table, so the left join in question 3 left its `case_name` null. The
-metadata table does not cover every case the Court has ever referenced, and
-a network built from an edge list can contain nodes the metadata never
-described.
-
-9. Finally, put a number on how the centrality measures relate to one another.
-The chapter claims that eigenvalue and betweenness centrality are usually
-highly correlated, except in a few network types. Compute the correlation
-between `degree` and `eigen`, and between `eigen` and `between`, across all the
-nodes.
-
-```{python}
-(
-    node
-    .select(
-        corr_degree_eigen = pl.corr(c.degree, c.eigen),
-        corr_eigen_between = pl.corr(c.eigen, c.between)
-    )
-)
-```
-
-Degree and eigenvalue move together closely, at a correlation of 0.91,
-which is why the plots in questions 5 and 6 looked so similar. Eigenvalue and
-betweenness correlate at only 0.37, and the bridge cases from question 7
-account for the gap: *McCulloch* and *Ashwander* are near the top on
-betweenness and near the bottom on eigenvalue, and a handful of nodes like
-them is enough to pull the correlation well below the other pair. The two
-colored plots look similar enough by eye to hide this difference, which is
-why it is worth measuring.
+The clusters line up with areas of law. One cluster is all search-and-seizure
+cases (*Boyd*, *Weeks*, *Katz*, *Terry*), and two antitrust cases (*Standard Oil*
+and *Socony*) form their own cluster. One cluster has no name because its only
+case, `"75 U.S. 168"`, has no row in `case`.

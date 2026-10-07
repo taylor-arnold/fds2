@@ -8,15 +8,41 @@ warnings.filterwarnings("ignore")
 
 ## Introduction
 
-It's commonly said in data science that most of our time is spent collecting and cleaning data. If we collect data in a clean format from the start, we can proceed directly to the exploration stage. @sec-restructure laid out the theory behind that claim: what makes a table tidy, and why. This chapter covers the practical decisions you face when building a dataset from scratch.
+It's commonly said in data science that most of our time is spent collecting and cleaning data. If we collect data in a clean format from the start, we can proceed directly to the exploration stage. This chapter starts with the theory behind that claim: the unit of observation, and the rules that make a table tidy. It then turns to the practical decisions you face when building a dataset from scratch.
 
 Two sources are worth reading in full. Karl Broman and Kara Woo's "Data Organization in Spreadsheets" mixes practical advice with a discussion of the principles behind it [@ch02:broman2018data]. Catherine D'Ignazio and Lauren Klein's *Data Feminism* raises questions of bias, inequality, and power that come up constantly when collecting and organizing data, even in projects that look purely technical [@klein2020feminism].
 
 This chapter gives a concise set of recommendations for organizing and storing data, rather than an extended discussion of alternatives. For the alternatives, see the sources above. Because it doesn't rely on advanced spreadsheet functions, any spreadsheet program will work. The screenshots come from Microsoft Excel, but the same steps apply in Google Sheets, LibreOffice, and similar programs.
 
+## Units of Observation
+
+When designing a way to store tabular data, we often must decide whether to favor many rows and few columns or many columns and few rows. A related decision, particularly when choosing a format with more columns, is what information to store in columns versus rows. In some cases the answers are clear and obvious. In others, there are trade-offs about which types of analyses will be easiest or hardest to perform with the data. Let's work through an example.
+
+Assume that you are a biologist tracking the heights of 100 plants over the next 14 days. There are several different ways that this data could be collected. We could have each day's measurements in a column and each plant as a row. We could have each plant as a column and each day as a row. Or we could have a row for each combination of plant and day, with `100*14 = 1,400` rows and three columns (plant ID, day ID, and height).
+
+A core data-science concept will help us distinguish the three cases above. A *unit of observation* is the entity about which data are collected and recorded in a dataset. In other words, it is the "who" or "what" that each row of the table represents. In the example with one row for each plant and one column for each day, the unit of observation is a *plant*. In the example with one row for each day and one column for each plant, the unit of observation is a *day*. In the final example, the one with 1,400 rows, we call the unit of observation *plant × day* (read "plant crossed with day"), which means each row corresponds to a unique combination of one plant and one day. The key takeaway is that once we have picked the unit of observation, there is only a single way to construct our data table.
+
+Note that the concept of a unit of observation is closely linked to that of a primary key, which we met in @sec-combine. By definition, a primary key must uniquely identify the "what" of the unit of observation. For example, a primary key for a table whose unit of observation is a plant must uniquely identify each plant. Likewise, a table with a *plant × day* unit of observation needs a key that uniquely identifies both the plant and the day.
+
+## Tidy Data
+
+None of the three layouts in the plant example is wrong. Each one is a complete, valid way to record the same 1,400 measurements. What differs is which unit of observation each layout is built around, and that difference has consequences for how easy the data is to work with.
+
+Hadley Wickham's "Tidy Data" gives a name to the layout that matches a chosen unit of observation, and a framework for recognizing it [@ch02:hadley2014tidy]. A dataset is *tidy* when three conditions hold:
+
+- every variable is a single column,
+- every observation is a single row,
+- every table holds a single unit of observation.
+
+The second and third rules restate what we already know from the previous section: rows correspond to a unit of observation, and a table should stick to one such unit. The first rule is the new piece. It says that a quantity we might want to filter on, group by, or plot should live in its own column, not be smuggled into a column name, split across several columns, or bundled together with another quantity in the same cell.
+
+The plant-by-day table with 1,400 rows is tidy for the *plant × day* unit of observation: `plant`, `day`, and `height` each get their own column, and each row is one measurement of one plant on one day. The plant-by-column table is not tidy for that same unit. Day is no longer a variable stored in a column; it has been scattered across fourteen column names, and a single observation (one plant's full trajectory) is spread across fourteen cells instead of appearing once.
+
+Tidiness is a property of a table *relative to a unit of observation*, not a property of the values themselves, which makes it easy to misjudge. The wide plant-by-day table is a tidy table for the unit of observation *plant*, if what you want is one row summarizing each plant's height over the two-week window. It is only untidy once you decide the unit of observation you need is *plant × day*. In @sec-restructure we will see how to move a table between layouts like these when an analysis needs a different unit of observation from the one the data were stored in.
+
 ## What Tables?
 
-The initial step in designing storage for tabular data is deciding what different tables we will need. As we saw in @sec-restructure when discussing pivots and unpivots, the most important characteristic that determines the structure of a specific table is the unit of observation. Recall that the unit of observation can be a simple value (such as `day` or `plant`) or a combination of values (such as `day × plant`). So, we need to decide which simple and complex units of observation we need for our specific application. There are two general principles that we should keep in mind in this process:
+The initial step in designing storage for tabular data is deciding what different tables we will need. As we saw earlier in this chapter, the most important characteristic that determines the structure of a specific table is the unit of observation. Recall that the unit of observation can be a simple value (such as `day` or `plant`) or a combination of values (such as `day × plant`). So, we need to decide which simple and complex units of observation we need for our specific application. There are two general principles that we should keep in mind in this process:
 
 - **prefer longer to wider**: When we have a situation where we need to decide between a longer and a wider format, prefer the longer format. It is easier to extend, easier to check, and there is usually only one long format instead of multiple possible wide ones.
 - **respect unit of observation**: When filling in data in a table, a general rule is that we only record data that describes the entire unit of observation. This is always the case for a simple unit of observation, but can easily be broken when we have a complex key. 
@@ -59,45 +85,6 @@ Most sources on collecting data suggest saving the results from our spreadsheets
 
 Our recommendation is a bit less strict about the need to export data only as a plain-text file. Plain text is the best way to share and store a dataset once an analysis is finished, but if we will continue adding to and changing the dataset, it may be preferable to store the data as an Excel file (`.xlsx`) or in Google Sheets. The latter (Google Sheets) can also be read directly into Python. This also avoids errors introduced when converting back and forth between Excel and plain-text formats. Data can be loaded directly from an Excel file as well using `pl.read_excel()`. Once the data collection and cleaning are finished, it's a good idea to store the data in a plain-text format for sharing and long-term preservation.
 
-## Reading Imperfect Files
-
-Everything so far in this chapter describes how to store data well when you are the one collecting it. Most of the time, you are not. A collaborator hands you a spreadsheet with three header rows and a merged cell. A government agency publishes a CSV encoded in Windows-1252 because the export tool was built in 2003 and never updated. A survey platform codes missing responses as `"-99"` instead of leaving the cell blank. None of this data is unusable, but none of it will load cleanly with the default settings either. This section covers the tools for reading it anyway.
-
-Loading a well-formed Excel file is simple. As mentioned above, `pl.read_excel()` reads a sheet directly into a Polars data frame:
-
-```{python}
-#| eval: false
-import polars as pl
-
-cookbooks = pl.read_excel("data/cookbooks.xlsx", sheet_name="Cookbooks")
-```
-
-If the file has multiple sheets and you don't specify `sheet_name`, Polars reads only the first sheet; passing `sheet_id=0` instead returns a dictionary mapping sheet names to data frames, which is convenient when a workbook holds several related tables at once, such as the cookbooks and authors tables from the worked example below.
-
-CSV files are just as common and, because they carry no information about types or encoding, tend to break in more varied ways. The function `pl.read_csv()` has a long list of arguments to handle this. In practice, a handful come up over and over:
-
-- **`separator`**: CSV technically stands for comma-separated values, but plenty of files use a semicolon, a tab, or a pipe instead, often because they were exported from a system configured for a locale where the comma is a decimal separator. Set `separator=";"` (or whatever character the file uses) to fix this.
-- **`encoding`**: Polars assumes UTF-8 by default. Older files, or files exported from Windows programs, are often encoded as `"windows-1252"` or `"latin1"` instead. Reading a file with the wrong encoding usually produces garbled characters rather than an outright error, so this one is easy to miss until you spot a name like "JosÃ©" where "José" should be.
-- **`skip_rows`**: Some export tools add a title, a generation date, or a logo caption above the header row. Setting `skip_rows` to the number of lines to discard gets you to the real start of the table.
-- **`null_values`**: Missing data is not always blank. Surveys and legacy databases frequently use a placeholder such as `"NA"`, `"N/A"`, `"-99"`, or `"."`. Passing a list of these strings to `null_values` tells Polars to treat them as missing rather than as literal text or, worse, as numbers.
-- **`schema_overrides`**: Polars guesses each column's type from its contents, and the guess is sometimes wrong in a way that loses information. A ZIP code column full of five-digit numbers gets read as an integer, which silently drops the leading zero from "02138." Passing `schema_overrides={"zip_code": pl.Utf8}` forces that column to stay text.
-
-A single file often needs several of these at once:
-
-```{python}
-#| eval: false
-survey = pl.read_csv(
-    "data/survey_responses.csv",
-    separator=";",
-    encoding="windows-1252",
-    skip_rows=2,
-    null_values=["NA", "N/A", "-99"],
-    schema_overrides={"zip_code": pl.Utf8, "respondent_id": pl.Utf8},
-)
-```
-
-The messy CSV file of Massachusetts cities from @sec-types is a good one to revisit here. It is closer to what you should expect from real, second-hand data than the clean files we have been using for most of this book. Its problems are type problems, and most of them can be fixed while reading the file. Setting `schema_overrides={"zip": pl.Utf8}` keeps the ZIP codes as text, so Boston stays 02108 instead of losing its leading zero, which no later cast can restore. Setting `null_values=["n/a"]` turns Pittsfield's placeholder into a missing value, so the `pop` column loads as integers instead of text. The `founded` column still arrives as text and can be converted with `.str.to_date()`, as in @sec-types. Whatever arguments you use, check the schema of the loaded data frame to confirm that a column of what looked like numbers didn't load as text. Reading an imperfect file is rarely a single function call; it is usually a short investigation that uses the tools from the rest of this book.
-
 ## Data Dictionary
 
 Finally, it is important to document exactly what information is being stored in each table and its variables. It is also important to note any relationships between primary and foreign keys, especially when they have different names. To do this, we can construct a *data dictionary*. Ideally, this will explain, for each variable, basic information such as the variable's name, measurement units, and expected values or categories. Any decisions that needed to be made should also be documented. A data dictionary can be a simple text file, or it can be stored as a structured dataset. Often, when storing data in a spreadsheet program, the data dictionary is included as the first or last sheet.
@@ -139,12 +126,12 @@ Above, we described the data dictionary as a tabular dataset. It is also possibl
 
 ## Extensions
 
-We have provided a consolidation of the information from the research papers mentioned in the introduction, focusing on issues of particular concern for humanities data collection. The first places to look for more information are the papers mentioned above: Karl Broman and Kara Woo's "Data Organization in Spreadsheets" [@ch02:broman2018data] and Catherine D'Ignazio and Lauren Klein's *Data Feminism* [@klein2020feminism]. Hadley Wickham's "Tidy Data," discussed in @sec-restructure, is also worth a second look here, since its theoretical framework underlies much of the practical advice above [@ch02:hadley2014tidy]. Another source for thinking about data dictionaries, data documentation, and data publishing is the "Datasheets for Datasets" paper [@gebru2021datasheets]. While the paper focuses on predictive modeling, it offers useful examples of the documentation needed when publishing large datasets and provides a critical lens on how choices made during data collection fundamentally affect subsequent data analyses.
+We have provided a consolidation of the information from the research papers mentioned in the introduction, focusing on issues of particular concern for humanities data collection. The first places to look for more information are the papers mentioned above: Karl Broman and Kara Woo's "Data Organization in Spreadsheets" [@ch02:broman2018data] and Catherine D'Ignazio and Lauren Klein's *Data Feminism* [@klein2020feminism]. Hadley Wickham's "Tidy Data," discussed earlier in this chapter, is also worth reading in full, since its theoretical framework underlies much of the practical advice above [@ch02:hadley2014tidy]. Another source for thinking about data dictionaries, data documentation, and data publishing is the "Datasheets for Datasets" paper [@gebru2021datasheets]. While the paper focuses on predictive modeling, it offers useful examples of the documentation needed when publishing large datasets and provides a critical lens on how choices made during data collection fundamentally affect subsequent data analyses.
 
 The kinds of data that need to be collected and how to collect them ultimately depend on one's underlying research questions. The process of translating a research question into a quantitative framework is outside the scope of this text, but it is an important consideration when working with data to address research questions in the humanities. There are many good guides to research design, though the majority focus on either scientific, hypothesis-driven quantitative designs or purely qualitative data collection. We recommend a few sources that sit at the intersection of these approaches.
 
 Content analysis is a common social-science technique used across fields. It often mixes qualitative questions with quantitative data, making it a good source of research-design advice for humanities data analysis [@schreier2012qualitative] [@neuendorf2017content] [@krippendorff2018content]. Similarly, corpus linguistics sits at the boundary of the humanities and the social sciences and offers many resources on best practices [@paquot2021practical]. Corpus linguistics often works with both textual and audio data and has developed specific techniques for working with the rich, multimodal datasets considered in the following chapters. Finally, sociology is another field that mixes humanistic questions with quantitative data, providing additional references on research design [@bernard2017research]. Although these references include domain-specific elements, many general principles can be extended to other domains.
 
-Finally, notice that we did not start the book with data collection, even though collecting data is most often the first step in data analysis. We saved this until the last core chapter because understanding how to collect and store data often goes hand in hand with understanding how to visualize, organize, and restructure it. A deeper understanding of how to collect data—particularly data with complex components such as text, networks, and images—will develop as we work through the remaining chapters.
+Finally, notice that we did not start the book with data collection, even though collecting data is most often the first step in data analysis. We saved it until late in the core chapters because understanding how to collect and store data often goes hand in hand with understanding how to visualize, organize, and combine it. A deeper understanding of how to collect data—particularly data with complex components such as text, networks, and images—will develop as we work through the remaining chapters.
 
 ## References {-}

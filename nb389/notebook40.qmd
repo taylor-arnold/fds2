@@ -66,34 +66,115 @@ anno = DSText.process(docs.select(c.doc_id, c.text), nlp)
 
 ### Questions
 
-`docs` and `anno` carry the same 200 IMDb movie reviews as the last
-notebook, 100 labeled `"positive"` and 100 labeled `"negative"`, with the
-stray `<br />` HTML already replaced by a space before `anno` was built.
-This notebook moves from single tokens and parts of speech to multi-word
-phrases, named entities, and grammatical structure. Print results unless a
-question says otherwise.
+`docs` and `anno` hold the same 200 IMDb movie reviews as the last notebook, 100
+labeled `"positive"` and 100 labeled `"negative"`, with the `<br />` already
+replaced by a space.
 
-1. Build the bigram table the same way the chapter does: filter `anno` to
-alphabetic tokens, shift `lemma` and `is_alpha` by `-1` within each `doc_id`
-and `sid`, keep pairs where both tokens are alphabetic, and paste the two
-lemmas together into a `bigram` column. Print the 15 most frequent bigrams.
+Unless a question says otherwise, just print the result of each block; do not save
+it to a variable.
+
+1. Filter `anno` to the first sentence of the first review (`doc_id` equal to
+`"doc0001"` and `sid` equal to 1) and select the columns `tid`, `token`, `lemma`,
+and `is_alpha`.
 
 ```{python}
-bigrams = (
+(
+    anno
+    .filter(c.doc_id == "doc0001", c.sid == 1)
+    .select(c.tid, c.token, c.lemma, c.is_alpha)
+)
+```
+
+The comma and the period are the only tokens with `is_alpha` equal to `false`.
+
+2. Filter `anno` to the alphabetic tokens with `.filter(c.is_alpha)`, count the
+number of times each `lemma` appears, sort from most to least common, and keep the
+first 10 rows.
+
+```{python}
+(
+    anno
+    .filter(c.is_alpha)
+    .group_by(c.lemma)
+    .agg(n = pl.len())
+    .sort(c.n, descending=True)
+    .head(10)
+)
+```
+
+All ten are short, common words such as "the", "be", and "and".
+
+3. Take the code from the previous question and draw it as a bar plot with
+`geom_col`, with `lemma` on the x-axis and the count on the y-axis. Add
+`coord_flip()` so the labels are readable.
+
+```{python}
+(
+    anno
+    .filter(c.is_alpha)
+    .group_by(c.lemma)
+    .agg(n = pl.len())
+    .sort(c.n, descending=True)
+    .head(10)
+    .ggplot(aes(c.lemma, c.n))
+    .geom_col()
+    .coord_flip()
+)
+```
+
+4. Filter `anno` to the alphabetic tokens with `.filter(c.is_alpha)`. Then add a
+column `next_token` equal to `c.lemma.shift(-1).over([c.doc_id, c.sid])`. Select
+the columns `doc_id`, `sid`, `lemma`, and `next_token`.
+
+```{python}
+(
     anno
     .filter(c.is_alpha)
     .with_columns(
-        next_token = c.lemma.shift(-1).over([c.doc_id, c.sid]),
-        next_is_alpha = c.is_alpha.shift(-1).over([c.doc_id, c.sid])
+        next_token = c.lemma.shift(-1).over([c.doc_id, c.sid])
     )
-    .filter(c.next_is_alpha)
+    .select(c.doc_id, c.sid, c.lemma, c.next_token)
+)
+```
+
+The last word of each sentence has a missing `next_token`, because `.over()`
+stops the shift at the end of each sentence. In the first sentence, that word is
+"good".
+
+5. Take the code from the previous question (without the `.select`). Remove the rows
+where `next_token` is missing with `.filter(c.next_token.is_not_null())`, and then
+add a column `bigram` equal to `c.lemma + " " + c.next_token`. Select `doc_id`,
+`sid`, and `bigram`.
+
+```{python}
+(
+    anno
+    .filter(c.is_alpha)
+    .with_columns(
+        next_token = c.lemma.shift(-1).over([c.doc_id, c.sid])
+    )
+    .filter(c.next_token.is_not_null())
     .with_columns(
         bigram = c.lemma + " " + c.next_token
     )
+    .select(c.doc_id, c.sid, c.bigram)
 )
+```
 
+6. Take the code from the previous question and count the number of times each
+`bigram` appears. Sort from most to least common and keep the first 15 rows.
+
+```{python}
 (
-    bigrams
+    anno
+    .filter(c.is_alpha)
+    .with_columns(
+        next_token = c.lemma.shift(-1).over([c.doc_id, c.sid])
+    )
+    .filter(c.next_token.is_not_null())
+    .with_columns(
+        bigram = c.lemma + " " + c.next_token
+    )
     .group_by(c.bigram)
     .agg(count = pl.len())
     .sort(c.count, descending=True)
@@ -101,17 +182,27 @@ bigrams = (
 )
 ```
 
-As in the chapter, raw frequency mostly turns up function-word glue ("of
-the", "in the", "to be") plus the two words for the thing being reviewed
-("this movie", "the film"). Nothing here is specific to movie reviews; the
-same bigrams would top the list for almost any English corpus.
+The most common bigrams are pairs of very common words, such as "of the" and
+"be a". Only "this movie" and "the film" tell us that these are movie reviews.
 
-2. Compute PMI for every bigram, following the chapter's chain: count each
-word, count each bigram, join the two word counts onto the bigram table, and
-combine them into `p_bigram`, `p_w1`, `p_w2`, and finally `pmi`. Filter to
-`bigram_count >= 5` and print the 15 highest-PMI bigrams.
+7. The block below is given. It follows the chapter's steps to compute the PMI of
+every bigram and saves the result as `pmi`, with one row per bigram. Run it and look
+at the table.
 
 ```{python}
+#| tags: [noclear]
+bigrams = (
+    anno
+    .filter(c.is_alpha)
+    .with_columns(
+        next_token = c.lemma.shift(-1).over([c.doc_id, c.sid])
+    )
+    .filter(c.next_token.is_not_null())
+    .with_columns(
+        bigram = c.lemma + " " + c.next_token
+    )
+)
+
 word_counts = (
     anno
     .filter(c.is_alpha)
@@ -119,27 +210,13 @@ word_counts = (
     .agg(word_count = pl.len())
 )
 
-total_words = (
-    anno
-    .filter(c.is_alpha)
-    .select(pl.len())
-    .item()
-)
+total_words = word_counts.select(c.word_count.sum()).item()
+total_bigrams = bigrams.height
 
-bigram_counts = (
+pmi = (
     bigrams
     .group_by(c.bigram, c.lemma, c.next_token)
     .agg(bigram_count = pl.len())
-)
-
-total_bigrams = (
-    bigrams
-    .select(pl.len())
-    .item()
-)
-
-top_pmi = (
-    bigram_counts
     .join(
         word_counts.rename({"lemma": "w1", "word_count": "w1_count"}),
         left_on=c.lemma,
@@ -158,98 +235,145 @@ top_pmi = (
     .with_columns(
         pmi = (c.p_bigram / (c.p_w1 * c.p_w2)).log()
     )
-    .filter(c.bigram_count >= 5)
-    .sort(c.pmi, descending=True)
     .select(c.bigram, c.bigram_count, c.pmi)
-    .head(15)
 )
-top_pmi
+pmi
 ```
 
-The chapter's PMI list for the Wikipedia author pages was almost entirely
-proper nouns: book titles ("Biographia Literaria"), historical events
-("Molotov-Ribbentrop Pact"), and names of people the authors wrote about.
-This list has proper nouns too ("New York", "Cathy Lee"), but it also has
-genre vocabulary no biography page would produce ("sci fi", "low budget",
-"special effect", "production value", "support cast") and first-person
-review phrasing ("my opinion", "my favorite", "apart from"). PMI measures how
-strongly two words predict each other, and in a corpus of reviews some of
-the most predictable pairs come from the genre's vocabulary and the
-reviewer's voice.
-
-3. Build the `entities` table the same way the chapter does: filter `anno`
-to rows with a non-empty `ent_type`, mark the start of each entity with
-`ent_iob == "B"`, take a cumulative sum of that flag within each `doc_id` to
-get an `entity_id`, and group by `doc_id`, `entity_id`, and `ent_type` to
-join the tokens back into `entity_text`. Then print the 15 most frequently
-mentioned `PERSON` entities.
+8. Sort `pmi` from the largest to the smallest value of `pmi` and keep the first 15
+rows.
 
 ```{python}
-entities = (
+(
+    pmi
+    .sort(c.pmi, descending=True)
+    .head(15)
+)
+```
+
+Every one of these bigrams appears only once. When two rare words show up next to
+each other a single time, the PMI is as large as it can be.
+
+9. Do the same as the previous question, but first keep only the bigrams with
+`bigram_count` of at least 5.
+
+```{python}
+(
+    pmi
+    .filter(c.bigram_count >= 5)
+    .sort(c.pmi, descending=True)
+    .head(15)
+)
+```
+
+With at least 5 uses, the list makes more sense: names ("New York", "Cathy Lee"),
+movie vocabulary ("sci fi", "low budget", "special effect"), and phrases from the
+reviewer's voice ("my opinion", "my favorite").
+
+10. Filter `anno` to the tokens that are part of a named entity
+(`c.ent_type != ""`) and select the columns `doc_id`, `token`, `ent_type`, and
+`ent_iob`.
+
+```{python}
+(
+    anno
+    .filter(c.ent_type != "")
+    .select(c.doc_id, c.token, c.ent_type, c.ent_iob)
+)
+```
+
+Every token of a multi-word entity gets the same `ent_type`. The first token has
+`ent_iob` equal to `"B"` and the others have `"I"`, as with "Costas Mandylor" in
+the first review.
+
+11. Take the code from the previous question (without the `.select`). Add a column
+`entity_id` equal to `(c.ent_iob == "B").cum_sum().over(c.doc_id)`. Then group by
+`doc_id`, `entity_id`, and `ent_type`, and join the tokens back together with
+`entity_text = c.token.str.join(" ")`.
+
+```{python}
+(
     anno
     .filter(c.ent_type != "")
     .with_columns(
-        new_entity = c.ent_iob == "B"
+        entity_id = (c.ent_iob == "B").cum_sum().over(c.doc_id)
     )
-    .with_columns(
-        entity_id = c.new_entity.cum_sum().over([c.doc_id])
-    )
-    .group_by([c.doc_id, c.entity_id, c.ent_type])
-    .agg(
-        entity_text = c.token.str.join(" "),
-    )
+    .group_by(c.doc_id, c.entity_id, c.ent_type)
+    .agg(entity_text = c.token.str.join(" "))
 )
+```
 
-top_people = (
-    entities
+12. Take the code from the previous question, keep only the `PERSON` entities, and
+count the number of times each `entity_text` appears. Sort from most to least common
+and keep the first 15 rows.
+
+```{python}
+(
+    anno
+    .filter(c.ent_type != "")
+    .with_columns(
+        entity_id = (c.ent_iob == "B").cum_sum().over(c.doc_id)
+    )
+    .group_by(c.doc_id, c.entity_id, c.ent_type)
+    .agg(entity_text = c.token.str.join(" "))
     .filter(c.ent_type == "PERSON")
     .group_by(c.entity_text)
     .agg(count = pl.len())
     .sort(c.count, descending=True)
     .head(15)
 )
-top_people
 ```
 
-4. Group `entities` by `ent_type`, count, and plot the result as a bar chart
-with `geom_col()` and `coord_flip()`, matching the chapter's own entity-type
-plot.
+The top two names each come from a single review. Kornbluth is the director of
+the movie in one review, and Baird is a character in another. A name that one
+review repeats many times can top the list.
+
+13. Take the code from question 11 and count the number of entities of each
+`ent_type`. Draw the result as a bar plot with `geom_col` and `coord_flip()`.
 
 ```{python}
 (
-    entities
+    anno
+    .filter(c.ent_type != "")
+    .with_columns(
+        entity_id = (c.ent_iob == "B").cum_sum().over(c.doc_id)
+    )
+    .group_by(c.doc_id, c.entity_id, c.ent_type)
+    .agg(entity_text = c.token.str.join(" "))
     .group_by(c.ent_type)
     .agg(count = pl.len())
     .ggplot(aes(c.ent_type, c.count))
     .geom_col()
     .coord_flip()
-    .labs(title="Named Entity Types in the Review Corpus", x="Entity Type", y="Count")
 )
 ```
 
-`PERSON` still leads, as it did for the biography pages, but the order below
-it changes. `ORG`, `CARDINAL`, and `GPE` all outrank `DATE` here, while in
-the chapter's corpus `DATE` was third behind `PERSON` and `ORG`. Reviews
-count things (a rating out of ten, a number of stars, "one of the worst
-films") far more than they cite calendar dates, which biography pages do
-constantly for birth, death, and publication years.
+`PERSON` is by far the most common type, followed by `ORG`, `CARDINAL`, and `GPE`.
+Reviews use a lot of numbers, such as a rating out of ten.
 
-5. Reconstruct subject-verb pairs the way the chapter does: select `VERB`
-tokens as `verbs`, then join every `nsubj` token to the verb sitting at its
-`head_idx` within the same `doc_id` and `sid`. Print the 10 most frequent
-subject-verb pairs.
+14. Filter `anno` to the first sentence of the first review (`doc_id` equal to
+`"doc0001"` and `sid` equal to 1) and select the columns `tid`, `token`, `dep`, and
+`head_idx`.
 
 ```{python}
-verbs = (
+(
     anno
-    .filter(c.upos == "VERB")
-    .select(
-        c.doc_id, c.sid,
-        verb_idx = c.tid,
-        verb = c.lemma
-    )
+    .filter(c.doc_id == "doc0001", c.sid == 1)
+    .select(c.tid, c.token, c.dep, c.head_idx)
 )
+```
 
+The subject "movie", the word "not", and the adjective "good" all have
+`head_idx` equal to 7, which points to the verb "is".
+
+15. Find the most common subject-verb pairs. Filter `anno` to the subjects
+(`dep` equal to `"nsubj"`) and select `doc_id`, `sid`, `subject = c.lemma`, and
+`verb_idx = c.head_idx`. Join this to the verbs on `doc_id`, `sid`, and `verb_idx`,
+where the verbs are
+`anno.filter(c.upos == "VERB").select(c.doc_id, c.sid, verb_idx = c.tid, verb = c.lemma)`.
+Count the pairs of `subject` and `verb`, sort, and keep the first 10 rows.
+
+```{python}
 (
     anno
     .filter(c.dep == "nsubj")
@@ -258,30 +382,32 @@ verbs = (
         subject = c.lemma,
         verb_idx = c.head_idx
     )
-    .join(verbs, on=[c.doc_id, c.sid, c.verb_idx])
-    .group_by([c.subject, c.verb])
+    .join(
+        anno.filter(c.upos == "VERB").select(
+            c.doc_id, c.sid, verb_idx = c.tid, verb = c.lemma
+        ),
+        on=[c.doc_id, c.sid, c.verb_idx]
+    )
+    .group_by(c.subject, c.verb)
     .agg(count = pl.len())
     .sort(c.count, descending=True)
     .head(10)
 )
 ```
 
-Nine of the ten pairs have `I` or `you` as the subject, the tenth is the
-generic `it have`, and no movie-related noun makes the list. In the chapter's
-biography pages, the most common subjects were the authors and their works
-("author write", "work receive"). A review corpus's dependency structure is
-dominated by its narrator instead of the thing being described, as you
-would expect from a first-person genre.
+Almost every pair has `I` or `you` as the subject. Reviews are written in the
+first person, so the reviewer is the most common subject.
 
-6. Extract adjective-noun pairs the way the chapter does (`dep == "amod"`,
-joined to the `NOUN` sitting at `head_idx`), restrict to pairs where the
-noun is `"movie"` or `"film"`, and print the count for `"good"` and `"bad"`
-by `label`.
+16. Find the most common adjective-noun pairs in the same way. Filter `anno` to
+`dep` equal to `"amod"` and select `doc_id`, `sid`, `adjective = c.lemma`, and
+`noun_idx = c.head_idx`. Join this to the nouns (`upos` equal to `"NOUN"`), using
+`noun_idx = c.tid` and `noun = c.lemma`. Count the pairs, sort, and keep the first 10
+rows.
 
 ```{python}
-amod = (
+(
     anno
-    .filter(c.dep == "amod", c.is_alpha)
+    .filter(c.dep == "amod")
     .select(
         c.doc_id, c.sid,
         adjective = c.lemma,
@@ -289,193 +415,43 @@ amod = (
     )
     .join(
         anno.filter(c.upos == "NOUN").select(
-            c.doc_id, c.sid, noun_idx = c.tid, noun = c.lemma,
+            c.doc_id, c.sid, noun_idx = c.tid, noun = c.lemma
         ),
         on=[c.doc_id, c.sid, c.noun_idx]
     )
-)
-
-(
-    amod
-    .filter(c.noun.is_in(["movie", "film"]))
-    .join(docs.select(c.doc_id, c.label), on=c.doc_id)
-    .filter(c.adjective.is_in(["good", "bad"]))
-    .group_by([c.label, c.adjective])
+    .group_by(c.adjective, c.noun)
     .agg(count = pl.len())
-    .sort([c.label, c.adjective])
+    .sort(c.count, descending=True)
+    .head(10)
 )
 ```
 
-Restricting to a grammatical attachment ("bad movie", not just "bad"
-anywhere in the review) sharpens the signal for `bad` well beyond the last
-notebook's whole-review counts: 16 negative uses of "bad movie"/"bad film"
-against a single positive one, compared with 86 to 17 for `bad` anywhere.
-`good` stays close to even, 9 negative against 8 positive. A tighter
-grammatical filter helps when the word is doing real evaluative work, but it
-does not handle negation: in "not a good movie", `good` still attaches to
-`movie`, and the "not" hangs off a different word.
+"good movie" and "bad movie" are the two most common pairs.
 
-7. In the first block, find every negated predicate adjective: join tokens
-with `dep == "neg"` to `ADJ` tokens with `dep in ["acomp", "attr"]` that
-share the same `head_idx` within a `doc_id`/`sid` (this is the same "share a
-head" logic question 5 used for subjects and verbs), and count how many
-negated predicate adjectives exist in total. In the second block, count how
-many of them have the negation word sitting in the position immediately
-before the adjective, the only case a bigram search like question 1's
-`shift(-1)` could ever catch.
-
-```{python}
-neg = (
-    anno
-    .filter(c.dep == "neg")
-    .select(c.doc_id, c.sid, neg_tid = c.tid, verb_idx = c.head_idx)
-)
-
-predicate_adj = (
-    anno
-    .filter(c.upos == "ADJ", c.dep.is_in(["acomp", "attr"]))
-    .select(c.doc_id, c.sid, verb_idx = c.head_idx, adj_tid = c.tid, adjective = c.lemma)
-)
-
-negated_adj = (
-    neg
-    .join(predicate_adj, on=[c.doc_id, c.sid, c.verb_idx])
-)
-negated_adj.height
-```
-
-```{python}
-(
-    negated_adj
-    .filter(c.adj_tid == c.neg_tid + 1)
-    .height
-)
-```
-
-Only 30 of the 76 negated predicate adjectives have the negation word
-directly before them. The other 46 have something in between, sometimes a
-single word ("never get tired") and sometimes several ("Never have I been so
-frustrated"). A bigram search for "not X" would have missed 61% of these
-negations, because English negation does not have to sit next to the word it
-negates. The dependency join finds all 76 regardless of the gap, since it
-follows a grammatical relationship instead of a distance. That is what the
-last notebook's question 6 was missing: a way to tell "good" and "not good"
-apart.
-
-8. Run `DSText.kwic()` on the lemma `"acting"` with `window=5` and
-`max_num=10`.
+17. Run `DSText.kwic()` on the lemma `"acting"` with `window=5` and `max_num=10`.
 
 ```{python}
 DSText.kwic(anno, "acting", max_num=10, window=5)
 ```
 
-The display is not filtered by `label`, so the concordance shows both halves
-of the corpus at once: "terrible", "decidedly bad", and "purely" sit near
-"good acting" and "above average" within the same 10 lines. An
-adjective-frequency table would not show this as directly. Here "acting" is
-the noun being judged, and the words on either side of it are the ones
-reviewers chose.
+"acting" appears next to "terrible" and "decidedly bad", but also next to
+"good acting" and "above average". Reading the context shows how each reviewer
+judged the acting.
 
-9. Compute the four complexity metrics from the chapter (mean sentence
-length, type-token ratio, mean word length, and content-word ratio) per
-document, join them into a single table, and print the mean of each metric
-grouped by `label`.
+18. Count the number of `"!"` tokens in each review, using
+`n_excl = (c.token == "!").sum()` inside of `.agg`. Join to the labels and find the
+average of `n_excl` for each `label`.
 
 ```{python}
-sentence_length = (
+(
     anno
-    .group_by([c.doc_id, c.sid])
-    .agg(n_words = c.is_alpha.sum())
     .group_by(c.doc_id)
-    .agg(mean_sentence_length = c.n_words.mean())
-)
-
-ttr = (
-    anno
-    .filter(c.is_alpha)
-    .group_by(c.doc_id)
-    .agg(n_tokens = pl.len(), n_types = c.lemma.n_unique())
-    .with_columns(ttr = c.n_types / c.n_tokens)
-    .select(c.doc_id, c.ttr)
-)
-
-word_length = (
-    anno
-    .filter(c.is_alpha)
-    .with_columns(word_length = c.token.str.len_chars())
-    .group_by(c.doc_id)
-    .agg(mean_word_length = c.word_length.mean())
-)
-
-content_pos = ["NOUN", "VERB", "ADJ", "ADV"]
-content_ratio = (
-    anno
-    .filter(c.is_alpha)
-    .with_columns(is_content = c.upos.is_in(content_pos))
-    .group_by(c.doc_id)
-    .agg(n_words = pl.len(), n_content = c.is_content.sum())
-    .with_columns(content_ratio = c.n_content / c.n_words)
-    .select(c.doc_id, c.content_ratio)
-)
-
-style_metrics = (
-    sentence_length
-    .join(ttr, on=c.doc_id)
-    .join(word_length, on=c.doc_id)
-    .join(content_ratio, on=c.doc_id)
+    .agg(n_excl = (c.token == "!").sum())
     .join(docs.select(c.doc_id, c.label), on=c.doc_id)
-)
-
-(
-    style_metrics
     .group_by(c.label)
-    .agg(
-        pl.col("mean_sentence_length").mean(),
-        pl.col("ttr").mean(),
-        pl.col("mean_word_length").mean(),
-        pl.col("content_ratio").mean()
-    )
+    .agg(n_excl = c.n_excl.mean())
 )
 ```
 
-None of the four metrics separates the two labels by much: sentence length
-differs by about half a word, and word length by four hundredths of a
-character. These are measures of *style*, and positive and negative reviews
-of the same kind of movie, written by the same kind of person, have no
-obvious reason to differ in style. As questions 6 and 7 showed, sentiment
-lives in which words get chosen, not in how long or varied the sentences
-are.
-
-10. Count the number of `"!"` tokens per document, join that count onto
-`docs`, and print the mean per-review count and the fraction of reviews
-containing at least one `"!"`, grouped by `label`.
-
-```{python}
-excl_counts = (
-    anno
-    .filter(c.token == "!")
-    .group_by(c.doc_id)
-    .agg(n_excl = pl.len())
-)
-
-(
-    docs
-    .select(c.doc_id, c.label)
-    .join(excl_counts, on=c.doc_id, how="left")
-    .with_columns(n_excl = c.n_excl.fill_null(0))
-    .group_by(c.label)
-    .agg(
-        mean_excl = c.n_excl.mean(),
-        pct_any_excl = (c.n_excl > 0).mean()
-    )
-)
-```
-
-Here the two labels finally split: negative reviews average 1.21
-exclamation points against 0.52 for positive ones, more than double. The
-share of reviews with any exclamation point is much closer (36% against
-31%), so the gap comes from a minority of negative reviews that use many. It
-is a crude signal and says nothing about *what* is being exclaimed, but it
-is a real difference in a place none of the chapter's four standard metrics
-looks. The chapter does not cover punctuation, and the count needed nothing
-beyond the `.filter()` and `.group_by()` chain from earlier chapters.
+Negative reviews have more than twice as many
+exclamation points on average (1.21) as positive ones (0.52).

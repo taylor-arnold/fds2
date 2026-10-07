@@ -99,7 +99,7 @@ Now back to the broken `pop` column in `cities`. Casting it to a numeric type sh
 
 The column is now `i64`, the real populations are numbers, and Pittsfield's entry has become `null`, the subject of the next section. Its maximum is now a number rather than `"n/a"`.
 
-What about the ZIP codes? Casting `c.zip` to `pl.String` turns 2108 back into text, but the text it produces is `"2108"`; the leading zero was discarded when the file was read and a cast cannot recover it. The fix is to prevent the damage in the first place by telling `read_csv` to treat the column as text from the start. We cover the options for reading imperfect files in @sec-collect.
+What about the ZIP codes? Casting `c.zip` to `pl.String` turns 2108 back into text, but the text it produces is `"2108"`; the leading zero was discarded when the file was read and a cast cannot recover it. The fix is to prevent the damage in the first place by telling `read_csv` to treat the column as text from the start, with `pl.read_csv("data/cities_messy.csv", schema_overrides={"zip": pl.String})`.
 
 ## Missing and Invalid Values
 
