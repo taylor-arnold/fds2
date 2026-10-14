@@ -198,12 +198,13 @@ in question 6 but with `label` in place of `doc_id`.
 
 ```{python}
 (
-    DSText.compute_tfidf(
-        anno.join(docs.select(c.doc_id, c.label), on=c.doc_id),
+    anno
+    .join(docs.select(c.doc_id, c.label), on=c.doc_id)
+    .pipe(DSText.compute_tfidf(
         max_df=0.75,
         doc_name="label"
     )
-    .sort([c.label, c.tfidf], descending=[False, True])
+    .sort(c.tfidf, descending=True)
     .group_by(c.label)
     .head(10)
     .group_by(c.label)
