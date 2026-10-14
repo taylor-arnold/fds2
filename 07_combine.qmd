@@ -162,37 +162,6 @@ Filtering joins are also a quick way to check data quality. Above, we saw that j
 
 Any rows that show up here are not explained by missing economic data. They are `iso` codes in the border dataset that don't correspond to any row in the country table at all. In a real project, you would want to chase these down: is `border` including dependent territories or disputed regions that `country` deliberately excludes, or is there a typo in one of the codes? A semi-join answers the mirror-image question. `border.join(country, on=c.iso, how="semi")` would keep only the rows of `border` whose `iso` value *does* have a match, without adding any of `country`'s columns. That is useful when you want to filter one table down to "things that exist elsewhere" and nothing more.
 
-## Attaching a Group Summary
-
-In @sec-group we saw how `.group_by()` and `.agg()` collapse a dataset down to one row per group, and how `.over()` computes a group-level statistic while keeping every original row. Using `.agg()` followed by a join gives us a second way to reach the same result as `.over()`, so it's worth comparing them directly.
-
-Suppose we want to attach each country's regional average Gini coefficient to every row of `country`, without collapsing the table. The `.over()` approach does this in a single step.
-
-```{python}
-(
-    country
-    .with_columns(
-        region_avg_gini = c.gini.mean().over(c.region)
-    )
-)
-```
-
-The agg-then-join approach reaches the same place in two steps: first collapse to one row per region, then join that summary back onto the original table using the shared `region` column as the key.
-
-```{python}
-region_avg = (
-    country
-    .group_by(c.region)
-    .agg(region_avg_gini = c.gini.mean())
-)
-(
-    country
-    .join(region_avg, on=c.region)
-)
-```
-
-Both produce the same output column. `.over()` is more concise and is the natural choice when the summary is the only thing you need. The agg-then-join version is worth reaching for when you need the intermediate summary table for its own sake (to inspect it, plot it, or join it against something else), since `.group_by().agg()` gives you that table directly, while `.over()` never creates it.
-
 ## Conditional Joins
 
 In this section, we introduce two additional kinds of joins that are helpful when working with certain types of complex data. Both of these allow us to join by relationships between keys that do not require values to be exactly equal. To start, let's create two subsets of our `country` data, separating out countries in Africa and in Asia, and sorting by the Gini coefficient. We remove any missing values from the output.

@@ -306,8 +306,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#joining-by-relation" id="toc-joining-by-relation" class="nav-link" data-scroll-target="#joining-by-relation"><span class="header-section-number">7.4</span> Joining by Relation</a></li>
   <li><a href="#join-examples" id="toc-join-examples" class="nav-link" data-scroll-target="#join-examples"><span class="header-section-number">7.5</span> Join Examples</a></li>
   <li><a href="#filtering-joins-semi-and-anti" id="toc-filtering-joins-semi-and-anti" class="nav-link" data-scroll-target="#filtering-joins-semi-and-anti"><span class="header-section-number">7.6</span> Filtering Joins: Semi and Anti</a></li>
-  <li><a href="#attaching-a-group-summary" id="toc-attaching-a-group-summary" class="nav-link" data-scroll-target="#attaching-a-group-summary"><span class="header-section-number">7.7</span> Attaching a Group Summary</a></li>
-  <li><a href="#conditional-joins" id="toc-conditional-joins" class="nav-link" data-scroll-target="#conditional-joins"><span class="header-section-number">7.8</span> Conditional Joins</a></li>
+  <li><a href="#conditional-joins" id="toc-conditional-joins" class="nav-link" data-scroll-target="#conditional-joins"><span class="header-section-number">7.7</span> Conditional Joins</a></li>
   </ul>
 </nav>
     </div>
@@ -336,7 +335,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="setup" class="level2" data-number="7.1">
 <h2 data-number="7.1" class="anchored" data-anchor-id="setup"><span class="header-section-number">7.1</span> Setup</h2>
 <p>Load all of the modules and datasets needed for the chapter.</p>
-<div id="014618b6" class="cell" data-execution_count="2">
+<div id="6bf4f22d" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine <span class="im">import</span> ggplot, aes</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> polars <span class="im">import</span> col <span class="im">as</span> c</span>
@@ -359,7 +358,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 data-number="7.4" class="anchored" data-anchor-id="joining-by-relation"><span class="header-section-number">7.4</span> Joining by Relation</h2>
 <p>We will start with an abstract example before turning to a specific example using DataFrames in Python. Assume we have two tables, <code>table_one</code> and <code>table_two</code>. The column <code>key_col</code> appears in both tables: it is a primary key in <code>table_two</code> and a foreign key in <code>table_one</code>. This means it has a single unique row associated with it in <code>table_two</code> but possibly many instances in <code>table_one</code>.</p>
 <p>To join the information in these two tables, we use the <code>.join()</code> method of the table containing the foreign key. The arguments include the second dataset and the name of the key used to combine the tables.</p>
-<div id="06458ca3" class="cell" data-execution_count="3">
+<div id="c24f9bb9" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    table_one</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    .join(table_two, on<span class="op">=</span>c.key_col)</span>
@@ -367,7 +366,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>Assuming our data are correctly organized, the output will be a dataset with the same number of rows as <code>table_one</code>, where the first set of columns will also match <code>table_one</code>. After the original columns, there will be a version of all the columns from <code>table_two</code> that correspond to the matching values of our key.</p>
 <p>Often some of the values in <code>table_one</code> will not have a matching value in <code>table_two</code>. In that case, the default behavior is to remove rows without matches; this is called an <em>inner join</em>. Alternatively, you can fill missing columns with <code>null</code> values, which results in a <em>left join</em>. We can indicate this to Python as follows:</p>
-<div id="6e8a2501" class="cell" data-execution_count="4">
+<div id="1126d060" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    table_one</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    .join(table_two, on<span class="op">=</span>c.key_col, how<span class="op">=</span><span class="st">"left"</span>)</span>
@@ -407,14 +406,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>There are several other modifications that we can apply to the basic syntax. For example, if our key has multiple columns, we can pass a list to <code>on</code> instead of a single value. Here is the code to join on two matching columns from the two DataFrames.</p>
-<div id="5209251f" class="cell" data-execution_count="5">
+<div id="5d946521" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    table_one</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    .join(table_two, on<span class="op">=</span>[c.key_col1, c.key_col2])</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Or, if the key has different names in the two tables, we can describe them with <code>left_on</code> (the first table) and <code>right_on</code> (the second table). These can be individual values or lists, where each element in one list corresponds to the element in the other.</p>
-<div id="581874a6" class="cell" data-execution_count="6">
+<div id="1ed3511d" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    table_one</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    .join(table_two, left_on<span class="op">=</span>c.key_col1, right_on<span class="op">=</span>c.key_col2)</span>
@@ -425,7 +424,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="join-examples" class="level2" data-number="7.5">
 <h2 data-number="7.5" class="anchored" data-anchor-id="join-examples"><span class="header-section-number">7.5</span> Join Examples</h2>
 <p>The code outline in the previous section should make more sense once we see examples using real datasets. To do this, we need multiple datasets that we can join together. We will create a smaller version of the <code>country</code> dataset that contains only two columns, which makes it easier to view the results without scrolling. We also load a dataset of country borders, where each row shows the relationship between a country and one of its neighbors.</p>
-<div id="b60c00f7" class="cell" data-execution_count="7">
+<div id="3eb64815" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>c_sml <span class="op">=</span> (</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    country</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    .select(c.iso, c.gini)</span>
@@ -503,7 +502,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>We can use a relational join to add the Gini coefficient for the country referenced in the border data. Note that <code>iso</code> is present in both tables; it’s a primary key in <code>c_sml</code> and a foreign key in <code>border</code>. We can join them using the code below.</p>
-<div id="06d44dbc" class="cell" data-execution_count="8">
+<div id="ef023bd3" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    border</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    .join(c_sml, on<span class="op">=</span>c.iso)</span>
@@ -593,7 +592,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>Notice that the Gini coefficient of the base country has been added to the data. The first rows all correspond to Afghanistan’s six borders, and therefore the same value of the Gini coefficient (27.8) is duplicated for each of them. Similarly, the last four rows correspond to Zimbabwe and repeat the Gini coefficient value of 50.3 in each. As with other data methods we use, the <code>.join()</code> method returns a new dataset without modifying the original data. We would need to save the output if we wanted to work further with the results.</p>
 <p>The DataFrame after the join has only 641 observations compared to the 829 observations in the original. The reason is that our <code>country</code> data only contains those countries for which we have full economic data. This means that some of the countries in <code>border</code> do not have an entry in <code>c_sml</code>. The default relational join is an inner join, so these missing corresponding rows are removed from the result. Changing to a left join restores the DataFrame to the same number of observations as the original <code>border</code> data.</p>
-<div id="ff5b1f50" class="cell" data-execution_count="9">
+<div id="1d0d3589" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    border</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    .join(c_sml, on<span class="op">=</span>c.iso, how<span class="op">=</span><span class="st">"left"</span>)</span>
@@ -682,7 +681,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>So far, we have added the Gini coefficient of the base country. We could also add the coefficient of the bordering country by associating the column <code>iso_neighbor</code> with the column <code>iso</code> in our countries DataFrame. Here is the code to add the neighboring Gini coefficient.</p>
-<div id="67dc6f7f" class="cell" data-execution_count="10">
+<div id="234ae917" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    border</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    .join(c_sml, left_on<span class="op">=</span>c.iso_neighbor, right_on<span class="op">=</span>c.iso)</span>
@@ -771,7 +770,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>What if we wanted to add the Gini coefficient to both countries in each row? This requires doing two separate joins, one after the other. In the second join, we add the suffix <code>_neighbor</code> to the Gini coefficient to distinguish the two scores in the output.</p>
-<div id="88172dc7" class="cell" data-execution_count="11">
+<div id="af58b134" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    border</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    .join(c_sml, on<span class="op">=</span>c.iso)</span>
@@ -879,7 +878,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 data-number="7.6" class="anchored" data-anchor-id="filtering-joins-semi-and-anti"><span class="header-section-number">7.6</span> Filtering Joins: Semi and Anti</h2>
 <p>Not every join is meant to add columns. Sometimes we just want to know which rows in one table have a match in another table, or which ones do not, without pulling in any of the second table’s columns. These are called filtering joins, because they act like the <code>.filter()</code> method: they select a subset of rows rather than adding new information. There are two variants. A <em>semi-join</em> keeps only the rows in the left table that have a match in the right table. An <em>anti-join</em> keeps only the rows in the left table that do <em>not</em> have a match. When there is a single key column, semi- and anti-joins can be replaced by a call to <code>.is_in()</code>; their real value shows up once there are multiple key columns and we want to know whether a specific combination matches, which <code>.is_in()</code> cannot easily express.</p>
 <p>Filtering joins are also a quick way to check data quality. Above, we saw that joining <code>border</code> to <code>c_sml</code> on <code>iso</code> dropped the DataFrame from 829 rows down to 641, because <code>c_sml</code> only contains countries with full economic data. But is that the <em>whole</em> explanation? We can check by comparing <code>border</code> against the full <code>country</code> table (not the trimmed-down <code>c_sml</code>) using an anti-join, which will show us every row in <code>border</code> whose <code>iso</code> value has no match in <code>country</code> at all.</p>
-<div id="0c72def7" class="cell" data-execution_count="12">
+<div id="a1fe7411" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    border</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    .join(country, on<span class="op">=</span>c.iso, how<span class="op">=</span><span class="st">"anti"</span>)</span>
@@ -956,560 +955,32 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>Any rows that show up here are not explained by missing economic data. They are <code>iso</code> codes in the border dataset that don’t correspond to any row in the country table at all. In a real project, you would want to chase these down: is <code>border</code> including dependent territories or disputed regions that <code>country</code> deliberately excludes, or is there a typo in one of the codes? A semi-join answers the mirror-image question. <code>border.join(country, on=c.iso, how="semi")</code> would keep only the rows of <code>border</code> whose <code>iso</code> value <em>does</em> have a match, without adding any of <code>country</code>’s columns. That is useful when you want to filter one table down to “things that exist elsewhere” and nothing more.</p>
 </section>
-<section id="attaching-a-group-summary" class="level2" data-number="7.7">
-<h2 data-number="7.7" class="anchored" data-anchor-id="attaching-a-group-summary"><span class="header-section-number">7.7</span> Attaching a Group Summary</h2>
-<p>In <a href="05_group.html" class="quarto-xref"><span>Chapter 5</span></a> we saw how <code>.group_by()</code> and <code>.agg()</code> collapse a dataset down to one row per group, and how <code>.over()</code> computes a group-level statistic while keeping every original row. Using <code>.agg()</code> followed by a join gives us a second way to reach the same result as <code>.over()</code>, so it’s worth comparing them directly.</p>
-<p>Suppose we want to attach each country’s regional average Gini coefficient to every row of <code>country</code>, without collapsing the table. The <code>.over()</code> approach does this in a single step.</p>
-<div id="ba8d1ed6" class="cell" data-execution_count="13">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    country</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>        region_avg_gini <span class="op">=</span> c.gini.mean().over(c.region)</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="9">
-<div><style>
-.dataframe > thead > tr,
-.dataframe > tbody > tr {
-  text-align: right;
-  white-space: pre-wrap;
-}
-</style>
-<small>shape: (135, 16)</small>
-<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th">iso</th>
-<th data-quarto-table-cell-role="th">full_name</th>
-<th data-quarto-table-cell-role="th">region</th>
-<th data-quarto-table-cell-role="th">subregion</th>
-<th data-quarto-table-cell-role="th">pop</th>
-<th data-quarto-table-cell-role="th">lexp</th>
-<th data-quarto-table-cell-role="th">lat</th>
-<th data-quarto-table-cell-role="th">lon</th>
-<th data-quarto-table-cell-role="th">hdi</th>
-<th data-quarto-table-cell-role="th">gdp</th>
-<th data-quarto-table-cell-role="th">gini</th>
-<th data-quarto-table-cell-role="th">happy</th>
-<th data-quarto-table-cell-role="th">cellphone</th>
-<th data-quarto-table-cell-role="th">water_access</th>
-<th data-quarto-table-cell-role="th">lang</th>
-<th data-quarto-table-cell-role="th">region_avg_gini</th>
-</tr>
-<tr class="even">
-<td>str</td>
-<td>str</td>
-<td>str</td>
-<td>str</td>
-<td>f64</td>
-<td>f64</td>
-<td>f64</td>
-<td>f64</td>
-<td>f64</td>
-<td>i64</td>
-<td>f64</td>
-<td>f64</td>
-<td>f64</td>
-<td>f64</td>
-<td>str</td>
-<td>f64</td>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>"SEN"</td>
-<td>"Senegal"</td>
-<td>"Africa"</td>
-<td>"Western Africa"</td>
-<td>18.932</td>
-<td>70.43</td>
-<td>14.366667</td>
-<td>-14.283333</td>
-<td>0.53</td>
-<td>4871</td>
-<td>38.1</td>
-<td>50.93</td>
-<td>66.0</td>
-<td>54.93987</td>
-<td>"pbp|fra|wol"</td>
-<td>41.922857</td>
-</tr>
-<tr class="even">
-<td>"VEN"</td>
-<td>"Venezuela, Bolivarian Republic…</td>
-<td>"Americas"</td>
-<td>"South America"</td>
-<td>28.517</td>
-<td>76.18</td>
-<td>8.0</td>
-<td>-67.0</td>
-<td>0.709</td>
-<td>8899</td>
-<td>44.8</td>
-<td>57.65</td>
-<td>96.8</td>
-<td>95.66913</td>
-<td>"spa|vsl"</td>
-<td>45.121053</td>
-</tr>
-<tr class="odd">
-<td>"FIN"</td>
-<td>"Finland"</td>
-<td>"Europe"</td>
-<td>"Northern Europe"</td>
-<td>5.623</td>
-<td>82.84</td>
-<td>65.0</td>
-<td>27.0</td>
-<td>0.948</td>
-<td>57574</td>
-<td>27.7</td>
-<td>76.99</td>
-<td>156.4</td>
-<td>99.44798</td>
-<td>"fin|swe"</td>
-<td>30.85</td>
-</tr>
-<tr class="even">
-<td>"USA"</td>
-<td>"United States of America"</td>
-<td>"Americas"</td>
-<td>"Northern America"</td>
-<td>347.276</td>
-<td>79.83</td>
-<td>39.828175</td>
-<td>-98.5795</td>
-<td>0.938</td>
-<td>78389</td>
-<td>47.7</td>
-<td>65.21</td>
-<td>91.7</td>
-<td>99.72235</td>
-<td>"eng"</td>
-<td>45.121053</td>
-</tr>
-<tr class="odd">
-<td>"LKA"</td>
-<td>"Sri Lanka"</td>
-<td>"Asia"</td>
-<td>"Southern Asia"</td>
-<td>23.229</td>
-<td>78.51</td>
-<td>7.0</td>
-<td>81.0</td>
-<td>0.776</td>
-<td>14380</td>
-<td>39.3</td>
-<td>36.02</td>
-<td>83.1</td>
-<td>90.77437</td>
-<td>"sin|sin|tam|tam"</td>
-<td>33.978788</td>
-</tr>
-<tr class="even">
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-</tr>
-<tr class="odd">
-<td>"ALB"</td>
-<td>"Albania"</td>
-<td>"Europe"</td>
-<td>"Southern Europe"</td>
-<td>2.772</td>
-<td>79.67</td>
-<td>41.0</td>
-<td>20.0</td>
-<td>0.81</td>
-<td>20362</td>
-<td>30.8</td>
-<td>54.45</td>
-<td>91.9</td>
-<td>98.5473</td>
-<td>"sqi"</td>
-<td>30.85</td>
-</tr>
-<tr class="even">
-<td>"MYS"</td>
-<td>"Malaysia"</td>
-<td>"Asia"</td>
-<td>"South-eastern Asia"</td>
-<td>35.978</td>
-<td>76.03</td>
-<td>3.7805111</td>
-<td>102.314362</td>
-<td>0.819</td>
-<td>35990</td>
-<td>46.2</td>
-<td>58.68</td>
-<td>118.2</td>
-<td>95.69194</td>
-<td>"msa"</td>
-<td>33.978788</td>
-</tr>
-<tr class="odd">
-<td>"SLV"</td>
-<td>"El Salvador"</td>
-<td>"Americas"</td>
-<td>"Central America"</td>
-<td>6.366</td>
-<td>76.98</td>
-<td>13.668889</td>
-<td>-88.866111</td>
-<td>0.678</td>
-<td>12221</td>
-<td>38.3</td>
-<td>64.82</td>
-<td>126.9</td>
-<td>86.19786</td>
-<td>"spa"</td>
-<td>45.121053</td>
-</tr>
-<tr class="even">
-<td>"CYP"</td>
-<td>"Cyprus"</td>
-<td>"Asia"</td>
-<td>"Western Asia"</td>
-<td>1.371</td>
-<td>81.77</td>
-<td>35.0</td>
-<td>33.0</td>
-<td>0.913</td>
-<td>55720</td>
-<td>31.2</td>
-<td>60.71</td>
-<td>123.1</td>
-<td>99.41781</td>
-<td>"ell|tur"</td>
-<td>33.978788</td>
-</tr>
-<tr class="odd">
-<td>"PAK"</td>
-<td>"Pakistan"</td>
-<td>"Asia"</td>
-<td>"Southern Asia"</td>
-<td>255.22</td>
-<td>66.71</td>
-<td>30.0</td>
-<td>71.0</td>
-<td>0.544</td>
-<td>5717</td>
-<td>29.6</td>
-<td>45.49</td>
-<td>49.8</td>
-<td>61.92651</td>
-<td>"eng|urd"</td>
-<td>33.978788</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-<p>The agg-then-join approach reaches the same place in two steps: first collapse to one row per region, then join that summary back onto the original table using the shared <code>region</code> column as the key.</p>
-<div id="71ba4102" class="cell" data-execution_count="14">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>region_avg <span class="op">=</span> (</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    country</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    .group_by(c.region)</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    .agg(region_avg_gini <span class="op">=</span> c.gini.mean())</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    country</span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    .join(region_avg, on<span class="op">=</span>c.region)</span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="10">
-<div><style>
-.dataframe > thead > tr,
-.dataframe > tbody > tr {
-  text-align: right;
-  white-space: pre-wrap;
-}
-</style>
-<small>shape: (135, 16)</small>
-<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th">iso</th>
-<th data-quarto-table-cell-role="th">full_name</th>
-<th data-quarto-table-cell-role="th">region</th>
-<th data-quarto-table-cell-role="th">subregion</th>
-<th data-quarto-table-cell-role="th">pop</th>
-<th data-quarto-table-cell-role="th">lexp</th>
-<th data-quarto-table-cell-role="th">lat</th>
-<th data-quarto-table-cell-role="th">lon</th>
-<th data-quarto-table-cell-role="th">hdi</th>
-<th data-quarto-table-cell-role="th">gdp</th>
-<th data-quarto-table-cell-role="th">gini</th>
-<th data-quarto-table-cell-role="th">happy</th>
-<th data-quarto-table-cell-role="th">cellphone</th>
-<th data-quarto-table-cell-role="th">water_access</th>
-<th data-quarto-table-cell-role="th">lang</th>
-<th data-quarto-table-cell-role="th">region_avg_gini</th>
-</tr>
-<tr class="even">
-<td>str</td>
-<td>str</td>
-<td>str</td>
-<td>str</td>
-<td>f64</td>
-<td>f64</td>
-<td>f64</td>
-<td>f64</td>
-<td>f64</td>
-<td>i64</td>
-<td>f64</td>
-<td>f64</td>
-<td>f64</td>
-<td>f64</td>
-<td>str</td>
-<td>f64</td>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>"SEN"</td>
-<td>"Senegal"</td>
-<td>"Africa"</td>
-<td>"Western Africa"</td>
-<td>18.932</td>
-<td>70.43</td>
-<td>14.366667</td>
-<td>-14.283333</td>
-<td>0.53</td>
-<td>4871</td>
-<td>38.1</td>
-<td>50.93</td>
-<td>66.0</td>
-<td>54.93987</td>
-<td>"pbp|fra|wol"</td>
-<td>41.922857</td>
-</tr>
-<tr class="even">
-<td>"VEN"</td>
-<td>"Venezuela, Bolivarian Republic…</td>
-<td>"Americas"</td>
-<td>"South America"</td>
-<td>28.517</td>
-<td>76.18</td>
-<td>8.0</td>
-<td>-67.0</td>
-<td>0.709</td>
-<td>8899</td>
-<td>44.8</td>
-<td>57.65</td>
-<td>96.8</td>
-<td>95.66913</td>
-<td>"spa|vsl"</td>
-<td>45.121053</td>
-</tr>
-<tr class="odd">
-<td>"FIN"</td>
-<td>"Finland"</td>
-<td>"Europe"</td>
-<td>"Northern Europe"</td>
-<td>5.623</td>
-<td>82.84</td>
-<td>65.0</td>
-<td>27.0</td>
-<td>0.948</td>
-<td>57574</td>
-<td>27.7</td>
-<td>76.99</td>
-<td>156.4</td>
-<td>99.44798</td>
-<td>"fin|swe"</td>
-<td>30.85</td>
-</tr>
-<tr class="even">
-<td>"USA"</td>
-<td>"United States of America"</td>
-<td>"Americas"</td>
-<td>"Northern America"</td>
-<td>347.276</td>
-<td>79.83</td>
-<td>39.828175</td>
-<td>-98.5795</td>
-<td>0.938</td>
-<td>78389</td>
-<td>47.7</td>
-<td>65.21</td>
-<td>91.7</td>
-<td>99.72235</td>
-<td>"eng"</td>
-<td>45.121053</td>
-</tr>
-<tr class="odd">
-<td>"LKA"</td>
-<td>"Sri Lanka"</td>
-<td>"Asia"</td>
-<td>"Southern Asia"</td>
-<td>23.229</td>
-<td>78.51</td>
-<td>7.0</td>
-<td>81.0</td>
-<td>0.776</td>
-<td>14380</td>
-<td>39.3</td>
-<td>36.02</td>
-<td>83.1</td>
-<td>90.77437</td>
-<td>"sin|sin|tam|tam"</td>
-<td>33.978788</td>
-</tr>
-<tr class="even">
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-</tr>
-<tr class="odd">
-<td>"ALB"</td>
-<td>"Albania"</td>
-<td>"Europe"</td>
-<td>"Southern Europe"</td>
-<td>2.772</td>
-<td>79.67</td>
-<td>41.0</td>
-<td>20.0</td>
-<td>0.81</td>
-<td>20362</td>
-<td>30.8</td>
-<td>54.45</td>
-<td>91.9</td>
-<td>98.5473</td>
-<td>"sqi"</td>
-<td>30.85</td>
-</tr>
-<tr class="even">
-<td>"MYS"</td>
-<td>"Malaysia"</td>
-<td>"Asia"</td>
-<td>"South-eastern Asia"</td>
-<td>35.978</td>
-<td>76.03</td>
-<td>3.7805111</td>
-<td>102.314362</td>
-<td>0.819</td>
-<td>35990</td>
-<td>46.2</td>
-<td>58.68</td>
-<td>118.2</td>
-<td>95.69194</td>
-<td>"msa"</td>
-<td>33.978788</td>
-</tr>
-<tr class="odd">
-<td>"SLV"</td>
-<td>"El Salvador"</td>
-<td>"Americas"</td>
-<td>"Central America"</td>
-<td>6.366</td>
-<td>76.98</td>
-<td>13.668889</td>
-<td>-88.866111</td>
-<td>0.678</td>
-<td>12221</td>
-<td>38.3</td>
-<td>64.82</td>
-<td>126.9</td>
-<td>86.19786</td>
-<td>"spa"</td>
-<td>45.121053</td>
-</tr>
-<tr class="even">
-<td>"CYP"</td>
-<td>"Cyprus"</td>
-<td>"Asia"</td>
-<td>"Western Asia"</td>
-<td>1.371</td>
-<td>81.77</td>
-<td>35.0</td>
-<td>33.0</td>
-<td>0.913</td>
-<td>55720</td>
-<td>31.2</td>
-<td>60.71</td>
-<td>123.1</td>
-<td>99.41781</td>
-<td>"ell|tur"</td>
-<td>33.978788</td>
-</tr>
-<tr class="odd">
-<td>"PAK"</td>
-<td>"Pakistan"</td>
-<td>"Asia"</td>
-<td>"Southern Asia"</td>
-<td>255.22</td>
-<td>66.71</td>
-<td>30.0</td>
-<td>71.0</td>
-<td>0.544</td>
-<td>5717</td>
-<td>29.6</td>
-<td>45.49</td>
-<td>49.8</td>
-<td>61.92651</td>
-<td>"eng|urd"</td>
-<td>33.978788</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-<p>Both produce the same output column. <code>.over()</code> is more concise and is the natural choice when the summary is the only thing you need. The agg-then-join version is worth reaching for when you need the intermediate summary table for its own sake (to inspect it, plot it, or join it against something else), since <code>.group_by().agg()</code> gives you that table directly, while <code>.over()</code> never creates it.</p>
-</section>
-<section id="conditional-joins" class="level2" data-number="7.8">
-<h2 data-number="7.8" class="anchored" data-anchor-id="conditional-joins"><span class="header-section-number">7.8</span> Conditional Joins</h2>
+<section id="conditional-joins" class="level2" data-number="7.7">
+<h2 data-number="7.7" class="anchored" data-anchor-id="conditional-joins"><span class="header-section-number">7.7</span> Conditional Joins</h2>
 <p>In this section, we introduce two additional kinds of joins that are helpful when working with certain types of complex data. Both of these allow us to join by relationships between keys that do not require values to be exactly equal. To start, let’s create two subsets of our <code>country</code> data, separating out countries in Africa and in Asia, and sorting by the Gini coefficient. We remove any missing values from the output.</p>
-<div id="326dd299" class="cell" data-execution_count="15">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>africa <span class="op">=</span> (</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    country</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.region <span class="op">==</span> <span class="st">"Africa"</span>)</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    .select(c.full_name, c.gini)</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    .sort(c.gini)</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    .drop_nulls()</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>asia <span class="op">=</span> (</span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    country</span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.region <span class="op">==</span> <span class="st">"Asia"</span>)</span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    .select(c.full_name, c.gini)</span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    .sort(c.gini)</span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    .drop_nulls()</span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="cc2c8909" class="cell" data-execution_count="13">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>africa <span class="op">=</span> (</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    country</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.region <span class="op">==</span> <span class="st">"Africa"</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    .select(c.full_name, c.gini)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    .sort(c.gini)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    .drop_nulls()</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>asia <span class="op">=</span> (</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    country</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.region <span class="op">==</span> <span class="st">"Asia"</span>)</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    .select(c.full_name, c.gini)</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    .sort(c.gini)</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    .drop_nulls()</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The function <code>.join_asof</code> combines two datasets by matching each row in the first (left) dataset to the nearest value in the second (right) dataset based on numeric values in a specified pair of columns. It always returns a dataset with the same number of rows as the first (left) dataset. The function is optimized to do this quickly even for large datasets; to achieve this, it requires that both datasets be sorted by the join key before being called. Below is an example where we associate each African country with the nearest Asian country in terms of their Gini coefficient. We set <code>coalesce=False</code> to ensure the matching country’s Gini coefficient is retained in the output.</p>
-<div id="fec737ef" class="cell" data-execution_count="16">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    africa</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    .join_asof(asia, on<span class="op">=</span>c.gini, strategy<span class="op">=</span><span class="st">"nearest"</span>, coalesce<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="12">
+<div id="14b926ba" class="cell" data-execution_count="14">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    africa</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    .join_asof(asia, on<span class="op">=</span>c.gini, strategy<span class="op">=</span><span class="st">"nearest"</span>, coalesce<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="10">
 <div><style>
 .dataframe > thead > tr,
 .dataframe > tbody > tr {
@@ -1607,15 +1078,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>The original motivation for the <code>.join_asof</code> method was to join two time-series datasets. The idea is that we might want the current (most recent) value from one table relative to another. Hence the function’s name and the fact that it uses the <code>backward</code> strategy by default to find the nearest value in the second dataset that is less than or equal to (i.e., no later than) the value in the first. You can set the strategy to <code>forward</code> to look in the other direction, or to <code>nearest</code> to find the closest value. You can also add additional keys with the <code>by</code>, <code>by_left</code>, or <code>by_right</code> options; these keys must match exactly before performing the nearest search. The tables must be pre-sorted by the join key(s) for the function to work.</p>
 <p>If we need to do more exotic joins between two tables, we can use the <code>.join_where</code> method. It takes one or more expressions in the same format used by the <code>.filter</code> method to specify which pairs of rows to keep in the joined dataset. To refer to columns that share the same name in both datasets, use the <code>_right</code> suffix to indicate the second dataset. Below is an example that finds all pairs of countries in Africa and Asia where the difference in the Gini coefficient is less than 5.</p>
-<div id="73534194" class="cell" data-execution_count="17">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    africa</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    .join_where(</span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>        asia,</span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>        (c.gini <span class="op">-</span> c.gini_right).<span class="bu">abs</span>() <span class="op">&lt;</span> <span class="dv">5</span></span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="13">
+<div id="25063c92" class="cell" data-execution_count="15">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    africa</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    .join_where(</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>        asia,</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>        (c.gini <span class="op">-</span> c.gini_right).<span class="bu">abs</span>() <span class="op">&lt;</span> <span class="dv">5</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="11">
 <div><style>
 .dataframe > thead > tr,
 .dataframe > tbody > tr {
