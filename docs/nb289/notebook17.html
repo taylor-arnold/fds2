@@ -1,0 +1,2209 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Notebook17 – Foundations of Data Science: Notebooks</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-e2f4ce8a337aa75ae0ff38e6debea2b5.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+</head>
+
+<body class="nav-sidebar docked fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./notebook17.html">Notebook17</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Foundations of Data Science: Notebooks</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook01.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook01</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook02.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook02</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook03.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook03</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook04.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook04</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook05.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook05</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook06.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook06</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook07.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook07</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook08.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook08</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook09.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook09</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook10.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook10</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook11.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook11</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook12.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook12</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook13.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook13</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook14.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook14</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook15.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook15</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook17.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Notebook17</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Notebook17</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="setup" class="level3">
+<h3 class="anchored" data-anchor-id="setup">Setup</h3>
+<p>Run all of the following before starting the notebook.</p>
+<div id="aba575bb" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="1">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span> wget <span class="op">-</span>q <span class="op">-</span>nc https:<span class="op">//</span>raw.githubusercontent.com<span class="op">/</span>taylor<span class="op">-</span>arnold<span class="op">/</span>fds2<span class="op">/</span>refs<span class="op">/</span>heads<span class="op">/</span>main<span class="op">/</span>funs.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div id="01a6971b" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="2">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine <span class="im">import</span> ggplot, aes</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> polars <span class="im">import</span> col <span class="im">as</span> c</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> funs</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>ub <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div id="e6168645" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="4">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>play <span class="op">=</span> pl.read_csv(ub <span class="op">+</span> <span class="st">"data/shakespeare_plays.csv"</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>char <span class="op">=</span> pl.read_csv(ub <span class="op">+</span> <span class="st">"data/shakespeare_characters.csv"</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>line <span class="op">=</span> pl.read_csv(ub <span class="op">+</span> <span class="st">"data/shakespeare_lines.csv.gz"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+<section id="questions" class="level3">
+<h3 class="anchored" data-anchor-id="questions">Questions</h3>
+<p>Back to the Folger Shakespeare corpus from Notebook13. <code>play</code> has one row per play, with a <code>play_id</code> and a <code>title</code>. <code>char</code> has one row per <em>character × play</em>, with a <code>character_id</code>, the <code>play_id</code>, and a <code>name</code>. <code>line</code> has one row per printed line, with the <code>play_id</code>, the <code>character_id</code> of the speaker, the <code>act</code>, the <code>scene</code>, a <code>line_number</code> such as <code>"3.1.64"</code>, and the <code>text</code>.</p>
+<p>In Notebook13 we found three things we could not fix yet: a table we wanted with one column per act, cells that hold several speakers at once, and a <code>line_number</code> that packs three numbers into one string. Today we have the tools for all three.</p>
+<p>Unless a question says otherwise, just print the result of each block; do not save it to a variable.</p>
+<ol type="1">
+<li>Start with a warm-up from Notebook13. Count the number of lines in each act of each play, grouping by <code>play_id</code> and <code>act</code>, and sort by <code>act</code>.</li>
+</ol>
+<div id="70e7bdcb" class="cell" data-execution_count="5">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    line</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    .group_by(c.play_id, c.act)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    .agg(n_lines <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    .sort(c.act)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="4">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (185, 3)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">play_id</th>
+<th data-quarto-table-cell-role="th">act</th>
+<th data-quarto-table-cell-role="th">n_lines</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>i64</td>
+<td>u32</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"tro"</td>
+<td>1</td>
+<td>497</td>
+</tr>
+<tr class="even">
+<td>"cym"</td>
+<td>1</td>
+<td>603</td>
+</tr>
+<tr class="odd">
+<td>"aww"</td>
+<td>1</td>
+<td>320</td>
+</tr>
+<tr class="even">
+<td>"ado"</td>
+<td>1</td>
+<td>40</td>
+</tr>
+<tr class="odd">
+<td>"tn"</td>
+<td>1</td>
+<td>220</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"mm"</td>
+<td>5</td>
+<td>500</td>
+</tr>
+<tr class="even">
+<td>"ado"</td>
+<td>5</td>
+<td>314</td>
+</tr>
+<tr class="odd">
+<td>"ham"</td>
+<td>5</td>
+<td>395</td>
+</tr>
+<tr class="even">
+<td>"err"</td>
+<td>5</td>
+<td>420</td>
+</tr>
+<tr class="odd">
+<td>"mv"</td>
+<td>5</td>
+<td>315</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>This table is long: 185 rows, one per <em>play × act</em>.</p>
+<ol start="2" type="1">
+<li>Take the code from the previous question and add a pivot, so that there is one row per play and one column per act. Use <code>index=c.play_id</code>, <code>on=c.act</code>, and <code>values=c.n_lines</code>.</li>
+</ol>
+<div id="d7a6f84f" class="cell" data-execution_count="6">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    line</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    .group_by(c.play_id, c.act)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    .agg(n_lines <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    .sort(c.act)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    .pivot(index<span class="op">=</span>c.play_id, on<span class="op">=</span>c.act, values<span class="op">=</span>c.n_lines)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="5">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (37, 6)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">play_id</th>
+<th data-quarto-table-cell-role="th">1</th>
+<th data-quarto-table-cell-role="th">2</th>
+<th data-quarto-table-cell-role="th">3</th>
+<th data-quarto-table-cell-role="th">4</th>
+<th data-quarto-table-cell-role="th">5</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>u32</td>
+<td>u32</td>
+<td>u32</td>
+<td>u32</td>
+<td>u32</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"r2"</td>
+<td>656</td>
+<td>650</td>
+<td>586</td>
+<td>340</td>
+<td>560</td>
+</tr>
+<tr class="even">
+<td>"wt"</td>
+<td>534</td>
+<td>553</td>
+<td>340</td>
+<td>649</td>
+<td>464</td>
+</tr>
+<tr class="odd">
+<td>"tn"</td>
+<td>220</td>
+<td>163</td>
+<td>228</td>
+<td>68</td>
+<td>310</td>
+</tr>
+<tr class="even">
+<td>"2h6"</td>
+<td>584</td>
+<td>410</td>
+<td>831</td>
+<td>433</td>
+<td>340</td>
+</tr>
+<tr class="odd">
+<td>"r3"</td>
+<td>1011</td>
+<td>422</td>
+<td>824</td>
+<td>869</td>
+<td>466</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"cym"</td>
+<td>603</td>
+<td>444</td>
+<td>734</td>
+<td>592</td>
+<td>864</td>
+</tr>
+<tr class="even">
+<td>"tim"</td>
+<td>429</td>
+<td>202</td>
+<td>342</td>
+<td>573</td>
+<td>336</td>
+</tr>
+<tr class="odd">
+<td>"mm"</td>
+<td>306</td>
+<td>521</td>
+<td>214</td>
+<td>271</td>
+<td>500</td>
+</tr>
+<tr class="even">
+<td>"tgv"</td>
+<td>320</td>
+<td>376</td>
+<td>341</td>
+<td>378</td>
+<td>259</td>
+</tr>
+<tr class="odd">
+<td>"lll"</td>
+<td>184</td>
+<td>237</td>
+<td>84</td>
+<td>498</td>
+<td>787</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Now there are 37 rows and a column for each of the five acts. The sort by <code>act</code> before the pivot is what puts the new columns in the order 1 to 5.</p>
+<ol start="3" type="1">
+<li>Take the code from the previous question and join <code>play</code> onto the result so that each row has the full title of the play.</li>
+</ol>
+<div id="320c357e" class="cell" data-execution_count="7">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    line</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    .group_by(c.play_id, c.act)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    .agg(n_lines <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    .sort(c.act)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    .pivot(index<span class="op">=</span>c.play_id, on<span class="op">=</span>c.act, values<span class="op">=</span>c.n_lines)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    .join(play, on<span class="op">=</span>c.play_id)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="6">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (37, 9)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">play_id</th>
+<th data-quarto-table-cell-role="th">1</th>
+<th data-quarto-table-cell-role="th">2</th>
+<th data-quarto-table-cell-role="th">3</th>
+<th data-quarto-table-cell-role="th">4</th>
+<th data-quarto-table-cell-role="th">5</th>
+<th data-quarto-table-cell-role="th">title</th>
+<th data-quarto-table-cell-role="th">author</th>
+<th data-quarto-table-cell-role="th">short_title</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>u32</td>
+<td>u32</td>
+<td>u32</td>
+<td>u32</td>
+<td>u32</td>
+<td>str</td>
+<td>str</td>
+<td>str</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"mnd"</td>
+<td>263</td>
+<td>435</td>
+<td>546</td>
+<td>174</td>
+<td>331</td>
+<td>"A Midsummer Night’s Dream"</td>
+<td>"William Shakespeare"</td>
+<td>"MND"</td>
+</tr>
+<tr class="even">
+<td>"aww"</td>
+<td>320</td>
+<td>445</td>
+<td>321</td>
+<td>166</td>
+<td>369</td>
+<td>"All’s Well That Ends Well"</td>
+<td>"William Shakespeare"</td>
+<td>"AWW"</td>
+</tr>
+<tr class="odd">
+<td>"ant"</td>
+<td>471</td>
+<td>737</td>
+<td>867</td>
+<td>678</td>
+<td>483</td>
+<td>"Antony and Cleopatra"</td>
+<td>"William Shakespeare"</td>
+<td>"Ant"</td>
+</tr>
+<tr class="even">
+<td>"ayl"</td>
+<td>175</td>
+<td>460</td>
+<td>238</td>
+<td>156</td>
+<td>176</td>
+<td>"As You Like It"</td>
+<td>"William Shakespeare"</td>
+<td>"AYL"</td>
+</tr>
+<tr class="odd">
+<td>"cor"</td>
+<td>680</td>
+<td>468</td>
+<td>756</td>
+<td>514</td>
+<td>566</td>
+<td>"Coriolanus"</td>
+<td>"William Shakespeare"</td>
+<td>"Cor"</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"wt"</td>
+<td>534</td>
+<td>553</td>
+<td>340</td>
+<td>649</td>
+<td>464</td>
+<td>"The Winter's Tale"</td>
+<td>"William Shakespeare"</td>
+<td>"WT"</td>
+</tr>
+<tr class="even">
+<td>"tim"</td>
+<td>429</td>
+<td>202</td>
+<td>342</td>
+<td>573</td>
+<td>336</td>
+<td>"Timon of Athens"</td>
+<td>"William Shakespeare"</td>
+<td>"Tim"</td>
+</tr>
+<tr class="odd">
+<td>"tit"</td>
+<td>500</td>
+<td>533</td>
+<td>386</td>
+<td>505</td>
+<td>572</td>
+<td>"Titus Andronicus"</td>
+<td>"William Shakespeare"</td>
+<td>"Tit"</td>
+</tr>
+<tr class="even">
+<td>"tro"</td>
+<td>497</td>
+<td>363</td>
+<td>373</td>
+<td>633</td>
+<td>520</td>
+<td>"Troilus and Cressida"</td>
+<td>"William Shakespeare"</td>
+<td>"Tro"</td>
+</tr>
+<tr class="odd">
+<td>"tn"</td>
+<td>220</td>
+<td>163</td>
+<td>228</td>
+<td>68</td>
+<td>310</td>
+<td>"Twelfth Night"</td>
+<td>"William Shakespeare"</td>
+<td>"TN"</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<ol start="4" type="1">
+<li>Now one play. Filter <code>line</code> to <em>Macbeth</em> (<code>"mac"</code>), keep only the speakers with at least 60 lines in the play using <code>.filter(pl.len().over(c.character_id) &gt;= 60)</code>, count the lines for each <code>character_id</code> and <code>act</code>, and pivot so there is one row per speaker and one column per act.</li>
+</ol>
+<div id="3772bded" class="cell" data-execution_count="8">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    line</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.play_id <span class="op">==</span> <span class="st">"mac"</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(pl.<span class="bu">len</span>().over(c.character_id) <span class="op">&gt;=</span> <span class="dv">60</span>)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    .group_by(c.character_id, c.act)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    .agg(n_lines <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    .sort(c.act)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    .pivot(index<span class="op">=</span>c.character_id, on<span class="op">=</span>c.act, values<span class="op">=</span>c.n_lines)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="7">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (8, 6)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">character_id</th>
+<th data-quarto-table-cell-role="th">1</th>
+<th data-quarto-table-cell-role="th">2</th>
+<th data-quarto-table-cell-role="th">3</th>
+<th data-quarto-table-cell-role="th">4</th>
+<th data-quarto-table-cell-role="th">5</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>u32</td>
+<td>u32</td>
+<td>u32</td>
+<td>u32</td>
+<td>u32</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"Duncan_Mac"</td>
+<td>69</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+</tr>
+<tr class="even">
+<td>"Lennox_Mac"</td>
+<td>2</td>
+<td>18</td>
+<td>37</td>
+<td>6</td>
+<td>7</td>
+</tr>
+<tr class="odd">
+<td>"Banquo_Mac"</td>
+<td>52</td>
+<td>34</td>
+<td>25</td>
+<td>null</td>
+<td>null</td>
+</tr>
+<tr class="even">
+<td>"Ross_Mac"</td>
+<td>34</td>
+<td>27</td>
+<td>5</td>
+<td>59</td>
+<td>9</td>
+</tr>
+<tr class="odd">
+<td>"Malcolm_Mac"</td>
+<td>16</td>
+<td>13</td>
+<td>null</td>
+<td>142</td>
+<td>38</td>
+</tr>
+<tr class="even">
+<td>"LadyMacbeth_Mac"</td>
+<td>113</td>
+<td>55</td>
+<td>62</td>
+<td>null</td>
+<td>null</td>
+</tr>
+<tr class="odd">
+<td>"Macbeth_Mac"</td>
+<td>119</td>
+<td>115</td>
+<td>262</td>
+<td>77</td>
+<td>138</td>
+</tr>
+<tr class="even">
+<td>"Macduff_Mac"</td>
+<td>null</td>
+<td>52</td>
+<td>null</td>
+<td>89</td>
+<td>34</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Some cells are <code>null</code>, because not every speaker talks in every act. Duncan speaks only in act 1, since he is murdered in act 2. Lady Macbeth has nothing in act 5; remember that, because we will see why at the end of the notebook.</p>
+<ol start="5" type="1">
+<li>Go back to the code from question 2 and add an unpivot to the end, with <code>index=c.play_id</code>, <code>variable_name="act"</code>, and <code>value_name="n_lines"</code>.</li>
+</ol>
+<div id="497ff071" class="cell" data-execution_count="9">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    line</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    .group_by(c.play_id, c.act)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    .agg(n_lines <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    .sort(c.act)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    .pivot(index<span class="op">=</span>c.play_id, on<span class="op">=</span>c.act, values<span class="op">=</span>c.n_lines)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    .unpivot(index<span class="op">=</span>c.play_id, variable_name<span class="op">=</span><span class="st">"act"</span>, value_name<span class="op">=</span><span class="st">"n_lines"</span>)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="8">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (185, 3)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">play_id</th>
+<th data-quarto-table-cell-role="th">act</th>
+<th data-quarto-table-cell-role="th">n_lines</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>str</td>
+<td>u32</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"tgv"</td>
+<td>"1"</td>
+<td>320</td>
+</tr>
+<tr class="even">
+<td>"h8"</td>
+<td>"1"</td>
+<td>733</td>
+</tr>
+<tr class="odd">
+<td>"tro"</td>
+<td>"1"</td>
+<td>497</td>
+</tr>
+<tr class="even">
+<td>"2h4"</td>
+<td>"1"</td>
+<td>340</td>
+</tr>
+<tr class="odd">
+<td>"mnd"</td>
+<td>"1"</td>
+<td>263</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"3h6"</td>
+<td>"5"</td>
+<td>495</td>
+</tr>
+<tr class="even">
+<td>"lr"</td>
+<td>"5"</td>
+<td>462</td>
+</tr>
+<tr class="odd">
+<td>"1h6"</td>
+<td>"5"</td>
+<td>565</td>
+</tr>
+<tr class="even">
+<td>"r2"</td>
+<td>"5"</td>
+<td>560</td>
+</tr>
+<tr class="odd">
+<td>"ham"</td>
+<td>"5"</td>
+<td>395</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>We are back to 185 rows, one per <em>play × act</em>. The pivot and the unpivot undo each other and no number changed along the way.</p>
+<ol start="6" type="1">
+<li>A wide table is hard to plot, because the acts are column names rather than a column. Take the code from the previous question, filter to the four tragedies <code>["ham", "mac", "oth", "lr"]</code>, and cast <code>act</code> back to an integer with <code>c.act.cast(pl.Int64)</code>. Then draw a line plot of the number of lines against the act, with one color for each play.</li>
+</ol>
+<div id="37b72f09" class="cell" data-execution_count="10">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    line</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    .group_by(c.play_id, c.act)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    .agg(n_lines <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    .sort(c.act)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    .pivot(index<span class="op">=</span>c.play_id, on<span class="op">=</span>c.act, values<span class="op">=</span>c.n_lines)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    .unpivot(index<span class="op">=</span>c.play_id, variable_name<span class="op">=</span><span class="st">"act"</span>, value_name<span class="op">=</span><span class="st">"n_lines"</span>)</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.play_id.is_in([<span class="st">"ham"</span>, <span class="st">"mac"</span>, <span class="st">"oth"</span>, <span class="st">"lr"</span>]))</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    .with_columns(act <span class="op">=</span> c.act.cast(pl.Int64))</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(c.act, c.n_lines))</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    .geom_line(aes(color<span class="op">=</span>c.play_id))</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="9">
+<div>
+<figure class="figure">
+<p><a href="notebook17_files/figure-html/cell-11-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="notebook17_files/figure-html/cell-11-output-1.png" width="672" height="480" class="figure-img"></a></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The cast is needed because <code>act</code> came back from the unpivot as text: it had been a column name. <em>Hamlet</em> drops by more than half from act 1 to act 2, even though act 2 is not a short act on the page. Keep that in mind too.</p>
+<ol start="7" type="1">
+<li>On to the packed speakers. Add a column <code>speaker</code> equal to <code>c.character_id.str.split(" #")</code>, which turns each cell into a list of speakers. Filter to <em>Macbeth</em> and to the rows where <code>character_id</code> contains <code>"#"</code>, and select <code>character_id</code> and <code>speaker</code>.</li>
+</ol>
+<div id="6a57fa91" class="cell" data-execution_count="11">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    line</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    .with_columns(speaker <span class="op">=</span> c.character_id.<span class="bu">str</span>.split(<span class="st">" #"</span>))</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.play_id <span class="op">==</span> <span class="st">"mac"</span>, c.character_id.<span class="bu">str</span>.contains(<span class="st">"#"</span>))</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    .select(c.character_id, c.speaker)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="10">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (28, 2)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">character_id</th>
+<th data-quarto-table-cell-role="th">speaker</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>list[str]</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"WITCHES.1_Mac #WITCHES.2_Mac #…</td>
+<td>["WITCHES.1_Mac", "WITCHES.2_Mac", "WITCHES.3_Mac"]</td>
+</tr>
+<tr class="even">
+<td>"WITCHES.1_Mac #WITCHES.2_Mac #…</td>
+<td>["WITCHES.1_Mac", "WITCHES.2_Mac", "WITCHES.3_Mac"]</td>
+</tr>
+<tr class="odd">
+<td>"WITCHES.1_Mac #WITCHES.2_Mac #…</td>
+<td>["WITCHES.1_Mac", "WITCHES.2_Mac", "WITCHES.3_Mac"]</td>
+</tr>
+<tr class="even">
+<td>"WITCHES.1_Mac #WITCHES.2_Mac #…</td>
+<td>["WITCHES.1_Mac", "WITCHES.2_Mac", "WITCHES.3_Mac"]</td>
+</tr>
+<tr class="odd">
+<td>"WITCHES.1_Mac #WITCHES.2_Mac #…</td>
+<td>["WITCHES.1_Mac", "WITCHES.2_Mac", "WITCHES.3_Mac"]</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"WITCHES.1_Mac #WITCHES.2_Mac #…</td>
+<td>["WITCHES.1_Mac", "WITCHES.2_Mac", "WITCHES.3_Mac"]</td>
+</tr>
+<tr class="even">
+<td>"WITCHES.1_Mac #WITCHES.2_Mac #…</td>
+<td>["WITCHES.1_Mac", "WITCHES.2_Mac", "WITCHES.3_Mac"]</td>
+</tr>
+<tr class="odd">
+<td>"WITCHES.1_Mac #WITCHES.2_Mac #…</td>
+<td>["WITCHES.1_Mac", "WITCHES.2_Mac", "WITCHES.3_Mac"]</td>
+</tr>
+<tr class="even">
+<td>"WITCHES.1_Mac #WITCHES.2_Mac #…</td>
+<td>["WITCHES.1_Mac", "WITCHES.2_Mac", "WITCHES.3_Mac"]</td>
+</tr>
+<tr class="odd">
+<td>"Macduff_Mac #Siward_Mac #Ross_…</td>
+<td>["Macduff_Mac", "Siward_Mac", … "SOLDIERS.MALCOLM_Mac"]</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>These are the lines spoken by more than one character at once. Each cell of <code>speaker</code> is now a list of names. For an ordinary line, the list has just one name in it.</p>
+<ol start="8" type="1">
+<li>Take the code from the previous question and add <code>.explode(c.speaker)</code> before the filter. Then count the lines for each <code>speaker</code> instead of selecting columns.</li>
+</ol>
+<div id="603deaa4" class="cell" data-execution_count="12">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    line</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    .with_columns(speaker <span class="op">=</span> c.character_id.<span class="bu">str</span>.split(<span class="st">" #"</span>))</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    .explode(c.speaker)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.play_id <span class="op">==</span> <span class="st">"mac"</span>, c.character_id.<span class="bu">str</span>.contains(<span class="st">"WITCH"</span>))</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    .group_by(c.speaker)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    .agg(n_lines <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    .sort(c.n_lines, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>/var/folders/ch/88l37b8j6g79m47httrlhnnm0000gq/T/ipykernel_48030/247186221.py:4: DeprecationWarning: In Polars 2.0, the default behavior for `empty_as_null` will change to `False`. To keep the current behavior, explicitly set `empty_as_null=True`.</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="11">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (3, 2)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">speaker</th>
+<th data-quarto-table-cell-role="th">n_lines</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>u32</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"WITCHES.1_Mac"</td>
+<td>80</td>
+</tr>
+<tr class="even">
+<td>"WITCHES.3_Mac"</td>
+<td>46</td>
+</tr>
+<tr class="odd">
+<td>"WITCHES.2_Mac"</td>
+<td>45</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>In Notebook13 there were four witch rows: three witches and a combined cell with 21 lines. Now there are three witches, and each one is credited with the lines they speak together.</p>
+<ol start="9" type="1">
+<li>Draw the twelve biggest parts in Shakespeare. Take the exploded table, count the lines for each <code>speaker</code> and <code>play_id</code>, and keep the top 12. Join <code>char</code> to get each character’s real name, using both columns of the key: <code>left_on=[c.speaker, c.play_id]</code> and <code>right_on=[c.character_id, c.play_id]</code>. Sort by the number of lines and draw a bar plot with <code>geom_col</code> and <code>coord_flip</code>.</li>
+</ol>
+<div id="ae314799" class="cell" data-execution_count="13">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    line</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    .with_columns(speaker <span class="op">=</span> c.character_id.<span class="bu">str</span>.split(<span class="st">" #"</span>))</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    .explode(c.speaker)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    .group_by(c.speaker, c.play_id)</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    .agg(n_lines <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    .sort(c.n_lines, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">12</span>)</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    .join(char, left_on<span class="op">=</span>[c.speaker, c.play_id], right_on<span class="op">=</span>[c.character_id, c.play_id])</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    .sort(c.n_lines)</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(c.name, c.n_lines))</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    .geom_col()</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    .coord_flip()</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>/var/folders/ch/88l37b8j6g79m47httrlhnnm0000gq/T/ipykernel_48030/3741914852.py:4: DeprecationWarning: In Polars 2.0, the default behavior for `empty_as_null` will change to `False`. To keep the current behavior, explicitly set `empty_as_null=True`.</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="12">
+<div>
+<figure class="figure">
+<p><a href="notebook17_files/figure-html/cell-14-output-2.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img src="notebook17_files/figure-html/cell-14-output-2.png" width="672" height="480" class="figure-img"></a></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The join needs both columns because <code>character_id</code> alone is not a key of <code>char</code>. Joining on <code>character_id</code> alone would copy Richard III’s bar three times, once for each play he appears in.</p>
+<p>Notice who is missing: Falstaff, the biggest comic part Shakespeare wrote, is not on the chart.</p>
+<p>The last packed cell is <code>line_number</code>, which holds three numbers. Splitting it into columns needs a list method we have not covered, so the block below is given. It adds an integer column <code>num</code> holding the line’s position within its scene.</p>
+<div id="7e80452b" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="14">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>lines <span class="op">=</span> (</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    line</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    .with_columns(num <span class="op">=</span> c.line_number.<span class="bu">str</span>.split(<span class="st">"."</span>).<span class="bu">list</span>.get(<span class="dv">2</span>).cast(pl.Int64))</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<ol start="10" type="1">
+<li>Filter <code>lines</code> to <em>Hamlet</em>, act 3, scene 1. Sort by <code>num</code> and select <code>num</code>, <code>character_id</code>, and <code>text</code>.</li>
+</ol>
+<div id="5d7754a2" class="cell" data-execution_count="15">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    lines</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.play_id <span class="op">==</span> <span class="st">"ham"</span>, c.act <span class="op">==</span> <span class="dv">3</span>, c.scene <span class="op">==</span> <span class="dv">1</span>)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    .sort(c.num)</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    .select(c.num, c.character_id, c.text)</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="14">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (149, 3)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">num</th>
+<th data-quarto-table-cell-role="th">character_id</th>
+<th data-quarto-table-cell-role="th">text</th>
+</tr>
+<tr class="even">
+<td>i64</td>
+<td>str</td>
+<td>str</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>"Claudius_Ham"</td>
+<td>"And can you by no drift of con…</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>"Claudius_Ham"</td>
+<td>"Get from him why he puts on th…</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>"Claudius_Ham"</td>
+<td>"Grating so harshly all his day…</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>"Claudius_Ham"</td>
+<td>"With turbulent and dangerous l…</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>"Rosencrantz_Ham"</td>
+<td>"He does confess he feels himse…</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>199</td>
+<td>"Polonius_Ham"</td>
+<td>"Of all their conference. If sh…</td>
+</tr>
+<tr class="even">
+<td>200</td>
+<td>"Polonius_Ham"</td>
+<td>"To England send him, or confin…</td>
+</tr>
+<tr class="odd">
+<td>201</td>
+<td>"Polonius_Ham"</td>
+<td>"Your wisdom best shall think."</td>
+</tr>
+<tr class="even">
+<td>202</td>
+<td>"Claudius_Ham"</td>
+<td>"It shall be so."</td>
+</tr>
+<tr class="odd">
+<td>203</td>
+<td>"Claudius_Ham"</td>
+<td>"Madness in great ones must not…</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>The scene now sorts in the order the lines are spoken.</p>
+<ol start="11" type="1">
+<li>Every scene numbers its lines from 1, so the largest <code>num</code> in a scene tells you how many lines the printed scene has. Group <code>lines</code> by <code>play_id</code>, <code>act</code>, and <code>scene</code>, and compute <code>recorded</code> (the number of rows) and <code>highest</code> (the maximum of <code>num</code>). Add a column <code>missing</code> equal to <code>highest - recorded</code> and sort from the most missing to the least.</li>
+</ol>
+<div id="6d21f79e" class="cell" data-execution_count="16">
+<details class="code-fold">
+<summary>View code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    lines</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    .group_by(c.play_id, c.act, c.scene)</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    .agg(</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>        recorded <span class="op">=</span> pl.<span class="bu">len</span>(),</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>        highest <span class="op">=</span> c.num.<span class="bu">max</span>()</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    .with_columns(missing <span class="op">=</span> c.highest <span class="op">-</span> c.recorded)</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    .sort(c.missing, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="15">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (688, 6)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">play_id</th>
+<th data-quarto-table-cell-role="th">act</th>
+<th data-quarto-table-cell-role="th">scene</th>
+<th data-quarto-table-cell-role="th">recorded</th>
+<th data-quarto-table-cell-role="th">highest</th>
+<th data-quarto-table-cell-role="th">missing</th>
+</tr>
+<tr class="even">
+<td>str</td>
+<td>i64</td>
+<td>i64</td>
+<td>u32</td>
+<td>i64</td>
+<td>i64</td>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"1h4"</td>
+<td>2</td>
+<td>4</td>
+<td>24</td>
+<td>545</td>
+<td>521</td>
+</tr>
+<tr class="even">
+<td>"2h4"</td>
+<td>2</td>
+<td>4</td>
+<td>15</td>
+<td>381</td>
+<td>366</td>
+</tr>
+<tr class="odd">
+<td>"aww"</td>
+<td>4</td>
+<td>3</td>
+<td>19</td>
+<td>362</td>
+<td>343</td>
+</tr>
+<tr class="even">
+<td>"ham"</td>
+<td>2</td>
+<td>2</td>
+<td>299</td>
+<td>634</td>
+<td>335</td>
+</tr>
+<tr class="odd">
+<td>"tn"</td>
+<td>3</td>
+<td>4</td>
+<td>93</td>
+<td>404</td>
+<td>311</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"1h6"</td>
+<td>4</td>
+<td>2</td>
+<td>56</td>
+<td>56</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td>"1h6"</td>
+<td>5</td>
+<td>2</td>
+<td>21</td>
+<td>21</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td>"h5"</td>
+<td>4</td>
+<td>5</td>
+<td>25</td>
+<td>25</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td>"r2"</td>
+<td>5</td>
+<td>6</td>
+<td>52</td>
+<td>52</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td>"cor"</td>
+<td>1</td>
+<td>7</td>
+<td>8</td>
+<td>8</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Lines are missing. The worst scene is <em>1 Henry IV</em> 2.4, numbered up to 545 with only 24 lines in the table. It is the tavern scene, and Falstaff speaks in prose. This table holds only the verse: that is why Falstaff missed the chart, why Lady Macbeth’s sleepwalking scene (in prose) left her act 5 empty, and why <em>Hamlet</em> drops in act 2.</p>
+<ol start="12" type="1">
+<li>Last question, and it is a written one. A pivot can be undone by an unpivot, but a <code>.group_by()</code> and <code>.agg()</code> cannot be undone. What does that tell you about the shape in which a dataset should be stored?</li>
+</ol>
+<p><strong>Answer</strong>: Store data long, at the most detailed unit of observation. A long table can be pivoted into any wide shape an analysis needs and pivoted back. A table that has already been aggregated has lost the rows it was built from, and nothing brings them back.</p>
+
+
+<!-- -->
+
+</section>
+
+</main> <!-- /main -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details .sourceCode");
+      for (let i = 0; i < detailsSrc.length; i++) {
+        const details = detailsSrc[i].closest('details');
+        if (details) {
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+      }
+      return false;
+    };
+  }
+  // Replace buttons to strip the broken listeners Quarto attached, then re-add fixed ones
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    const fresh = hideAllCode.cloneNode(true);
+    hideAllCode.parentNode.replaceChild(fresh, hideAllCode);
+    fresh.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    const fresh = showAllCode.cloneNode(true);
+    showAllCode.parentNode.replaceChild(fresh, showAllCode);
+    fresh.addEventListener("click", toggleCodeHandler(true));
+  }
+});
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const cellDetails = window.document.querySelectorAll(".cell details.code-fold");
+        for (let i=0; i<cellDetails.length; i++) {
+          const details = cellDetails[i];
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell div.sourceCode.cell-code");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Notebook17"</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="an">solutions-release-date:</span><span class="co"> "2026-11-02"</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="fu">### Setup</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>Run all of the following before starting the notebook.</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [noclear]</span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a><span class="op">!</span> wget <span class="op">-</span>q <span class="op">-</span>nc https:<span class="op">//</span>raw.githubusercontent.com<span class="op">/</span>taylor<span class="op">-</span>arnold<span class="op">/</span>fds2<span class="op">/</span>refs<span class="op">/</span>heads<span class="op">/</span>main<span class="op">/</span>funs.py</span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [noclear]</span></span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine <span class="im">import</span> ggplot, aes</span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> polars <span class="im">import</span> col <span class="im">as</span> c</span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> funs</span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a>ub <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"</span></span>
+<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-33"><a href="#cb18-33" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb18-34"><a href="#cb18-34" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [remove]</span></span>
+<span id="cb18-35"><a href="#cb18-35" aria-hidden="true" tabindex="-1"></a><span class="co">#| include: false</span></span>
+<span id="cb18-36"><a href="#cb18-36" aria-hidden="true" tabindex="-1"></a>ub <span class="op">=</span> <span class="st">""</span></span>
+<span id="cb18-37"><a href="#cb18-37" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-38"><a href="#cb18-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-41"><a href="#cb18-41" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb18-42"><a href="#cb18-42" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [noclear]</span></span>
+<span id="cb18-43"><a href="#cb18-43" aria-hidden="true" tabindex="-1"></a>play <span class="op">=</span> pl.read_csv(ub <span class="op">+</span> <span class="st">"data/shakespeare_plays.csv"</span>)</span>
+<span id="cb18-44"><a href="#cb18-44" aria-hidden="true" tabindex="-1"></a>char <span class="op">=</span> pl.read_csv(ub <span class="op">+</span> <span class="st">"data/shakespeare_characters.csv"</span>)</span>
+<span id="cb18-45"><a href="#cb18-45" aria-hidden="true" tabindex="-1"></a>line <span class="op">=</span> pl.read_csv(ub <span class="op">+</span> <span class="st">"data/shakespeare_lines.csv.gz"</span>)</span>
+<span id="cb18-46"><a href="#cb18-46" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-47"><a href="#cb18-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-48"><a href="#cb18-48" aria-hidden="true" tabindex="-1"></a><span class="fu">### Questions</span></span>
+<span id="cb18-49"><a href="#cb18-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-50"><a href="#cb18-50" aria-hidden="true" tabindex="-1"></a>Back to the Folger Shakespeare corpus from Notebook13. <span class="in">`play`</span> has one row per play,</span>
+<span id="cb18-51"><a href="#cb18-51" aria-hidden="true" tabindex="-1"></a>with a <span class="in">`play_id`</span> and a <span class="in">`title`</span>. <span class="in">`char`</span> has one row per *character × play*, with a</span>
+<span id="cb18-52"><a href="#cb18-52" aria-hidden="true" tabindex="-1"></a><span class="in">`character_id`</span>, the <span class="in">`play_id`</span>, and a <span class="in">`name`</span>. <span class="in">`line`</span> has one row per printed line, with</span>
+<span id="cb18-53"><a href="#cb18-53" aria-hidden="true" tabindex="-1"></a>the <span class="in">`play_id`</span>, the <span class="in">`character_id`</span> of the speaker, the <span class="in">`act`</span>, the <span class="in">`scene`</span>, a</span>
+<span id="cb18-54"><a href="#cb18-54" aria-hidden="true" tabindex="-1"></a><span class="in">`line_number`</span> such as <span class="in">`"3.1.64"`</span>, and the <span class="in">`text`</span>.</span>
+<span id="cb18-55"><a href="#cb18-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-56"><a href="#cb18-56" aria-hidden="true" tabindex="-1"></a>In Notebook13 we found three things we could not fix yet: a table we wanted with one</span>
+<span id="cb18-57"><a href="#cb18-57" aria-hidden="true" tabindex="-1"></a>column per act, cells that hold several speakers at once, and a <span class="in">`line_number`</span> that</span>
+<span id="cb18-58"><a href="#cb18-58" aria-hidden="true" tabindex="-1"></a>packs three numbers into one string. Today we have the tools for all three.</span>
+<span id="cb18-59"><a href="#cb18-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-60"><a href="#cb18-60" aria-hidden="true" tabindex="-1"></a>Unless a question says otherwise, just print the result of each block; do not save it</span>
+<span id="cb18-61"><a href="#cb18-61" aria-hidden="true" tabindex="-1"></a>to a variable.</span>
+<span id="cb18-62"><a href="#cb18-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-63"><a href="#cb18-63" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Start with a warm-up from Notebook13. Count the number of lines in each act of each</span>
+<span id="cb18-64"><a href="#cb18-64" aria-hidden="true" tabindex="-1"></a>play, grouping by <span class="in">`play_id`</span> and <span class="in">`act`</span>, and sort by <span class="in">`act`</span>.</span>
+<span id="cb18-65"><a href="#cb18-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-68"><a href="#cb18-68" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb18-69"><a href="#cb18-69" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb18-70"><a href="#cb18-70" aria-hidden="true" tabindex="-1"></a>    line</span>
+<span id="cb18-71"><a href="#cb18-71" aria-hidden="true" tabindex="-1"></a>    .group_by(c.play_id, c.act)</span>
+<span id="cb18-72"><a href="#cb18-72" aria-hidden="true" tabindex="-1"></a>    .agg(n_lines <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb18-73"><a href="#cb18-73" aria-hidden="true" tabindex="-1"></a>    .sort(c.act)</span>
+<span id="cb18-74"><a href="#cb18-74" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-75"><a href="#cb18-75" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-76"><a href="#cb18-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-77"><a href="#cb18-77" aria-hidden="true" tabindex="-1"></a>This table is long: 185 rows, one per *play × act*.</span>
+<span id="cb18-78"><a href="#cb18-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-79"><a href="#cb18-79" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Take the code from the previous question and add a pivot, so that there is one row</span>
+<span id="cb18-80"><a href="#cb18-80" aria-hidden="true" tabindex="-1"></a>per play and one column per act. Use <span class="in">`index=c.play_id`</span>, <span class="in">`on=c.act`</span>, and</span>
+<span id="cb18-81"><a href="#cb18-81" aria-hidden="true" tabindex="-1"></a><span class="in">`values=c.n_lines`</span>.</span>
+<span id="cb18-82"><a href="#cb18-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-85"><a href="#cb18-85" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb18-86"><a href="#cb18-86" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb18-87"><a href="#cb18-87" aria-hidden="true" tabindex="-1"></a>    line</span>
+<span id="cb18-88"><a href="#cb18-88" aria-hidden="true" tabindex="-1"></a>    .group_by(c.play_id, c.act)</span>
+<span id="cb18-89"><a href="#cb18-89" aria-hidden="true" tabindex="-1"></a>    .agg(n_lines <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb18-90"><a href="#cb18-90" aria-hidden="true" tabindex="-1"></a>    .sort(c.act)</span>
+<span id="cb18-91"><a href="#cb18-91" aria-hidden="true" tabindex="-1"></a>    .pivot(index<span class="op">=</span>c.play_id, on<span class="op">=</span>c.act, values<span class="op">=</span>c.n_lines)</span>
+<span id="cb18-92"><a href="#cb18-92" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-93"><a href="#cb18-93" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-94"><a href="#cb18-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-95"><a href="#cb18-95" aria-hidden="true" tabindex="-1"></a>Now there are 37 rows and a column for each of the five acts. The sort by <span class="in">`act`</span> before</span>
+<span id="cb18-96"><a href="#cb18-96" aria-hidden="true" tabindex="-1"></a>the pivot is what puts the new columns in the order 1 to 5.</span>
+<span id="cb18-97"><a href="#cb18-97" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-98"><a href="#cb18-98" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Take the code from the previous question and join <span class="in">`play`</span> onto the result so that</span>
+<span id="cb18-99"><a href="#cb18-99" aria-hidden="true" tabindex="-1"></a>each row has the full title of the play.</span>
+<span id="cb18-100"><a href="#cb18-100" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-103"><a href="#cb18-103" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb18-104"><a href="#cb18-104" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb18-105"><a href="#cb18-105" aria-hidden="true" tabindex="-1"></a>    line</span>
+<span id="cb18-106"><a href="#cb18-106" aria-hidden="true" tabindex="-1"></a>    .group_by(c.play_id, c.act)</span>
+<span id="cb18-107"><a href="#cb18-107" aria-hidden="true" tabindex="-1"></a>    .agg(n_lines <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb18-108"><a href="#cb18-108" aria-hidden="true" tabindex="-1"></a>    .sort(c.act)</span>
+<span id="cb18-109"><a href="#cb18-109" aria-hidden="true" tabindex="-1"></a>    .pivot(index<span class="op">=</span>c.play_id, on<span class="op">=</span>c.act, values<span class="op">=</span>c.n_lines)</span>
+<span id="cb18-110"><a href="#cb18-110" aria-hidden="true" tabindex="-1"></a>    .join(play, on<span class="op">=</span>c.play_id)</span>
+<span id="cb18-111"><a href="#cb18-111" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-112"><a href="#cb18-112" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-113"><a href="#cb18-113" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-114"><a href="#cb18-114" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>Now one play. Filter <span class="in">`line`</span> to *Macbeth* (<span class="in">`"mac"`</span>), keep only the speakers with at</span>
+<span id="cb18-115"><a href="#cb18-115" aria-hidden="true" tabindex="-1"></a>least 60 lines in the play using <span class="in">`.filter(pl.len().over(c.character_id) &gt;= 60)`</span>, count</span>
+<span id="cb18-116"><a href="#cb18-116" aria-hidden="true" tabindex="-1"></a>the lines for each <span class="in">`character_id`</span> and <span class="in">`act`</span>, and pivot so there is one row per speaker</span>
+<span id="cb18-117"><a href="#cb18-117" aria-hidden="true" tabindex="-1"></a>and one column per act.</span>
+<span id="cb18-118"><a href="#cb18-118" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-121"><a href="#cb18-121" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb18-122"><a href="#cb18-122" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb18-123"><a href="#cb18-123" aria-hidden="true" tabindex="-1"></a>    line</span>
+<span id="cb18-124"><a href="#cb18-124" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.play_id <span class="op">==</span> <span class="st">"mac"</span>)</span>
+<span id="cb18-125"><a href="#cb18-125" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(pl.<span class="bu">len</span>().over(c.character_id) <span class="op">&gt;=</span> <span class="dv">60</span>)</span>
+<span id="cb18-126"><a href="#cb18-126" aria-hidden="true" tabindex="-1"></a>    .group_by(c.character_id, c.act)</span>
+<span id="cb18-127"><a href="#cb18-127" aria-hidden="true" tabindex="-1"></a>    .agg(n_lines <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb18-128"><a href="#cb18-128" aria-hidden="true" tabindex="-1"></a>    .sort(c.act)</span>
+<span id="cb18-129"><a href="#cb18-129" aria-hidden="true" tabindex="-1"></a>    .pivot(index<span class="op">=</span>c.character_id, on<span class="op">=</span>c.act, values<span class="op">=</span>c.n_lines)</span>
+<span id="cb18-130"><a href="#cb18-130" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-131"><a href="#cb18-131" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-132"><a href="#cb18-132" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-133"><a href="#cb18-133" aria-hidden="true" tabindex="-1"></a>Some cells are <span class="in">`null`</span>, because not every speaker talks in every act. Duncan speaks only</span>
+<span id="cb18-134"><a href="#cb18-134" aria-hidden="true" tabindex="-1"></a>in act 1, since he is murdered in act 2. Lady Macbeth has nothing in act 5; remember</span>
+<span id="cb18-135"><a href="#cb18-135" aria-hidden="true" tabindex="-1"></a>that, because we will see why at the end of the notebook.</span>
+<span id="cb18-136"><a href="#cb18-136" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-137"><a href="#cb18-137" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>Go back to the code from question 2 and add an unpivot to the end, with</span>
+<span id="cb18-138"><a href="#cb18-138" aria-hidden="true" tabindex="-1"></a><span class="in">`index=c.play_id`</span>, <span class="in">`variable_name="act"`</span>, and <span class="in">`value_name="n_lines"`</span>.</span>
+<span id="cb18-139"><a href="#cb18-139" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-142"><a href="#cb18-142" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb18-143"><a href="#cb18-143" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb18-144"><a href="#cb18-144" aria-hidden="true" tabindex="-1"></a>    line</span>
+<span id="cb18-145"><a href="#cb18-145" aria-hidden="true" tabindex="-1"></a>    .group_by(c.play_id, c.act)</span>
+<span id="cb18-146"><a href="#cb18-146" aria-hidden="true" tabindex="-1"></a>    .agg(n_lines <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb18-147"><a href="#cb18-147" aria-hidden="true" tabindex="-1"></a>    .sort(c.act)</span>
+<span id="cb18-148"><a href="#cb18-148" aria-hidden="true" tabindex="-1"></a>    .pivot(index<span class="op">=</span>c.play_id, on<span class="op">=</span>c.act, values<span class="op">=</span>c.n_lines)</span>
+<span id="cb18-149"><a href="#cb18-149" aria-hidden="true" tabindex="-1"></a>    .unpivot(index<span class="op">=</span>c.play_id, variable_name<span class="op">=</span><span class="st">"act"</span>, value_name<span class="op">=</span><span class="st">"n_lines"</span>)</span>
+<span id="cb18-150"><a href="#cb18-150" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-151"><a href="#cb18-151" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-152"><a href="#cb18-152" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-153"><a href="#cb18-153" aria-hidden="true" tabindex="-1"></a>We are back to 185 rows, one per *play × act*. The pivot and the unpivot undo each</span>
+<span id="cb18-154"><a href="#cb18-154" aria-hidden="true" tabindex="-1"></a>other and no number changed along the way.</span>
+<span id="cb18-155"><a href="#cb18-155" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-156"><a href="#cb18-156" aria-hidden="true" tabindex="-1"></a><span class="ss">6. </span>A wide table is hard to plot, because the acts are column names rather than a</span>
+<span id="cb18-157"><a href="#cb18-157" aria-hidden="true" tabindex="-1"></a>column. Take the code from the previous question, filter to the four tragedies</span>
+<span id="cb18-158"><a href="#cb18-158" aria-hidden="true" tabindex="-1"></a><span class="in">`["ham", "mac", "oth", "lr"]`</span>, and cast <span class="in">`act`</span> back to an integer with</span>
+<span id="cb18-159"><a href="#cb18-159" aria-hidden="true" tabindex="-1"></a><span class="in">`c.act.cast(pl.Int64)`</span>. Then draw a line plot of the number of lines against the act,</span>
+<span id="cb18-160"><a href="#cb18-160" aria-hidden="true" tabindex="-1"></a>with one color for each play.</span>
+<span id="cb18-161"><a href="#cb18-161" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-164"><a href="#cb18-164" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb18-165"><a href="#cb18-165" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb18-166"><a href="#cb18-166" aria-hidden="true" tabindex="-1"></a>    line</span>
+<span id="cb18-167"><a href="#cb18-167" aria-hidden="true" tabindex="-1"></a>    .group_by(c.play_id, c.act)</span>
+<span id="cb18-168"><a href="#cb18-168" aria-hidden="true" tabindex="-1"></a>    .agg(n_lines <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb18-169"><a href="#cb18-169" aria-hidden="true" tabindex="-1"></a>    .sort(c.act)</span>
+<span id="cb18-170"><a href="#cb18-170" aria-hidden="true" tabindex="-1"></a>    .pivot(index<span class="op">=</span>c.play_id, on<span class="op">=</span>c.act, values<span class="op">=</span>c.n_lines)</span>
+<span id="cb18-171"><a href="#cb18-171" aria-hidden="true" tabindex="-1"></a>    .unpivot(index<span class="op">=</span>c.play_id, variable_name<span class="op">=</span><span class="st">"act"</span>, value_name<span class="op">=</span><span class="st">"n_lines"</span>)</span>
+<span id="cb18-172"><a href="#cb18-172" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.play_id.is_in([<span class="st">"ham"</span>, <span class="st">"mac"</span>, <span class="st">"oth"</span>, <span class="st">"lr"</span>]))</span>
+<span id="cb18-173"><a href="#cb18-173" aria-hidden="true" tabindex="-1"></a>    .with_columns(act <span class="op">=</span> c.act.cast(pl.Int64))</span>
+<span id="cb18-174"><a href="#cb18-174" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(c.act, c.n_lines))</span>
+<span id="cb18-175"><a href="#cb18-175" aria-hidden="true" tabindex="-1"></a>    .geom_line(aes(color<span class="op">=</span>c.play_id))</span>
+<span id="cb18-176"><a href="#cb18-176" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-177"><a href="#cb18-177" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-178"><a href="#cb18-178" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-179"><a href="#cb18-179" aria-hidden="true" tabindex="-1"></a>The cast is needed because <span class="in">`act`</span> came back from the unpivot as text: it had been a</span>
+<span id="cb18-180"><a href="#cb18-180" aria-hidden="true" tabindex="-1"></a>column name. *Hamlet* drops by more than half from act 1 to act 2, even though act 2 is</span>
+<span id="cb18-181"><a href="#cb18-181" aria-hidden="true" tabindex="-1"></a>not a short act on the page. Keep that in mind too.</span>
+<span id="cb18-182"><a href="#cb18-182" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-183"><a href="#cb18-183" aria-hidden="true" tabindex="-1"></a><span class="ss">7. </span>On to the packed speakers. Add a column <span class="in">`speaker`</span> equal to</span>
+<span id="cb18-184"><a href="#cb18-184" aria-hidden="true" tabindex="-1"></a><span class="in">`c.character_id.str.split(" #")`</span>, which turns each cell into a list of speakers. Filter</span>
+<span id="cb18-185"><a href="#cb18-185" aria-hidden="true" tabindex="-1"></a>to *Macbeth* and to the rows where <span class="in">`character_id`</span> contains <span class="in">`"#"`</span>, and select</span>
+<span id="cb18-186"><a href="#cb18-186" aria-hidden="true" tabindex="-1"></a><span class="in">`character_id`</span> and <span class="in">`speaker`</span>.</span>
+<span id="cb18-187"><a href="#cb18-187" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-190"><a href="#cb18-190" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb18-191"><a href="#cb18-191" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb18-192"><a href="#cb18-192" aria-hidden="true" tabindex="-1"></a>    line</span>
+<span id="cb18-193"><a href="#cb18-193" aria-hidden="true" tabindex="-1"></a>    .with_columns(speaker <span class="op">=</span> c.character_id.<span class="bu">str</span>.split(<span class="st">" #"</span>))</span>
+<span id="cb18-194"><a href="#cb18-194" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.play_id <span class="op">==</span> <span class="st">"mac"</span>, c.character_id.<span class="bu">str</span>.contains(<span class="st">"#"</span>))</span>
+<span id="cb18-195"><a href="#cb18-195" aria-hidden="true" tabindex="-1"></a>    .select(c.character_id, c.speaker)</span>
+<span id="cb18-196"><a href="#cb18-196" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-197"><a href="#cb18-197" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-198"><a href="#cb18-198" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-199"><a href="#cb18-199" aria-hidden="true" tabindex="-1"></a>These are the lines spoken by more than one character at once. Each cell of <span class="in">`speaker`</span></span>
+<span id="cb18-200"><a href="#cb18-200" aria-hidden="true" tabindex="-1"></a>is now a list of names. For an ordinary line, the list has just one name in it.</span>
+<span id="cb18-201"><a href="#cb18-201" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-202"><a href="#cb18-202" aria-hidden="true" tabindex="-1"></a><span class="ss">8. </span>Take the code from the previous question and add <span class="in">`.explode(c.speaker)`</span> before the</span>
+<span id="cb18-203"><a href="#cb18-203" aria-hidden="true" tabindex="-1"></a>filter. Then count the lines for each <span class="in">`speaker`</span> instead of selecting columns.</span>
+<span id="cb18-204"><a href="#cb18-204" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-207"><a href="#cb18-207" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb18-208"><a href="#cb18-208" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb18-209"><a href="#cb18-209" aria-hidden="true" tabindex="-1"></a>    line</span>
+<span id="cb18-210"><a href="#cb18-210" aria-hidden="true" tabindex="-1"></a>    .with_columns(speaker <span class="op">=</span> c.character_id.<span class="bu">str</span>.split(<span class="st">" #"</span>))</span>
+<span id="cb18-211"><a href="#cb18-211" aria-hidden="true" tabindex="-1"></a>    .explode(c.speaker)</span>
+<span id="cb18-212"><a href="#cb18-212" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.play_id <span class="op">==</span> <span class="st">"mac"</span>, c.character_id.<span class="bu">str</span>.contains(<span class="st">"WITCH"</span>))</span>
+<span id="cb18-213"><a href="#cb18-213" aria-hidden="true" tabindex="-1"></a>    .group_by(c.speaker)</span>
+<span id="cb18-214"><a href="#cb18-214" aria-hidden="true" tabindex="-1"></a>    .agg(n_lines <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb18-215"><a href="#cb18-215" aria-hidden="true" tabindex="-1"></a>    .sort(c.n_lines, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb18-216"><a href="#cb18-216" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-217"><a href="#cb18-217" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-218"><a href="#cb18-218" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-219"><a href="#cb18-219" aria-hidden="true" tabindex="-1"></a>In Notebook13 there were four witch rows: three witches and a combined cell with 21</span>
+<span id="cb18-220"><a href="#cb18-220" aria-hidden="true" tabindex="-1"></a>lines. Now there are three witches, and each one is credited with the lines they speak</span>
+<span id="cb18-221"><a href="#cb18-221" aria-hidden="true" tabindex="-1"></a>together.</span>
+<span id="cb18-222"><a href="#cb18-222" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-223"><a href="#cb18-223" aria-hidden="true" tabindex="-1"></a><span class="ss">9. </span>Draw the twelve biggest parts in Shakespeare. Take the exploded table, count the</span>
+<span id="cb18-224"><a href="#cb18-224" aria-hidden="true" tabindex="-1"></a>lines for each <span class="in">`speaker`</span> and <span class="in">`play_id`</span>, and keep the top 12. Join <span class="in">`char`</span> to get each</span>
+<span id="cb18-225"><a href="#cb18-225" aria-hidden="true" tabindex="-1"></a>character's real name, using both columns of the key:</span>
+<span id="cb18-226"><a href="#cb18-226" aria-hidden="true" tabindex="-1"></a><span class="in">`left_on=[c.speaker, c.play_id]`</span> and <span class="in">`right_on=[c.character_id, c.play_id]`</span>. Sort by</span>
+<span id="cb18-227"><a href="#cb18-227" aria-hidden="true" tabindex="-1"></a>the number of lines and draw a bar plot with <span class="in">`geom_col`</span> and <span class="in">`coord_flip`</span>.</span>
+<span id="cb18-228"><a href="#cb18-228" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-231"><a href="#cb18-231" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb18-232"><a href="#cb18-232" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb18-233"><a href="#cb18-233" aria-hidden="true" tabindex="-1"></a>    line</span>
+<span id="cb18-234"><a href="#cb18-234" aria-hidden="true" tabindex="-1"></a>    .with_columns(speaker <span class="op">=</span> c.character_id.<span class="bu">str</span>.split(<span class="st">" #"</span>))</span>
+<span id="cb18-235"><a href="#cb18-235" aria-hidden="true" tabindex="-1"></a>    .explode(c.speaker)</span>
+<span id="cb18-236"><a href="#cb18-236" aria-hidden="true" tabindex="-1"></a>    .group_by(c.speaker, c.play_id)</span>
+<span id="cb18-237"><a href="#cb18-237" aria-hidden="true" tabindex="-1"></a>    .agg(n_lines <span class="op">=</span> pl.<span class="bu">len</span>())</span>
+<span id="cb18-238"><a href="#cb18-238" aria-hidden="true" tabindex="-1"></a>    .sort(c.n_lines, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb18-239"><a href="#cb18-239" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">12</span>)</span>
+<span id="cb18-240"><a href="#cb18-240" aria-hidden="true" tabindex="-1"></a>    .join(char, left_on<span class="op">=</span>[c.speaker, c.play_id], right_on<span class="op">=</span>[c.character_id, c.play_id])</span>
+<span id="cb18-241"><a href="#cb18-241" aria-hidden="true" tabindex="-1"></a>    .sort(c.n_lines)</span>
+<span id="cb18-242"><a href="#cb18-242" aria-hidden="true" tabindex="-1"></a>    .ggplot(aes(c.name, c.n_lines))</span>
+<span id="cb18-243"><a href="#cb18-243" aria-hidden="true" tabindex="-1"></a>    .geom_col()</span>
+<span id="cb18-244"><a href="#cb18-244" aria-hidden="true" tabindex="-1"></a>    .coord_flip()</span>
+<span id="cb18-245"><a href="#cb18-245" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-246"><a href="#cb18-246" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-247"><a href="#cb18-247" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-248"><a href="#cb18-248" aria-hidden="true" tabindex="-1"></a>The join needs both columns because <span class="in">`character_id`</span> alone is not a key of <span class="in">`char`</span>.</span>
+<span id="cb18-249"><a href="#cb18-249" aria-hidden="true" tabindex="-1"></a>Joining on <span class="in">`character_id`</span> alone would copy Richard III's bar three times, once for each</span>
+<span id="cb18-250"><a href="#cb18-250" aria-hidden="true" tabindex="-1"></a>play he appears in.</span>
+<span id="cb18-251"><a href="#cb18-251" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-252"><a href="#cb18-252" aria-hidden="true" tabindex="-1"></a>Notice who is missing: Falstaff, the biggest comic part Shakespeare wrote, is not on</span>
+<span id="cb18-253"><a href="#cb18-253" aria-hidden="true" tabindex="-1"></a>the chart.</span>
+<span id="cb18-254"><a href="#cb18-254" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-255"><a href="#cb18-255" aria-hidden="true" tabindex="-1"></a>The last packed cell is <span class="in">`line_number`</span>, which holds three numbers. Splitting it into</span>
+<span id="cb18-256"><a href="#cb18-256" aria-hidden="true" tabindex="-1"></a>columns needs a list method we have not covered, so the block below is given. It adds</span>
+<span id="cb18-257"><a href="#cb18-257" aria-hidden="true" tabindex="-1"></a>an integer column <span class="in">`num`</span> holding the line's position within its scene.</span>
+<span id="cb18-258"><a href="#cb18-258" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-261"><a href="#cb18-261" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb18-262"><a href="#cb18-262" aria-hidden="true" tabindex="-1"></a><span class="co">#| tags: [noclear]</span></span>
+<span id="cb18-263"><a href="#cb18-263" aria-hidden="true" tabindex="-1"></a>lines <span class="op">=</span> (</span>
+<span id="cb18-264"><a href="#cb18-264" aria-hidden="true" tabindex="-1"></a>    line</span>
+<span id="cb18-265"><a href="#cb18-265" aria-hidden="true" tabindex="-1"></a>    .with_columns(num <span class="op">=</span> c.line_number.<span class="bu">str</span>.split(<span class="st">"."</span>).<span class="bu">list</span>.get(<span class="dv">2</span>).cast(pl.Int64))</span>
+<span id="cb18-266"><a href="#cb18-266" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-267"><a href="#cb18-267" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-268"><a href="#cb18-268" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-269"><a href="#cb18-269" aria-hidden="true" tabindex="-1"></a><span class="ss">10. </span>Filter <span class="in">`lines`</span> to *Hamlet*, act 3, scene 1. Sort by <span class="in">`num`</span> and select <span class="in">`num`</span>,</span>
+<span id="cb18-270"><a href="#cb18-270" aria-hidden="true" tabindex="-1"></a><span class="in">`character_id`</span>, and <span class="in">`text`</span>.</span>
+<span id="cb18-271"><a href="#cb18-271" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-274"><a href="#cb18-274" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb18-275"><a href="#cb18-275" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb18-276"><a href="#cb18-276" aria-hidden="true" tabindex="-1"></a>    lines</span>
+<span id="cb18-277"><a href="#cb18-277" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(c.play_id <span class="op">==</span> <span class="st">"ham"</span>, c.act <span class="op">==</span> <span class="dv">3</span>, c.scene <span class="op">==</span> <span class="dv">1</span>)</span>
+<span id="cb18-278"><a href="#cb18-278" aria-hidden="true" tabindex="-1"></a>    .sort(c.num)</span>
+<span id="cb18-279"><a href="#cb18-279" aria-hidden="true" tabindex="-1"></a>    .select(c.num, c.character_id, c.text)</span>
+<span id="cb18-280"><a href="#cb18-280" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-281"><a href="#cb18-281" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-282"><a href="#cb18-282" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-283"><a href="#cb18-283" aria-hidden="true" tabindex="-1"></a>The scene now sorts in the order the lines are spoken.</span>
+<span id="cb18-284"><a href="#cb18-284" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-285"><a href="#cb18-285" aria-hidden="true" tabindex="-1"></a><span class="ss">11. </span>Every scene numbers its lines from 1, so the largest <span class="in">`num`</span> in a scene tells you how</span>
+<span id="cb18-286"><a href="#cb18-286" aria-hidden="true" tabindex="-1"></a>many lines the printed scene has. Group <span class="in">`lines`</span> by <span class="in">`play_id`</span>, <span class="in">`act`</span>, and <span class="in">`scene`</span>, and</span>
+<span id="cb18-287"><a href="#cb18-287" aria-hidden="true" tabindex="-1"></a>compute <span class="in">`recorded`</span> (the number of rows) and <span class="in">`highest`</span> (the maximum of <span class="in">`num`</span>). Add a</span>
+<span id="cb18-288"><a href="#cb18-288" aria-hidden="true" tabindex="-1"></a>column <span class="in">`missing`</span> equal to <span class="in">`highest - recorded`</span> and sort from the most missing to the</span>
+<span id="cb18-289"><a href="#cb18-289" aria-hidden="true" tabindex="-1"></a>least.</span>
+<span id="cb18-290"><a href="#cb18-290" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-293"><a href="#cb18-293" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb18-294"><a href="#cb18-294" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb18-295"><a href="#cb18-295" aria-hidden="true" tabindex="-1"></a>    lines</span>
+<span id="cb18-296"><a href="#cb18-296" aria-hidden="true" tabindex="-1"></a>    .group_by(c.play_id, c.act, c.scene)</span>
+<span id="cb18-297"><a href="#cb18-297" aria-hidden="true" tabindex="-1"></a>    .agg(</span>
+<span id="cb18-298"><a href="#cb18-298" aria-hidden="true" tabindex="-1"></a>        recorded <span class="op">=</span> pl.<span class="bu">len</span>(),</span>
+<span id="cb18-299"><a href="#cb18-299" aria-hidden="true" tabindex="-1"></a>        highest <span class="op">=</span> c.num.<span class="bu">max</span>()</span>
+<span id="cb18-300"><a href="#cb18-300" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb18-301"><a href="#cb18-301" aria-hidden="true" tabindex="-1"></a>    .with_columns(missing <span class="op">=</span> c.highest <span class="op">-</span> c.recorded)</span>
+<span id="cb18-302"><a href="#cb18-302" aria-hidden="true" tabindex="-1"></a>    .sort(c.missing, descending<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb18-303"><a href="#cb18-303" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-304"><a href="#cb18-304" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb18-305"><a href="#cb18-305" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-306"><a href="#cb18-306" aria-hidden="true" tabindex="-1"></a>Lines are missing. The worst scene is *1 Henry IV* 2.4, numbered up to 545 with only 24</span>
+<span id="cb18-307"><a href="#cb18-307" aria-hidden="true" tabindex="-1"></a>lines in the table. It is the tavern scene, and Falstaff speaks in prose. This table</span>
+<span id="cb18-308"><a href="#cb18-308" aria-hidden="true" tabindex="-1"></a>holds only the verse: that is why Falstaff missed the chart, why Lady Macbeth's</span>
+<span id="cb18-309"><a href="#cb18-309" aria-hidden="true" tabindex="-1"></a>sleepwalking scene (in prose) left her act 5 empty, and why *Hamlet* drops in act 2.</span>
+<span id="cb18-310"><a href="#cb18-310" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-311"><a href="#cb18-311" aria-hidden="true" tabindex="-1"></a><span class="ss">12. </span>Last question, and it is a written one. A pivot can be undone by an unpivot, but a</span>
+<span id="cb18-312"><a href="#cb18-312" aria-hidden="true" tabindex="-1"></a><span class="in">`.group_by()`</span> and <span class="in">`.agg()`</span> cannot be undone. What does that tell you about the shape in</span>
+<span id="cb18-313"><a href="#cb18-313" aria-hidden="true" tabindex="-1"></a>which a dataset should be stored?</span>
+<span id="cb18-314"><a href="#cb18-314" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-315"><a href="#cb18-315" aria-hidden="true" tabindex="-1"></a>**Answer**: Store data long, at the most detailed unit of observation. A long table can</span>
+<span id="cb18-316"><a href="#cb18-316" aria-hidden="true" tabindex="-1"></a>be pivoted into any wide shape an analysis needs and pivoted back. A table that has</span>
+<span id="cb18-317"><a href="#cb18-317" aria-hidden="true" tabindex="-1"></a>already been aggregated has lost the rows it was built from, and nothing brings them</span>
+<span id="cb18-318"><a href="#cb18-318" aria-hidden="true" tabindex="-1"></a>back.</span>
+</code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
+
+
+
+
+</body></html>
