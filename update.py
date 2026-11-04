@@ -33,7 +33,7 @@ MAKE_ALL = False
 # release date. Each course keeps its own hour so solutions can appear after that
 # section has met; anything not listed here falls back to noon.
 RELEASE_HOURS = {"nb289": 9, "nb389": 9}
-DEFAULT_RELEASE_HOUR = 12
+DEFAULT_RELEASE_HOUR = 11
 
 # Quarto never deletes files it has already written, so a notebook dropped from
 # the render list keeps its old HTML sitting in the output directory, reachable
