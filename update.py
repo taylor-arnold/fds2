@@ -6,13 +6,15 @@ Behavior:
 - Searches `nb289` and `nb389` for files matching `notebookXX.qmd`.
 - Parses the YAML header in each file for `title` and `solutions-release-date`.
 - Compares the release date (at that directory's release hour) to the current system time.
-- If the current time is past the release time (or if MAKE_ALL is True), the notebook is marked for release.
+- If the current time is past the release time (or if MAKE_ALL is True, or --all is
+  passed), the notebook is marked for release.
 - Updates the `_quarto.yml` file in the respective directory, specifically modifying 
   the `project.render` list and the `website.sidebar.contents` list.
 - Deletes any already-rendered HTML in the output directory belonging to a notebook
   that has not been released, so unreleased solutions are not left reachable by URL.
 
 Pass --dry-run to report what would change without touching any files.
+Pass --all to release every notebook now, ignoring the release dates.
 """
 
 import os
@@ -314,14 +316,17 @@ def process_directory(directory: str, dry_run: bool = False):
 # --- Automation --------------------------------------------------------------
 
 def main():
+    global MAKE_ALL
     dry_run = "--dry-run" in sys.argv[1:]
+    if "--all" in sys.argv[1:]:
+        MAKE_ALL = True
     target_dirs = ["nb289", "nb389"]
 
     if dry_run:
         print(f"\n{Colors.BOLD}{Colors.WARNING}Dry run: no files will be written or deleted.{Colors.ENDC}")
 
     if MAKE_ALL:
-        print(f"\n{Colors.WARNING}MAKE_ALL is on: every notebook is released regardless of its date.{Colors.ENDC}")
+        print(f"\n{Colors.WARNING}Releasing all: every notebook is released regardless of its date.{Colors.ENDC}")
 
     for d in target_dirs:
         process_directory(d, dry_run=dry_run)

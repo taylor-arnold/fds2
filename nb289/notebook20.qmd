@@ -24,7 +24,312 @@ import funs
 ub = "https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"
 ```
 
+```{python}
+#| tags: [remove]
+#| include: false
+ub = ""
+```
+
+```{python}
+#| tags: [noclear]
+people = pl.read_csv(ub + "data/calibration_people.csv")
+question = pl.read_csv(ub + "data/calibration_questions.csv")
+guess = pl.read_csv(ub + "data/calibration_responses.csv")
+
+mem_people = pl.read_csv(ub + "data/memory_people.csv")
+recall = pl.read_csv(ub + "data/memory_responses.csv")
+word = pl.read_csv(ub + "data/memory_words.csv")
+```
+
 ### Questions
 
-Today is a data collection practice day. The activity for this class will be posted
-here.
+These are the data we collected in class from the first two experiments. In the first,
+each of you answered 14 trivia questions with a range that you were 90% sure contained
+the right answer. In the second, you saw 20 words, one at a time, and then wrote down as
+many as you could remember.
+
+For the first experiment, `question` has the text and the correct `answer` for each of
+the 14 questions. `guess` has one row per person per question, with the low and high
+ends of the range in `guess_low` and `guess_high`. `people` has a few facts about each
+person: `height` in inches, whether they have `watched_friends`, whether they
+`plays_basketball`, and their `major`. Heights and the basketball hoop are in inches;
+answers written in centimeters, and hoop guesses of 30 or more with no unit, have
+been converted.
+
+For the second experiment, `word` has the 20 words, with the `position` each word was
+shown in and a few features of the word. `recall` has one row for each word a person
+wrote down, and `mem_people` has the class year and whether each person is bilingual.
+
+Unless a question says otherwise, just print the result of each block; do not save it
+to a variable.
+
+1. Start with a warm-up. Filter `guess` to question 11 (the average height of an adult
+man) and sort by `guess_low`.
+
+```{python}
+(
+    guess
+    .filter(c.question == 11)
+    .sort(c.guess_low)
+)
+```
+
+2. Draw a scatter plot from `people` with `height` on the x-axis and `major` on the
+y-axis.
+
+```{python}
+(
+    people
+    .ggplot(aes(c.height, c.major))
+    .geom_point()
+)
+```
+
+3. Now the first experiment. Join `question` onto `guess` and add a column `hit` that is
+true when the `answer` is between `guess_low` and `guess_high`. You can write this as
+`(c.answer >= c.guess_low) & (c.answer <= c.guess_high)`.
+
+```{python}
+(
+    guess
+    .join(question, on=c.question)
+    .with_columns(
+        hit = (c.answer >= c.guess_low) & (c.answer <= c.guess_high)
+    )
+)
+```
+
+4. Take the code from the previous question and compute the mean of `hit` across all of
+the rows. The mean of a true/false column is the proportion of rows that are true.
+
+```{python}
+(
+    guess
+    .join(question, on=c.question)
+    .with_columns(
+        hit = (c.answer >= c.guess_low) & (c.answer <= c.guess_high)
+    )
+    .select(hit = c.hit.mean())
+)
+```
+
+If everyone had given honest 90% ranges, about 90% of them would contain the answer.
+Only 41% did. The ranges were far too narrow: as a class, we were much more sure of
+ourselves than we should have been.
+
+5. Take the code from question 3, group by `question`, and compute the mean of `hit`.
+Draw a bar plot with `question` on the x-axis and the mean on the y-axis, and add
+`.geom_hline(yintercept=0.9, linetype="dashed")` to draw a line at 90%.
+
+```{python}
+(
+    guess
+    .join(question, on=c.question)
+    .with_columns(
+        hit = (c.answer >= c.guess_low) & (c.answer <= c.guess_high)
+    )
+    .group_by(c.question)
+    .agg(hit = c.hit.mean())
+    .ggplot(aes(c.question, c.hit))
+    .geom_col()
+    .geom_hline(yintercept=0.9, linetype="dashed")
+)
+```
+
+Only the coffee question (6) and the height of an adult man (11) come close to the line.
+The worst are Charlemagne (5) and the number of words on the front page of the New York
+Times (13).
+
+6. A miss can be too high or too low. Take the code from question 3, group by
+`question`, and compute `too_high`, the mean of `c.guess_low > c.answer`, and
+`too_low`, the mean of `c.guess_high < c.answer`. Sort by `question`.
+
+```{python}
+(
+    guess
+    .join(question, on=c.question)
+    .with_columns(
+        hit = (c.answer >= c.guess_low) & (c.answer <= c.guess_high)
+    )
+    .group_by(c.question)
+    .agg(
+        too_high = (c.guess_low > c.answer).mean(),
+        too_low = (c.guess_high < c.answer).mean()
+    )
+    .sort(c.question)
+)
+```
+
+Charlemagne was crowned in 800, and 86% of the ranges were entirely later than that.
+For the number of words a person speaks in a day (14), 73% of the ranges were too low.
+The misses are not random noise; on most questions, the class leaned the same way.
+
+7. Now look at people instead of questions. Take the code from question 3, group by
+`name`, compute the number of hits with `c.hit.sum()`, and sort from the most hits to
+the fewest.
+
+```{python}
+(
+    guess
+    .join(question, on=c.question)
+    .with_columns(
+        hit = (c.answer >= c.guess_low) & (c.answer <= c.guess_high)
+    )
+    .group_by(c.name)
+    .agg(hits = c.hit.sum())
+    .sort(c.hits, descending=True)
+)
+```
+
+A well-calibrated person would get about 12 or 13 of the 14 questions. The best in the
+class got 10, and most people got between 4 and 7.
+
+8. Did people who have watched *Friends* do better on the two *Friends* questions (8
+and 9)? Take the code from question 3, join `people` onto it, filter to questions 8 and
+9, group by `question` and `watched_friends`, and compute the mean of `hit` and the
+number of rows. Sort by `question`.
+
+```{python}
+(
+    guess
+    .join(question, on=c.question)
+    .with_columns(
+        hit = (c.answer >= c.guess_low) & (c.answer <= c.guess_high)
+    )
+    .join(people, on=c.name)
+    .filter(c.question.is_in([8, 9]))
+    .group_by(c.question, c.watched_friends)
+    .agg(
+        hit = c.hit.mean(),
+        n = pl.len()
+    )
+    .sort(c.question, c.watched_friends)
+)
+```
+
+Not in any way we can see. Viewers did a little worse on question 8 and a little better
+on question 9, but with only 8 viewers, one person changes their rate by more than 12
+points. The join also dropped JAM, who is in `guess` but not in `people`.
+
+9. Do taller people guess that the average man is taller? Filter `guess` to question 11,
+join `people`, and add a column `mid` with the middle of the range,
+`(c.guess_low + c.guess_high) / 2`. Draw a scatter plot of `mid` against `height`.
+
+```{python}
+(
+    guess
+    .filter(c.question == 11)
+    .join(people, on=c.name)
+    .with_columns(mid = (c.guess_low + c.guess_high) / 2)
+    .ggplot(aes(c.height, c.mid))
+    .geom_point()
+)
+```
+
+There is no clear pattern. Almost every range is centered between 67 and 73 inches,
+whatever the height of the person guessing.
+
+10. Now the second experiment. As a warm-up, count the number of words each person
+wrote down in `recall` and sort from the fewest to the most.
+
+```{python}
+(
+    recall
+    .group_by(c.name)
+    .agg(n = pl.len())
+    .sort(c.n)
+)
+```
+
+11. Some of the responses were not on the list. Use an anti join of `recall` with `word`
+to find them. The keys have different names, so use `left_on=c.response` and
+`right_on=c.word`.
+
+```{python}
+(
+    recall
+    .join(word, left_on=c.response, right_on=c.word, how="anti")
+)
+```
+
+Three people remembered a word that they never saw. Psychologists call these
+intrusions. "Glass" fits in with "bottle" and "window", and "color" fits with "yellow".
+
+12. Count the number of people who recalled each word: group `recall` by `response` and
+count the rows. Then join `word` onto the result and sort by `position`.
+
+```{python}
+(
+    recall
+    .group_by(c.response)
+    .agg(n = pl.len())
+    .join(word, left_on=c.response, right_on=c.word)
+    .sort(c.position)
+)
+```
+
+13. Take the code from the previous question and draw a line plot of `n` against
+`position`, with points on top of the line.
+
+```{python}
+(
+    recall
+    .group_by(c.response)
+    .agg(n = pl.len())
+    .join(word, left_on=c.response, right_on=c.word)
+    .sort(c.position)
+    .ggplot(aes(c.position, c.n))
+    .geom_line()
+    .geom_point()
+)
+```
+
+This is called a serial position curve. The first six words were recalled by most of
+the 17 people, and recall drops after that, apart from "yellow"; memory researchers call
+this the primacy effect. The spike at position 14 is the one vulgar word, which all 17 people
+remembered.
+
+14. Take the code from question 12 and group the result by `in_room`, computing the mean
+of `n`. Was a word easier to remember when the object was in the room with us?
+
+```{python}
+(
+    recall
+    .group_by(c.response)
+    .agg(n = pl.len())
+    .join(word, left_on=c.response, right_on=c.word)
+    .group_by(c.in_room)
+    .agg(n = c.n.mean())
+)
+```
+
+No. The words for objects in the room were recalled by 10.8 people on average, and the
+other words by 11.3.
+
+15. Last, the people. Take the code from question 10, join `mem_people` onto it, group
+by `bilingual`, and compute the mean of `n` and the number of people.
+
+```{python}
+(
+    recall
+    .group_by(c.name)
+    .agg(n = pl.len())
+    .join(mem_people, on=c.name)
+    .group_by(c.bilingual)
+    .agg(
+        n_mean = c.n.mean(),
+        people = pl.len()
+    )
+)
+```
+
+The bilingual students recalled about one more word on average (14.0 against 12.6), but
+there are only 13 people here. Four people who did the memory task are not in
+`mem_people`, so the join dropped them.
+
+16. Last question, and it is a written one. Pick one of the results above and describe
+how you would change the experiment to get a more convincing answer.
+
+**Answer**: For example, the *Friends* comparison in question 8 has only two questions
+and 21 people. A better version would ask several more *Friends* questions and compare
+viewers and non-viewers on all of them, ideally with more people.

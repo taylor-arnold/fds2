@@ -248,6 +248,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text">Notebook46</span></a>
   </div>
 </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook47.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook47</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./notebook48.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Notebook48</span></a>
+  </div>
+</li>
     </ul>
     </div>
 </nav>
@@ -279,19 +291,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="setup" class="level3">
 <h3 class="anchored" data-anchor-id="setup">Setup</h3>
 <p>Run all of the following before starting the notebook.</p>
-<div id="e40c6c0b" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="1">
+<div id="74177ee3" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="1">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span> wget <span class="op">-</span>q <span class="op">-</span>nc https:<span class="op">//</span>raw.githubusercontent.com<span class="op">/</span>taylor<span class="op">-</span>arnold<span class="op">/</span>fds2<span class="op">/</span>refs<span class="op">/</span>heads<span class="op">/</span>main<span class="op">/</span>funs.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<div id="bad19f1c" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="2">
+<div id="757bf072" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="2">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span> pip install igraph <span class="op">--</span>quiet</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<div id="cdaea825" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="3">
+<div id="ee37367e" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="3">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
@@ -304,7 +316,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>ub <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/taylor-arnold/fds2/refs/heads/main/"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<div id="3f668439" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="5">
+<div id="00828a43" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="5">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>case <span class="op">=</span> pl.read_csv(ub <span class="op">+</span> <span class="st">"data/scotus_case.csv"</span>)</span>
@@ -316,7 +328,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h3 class="anchored" data-anchor-id="questions">Questions</h3>
 <p>This notebook continues with the U.S. Supreme Court citation network. Each row of <code>case</code> is one decided case, identified by its <code>citation</code>, and each row of <code>cite</code> is one link: the case in <code>citing_case</code> cites the earlier case in <code>cited_case</code>.</p>
 <p>As in the last notebook, we focus on the 80 most-cited cases. The block below is given. It saves their citations as a list called <code>top</code>.</p>
-<div id="875bd4be" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="6">
+<div id="4acc5664" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="6">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>top <span class="op">=</span> (</span>
@@ -334,7 +346,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol type="1">
 <li>Filter <code>case</code> to the 80 cases in <code>top</code> using <code>c.citation.is_in(top)</code>. Select <code>case_name</code> and <code>term</code> and sort by <code>term</code>.</li>
 </ol>
-<div id="9520d992" class="cell" data-execution_count="7">
+<div id="b63d355c" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -418,7 +430,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="2" type="1">
 <li>Filter <code>cite</code> to the rows where <code>citing_case</code> is <code>"347 U.S. 483"</code> (<em>Brown v. Board of Education</em>) and <code>cited_case</code> is in <code>top</code>. These are the other top cases that <em>Brown</em> cites.</li>
 </ol>
-<div id="8339ceb2" class="cell" data-execution_count="8">
+<div id="8319b231" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -465,7 +477,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Two cases are <em>co-cited</em> when a third case cites both of them. To find these pairs, filter <code>cite</code> to the rows where <code>cited_case</code> is in <code>top</code>, and then join the result to itself on <code>citing_case</code>:</li>
 </ol>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>.join(cite.<span class="bu">filter</span>(c.cited_case.is_in(top)), on<span class="op">=</span>c.citing_case)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div id="84b8f2e0" class="cell" data-execution_count="9">
+<div id="d8981231" class="cell" data-execution_count="9">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -561,7 +573,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="4" type="1">
 <li>Take the code from the previous question and keep each pair once with <code>.filter(c.cited_case &lt; c.cited_case_right)</code>. Then count the rows for each pair of <code>cited_case</code> and <code>cited_case_right</code>, sort from most to least common, and keep the first 10 rows.</li>
 </ol>
-<div id="42759928" class="cell" data-execution_count="10">
+<div id="78c57d16" class="cell" data-execution_count="10">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -657,7 +669,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="5" type="1">
 <li>The block below is given. It keeps the pairs co-cited at least 15 times, builds an undirected network with <code>DSNetwork.process()</code>, and joins the case names onto the node table. The results are saved as <code>co_node</code> and <code>co_edge</code>. Run it and look at <code>co_node</code>.</li>
 </ol>
-<div id="63757b44" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="11">
+<div id="e78b5449" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="11">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>cocite_edges <span class="op">=</span> (</span>
@@ -726,74 +738,74 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
-<td>"274 U.S. 357"</td>
-<td>0.821812</td>
-<td>-0.264154</td>
+<td>"268 U.S. 510"</td>
+<td>-0.621195</td>
+<td>-0.457804</td>
 <td>1</td>
 <td>68</td>
 <td>"0"</td>
-<td>17</td>
-<td>0.96251</td>
-<td>52.225964</td>
-<td>34.916667</td>
-<td>"WHITNEY v. CALIFORNIA"</td>
-<td>1926</td>
+<td>12</td>
+<td>0.479697</td>
+<td>175.739193</td>
+<td>33.5</td>
+<td>"PIERCE, GOVERNOR OF OREGON, et…</td>
+<td>1924</td>
 </tr>
 <tr class="even">
-<td>"357 U.S. 513"</td>
-<td>0.498279</td>
-<td>0.211276</td>
-<td>1</td>
-<td>68</td>
-<td>"0"</td>
-<td>14</td>
-<td>0.791832</td>
-<td>109.747127</td>
-<td>32.666667</td>
-<td>"SPEISER v. RANDALL, ASSESSOR O…</td>
-<td>1957</td>
-</tr>
-<tr class="odd">
-<td>"118 U.S. 356"</td>
-<td>-1.996387</td>
-<td>-3.295493</td>
+<td>"308 U.S. 147"</td>
+<td>-1.893994</td>
+<td>-0.841098</td>
 <td>1</td>
 <td>68</td>
 <td>"1"</td>
-<td>8</td>
-<td>0.11633</td>
-<td>162.662153</td>
-<td>28.716667</td>
-<td>"YICK WO v. HOPKINS, SHERIFF"</td>
-<td>1885</td>
-</tr>
-<tr class="even">
-<td>"347 U.S. 483"</td>
-<td>-1.193895</td>
-<td>-3.186365</td>
-<td>1</td>
-<td>68</td>
-<td>"1"</td>
-<td>9</td>
-<td>0.156641</td>
-<td>162.678372</td>
-<td>29.8</td>
-<td>"BROWN et al. v. BOARD OF EDUCA…</td>
-<td>1953</td>
+<td>19</td>
+<td>0.997488</td>
+<td>85.552712</td>
+<td>35.166667</td>
+<td>"SCHNEIDER v. STATE (TOWN OF IR…</td>
+<td>1939</td>
 </tr>
 <tr class="odd">
-<td>"371 U.S. 415"</td>
-<td>0.796276</td>
-<td>-1.440417</td>
+<td>"372 U.S. 335"</td>
+<td>-0.663805</td>
+<td>4.615909</td>
 <td>1</td>
 <td>68</td>
-<td>"0"</td>
-<td>17</td>
-<td>0.922516</td>
-<td>19.172932</td>
-<td>33.166667</td>
-<td>"NATIONAL ASSOCIATION FOR THE A…</td>
+<td>"2"</td>
+<td>12</td>
+<td>0.040692</td>
+<td>148.404676</td>
+<td>30.588095</td>
+<td>"GIDEON v. WAINWRIGHT, CORRECTI…</td>
 <td>1962</td>
+</tr>
+<tr class="even">
+<td>"466 U.S. 668"</td>
+<td>-2.227152</td>
+<td>5.565305</td>
+<td>1</td>
+<td>68</td>
+<td>"2"</td>
+<td>3</td>
+<td>0.005905</td>
+<td>0.0</td>
+<td>21.204762</td>
+<td>"STRICKLAND, SUPERINTENDENT, FL…</td>
+<td>1983</td>
+</tr>
+<tr class="odd">
+<td>"315 U.S. 568"</td>
+<td>-3.18454</td>
+<td>0.138752</td>
+<td>1</td>
+<td>68</td>
+<td>"1"</td>
+<td>14</td>
+<td>0.84574</td>
+<td>1.623236</td>
+<td>30.7</td>
+<td>"CHAPLINSKY v. NEW HAMPSHIRE"</td>
+<td>1941</td>
 </tr>
 <tr class="even">
 <td>…</td>
@@ -811,11 +823,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="odd">
 <td>"22 U.S. 738"</td>
-<td>5.97833</td>
-<td>-3.581123</td>
+<td>2.888039</td>
+<td>-5.708808</td>
 <td>1</td>
 <td>68</td>
-<td>"8"</td>
+<td>"4"</td>
 <td>2</td>
 <td>0.000248</td>
 <td>0.0</td>
@@ -824,60 +836,60 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>1824</td>
 </tr>
 <tr class="even">
-<td>"5 U.S. 137"</td>
-<td>3.483831</td>
-<td>-3.499197</td>
+<td>"408 U.S. 238"</td>
+<td>7.271178</td>
+<td>-1.149608</td>
+<td>3</td>
+<td>2</td>
+<td>"9"</td>
 <td>1</td>
-<td>68</td>
-<td>"8"</td>
-<td>4</td>
-<td>0.023996</td>
-<td>570.0</td>
-<td>24.2</td>
-<td>"WILLIAM MARBURY v. JAMES MADIS…</td>
-<td>1803</td>
+<td>1.0</td>
+<td>0.0</td>
+<td>1.0</td>
+<td>"FURMAN v. GEORGIA"</td>
+<td>1971</td>
 </tr>
 <tr class="odd">
-<td>"309 U.S. 227"</td>
-<td>0.097242</td>
-<td>2.604226</td>
+<td>"428 U.S. 153"</td>
+<td>7.099471</td>
+<td>-2.059966</td>
+<td>3</td>
+<td>2</td>
+<td>"9"</td>
+<td>1</td>
+<td>1.0</td>
+<td>0.0</td>
+<td>1.0</td>
+<td>"GREGG v. GEORGIA"</td>
+<td>1975</td>
+</tr>
+<tr class="even">
+<td>"285 U.S. 22"</td>
+<td>-2.902271</td>
+<td>-4.079482</td>
+<td>1</td>
+<td>68</td>
+<td>"0"</td>
+<td>1</td>
+<td>0.016866</td>
+<td>0.0</td>
+<td>19.609524</td>
+<td>"CROWELL, DEPUTY COMMISSIONER, …</td>
+<td>1931</td>
+</tr>
+<tr class="odd">
+<td>"223 U.S. 1"</td>
+<td>-1.110959</td>
+<td>-7.631115</td>
 <td>1</td>
 <td>68</td>
 <td>"3"</td>
-<td>2</td>
-<td>0.02559</td>
-<td>0.0</td>
-<td>23.238095</td>
-<td>"CHAMBERS et al. v. FLORIDA"</td>
-<td>1939</td>
-</tr>
-<tr class="even">
-<td>"221 U.S. 1"</td>
-<td>-5.874507</td>
-<td>-4.737875</td>
-<td>3</td>
-<td>2</td>
-<td>"9"</td>
 <td>1</td>
-<td>1.0</td>
+<td>0.00001</td>
 <td>0.0</td>
-<td>1.0</td>
-<td>"THE STANDARD OIL COMPANY OF NE…</td>
-<td>1910</td>
-</tr>
-<tr class="odd">
-<td>"310 U.S. 150"</td>
-<td>-6.393795</td>
-<td>-3.940776</td>
-<td>3</td>
-<td>2</td>
-<td>"9"</td>
-<td>1</td>
-<td>1.0</td>
-<td>0.0</td>
-<td>1.0</td>
-<td>"UNITED STATES v. SOCONY-VACUUM…</td>
-<td>1939</td>
+<td>14.086111</td>
+<td>"SECOND EMPLOYERS' LIABILITY CA…</td>
+<td>1911</td>
 </tr>
 </tbody>
 </table>
@@ -887,7 +899,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="6" type="1">
 <li>Draw the co-citation network in the same way as the last notebook, using <code>co_node</code> and <code>co_edge</code>. Color the points by <code>eigen</code>.</li>
 </ol>
-<div id="a437cee7" class="cell" data-execution_count="12">
+<div id="abdfe2fd" class="cell" data-execution_count="12">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -914,7 +926,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="7" type="1">
 <li>Filter <code>co_node</code> to the main component with <code>c.component == 1</code>. Then sort by <code>eigen</code> from largest to smallest, keep the first 10 rows, and select <code>case_name</code>, <code>term</code>, <code>eigen</code>, and <code>degree</code>.</li>
 </ol>
-<div id="00ac9da4" class="cell" data-execution_count="13">
+<div id="1dd3e37f" class="cell" data-execution_count="13">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -1019,7 +1031,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="8" type="1">
 <li>The block below is given. It builds a <em>directed</em> network from the citations among the top cases and joins the case names onto the node table. The results are saved as <code>di_node</code> and <code>di_edge</code>. Run it and look at <code>di_node</code>.</li>
 </ol>
-<div id="00e52185" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="14">
+<div id="d25b8212" class="cell" data-tags="[&quot;noclear&quot;]" data-execution_count="14">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>edges <span class="op">=</span> (</span>
@@ -1086,8 +1098,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tbody>
 <tr class="odd">
 <td>"100 U.S. 339"</td>
-<td>2.339976</td>
-<td>1.905594</td>
+<td>2.305398</td>
+<td>1.744376</td>
 <td>73</td>
 <td>1</td>
 <td>"0"</td>
@@ -1101,8 +1113,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="even">
 <td>"5 U.S. 137"</td>
-<td>-0.103189</td>
-<td>0.686924</td>
+<td>-0.134253</td>
+<td>0.623427</td>
 <td>77</td>
 <td>1</td>
 <td>"1"</td>
@@ -1116,8 +1128,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="odd">
 <td>"83 U.S. 36"</td>
-<td>3.154091</td>
-<td>-0.210006</td>
+<td>3.130805</td>
+<td>-0.26427</td>
 <td>74</td>
 <td>1</td>
 <td>"0"</td>
@@ -1131,8 +1143,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="even">
 <td>"110 U.S. 516"</td>
-<td>0.213153</td>
-<td>1.344449</td>
+<td>0.082186</td>
+<td>1.40351</td>
 <td>71</td>
 <td>1</td>
 <td>"1"</td>
@@ -1146,8 +1158,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="odd">
 <td>"94 U.S. 113"</td>
-<td>-0.645626</td>
-<td>-1.342582</td>
+<td>-0.479102</td>
+<td>-1.473918</td>
 <td>72</td>
 <td>1</td>
 <td>"2"</td>
@@ -1176,8 +1188,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="odd">
 <td>"408 U.S. 238"</td>
-<td>-0.04459</td>
-<td>1.852777</td>
+<td>-0.223038</td>
+<td>1.923221</td>
 <td>4</td>
 <td>1</td>
 <td>"1"</td>
@@ -1191,8 +1203,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="even">
 <td>"424 U.S. 1"</td>
-<td>1.487532</td>
-<td>-0.54627</td>
+<td>1.507508</td>
+<td>-0.421791</td>
 <td>3</td>
 <td>1</td>
 <td>"2"</td>
@@ -1206,8 +1218,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="odd">
 <td>"428 U.S. 153"</td>
-<td>-0.993575</td>
-<td>4.179397</td>
+<td>-1.080095</td>
+<td>4.351777</td>
 <td>2</td>
 <td>1</td>
 <td>"1"</td>
@@ -1221,8 +1233,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="even">
 <td>"466 U.S. 668"</td>
-<td>0.654554</td>
-<td>4.140945</td>
+<td>0.327818</td>
+<td>4.266266</td>
 <td>1</td>
 <td>1</td>
 <td>"1"</td>
@@ -1236,8 +1248,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="odd">
 <td>"75 U.S. 168"</td>
-<td>6.535847</td>
-<td>-0.8338</td>
+<td>6.460132</td>
+<td>-0.997084</td>
 <td>75</td>
 <td>1</td>
 <td>"8"</td>
@@ -1258,7 +1270,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="9" type="1">
 <li>Sort <code>di_node</code> by <code>degree_in</code> from largest to smallest, keep the first 10 rows, and select <code>case_name</code>, <code>term</code>, <code>degree_in</code>, and <code>degree_out</code>.</li>
 </ol>
-<div id="3068a7ee" class="cell" data-execution_count="15">
+<div id="67648253" class="cell" data-execution_count="15">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -1362,7 +1374,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="10" type="1">
 <li>Draw a scatter plot of <code>di_node</code> with <code>degree_out</code> on the x-axis and <code>degree_in</code> on the y-axis. Add a dashed line where the two are equal with <code>.geom_abline(slope=1, intercept=0, linetype="dashed")</code>.</li>
 </ol>
-<div id="401ccc46" class="cell" data-execution_count="16">
+<div id="d5b2236c" class="cell" data-execution_count="16">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -1384,7 +1396,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="11" type="1">
 <li>Draw a scatter plot of <code>di_node</code> with <code>term</code> on the x-axis and <code>degree_out</code> on the y-axis.</li>
 </ol>
-<div id="d28012fb" class="cell" data-execution_count="17">
+<div id="8d8239c8" class="cell" data-execution_count="17">
 <details class="code-fold">
 <summary>View code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>(</span>
